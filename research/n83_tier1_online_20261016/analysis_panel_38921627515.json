@@ -1,0 +1,1133 @@
+{
+  "admitted_pair_count": 5,
+  "candidate_id": "IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0ha2d30fb17dd0",
+  "cross_point_base_identity": [
+    [
+      "c5511247735bc183359d5425c4dd794aaad49ad38d2ca964799e1caa76afaa08",
+      783270873
+    ]
+  ],
+  "evidence_status": "PASS_INDEPENDENT_REPLAY",
+  "execution_order_status": "PASS",
+  "hardware_tier": "tier1_github_hosted_runner",
+  "instance_id": "github-actions-38921627515-1",
+  "mean_ic_online_ms": 6.3989896,
+  "mean_rho_online_ms": 1010.6416454,
+  "median_online_ratio": 208.7194432080228,
+  "online_ratios": [
+    208.7194432080228,
+    39.83587089817657,
+    2241.1972016392638,
+    115.83254644435445,
+    1323.268748555293
+  ],
+  "pair_count": 5,
+  "paired_log_ratio_interval": {
+    "lower_95_log_ratio": 3.644080310579728,
+    "lower_95_ratio": 38.24758077575815,
+    "mean_log_ratio": 5.736106017545654,
+    "sample_sd_log_ratio": 1.6848565392830281,
+    "upper_95_log_ratio": 7.8281317245115805,
+    "upper_95_ratio": 2510.235178905299
+  },
+  "point_rows": [
+    {
+      "calibration": {
+        "after": {
+          "full_child_wall_seconds": 1.0006581819998246,
+          "online_ms": 466.89896,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 4200000,
+                  "2": 2600000
+                },
+                "interrupt_count": 7152179,
+                "recorded_utc": "2026-10-16T15:59:41.179772+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 4200427,
+                  "2": 2600000
+                },
+                "interrupt_count": 7151217,
+                "recorded_utc": "2026-10-16T15:59:40.177261+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 962,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        },
+        "before": {
+          "full_child_wall_seconds": 1.001005293000162,
+          "online_ms": 490.19653,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 3645111,
+                  "2": 2600000
+                },
+                "interrupt_count": 6646127,
+                "recorded_utc": "2026-10-16T15:53:23.847502+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 4204329,
+                  "2": 4207109
+                },
+                "interrupt_count": 6644559,
+                "recorded_utc": "2026-10-16T15:53:22.845207+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 1568,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        }
+      },
+      "calibration_aa": {
+        "online_ms": [
+          490.19653,
+          466.89896
+        ],
+        "relative_difference": 0.04868389882393032,
+        "status": "PASS_10_PERCENT"
+      },
+      "ic": {
+        "actual_factor_base_points": 509952,
+        "arm": "p1_ic",
+        "base_hash": "c5511247735bc183359d5425c4dd794aaad49ad38d2ca964799e1caa76afaa08",
+        "cold_process_ms_exploratory": 374141.38517599995,
+        "cold_unattributed_ms": 25.37308499997351,
+        "effective_columns": 3072,
+        "full_child_wall_seconds": 374.82489474700014,
+        "k": 3072,
+        "layout": "root11_dynamic",
+        "one_target_online_ms": 4.524706,
+        "online_phases_ms": {
+          "target_descent_ms": 0.000433,
+          "target_pdp_ms": 4.391043,
+          "target_query_ms": 2.9999999999999997e-05,
+          "target_recovery_check_ms": 0.09407,
+          "target_relation_check_ms": 0.038487
+        },
+        "rank_attempts": 3072,
+        "rank_relations": 3072,
+        "rank_stage_ms": 40984.11713,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 10094923776,
+          "status": "PASS"
+        },
+        "root_state_allocated_bytes": 4308091392,
+        "root_table_allocated_bytes": 5368709120,
+        "root_table_entries": 783270873,
+        "setup_ms": 333127.231888,
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "target_probes": 12850,
+        "targets_total_ms": 4.663073,
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 4200430
+              },
+              "interrupt_count": 7149726,
+              "recorded_utc": "2026-10-16T15:59:38.674396+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 3645111,
+                "2": 2600000
+              },
+              "interrupt_count": 6646127,
+              "recorded_utc": "2026-10-16T15:53:23.847736+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 503599,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      },
+      "online_ratio": 208.7194432080228,
+      "pair_admitted": true,
+      "point_index": 1,
+      "public_point": [
+        "8568701026662390827803516",
+        "587063323591041307826517"
+      ],
+      "rho": {
+        "full_child_wall_seconds": 1.5011017059996448,
+        "online_ms": 944.394117,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 25448448,
+          "status": "PASS"
+        },
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 2600000
+              },
+              "interrupt_count": 7151215,
+              "recorded_utc": "2026-10-16T15:59:40.177015+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 4200430
+              },
+              "interrupt_count": 7149729,
+              "recorded_utc": "2026-10-16T15:59:38.674624+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 1486,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      }
+    },
+    {
+      "calibration": {
+        "after": {
+          "full_child_wall_seconds": 1.0007082769998306,
+          "online_ms": 466.510129,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 2600000,
+                  "2": 4200117
+                },
+                "interrupt_count": 7661935,
+                "recorded_utc": "2026-10-16T16:06:01.021271+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 2600000,
+                  "2": 4201837
+                },
+                "interrupt_count": 7660953,
+                "recorded_utc": "2026-10-16T16:06:00.018939+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 982,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        },
+        "before": {
+          "full_child_wall_seconds": 1.000776414000029,
+          "online_ms": 466.467685,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 2600000,
+                  "2": 2600000
+                },
+                "interrupt_count": 7153119,
+                "recorded_utc": "2026-10-16T15:59:42.182070+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 4200000,
+                  "2": 2600000
+                },
+                "interrupt_count": 7152179,
+                "recorded_utc": "2026-10-16T15:59:41.179948+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 940,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        }
+      },
+      "calibration_aa": {
+        "online_ms": [
+          466.467685,
+          466.510129
+        ],
+        "relative_difference": 9.098608640652851e-05,
+        "status": "PASS_10_PERCENT"
+      },
+      "ic": {
+        "actual_factor_base_points": 509952,
+        "arm": "p2_ic",
+        "base_hash": "c5511247735bc183359d5425c4dd794aaad49ad38d2ca964799e1caa76afaa08",
+        "cold_process_ms_exploratory": 375647.683417,
+        "cold_unattributed_ms": 25.22447599997661,
+        "effective_columns": 3072,
+        "full_child_wall_seconds": 376.3318039810001,
+        "k": 3072,
+        "layout": "root11_dynamic",
+        "one_target_online_ms": 23.537855,
+        "online_phases_ms": {
+          "target_descent_ms": 0.000377,
+          "target_pdp_ms": 23.42843,
+          "target_query_ms": 2.9999999999999997e-05,
+          "target_recovery_check_ms": 0.088979,
+          "target_relation_check_ms": 0.019338
+        },
+        "rank_attempts": 3072,
+        "rank_relations": 3072,
+        "rank_stage_ms": 41242.201793,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 10097905664,
+          "status": "PASS"
+        },
+        "root_state_allocated_bytes": 4308091392,
+        "root_table_allocated_bytes": 5368709120,
+        "root_table_entries": 783270873,
+        "setup_ms": 334356.568587,
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "target_probes": 71429,
+        "targets_total_ms": 23.688561,
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 4201837
+              },
+              "interrupt_count": 7660952,
+              "recorded_utc": "2026-10-16T16:06:00.018737+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 4200892
+              },
+              "interrupt_count": 7154845,
+              "recorded_utc": "2026-10-16T15:59:43.685260+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 506107,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      },
+      "online_ratio": 39.83587089817657,
+      "pair_admitted": true,
+      "point_index": 2,
+      "public_point": [
+        "3816552257052947290744814",
+        "9562101751352239194122897"
+      ],
+      "rho": {
+        "full_child_wall_seconds": 1.501094835999993,
+        "online_ms": 937.650953,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 25448448,
+          "status": "PASS"
+        },
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 2600000
+              },
+              "interrupt_count": 7154842,
+              "recorded_utc": "2026-10-16T15:59:43.684989+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 4199380
+              },
+              "interrupt_count": 7153121,
+              "recorded_utc": "2026-10-16T15:59:42.182334+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 1721,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      }
+    },
+    {
+      "calibration": {
+        "after": {
+          "full_child_wall_seconds": 1.000707666999915,
+          "online_ms": 467.552932,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 2600000,
+                  "2": 4204469
+                },
+                "interrupt_count": 8170107,
+                "recorded_utc": "2026-10-16T16:12:19.850570+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 4198881,
+                  "2": 2600000
+                },
+                "interrupt_count": 8169046,
+                "recorded_utc": "2026-10-16T16:12:18.848535+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 1061,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        },
+        "before": {
+          "full_child_wall_seconds": 1.0007638530000804,
+          "online_ms": 466.498991,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 4175324,
+                  "2": 2600000
+                },
+                "interrupt_count": 7662919,
+                "recorded_utc": "2026-10-16T16:06:02.023554+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 2600000,
+                  "2": 4200117
+                },
+                "interrupt_count": 7661938,
+                "recorded_utc": "2026-10-16T16:06:01.021481+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 981,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        }
+      },
+      "calibration_aa": {
+        "online_ms": [
+          466.498991,
+          467.552932
+        ],
+        "relative_difference": 0.0022567075213869216,
+        "status": "PASS_10_PERCENT"
+      },
+      "ic": {
+        "actual_factor_base_points": 509952,
+        "arm": "p3_ic",
+        "base_hash": "c5511247735bc183359d5425c4dd794aaad49ad38d2ca964799e1caa76afaa08",
+        "cold_process_ms_exploratory": 374014.943351,
+        "cold_unattributed_ms": 24.97551099999476,
+        "effective_columns": 3072,
+        "full_child_wall_seconds": 374.81848589799984,
+        "k": 3072,
+        "layout": "root11_dynamic",
+        "one_target_online_ms": 0.651024,
+        "online_phases_ms": {
+          "target_descent_ms": 0.000388,
+          "target_pdp_ms": 0.5334080000000001,
+          "target_query_ms": 3.2000000000000005e-05,
+          "target_recovery_check_ms": 0.09886,
+          "target_relation_check_ms": 0.017886
+        },
+        "rank_attempts": 3072,
+        "rank_relations": 3072,
+        "rank_stage_ms": 40692.953574,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 10095005696,
+          "status": "PASS"
+        },
+        "root_state_allocated_bytes": 4308091392,
+        "root_table_allocated_bytes": 5368709120,
+        "root_table_entries": 783270873,
+        "setup_ms": 333296.22977700003,
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "target_probes": 1116,
+        "targets_total_ms": 0.784489,
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 4201259
+              },
+              "interrupt_count": 8166881,
+              "recorded_utc": "2026-10-16T16:12:16.845360+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 4175324,
+                "2": 2600000
+              },
+              "interrupt_count": 7662919,
+              "recorded_utc": "2026-10-16T16:06:02.023739+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 503962,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      },
+      "online_ratio": 2241.1972016392638,
+      "pair_admitted": true,
+      "point_index": 3,
+      "public_point": [
+        "6575222844613856968663271",
+        "4349494314911582632291785"
+      ],
+      "rho": {
+        "full_child_wall_seconds": 2.0013443449997794,
+        "online_ms": 1459.073167,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 31158272,
+          "status": "PASS"
+        },
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 4198881,
+                "2": 2600000
+              },
+              "interrupt_count": 8169044,
+              "recorded_utc": "2026-10-16T16:12:18.848244+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 4201259
+              },
+              "interrupt_count": 8166883,
+              "recorded_utc": "2026-10-16T16:12:16.845558+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 2161,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      }
+    },
+    {
+      "calibration": {
+        "after": {
+          "full_child_wall_seconds": 1.0006976579998081,
+          "online_ms": 504.86644,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 4192042,
+                  "2": 2600000
+                },
+                "interrupt_count": 8682443,
+                "recorded_utc": "2026-10-16T16:18:40.693810+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 2600000,
+                  "2": 3698245
+                },
+                "interrupt_count": 8681460,
+                "recorded_utc": "2026-10-16T16:18:39.691546+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 983,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        },
+        "before": {
+          "full_child_wall_seconds": 1.0006668989999525,
+          "online_ms": 467.864296,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 2600000,
+                  "2": 2600000
+                },
+                "interrupt_count": 8171093,
+                "recorded_utc": "2026-10-16T16:12:20.852930+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 2600000,
+                  "2": 4204469
+                },
+                "interrupt_count": 8170108,
+                "recorded_utc": "2026-10-16T16:12:19.850769+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 985,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        }
+      },
+      "calibration_aa": {
+        "online_ms": [
+          467.864296,
+          504.86644
+        ],
+        "relative_difference": 0.07607890371010131,
+        "status": "PASS_10_PERCENT"
+      },
+      "ic": {
+        "actual_factor_base_points": 509952,
+        "arm": "p4_ic",
+        "base_hash": "c5511247735bc183359d5425c4dd794aaad49ad38d2ca964799e1caa76afaa08",
+        "cold_process_ms_exploratory": 377426.96605700004,
+        "cold_unattributed_ms": 25.70797800004176,
+        "effective_columns": 3072,
+        "full_child_wall_seconds": 378.3347074420003,
+        "k": 3072,
+        "layout": "root11_dynamic",
+        "one_target_online_ms": 2.178198,
+        "online_phases_ms": {
+          "target_descent_ms": 0.00039200000000000004,
+          "target_pdp_ms": 2.065948,
+          "target_query_ms": 2.9999999999999997e-05,
+          "target_recovery_check_ms": 0.08781299999999999,
+          "target_relation_check_ms": 0.023265
+        },
+        "rank_attempts": 3072,
+        "rank_relations": 3072,
+        "rank_stage_ms": 42209.190706999994,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 10094899200,
+          "status": "PASS"
+        },
+        "root_state_allocated_bytes": 4308091392,
+        "root_table_allocated_bytes": 5368709120,
+        "root_table_entries": 783270873,
+        "setup_ms": 335189.751499,
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "target_probes": 5779,
+        "targets_total_ms": 2.315873,
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 3698245
+              },
+              "interrupt_count": 8681456,
+              "recorded_utc": "2026-10-16T16:18:39.691322+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 4197901,
+                "2": 4203678
+              },
+              "interrupt_count": 8171810,
+              "recorded_utc": "2026-10-16T16:12:21.355072+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 509646,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      },
+      "online_ratio": 115.83254644435445,
+      "pair_admitted": true,
+      "point_index": 4,
+      "public_point": [
+        "9270218211410587107292663",
+        "8224538291192911223684875"
+      ],
+      "rho": {
+        "full_child_wall_seconds": 0.5002904530001615,
+        "online_ms": 252.306221,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 25448448,
+          "status": "PASS"
+        },
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 4197901,
+                "2": 4203678
+              },
+              "interrupt_count": 8171808,
+              "recorded_utc": "2026-10-16T16:12:21.354844+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 2600000
+              },
+              "interrupt_count": 8171094,
+              "recorded_utc": "2026-10-16T16:12:20.853139+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 714,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      }
+    },
+    {
+      "calibration": {
+        "after": {
+          "full_child_wall_seconds": 1.0007172929999797,
+          "online_ms": 467.935234,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 4204225,
+                  "2": 2600000
+                },
+                "interrupt_count": 9192993,
+                "recorded_utc": "2026-10-16T16:25:01.036716+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 4202459,
+                  "2": 4221543
+                },
+                "interrupt_count": 9191971,
+                "recorded_utc": "2026-10-16T16:25:00.034504+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 1022,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        },
+        "before": {
+          "full_child_wall_seconds": 1.0007730829993307,
+          "online_ms": 469.735005,
+          "resources": {
+            "cpu_throttled_periods_delta": 0,
+            "major_faults": 0,
+            "oom_events_delta": 0,
+            "oom_kills_delta": 0,
+            "peak_rss_bytes": 25448448,
+            "status": "PASS"
+          },
+          "status": "PASS_INDEPENDENT_REPLAY",
+          "telemetry": {
+            "receipt": {
+              "after": {
+                "frequency_khz": {
+                  "0": 2600000,
+                  "2": 2600000
+                },
+                "interrupt_count": 8683439,
+                "recorded_utc": "2026-10-16T16:18:41.696102+00:00",
+                "steal_ticks": 0
+              },
+              "before": {
+                "frequency_khz": {
+                  "0": 4192042,
+                  "2": 2600000
+                },
+                "interrupt_count": 8682443,
+                "recorded_utc": "2026-10-16T16:18:40.693989+00:00",
+                "steal_ticks": 0
+              },
+              "interrupt_delta": 996,
+              "selected_cpus": [
+                0,
+                2
+              ],
+              "steal_fraction_of_cpu_envelope": 0.0,
+              "steal_fraction_of_wall": 0.0,
+              "steal_seconds": 0.0
+            },
+            "status": "PASS"
+          }
+        }
+      },
+      "calibration_aa": {
+        "online_ms": [
+          469.735005,
+          467.935234
+        ],
+        "relative_difference": 0.0038388143830168442,
+        "status": "PASS_10_PERCENT"
+      },
+      "ic": {
+        "actual_factor_base_points": 509952,
+        "arm": "p5_ic",
+        "base_hash": "c5511247735bc183359d5425c4dd794aaad49ad38d2ca964799e1caa76afaa08",
+        "cold_process_ms_exploratory": 375836.314936,
+        "cold_unattributed_ms": 25.633318999955257,
+        "effective_columns": 3072,
+        "full_child_wall_seconds": 376.3330414739994,
+        "k": 3072,
+        "layout": "root11_dynamic",
+        "one_target_online_ms": 1.103165,
+        "online_phases_ms": {
+          "target_descent_ms": 0.000558,
+          "target_pdp_ms": 0.9881130000000001,
+          "target_query_ms": 3.2000000000000005e-05,
+          "target_recovery_check_ms": 0.09113299999999999,
+          "target_relation_check_ms": 0.02272
+        },
+        "rank_attempts": 3072,
+        "rank_relations": 3072,
+        "rank_stage_ms": 41524.322396,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 10094960640,
+          "status": "PASS"
+        },
+        "root_state_allocated_bytes": 4308091392,
+        "root_table_allocated_bytes": 5368709120,
+        "root_table_entries": 783270873,
+        "setup_ms": 334285.120982,
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "target_probes": 2485,
+        "targets_total_ms": 1.2382389999999999,
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 2600000
+              },
+              "interrupt_count": 9189813,
+              "recorded_utc": "2026-10-16T16:24:58.030934+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 4199584
+              },
+              "interrupt_count": 8683443,
+              "recorded_utc": "2026-10-16T16:18:41.696394+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 506370,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      },
+      "online_ratio": 1323.268748555293,
+      "pair_admitted": true,
+      "point_index": 5,
+      "public_point": [
+        "1602863696419974174266573",
+        "1032275024642518193248892"
+      ],
+      "rho": {
+        "full_child_wall_seconds": 2.001414964000105,
+        "online_ms": 1459.783769,
+        "resources": {
+          "cpu_throttled_periods_delta": 0,
+          "major_faults": 0,
+          "oom_events_delta": 0,
+          "oom_kills_delta": 0,
+          "peak_rss_bytes": 31166464,
+          "status": "PASS"
+        },
+        "status": "PASS_INDEPENDENT_REPLAY",
+        "telemetry": {
+          "receipt": {
+            "after": {
+              "frequency_khz": {
+                "0": 4202459,
+                "2": 4221543
+              },
+              "interrupt_count": 9191971,
+              "recorded_utc": "2026-10-16T16:25:00.034308+00:00",
+              "steal_ticks": 0
+            },
+            "before": {
+              "frequency_khz": {
+                "0": 2600000,
+                "2": 2600000
+              },
+              "interrupt_count": 9189815,
+              "recorded_utc": "2026-10-16T16:24:58.031138+00:00",
+              "steal_ticks": 0
+            },
+            "interrupt_delta": 2156,
+            "selected_cpus": [
+              0,
+              2
+            ],
+            "steal_fraction_of_cpu_envelope": 0.0,
+            "steal_fraction_of_wall": 0.0,
+            "steal_seconds": 0.0
+          },
+          "status": "PASS"
+        }
+      }
+    }
+  ],
+  "schema": "n83.tier1-online-analysis/v1",
+  "status": "TIER1_ONLINE_SPEEDUP_PASS",
+  "workload_role": "five_fresh_single_target_online_pairs"
+}

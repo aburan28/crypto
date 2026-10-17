@@ -42,7 +42,12 @@ pub struct RhoParams {
 /// The smallest measured field whose prime has at least `group_log2` bits
 /// (a prime-order curve over `F_p` has `n ≈ p`).
 pub fn field_for(group_log2: f64) -> Result<&'static str, String> {
-    let mut fs: Vec<_> = FIELDS.iter().collect();
+    // The general backends only: `fp64bf`, `fp64cm` and `pf64` are
+    // comparison arms, not what a group is priced on.
+    let mut fs: Vec<_> = FIELDS
+        .iter()
+        .filter(|f| matches!(f.name, "fp64" | "w1" | "w2" | "w3" | "w4"))
+        .collect();
     fs.sort_by_key(|f| f.bits());
     fs.into_iter()
         .find(|f| f.bits() as f64 >= group_log2)
@@ -109,6 +114,7 @@ pub fn workload(p: &RhoParams, counts: &KernelCounts) -> Result<(Workload, RhoSh
         working_set_bytes_per_core: ELEMS_RESIDENT_PER_WALK as f64 * e * p.batch as f64
             + 2.0 * e * TABLE as f64,
         parallel_fraction: 1.0,
+        pipes_overlap: false,
     };
     let start = Phase {
         name: "start-points".into(),

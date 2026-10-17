@@ -22,11 +22,13 @@ the remaining requested primes through p = 199.
 > **Update 2026-10-16** ([continuation report](residual_model_20261016/REPORT.md)):
 > a certifying point counter reproduces every retained census from p = 37 to 59
 > byte for byte, so those zero labels are now exact rather than probabilistic.
-> The certified census continues past p = 59; p = 61, 67 and 71 are complete. Inside the
+> The certified census continues past p = 59; p = 61 through 103 are complete. Inside the
 > high-depth classes, the residual zeros follow a parameter-free random
 > thinning of an exactly computed 8th-power mass. The registered predictions
 > pass at the pristine holdouts p = 53 and 59 and at the forward predictions
-> p = 61, 67 and 71. Beyond the proved obstruction, no compact deterministic criterion is
+> p = 61, 67, 71, 73, 79, 83, 89 and 97, though the excess of zero rows over the
+> predictions was borderline at p = 97 (pooled z = 1.91) and has a registered
+> follow-up test; the first two fresh primes show no excess. Beyond the proved obstruction, no compact deterministic criterion is
 > needed to explain the data.
 
 ## Requested question and scope

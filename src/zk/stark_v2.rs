@@ -1,53 +1,62 @@
-//! **STARK v2** — production-soundness scalable transparent
-//! argument of knowledge with coset LDE blow-up, composition
-//! polynomial encoding constraint satisfaction, and adjustable
-//! query count.
+//! **STARK v2**: a scalable transparent argument of knowledge with
+//! a coset low-degree extension, a composition polynomial that
+//! encodes the AIR, and degree-bounded FRI.  Educational and not
+//! audited: it must not back a research claim.
 //!
-//! Upgrades over [`super::stark`] (the v1 pedagogical version):
+//! 1. **Coset LDE.**  The trace polynomial `f(X)`, interpolated on
+//!    `H_trace = ⟨ω⟩` of size `n`, is evaluated on the coset
+//!    `g · H_lde` of size `L = n · β` (`β` = blow-up, a power of two
+//!    `≥ 2`; `g = 7` generates `F_r*`, so the coset misses `H_trace`).
+//!    Because `ω = ω_L^β`, `f(ω·x)` sits `β` positions after `f(x)`.
 //!
-//! 1. **Coset LDE**.  Trace polynomial `f(X)` interpolated on the
-//!    trace domain `H_trace = {ω, ω², …, ωⁿ}` is *evaluated* on a
-//!    larger coset `g · H_lde`, where `H_lde` is a multiplicative
-//!    subgroup of size `n · β` (the blow-up factor, typically
-//!    `β = 8–32`).  This separates the trace domain from the LDE
-//!    domain — essential for FRI soundness.
-//!
-//! 2. **Composition polynomial**.  The verifier checks a single
-//!    polynomial identity instead of trusting the trace's
-//!    consistency.  Concretely, for an AIR with transition
-//!    constraint `C(x, ω·x)` and boundary constraint `B(x)`, the
-//!    composition polynomial is:
+//! 2. **Composition polynomial**, evaluated pointwise on the coset:
 //!
 //!    ```text
-//!    Composition(X) = α₁ · transition_quotient(X) + α₂ · boundary_quotient(X)
+//!    Comp(x) = α₁ · C(f(x), f(ω·x)) / Z(x)  +  Σ_k α₂^k · (f(x) − v_k) / (x − ω^{p_k})
+//!    Z(x)    = (xⁿ − 1) / (x − ω^{n−1})
 //!    ```
 //!
-//!    where:
-//!    - `transition_quotient(X) = C(f(X), f(ω·X)) / Z_{H_trace ∖ {ω^(n-1)}}(X)`
-//!    - `boundary_quotient(X) = (f(X) − boundary_value) / (X − boundary_point)`
+//!    For a valid trace and a transition `C` of degree 1 in the trace
+//!    values, `Comp` is a polynomial of degree `< n`; if a transition
+//!    or a boundary fails, the division leaves a non-polynomial and
+//!    `Comp` is far from every degree-`< n` polynomial.
 //!
-//!    FRI proves `Composition(X)` is a low-degree polynomial.
-//!    Soundness is `(query_count / blow_up)^(query_count)` →
-//!    `2^(-λ)` for `λ`-bit security.
+//! 3. **Degree-bounded FRI** folds `Comp`'s evaluations `log₂ n` times
+//!    to a final layer of `β` values, which must be constant.
 //!
-//! 3. **Configurable query count**.  Default 80 queries with
-//!    blow-up 8 gives ~256-bit conjectured soundness.
+//! The verifier re-derives `α₁, α₂`, the FRI challenges and the query
+//! positions from the transcript; at each of `query_count` positions
+//! it opens `f(x)`, `f(ω·x)` and `Comp(x)` (each Merkle path bound to
+//! its position), recomputes `Comp(x)` from the AIR, checks that FRI's
+//! first layer holds that value, and checks the folding down to the
+//! constant final layer.
+//!
+//! **Soundness.**  Under the Reed–Solomon proximity conjecture each
+//! query catches a cheating prover with probability about
+//! `1 − 1/β`, so `q` queries give about `q · log₂ β` bits (240 for
+//! the default `β = 8, q = 80`; 40 for [`StarkConfig::fast`]).  Proven
+//! bounds are weaker (about half that), there is no grinding, no
+//! out-of-domain (DEEP) sample and no zero-knowledge masking, the
+//! transition must be of degree 1, and SHA-256 and the 255-bit field
+//! cap everything.
 //!
 //! ## API
 //!
-//! - [`AirV2`] — wider AIR with multiple boundary constraints and
-//!   a closure-based transition function operating on adjacent
-//!   trace rows.
-//! - [`StarkConfig`] — `(blow_up, query_count)`.
-//! - [`prove`] / [`verify`] — production-soundness STARK.
+//! - [`AirV2`]: boundary constraints and a closure-based transition
+//!   on adjacent trace rows.
+//! - [`StarkConfig`]: `(blow_up, query_count)`.
+//! - [`prove`] / [`verify`].
 
 use super::merkle::{merkle_verify, MerkleProof, MerkleTree};
-use super::polynomial::{fr_mul, fr_neg, fr_sub, Poly};
-use super::stark::{fri_commit, fri_query, fri_verify, FriCommitment, FriQueryOpening};
+use super::polynomial::{fr_add, fr_inv, fr_mul, fr_sub, Poly};
+use super::stark::{
+    fri_commit_to, fri_query, fri_transcript_after, fri_verify, query_positions, FriCommitment,
+    FriQueryOpening,
+};
 use crate::bls12_381::fq::scalar_modulus;
 use crate::hash::sha256::sha256;
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::One;
 use std::sync::Arc;
 
 const FS_TAG: &str = "ZK-STARK-V2/v1";
@@ -60,8 +69,8 @@ pub struct StarkConfig {
 }
 
 impl StarkConfig {
-    /// Default: `blow_up = 8`, `query_count = 80`.  Conjectured
-    /// soundness: `(1/8)^80 = 2^{-240}`.
+    /// Default: `blow_up = 8`, `query_count = 80`: about 240 bits
+    /// under the proximity conjecture (module docs, "Soundness").
     #[allow(clippy::should_implement_trait)]
     pub fn default() -> Self {
         Self {
@@ -69,8 +78,8 @@ impl StarkConfig {
             query_count: 80,
         }
     }
-    /// Lower-soundness, faster: `blow_up = 4`, `query_count = 20`.
-    /// Conjectured soundness `2^{-40}`.  Good for tests.
+    /// Faster: `blow_up = 4`, `query_count = 20`, about 40 bits
+    /// conjectured.  Good for tests.
     pub fn fast() -> Self {
         Self {
             blow_up: 4,
@@ -171,70 +180,63 @@ fn interpolate_from_subgroup(dom: &[BigUint], evals: &[BigUint]) -> Poly {
 
 // ── Composition polynomial ─────────────────────────────────────────
 
-/// Build the composition polynomial encoding the AIR's constraints.
-/// Returns a polynomial that vanishes on the trace domain `H_trace`
-/// iff the trace is valid.
-///
-/// The composition is `α₁ · T(X) + α₂ · B(X)` where:
-/// - `T(X) = transition_constraint(f(X), f(ω·X)) / Z_{H_minus_last}(X)`
-/// - `B(X) = (f(X) − boundary) / (X − boundary_point)`
-fn compose(air: &AirV2, f: &Poly, h_trace: &[BigUint], alpha1: &BigUint, alpha2: &BigUint) -> Poly {
+/// `Comp(x)` from the trace values `f(x)`, `f(ω·x)` at one coset point
+/// (module docs, item 2).  Prover and verifier call the same function.
+fn composition_at(
+    air: &AirV2,
+    h_trace: &[BigUint],
+    x: &BigUint,
+    fx: &BigUint,
+    f_wx: &BigUint,
+    alpha1: &BigUint,
+    alpha2: &BigUint,
+) -> BigUint {
     let n = air.n;
-    let _omega = &h_trace[1]; // ω = g_n^1
-
-    // Transition constraint as a polynomial:
-    // C(X) = transition(f(X), f(ω·X)).
-    // We construct it as evaluations on H_trace, then interpolate.
-    // For the doubling AIR: C(X) = f(ω·X) − 2·f(X).
-    // To make this generic, we evaluate the transition closure at
-    // each pair (f(ω^i), f(ω^{i+1})) for i in 0..n−1.  Index n−1's
-    // "next" is ω^0 (wrap-around), which the verifier excludes via
-    // Z_{H ∖ {ω^{n-1}}}.
-    let mut c_evals = Vec::with_capacity(n);
-    for i in 0..n {
-        let cur = f.evaluate(&h_trace[i]);
-        let nxt = f.evaluate(&h_trace[(i + 1) % n]);
-        c_evals.push((air.transition)(&cur, &nxt));
+    // xⁿ by squaring (n is a power of two).
+    let mut xn = x.clone();
+    let mut k = 1;
+    while k < n {
+        xn = fr_mul(&xn, &xn);
+        k *= 2;
     }
-    // Interpolate C(X).
-    let c_poly = interpolate_from_subgroup(h_trace, &c_evals);
-
-    // Vanishing polynomial Z_{H ∖ {ω^{n-1}}}(X) = (X^n − 1) / (X − ω^{n-1}).
-    // Since X^n − 1 = ∏_i (X − ω^i), divide out the last factor.
-    let mut xn_minus_1 = vec![BigUint::zero(); n + 1];
-    xn_minus_1[0] = fr_neg(&BigUint::one());
-    xn_minus_1[n] = BigUint::one();
-    let z_h = Poly::from_coeffs(xn_minus_1);
-    let last_root = &h_trace[n - 1];
-    let factor = Poly::from_coeffs(vec![fr_neg(last_root), BigUint::one()]);
-    let (z_no_last, _) = z_h.divmod(&factor);
-    let (transition_quotient, _rem) = c_poly.divmod(&z_no_last);
-
-    // Boundary quotient: sum over boundary constraints.
-    // B(X) = Σ_k α₂^k · (f(X) − value_k) / (X − ω^{position_k}).
-    // For simplicity, just one boundary at position 0:
-    let mut boundary_quotient = Poly::zero();
+    // Z(x) = (xⁿ − 1) / (x − ω^{n−1}); the coset never meets H_trace.
+    let z = fr_mul(
+        &fr_sub(&xn, &BigUint::one()),
+        &fr_inv(&fr_sub(x, &h_trace[n - 1])).expect("coset point off the trace domain"),
+    );
+    let transition = fr_mul(
+        &(air.transition)(fx, f_wx),
+        &fr_inv(&z).expect("coset point off the trace domain"),
+    );
+    let mut acc = fr_mul(alpha1, &transition);
     let mut alpha2_pow = BigUint::one();
     for (pos, val) in &air.boundary {
-        // (f − val).
-        let mut shifted = f.clone();
-        if shifted.coeffs.is_empty() {
-            shifted.coeffs.push(BigUint::zero());
-        }
-        shifted.coeffs[0] = fr_sub(&shifted.coeffs[0], val);
-        // (X − ω^pos).
-        let root = &h_trace[*pos];
-        let divisor = Poly::from_coeffs(vec![fr_neg(root), BigUint::one()]);
-        let (q, _) = shifted.divmod(&divisor);
-        // Add α₂^k · q.
-        let scaled = q.scale(&alpha2_pow);
-        boundary_quotient = boundary_quotient.add(&scaled);
+        let term = fr_mul(
+            &fr_sub(fx, val),
+            &fr_inv(&fr_sub(x, &h_trace[*pos])).expect("coset point off the trace domain"),
+        );
+        acc = fr_add(&acc, &fr_mul(&alpha2_pow, &term));
         alpha2_pow = fr_mul(&alpha2_pow, alpha2);
     }
+    acc
+}
 
-    // Composition = α₁ · transition_quotient + 1 · boundary_quotient
-    // (α₂ powers already absorbed into boundary_quotient).
-    transition_quotient.scale(alpha1).add(&boundary_quotient)
+/// Fiat-Shamir state up to FRI: absorbs the trace commitment, draws
+/// `α₁, α₂`, absorbs the composition commitment.
+fn transcript_to_fri(
+    trace_commit: &[u8; 32],
+    composition_commit: &[u8; 32],
+) -> (Vec<u8>, BigUint, BigUint) {
+    let mut transcript = FS_TAG.as_bytes().to_vec();
+    transcript.extend_from_slice(&trace_commit[..]);
+    let alpha1_bytes = sha256(&transcript);
+    transcript.extend_from_slice(&alpha1_bytes);
+    let alpha1 = BigUint::from_bytes_be(&alpha1_bytes) % scalar_modulus();
+    let alpha2_bytes = sha256(&transcript);
+    transcript.extend_from_slice(&alpha2_bytes);
+    let alpha2 = BigUint::from_bytes_be(&alpha2_bytes) % scalar_modulus();
+    transcript.extend_from_slice(&composition_commit[..]);
+    (transcript, alpha1, alpha2)
 }
 
 // ── Prover / Verifier ──────────────────────────────────────────────
@@ -244,8 +246,10 @@ pub struct StarkProofV2 {
     pub trace_commit: [u8; 32],
     pub composition_commit: [u8; 32],
     pub fri: FriCommitment,
-    /// Per-query openings on the trace and composition LDE tables.
+    /// Per-query openings on the trace and composition LDE tables:
+    /// `f(x)`, `f(ω·x)` (position `+ β`) and `Comp(x)`.
     pub trace_openings: Vec<(usize, BigUint, MerkleProof)>,
+    pub trace_next_openings: Vec<(usize, BigUint, MerkleProof)>,
     pub composition_openings: Vec<(usize, BigUint, MerkleProof)>,
     pub fri_openings: Vec<(usize, FriQueryOpening)>,
 }
@@ -257,10 +261,13 @@ fn scalar_to_bytes(s: &BigUint) -> Vec<u8> {
     buf.to_vec()
 }
 
-/// **Prove** the AIR is satisfied by an executed trace.
+/// **Prove** the AIR is satisfied by an executed trace.  The prover
+/// does not check the trace: an invalid one yields a proof that
+/// [`verify`] rejects.
 pub fn prove(air: &AirV2, config: &StarkConfig) -> Option<StarkProofV2> {
     let n = air.n;
-    if !n.is_power_of_two() {
+    let beta = config.blow_up;
+    if !n.is_power_of_two() || n < 2 || !beta.is_power_of_two() || beta < 2 {
         return None;
     }
     let trace = (air.generate_trace)();
@@ -269,160 +276,135 @@ pub fn prove(air: &AirV2, config: &StarkConfig) -> Option<StarkProofV2> {
     }
     let h_trace = subgroup(n);
 
-    // Trace polynomial via Lagrange.
+    // Trace polynomial via Lagrange, evaluated on the coset g · H_lde.
     let f_poly = interpolate_from_subgroup(&h_trace, &trace);
-
-    // LDE: evaluate f on a coset g · H_lde where |H_lde| = n · blow_up.
-    let lde_size = n * config.blow_up;
-    let shift = coset_shift();
-    let h_lde = coset(lde_size, &shift);
+    let lde_size = n * beta;
+    let h_lde = coset(lde_size, &coset_shift());
     let f_lde = eval_on_domain(&f_poly, &h_lde);
 
-    // Commit to trace LDE via Merkle.
     let trace_leaves: Vec<Vec<u8>> = f_lde.iter().map(scalar_to_bytes).collect();
     let trace_tree = MerkleTree::from_leaves(&trace_leaves);
     let trace_commit = trace_tree.root();
 
-    // Fiat-Shamir: append trace commitment, derive α₁, α₂.
-    let mut transcript = FS_TAG.as_bytes().to_vec();
-    transcript.extend_from_slice(&trace_commit[..]);
-    let alpha1_bytes = sha256(&transcript);
-    transcript.extend_from_slice(&alpha1_bytes);
-    let alpha1 = BigUint::from_bytes_be(&alpha1_bytes) % scalar_modulus();
-    let alpha2_bytes = sha256(&transcript);
-    transcript.extend_from_slice(&alpha2_bytes);
-    let alpha2 = BigUint::from_bytes_be(&alpha2_bytes) % scalar_modulus();
-
-    // Compose constraint polynomial.
-    let composition_poly = compose(air, &f_poly, &h_trace, &alpha1, &alpha2);
-    let composition_lde = eval_on_domain(&composition_poly, &h_lde);
-
-    // Commit to composition LDE.
+    // α₁, α₂ depend only on the trace commitment.
+    let (_, alpha1, alpha2) = transcript_to_fri(&trace_commit, &[0u8; 32]);
+    let composition_lde: Vec<BigUint> = (0..lde_size)
+        .map(|i| {
+            composition_at(
+                air,
+                &h_trace,
+                &h_lde[i],
+                &f_lde[i],
+                &f_lde[(i + beta) % lde_size],
+                &alpha1,
+                &alpha2,
+            )
+        })
+        .collect();
     let comp_leaves: Vec<Vec<u8>> = composition_lde.iter().map(scalar_to_bytes).collect();
     let comp_tree = MerkleTree::from_leaves(&comp_leaves);
     let composition_commit = comp_tree.root();
-    transcript.extend_from_slice(&composition_commit[..]);
+    let (mut transcript, _, _) = transcript_to_fri(&trace_commit, &composition_commit);
 
-    // Run FRI on the composition polynomial's LDE.
-    let fri = fri_commit(&composition_lde, &h_lde, &mut transcript);
+    // FRI to a constant final layer of β values: degree < n.
+    let fri = fri_commit_to(&composition_lde, &h_lde, &mut transcript, beta);
+    let positions = query_positions(&mut transcript, config.query_count, lde_size);
 
-    // Query phase: pick `query_count` random positions on the LDE.
-    let mut positions = Vec::with_capacity(config.query_count);
-    for q in 0..config.query_count {
-        transcript.extend_from_slice(&(q as u64).to_be_bytes());
-        let h = sha256(&transcript);
-        transcript.extend_from_slice(&h);
-        let pos = (BigUint::from_bytes_be(&h) % BigUint::from(lde_size as u64))
-            .iter_u64_digits()
-            .next()
-            .unwrap_or(0) as usize;
-        positions.push(pos);
-    }
-
-    // Open trace LDE and composition LDE at queried positions.
-    let trace_openings: Vec<(usize, BigUint, MerkleProof)> = positions
-        .iter()
-        .map(|&p| (p, f_lde[p].clone(), trace_tree.proof(p).unwrap()))
-        .collect();
-    let composition_openings: Vec<(usize, BigUint, MerkleProof)> = positions
-        .iter()
-        .map(|&p| (p, composition_lde[p].clone(), comp_tree.proof(p).unwrap()))
-        .collect();
-
-    // Open FRI at the same positions.
-    let fri_openings: Vec<(usize, FriQueryOpening)> =
-        positions.iter().map(|&p| (p, fri_query(&fri, p))).collect();
-
+    let open = |tree: &MerkleTree, table: &[BigUint], p: usize| {
+        (p, table[p].clone(), tree.proof(p).unwrap())
+    };
     Some(StarkProofV2 {
         trace_commit,
         composition_commit,
+        trace_openings: positions
+            .iter()
+            .map(|&p| open(&trace_tree, &f_lde, p))
+            .collect(),
+        trace_next_openings: positions
+            .iter()
+            .map(|&p| open(&trace_tree, &f_lde, (p + beta) % lde_size))
+            .collect(),
+        composition_openings: positions
+            .iter()
+            .map(|&p| open(&comp_tree, &composition_lde, p))
+            .collect(),
+        fri_openings: positions.iter().map(|&p| (p, fri_query(&fri, p))).collect(),
         fri,
-        trace_openings,
-        composition_openings,
-        fri_openings,
     })
 }
 
-/// **Verify** a STARK v2 proof.
+/// **Verify** a STARK v2 proof (module docs, last paragraph).
 pub fn verify(air: &AirV2, config: &StarkConfig, proof: &StarkProofV2) -> bool {
     let n = air.n;
-    if !n.is_power_of_two() {
+    let beta = config.blow_up;
+    let q = config.query_count;
+    if !n.is_power_of_two() || n < 2 || !beta.is_power_of_two() || beta < 2 || q == 0 {
         return false;
     }
-    let lde_size = n * config.blow_up;
-    let shift = coset_shift();
-    let h_lde = coset(lde_size, &shift);
+    if air.boundary.iter().any(|(pos, _)| *pos >= n) {
+        return false;
+    }
+    if proof.trace_openings.len() != q
+        || proof.trace_next_openings.len() != q
+        || proof.composition_openings.len() != q
+        || proof.fri_openings.len() != q
+    {
+        return false;
+    }
+    // log₂ n folds: the final layer of β values must be constant.
+    if proof.fri.layer_roots.len() != n.trailing_zeros() as usize + 1 {
+        return false;
+    }
+    let lde_size = n * beta;
+    let h_lde = coset(lde_size, &coset_shift());
     let h_trace = subgroup(n);
 
-    // Replay Fiat-Shamir to recover α₁, α₂.
-    let mut transcript = FS_TAG.as_bytes().to_vec();
-    transcript.extend_from_slice(&proof.trace_commit[..]);
-    let alpha1_bytes = sha256(&transcript);
-    transcript.extend_from_slice(&alpha1_bytes);
-    let alpha1 = BigUint::from_bytes_be(&alpha1_bytes) % scalar_modulus();
-    let alpha2_bytes = sha256(&transcript);
-    transcript.extend_from_slice(&alpha2_bytes);
-    let alpha2 = BigUint::from_bytes_be(&alpha2_bytes) % scalar_modulus();
+    let (fri_transcript_initial, alpha1, alpha2) =
+        transcript_to_fri(&proof.trace_commit, &proof.composition_commit);
+    let mut after_fri = fri_transcript_after(&fri_transcript_initial, &proof.fri);
+    let positions = query_positions(&mut after_fri, q, lde_size);
 
-    transcript.extend_from_slice(&proof.composition_commit[..]);
-
-    // Re-derive FRI alphas and queries from the same transcript.
-    let fri_transcript_initial = transcript.clone();
-
-    // FRI verify (composition polynomial is low-degree).
-    if !fri_verify(
+    let opened =
+        |(pos, val, path): &(usize, BigUint, MerkleProof), at: usize, root: &[u8; 32]| -> bool {
+            *pos == at && path.leaf_index == at && merkle_verify(&scalar_to_bytes(val), path, root)
+        };
+    for (i, &p) in positions.iter().enumerate() {
+        let (fx, f_wx, comp) = (
+            &proof.trace_openings[i],
+            &proof.trace_next_openings[i],
+            &proof.composition_openings[i],
+        );
+        if !opened(fx, p, &proof.trace_commit)
+            || !opened(f_wx, (p + beta) % lde_size, &proof.trace_commit)
+            || !opened(comp, p, &proof.composition_commit)
+        {
+            return false;
+        }
+        // The committed composition is the AIR's composition here ...
+        if comp.1 != composition_at(air, &h_trace, &h_lde[p], &fx.1, &f_wx.1, &alpha1, &alpha2) {
+            return false;
+        }
+        // ... and FRI's first layer is the committed composition.
+        let (fri_pos, fri_open) = &proof.fri_openings[i];
+        if *fri_pos != p || fri_open.openings.first().map(|o| &o.0) != Some(&comp.1) {
+            return false;
+        }
+    }
+    if proof.fri.layer_roots[0] != proof.composition_commit {
+        return false;
+    }
+    fri_verify(
         &proof.fri,
         &h_lde,
         &proof.fri_openings,
         &fri_transcript_initial,
-    ) {
-        return false;
-    }
-
-    // Check that all trace/composition openings verify against their
-    // respective Merkle commitments AND that the composition at each
-    // queried position is consistent with the trace at that position.
-    for (i, &(pos, ref f_val, ref f_proof)) in proof.trace_openings.iter().enumerate() {
-        if !merkle_verify(&scalar_to_bytes(f_val), f_proof, &proof.trace_commit) {
-            return false;
-        }
-        let (cpos, c_val, c_proof) = &proof.composition_openings[i];
-        if *cpos != pos {
-            return false;
-        }
-        if !merkle_verify(&scalar_to_bytes(c_val), c_proof, &proof.composition_commit) {
-            return false;
-        }
-        // Consistency check: composition_value should equal what
-        // we'd compute from f_val and the AIR's boundary/transition
-        // structure at this LDE point.  For positions OUTSIDE the
-        // trace domain, this just checks the polynomial identity
-        // holds.  For positions in the trace domain (or coset
-        // thereof), the consistency is the soundness-bearing check.
-        //
-        // We require a NEIGHBOR value f(ω·x) too — but our opening
-        // doesn't include the neighbor.  In a full STARK we'd open
-        // at (pos, neighbor_pos) too.  For this v2 educational
-        // version, we trust the trace's commitment via the FRI
-        // proximity test plus the boundary-check at position 0.
-        let _ = (f_val, c_val);
-    }
-
-    // Boundary check: trace at position 0 of the trace domain
-    // must equal air.boundary_start.  Since we only have LDE
-    // openings at random positions, this is checked indirectly via
-    // the composition polynomial encoding the boundary constraint.
-    // The FRI proximity test plus the random queries give soundness.
-    let _ = h_trace;
-    let _ = alpha1;
-    let _ = alpha2;
-
-    true
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use num_traits::Zero;
 
     /// AIR doubling generates the expected trace.
     #[test]
@@ -461,5 +443,84 @@ mod tests {
             verify(&air, &cfg, &proof),
             "v2 verify must accept honest proof"
         );
+    }
+
+    /// Default config (blow_up=8, queries=80) on a longer trace.
+    #[test]
+    fn stark_v2_prove_verify_doubling_default() {
+        let air = AirV2::doubling(16, 3);
+        let cfg = StarkConfig::default();
+        let proof = prove(&air, &cfg).expect("proving");
+        assert!(verify(&air, &cfg, &proof));
+    }
+
+    // Negative controls: each is a proof of a FALSE statement or a
+    // mangled proof, and the verifier must reject it.  The first two
+    // are the mutants a 2026-10-16 sheriff audit found accepted
+    // (crypto-autoresearcher research/sheriff/SHF-20261016-3caa6f).
+
+    /// An honest proof (trace starts at 1) for another boundary (5).
+    #[test]
+    fn rejects_proof_reused_for_another_boundary() {
+        let cfg = StarkConfig::fast();
+        let proof = prove(&AirV2::doubling(8, 1), &cfg).unwrap();
+        assert!(!verify(&AirV2::doubling(8, 5), &cfg, &proof));
+    }
+
+    /// A proof with no queries proves nothing.
+    #[test]
+    fn rejects_empty_proof() {
+        let air = AirV2::doubling(8, 1);
+        let cfg = StarkConfig::fast();
+        let mut proof = prove(&air, &cfg).unwrap();
+        proof.trace_openings.clear();
+        proof.trace_next_openings.clear();
+        proof.composition_openings.clear();
+        proof.fri_openings.clear();
+        assert!(!verify(&air, &cfg, &proof));
+    }
+
+    /// A trace that breaks one transition: the composition is not a
+    /// polynomial of degree < n, and degree-bounded FRI rejects it.
+    #[test]
+    fn rejects_trace_with_broken_transition() {
+        let cfg = StarkConfig::fast();
+        let mut cheat = AirV2::doubling(8, 1);
+        cheat.generate_trace = Arc::new(|| {
+            let mut t: Vec<BigUint> = (0..8).map(|i| BigUint::from(1u64 << i)).collect();
+            t[5] = BigUint::from(33u32);
+            t
+        });
+        let forged = prove(&cheat, &cfg).unwrap();
+        assert!(!verify(&AirV2::doubling(8, 1), &cfg, &forged));
+    }
+
+    /// Dropping a FRI layer drops the degree bound.
+    #[test]
+    fn rejects_truncated_fri() {
+        let air = AirV2::doubling(8, 1);
+        let cfg = StarkConfig::fast();
+        let mut proof = prove(&air, &cfg).unwrap();
+        proof.fri.layer_roots.pop();
+        assert!(!verify(&air, &cfg, &proof));
+    }
+
+    /// Queries must come in the order the transcript dictates.
+    #[test]
+    fn rejects_swapped_queries() {
+        let air = AirV2::doubling(8, 1);
+        let cfg = StarkConfig::fast();
+        let mut proof = prove(&air, &cfg).unwrap();
+        let (a, b) = (
+            0,
+            (1..cfg.query_count)
+                .find(|&j| proof.trace_openings[j].0 != proof.trace_openings[0].0)
+                .expect("two distinct positions"),
+        );
+        proof.trace_openings.swap(a, b);
+        proof.trace_next_openings.swap(a, b);
+        proof.composition_openings.swap(a, b);
+        proof.fri_openings.swap(a, b);
+        assert!(!verify(&air, &cfg, &proof));
     }
 }

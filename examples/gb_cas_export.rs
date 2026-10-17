@@ -104,6 +104,16 @@ const FP_CASES: &[(&str, usize, usize, u32, u64, u32)] = &[
     ("overdet_n12_m24_p65521", 12, 24, 2, 65521, 10),
 ];
 
+/// Larger cases, run after [`FP_CASES`] when `GB_CAS_LARGE=1`: where the
+/// engines' scaling separates.
+const FP_LARGE_CASES: &[(&str, usize, usize, u32, u64, u32)] = &[
+    ("quad_n10_p65521", 10, 10, 2, 65521, 16),
+    ("quad_n11_p65521", 11, 11, 2, 65521, 16),
+    ("cubic_n6_p65521", 6, 6, 3, 65521, 18),
+    ("quart_n4_p65521", 4, 4, 4, 65521, 18),
+    ("overdet_n14_m28_p65521", 14, 28, 2, 65521, 10),
+];
+
 // ── writers ────────────────────────────────────────────────────────────
 
 /// A term `c·x1^e1·…` in the shared syntax of msolve, Singular and Magma
@@ -226,7 +236,14 @@ fn write_magma(path: &Path, n: usize, p: u64, input: &[String], ours: &[String])
 }
 
 fn run_fp(outdir: &Path, repeats: usize) {
-    for &(name, n, m, d, p, dmax) in FP_CASES {
+    let large = std::env::var("GB_CAS_LARGE").is_ok_and(|v| v == "1");
+    // `GB_CAS_ONLY=<case>` runs that case alone (for profiling)
+    let only = std::env::var("GB_CAS_ONLY").ok();
+    let cases = FP_CASES
+        .iter()
+        .chain(FP_LARGE_CASES.iter().filter(|_| large))
+        .filter(|c| only.as_deref().is_none_or(|o| o == c.0));
+    for &(name, n, m, d, p, dmax) in cases {
         let sys = system(
             n,
             m,

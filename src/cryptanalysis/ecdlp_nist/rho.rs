@@ -268,6 +268,27 @@ fn fold_coeffs(a: &mut BigUint, b: &mut BigUint, i: u32, neg: bool, mult: &[BigU
     }
 }
 
+/// Both operands are reduced, so their sum needs at most one subtraction.
+#[inline]
+fn add_reduced(a: &BigUint, b: &BigUint, n: &BigUint) -> BigUint {
+    debug_assert!(a < n && b < n);
+    let mut sum = a + b;
+    if &sum >= n {
+        sum -= n;
+    }
+    sum
+}
+
+#[inline]
+fn double_reduced(a: &BigUint, n: &BigUint) -> BigUint {
+    debug_assert!(a < n);
+    let mut doubled = a << 1usize;
+    if &doubled >= n {
+        doubled -= n;
+    }
+    doubled
+}
+
 #[allow(clippy::too_many_arguments)]
 fn worker<G: EcdlpGroup>(
     g: &G,
@@ -352,8 +373,8 @@ fn worker<G: EcdlpGroup>(
             let j = (key % r) as usize;
             let (rj, aj, bj) = &jumps[j];
             let sum = g.add(&p, rj);
-            let mut a2 = (&a + aj) % n;
-            let mut b2 = (&b + bj) % n;
+            let mut a2 = add_reduced(&a, aj, n);
+            let mut b2 = add_reduced(&b, bj, n);
             let mut next = if fold {
                 let (rep, i, neg) = g.canonical_orbit(&sum);
                 fold_coeffs(&mut a2, &mut b2, i, neg, multipliers, n);
@@ -367,8 +388,8 @@ fn worker<G: EcdlpGroup>(
                 // Fruitless 2-cycle: escape by doubling the current point.
                 shared.escapes.fetch_add(1, Ordering::Relaxed);
                 let dbl = g.double(&p);
-                a2 = (&a << 1u32) % n;
-                b2 = (&b << 1u32) % n;
+                a2 = double_reduced(&a, n);
+                b2 = double_reduced(&b, n);
                 let (rep, i, neg) = g.canonical_orbit(&dbl);
                 fold_coeffs(&mut a2, &mut b2, i, neg, multipliers, n);
                 next = rep;
@@ -426,6 +447,29 @@ pub(crate) fn solve_from(
 mod tests {
     use super::*;
     use crate::cryptanalysis::ecdlp_nist::toy;
+
+    #[test]
+    fn reduced_coefficient_updates_match_modulo() {
+        let mut rng = StdRng::seed_from_u64(0xadd0_d0ab);
+        let orders = [
+            BigUint::from(2u32),
+            BigUint::from(3u32),
+            BigUint::from(65_537u32),
+            BigUint::from(u64::MAX),
+            (BigUint::one() << 130usize) + 51u32,
+        ];
+        for n in &orders {
+            let edge = n - 1u32;
+            assert_eq!(add_reduced(&edge, &edge, n), (&edge + &edge) % n);
+            assert_eq!(double_reduced(&edge, n), (&edge << 1usize) % n);
+            for _ in 0..128 {
+                let a = rng.gen_biguint_below(n);
+                let b = rng.gen_biguint_below(n);
+                assert_eq!(add_reduced(&a, &b, n), (&a + &b) % n);
+                assert_eq!(double_reduced(&a, n), (&a << 1usize) % n);
+            }
+        }
+    }
 
     fn check<G: EcdlpGroup>(g: &G, k: u64, opts: &RhoOptions) -> RhoReport {
         let q = g.mul(&g.generator(), &BigUint::from(k));

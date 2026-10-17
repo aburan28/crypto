@@ -15,6 +15,7 @@ use crate::ext::Fp4;
 use crate::field::{factor_u64, Field, Rng};
 use crate::kernel::velu::velu_cyclic;
 use std::collections::HashMap;
+use std::sync::Mutex;
 
 type E2 = ((u64, u64), (u64, u64));
 type Zp2 = Fp4;
@@ -36,6 +37,8 @@ pub struct Deuring {
     /// odd prime powers dividing p^2 - 1, with bases of E_0[l^e] over F_{p^4}
     pub tors: Vec<TorsionBasis>,
     pub t_odd: u64,
+    /// discrete-logarithm tables {s P1 + t Q1 -> (s, t)} keyed by (l, P1, Q1), built once
+    dlog_tables: Mutex<HashMap<(u64, Pt<E2>, Pt<E2>), std::sync::Arc<HashMap<Pt<E2>, (u64, u64)>>>>,
 }
 
 fn neg_pt(f: &Zp2, p: &Pt<E2>) -> Pt<E2> {
@@ -118,6 +121,7 @@ impl Deuring {
             e0,
             tors,
             t_odd,
+            dlog_tables: Mutex::new(HashMap::new()),
         }
     }
 
@@ -170,18 +174,28 @@ impl Deuring {
         let lk = ell.pow(k);
         let top = ell.pow(k - 1);
         let (p1, q1) = (pmul(f, e, p, top as u128), pmul(f, e, q, top as u128));
-        let mut table: HashMap<Pt<E2>, (u64, u64)> = HashMap::new();
-        for s in 0..ell {
-            for t in 0..ell {
-                let v = padd(
-                    f,
-                    e,
-                    &pmul(f, e, &p1, s as u128),
-                    &pmul(f, e, &q1, t as u128),
-                );
-                table.insert(v, (s, t));
+        let key = (ell, p1, q1);
+        let cached = self.dlog_tables.lock().unwrap().get(&key).cloned();
+        let table = match cached {
+            Some(t) => t,
+            None => {
+                // l^2 entries by running sums (one addition each)
+                let mut t: HashMap<Pt<E2>, (u64, u64)> =
+                    HashMap::with_capacity((ell * ell) as usize);
+                let mut row = Pt::Inf;
+                for s in 0..ell {
+                    let mut v = row;
+                    for u in 0..ell {
+                        t.insert(v, (s, u));
+                        v = padd(f, e, &v, &q1);
+                    }
+                    row = padd(f, e, &row, &p1);
+                }
+                let t = std::sync::Arc::new(t);
+                self.dlog_tables.lock().unwrap().insert(key, t.clone());
+                t
             }
-        }
+        };
         let (mut a, mut b) = (0u64, 0u64);
         let mut lpow = 1u64;
         for d in 0..k {
