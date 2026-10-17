@@ -11455,6 +11455,358 @@
    ]
   },
   {
+   "slug": "icv1-fp16-t177-f6096508",
+   "icv1": "ICV1:fp-40129:177:39953:28902:unk:unk:r:f60965087409",
+   "family": "prime",
+   "params": {
+    "a": "40126",
+    "b": "24190",
+    "p": "40129"
+   },
+   "model_json": "{\"a\":\"40126\",\"b\":\"24190\",\"field\":\"fp-40129\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"40129\",\"v\":\"1\"}",
+   "trace": 177,
+   "order": "39953",
+   "j": "28902",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-t3-75845e93",
+   "icv1": "ICV1:fp-40129:3:40127:27665:unk:unk:r:75845e937813",
+   "family": "prime",
+   "params": {
+    "a": "40126",
+    "b": "12823",
+    "p": "40129"
+   },
+   "model_json": "{\"a\":\"40126\",\"b\":\"12823\",\"field\":\"fp-40129\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"40129\",\"v\":\"1\"}",
+   "trace": 3,
+   "order": "40127",
+   "j": "27665",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-tm119-f1da0584",
+   "icv1": "ICV1:fp-40897:-119:41017:38161:unk:unk:r:f1da05849471",
+   "family": "prime",
+   "params": {
+    "a": "40894",
+    "b": "20995",
+    "p": "40897"
+   },
+   "model_json": "{\"a\":\"40894\",\"b\":\"20995\",\"field\":\"fp-40897\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"40897\",\"v\":\"1\"}",
+   "trace": -119,
+   "order": "41017",
+   "j": "38161",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-tm153-d212d6a3",
+   "icv1": "ICV1:fp-40897:-153:41051:7309:unk:unk:r:d212d6a306b1",
+   "family": "prime",
+   "params": {
+    "a": "40894",
+    "b": "31301",
+    "p": "40897"
+   },
+   "model_json": "{\"a\":\"40894\",\"b\":\"31301\",\"field\":\"fp-40897\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"40897\",\"v\":\"1\"}",
+   "trace": -153,
+   "order": "41051",
+   "j": "7309",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-t97-681128fd",
+   "icv1": "ICV1:fp-42433:97:42337:6791:unk:unk:r:681128fdb70c",
+   "family": "prime",
+   "params": {
+    "a": "42430",
+    "b": "32244",
+    "p": "42433"
+   },
+   "model_json": "{\"a\":\"42430\",\"b\":\"32244\",\"field\":\"fp-42433\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"42433\",\"v\":\"1\"}",
+   "trace": 97,
+   "order": "42337",
+   "j": "6791",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-tm207-d2c917dd",
+   "icv1": "ICV1:fp-42433:-207:42641:9131:unk:unk:r:d2c917dd8206",
+   "family": "prime",
+   "params": {
+    "a": "42430",
+    "b": "28710",
+    "p": "42433"
+   },
+   "model_json": "{\"a\":\"42430\",\"b\":\"28710\",\"field\":\"fp-42433\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"42433\",\"v\":\"1\"}",
+   "trace": -207,
+   "order": "42641",
+   "j": "9131",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-t253-d57d1f3b",
+   "icv1": "ICV1:fp-42689:253:42437:3321:unk:unk:r:d57d1f3bef0f",
+   "family": "prime",
+   "params": {
+    "a": "42686",
+    "b": "2591",
+    "p": "42689"
+   },
+   "model_json": "{\"a\":\"42686\",\"b\":\"2591\",\"field\":\"fp-42689\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"42689\",\"v\":\"1\"}",
+   "trace": 253,
+   "order": "42437",
+   "j": "3321",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-t317-a95cf26b",
+   "icv1": "ICV1:fp-42689:317:42373:2024:unk:unk:r:a95cf26bae58",
+   "family": "prime",
+   "params": {
+    "a": "42686",
+    "b": "891",
+    "p": "42689"
+   },
+   "model_json": "{\"a\":\"42686\",\"b\":\"891\",\"field\":\"fp-42689\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"42689\",\"v\":\"1\"}",
+   "trace": 317,
+   "order": "42373",
+   "j": "2024",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-t13-ccb41873",
+   "icv1": "ICV1:fp-43201:13:43189:13232:unk:unk:r:ccb418737e4c",
+   "family": "prime",
+   "params": {
+    "a": "43198",
+    "b": "34109",
+    "p": "43201"
+   },
+   "model_json": "{\"a\":\"43198\",\"b\":\"34109\",\"field\":\"fp-43201\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"43201\",\"v\":\"1\"}",
+   "trace": 13,
+   "order": "43189",
+   "j": "13232",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-t409-9f545124",
+   "icv1": "ICV1:fp-43201:409:42793:30678:unk:unk:r:9f545124d691",
+   "family": "prime",
+   "params": {
+    "a": "43198",
+    "b": "19785",
+    "p": "43201"
+   },
+   "model_json": "{\"a\":\"43198\",\"b\":\"19785\",\"field\":\"fp-43201\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"43201\",\"v\":\"1\"}",
+   "trace": 409,
+   "order": "42793",
+   "j": "30678",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-t265-7d8fe610",
+   "icv1": "ICV1:fp-45697:265:45433:33876:unk:unk:r:7d8fe610ac64",
+   "family": "prime",
+   "params": {
+    "a": "45694",
+    "b": "23372",
+    "p": "45697"
+   },
+   "model_json": "{\"a\":\"45694\",\"b\":\"23372\",\"field\":\"fp-45697\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"45697\",\"v\":\"1\"}",
+   "trace": 265,
+   "order": "45433",
+   "j": "33876",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-t31-98e0cf80",
+   "icv1": "ICV1:fp-45697:31:45667:4278:unk:unk:r:98e0cf80f1d1",
+   "family": "prime",
+   "params": {
+    "a": "45694",
+    "b": "18044",
+    "p": "45697"
+   },
+   "model_json": "{\"a\":\"45694\",\"b\":\"18044\",\"field\":\"fp-45697\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"45697\",\"v\":\"1\"}",
+   "trace": 31,
+   "order": "45667",
+   "j": "4278",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-tm329-30be371f",
+   "icv1": "ICV1:fp-48193:-329:48523:7928:unk:unk:r:30be371f1abf",
+   "family": "prime",
+   "params": {
+    "a": "48190",
+    "b": "6223",
+    "p": "48193"
+   },
+   "model_json": "{\"a\":\"48190\",\"b\":\"6223\",\"field\":\"fp-48193\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"48193\",\"v\":\"1\"}",
+   "trace": -329,
+   "order": "48523",
+   "j": "7928",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-tm369-a31e193c",
+   "icv1": "ICV1:fp-48193:-369:48563:40487:unk:unk:r:a31e193c2f93",
+   "family": "prime",
+   "params": {
+    "a": "48190",
+    "b": "20823",
+    "p": "48193"
+   },
+   "model_json": "{\"a\":\"48190\",\"b\":\"20823\",\"field\":\"fp-48193\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"48193\",\"v\":\"1\"}",
+   "trace": -369,
+   "order": "48563",
+   "j": "40487",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-tm335-046566a7",
+   "icv1": "ICV1:fp-50497:-335:50833:3162:unk:unk:r:046566a70108",
+   "family": "prime",
+   "params": {
+    "a": "50494",
+    "b": "16983",
+    "p": "50497"
+   },
+   "model_json": "{\"a\":\"50494\",\"b\":\"16983\",\"field\":\"fp-50497\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"50497\",\"v\":\"1\"}",
+   "trace": -335,
+   "order": "50833",
+   "j": "3162",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp16-tm41-b2db7615",
+   "icv1": "ICV1:fp-50497:-41:50539:49867:unk:unk:r:b2db76150c9f",
+   "family": "prime",
+   "params": {
+    "a": "50494",
+    "b": "48314",
+    "p": "50497"
+   },
+   "model_json": "{\"a\":\"50494\",\"b\":\"48314\",\"field\":\"fp-50497\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"50497\",\"v\":\"1\"}",
+   "trace": -41,
+   "order": "50539",
+   "j": "49867",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp16-tm393-20f8a24e",
    "icv1": "ICV1:fp-53197:-393:53591:11973:unk:unk:r:20f8a24e456a",
    "family": "prime",
@@ -12103,6 +12455,314 @@
    ]
   },
   {
+   "slug": "icv1-fp20-tm1021-15cd4237",
+   "icv1": "ICV1:fp-570881:-1021:571903:303392:unk:unk:r:15cd4237de31",
+   "family": "prime",
+   "params": {
+    "a": "570878",
+    "b": "79256",
+    "p": "570881"
+   },
+   "model_json": "{\"a\":\"570878\",\"b\":\"79256\",\"field\":\"fp-570881\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"570881\",\"v\":\"1\"}",
+   "trace": -1021,
+   "order": "571903",
+   "j": "303392",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-tm1205-9f62a0f6",
+   "icv1": "ICV1:fp-570881:-1205:572087:525754:unk:unk:r:9f62a0f6b0e0",
+   "family": "prime",
+   "params": {
+    "a": "570878",
+    "b": "542689",
+    "p": "570881"
+   },
+   "model_json": "{\"a\":\"570878\",\"b\":\"542689\",\"field\":\"fp-570881\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"570881\",\"v\":\"1\"}",
+   "trace": -1205,
+   "order": "572087",
+   "j": "525754",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-t99-a84fb1f1",
+   "icv1": "ICV1:fp-684289:99:684191:417148:unk:unk:r:a84fb1f15744",
+   "family": "prime",
+   "params": {
+    "a": "684286",
+    "b": "442174",
+    "p": "684289"
+   },
+   "model_json": "{\"a\":\"684286\",\"b\":\"442174\",\"field\":\"fp-684289\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"684289\",\"v\":\"1\"}",
+   "trace": 99,
+   "order": "684191",
+   "j": "417148",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-tm819-6a77f16b",
+   "icv1": "ICV1:fp-684289:-819:685109:67584:unk:unk:r:6a77f16b823e",
+   "family": "prime",
+   "params": {
+    "a": "684286",
+    "b": "147152",
+    "p": "684289"
+   },
+   "model_json": "{\"a\":\"684286\",\"b\":\"147152\",\"field\":\"fp-684289\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"684289\",\"v\":\"1\"}",
+   "trace": -819,
+   "order": "685109",
+   "j": "67584",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-t103-827b6ca3",
+   "icv1": "ICV1:fp-835841:103:835739:622236:unk:unk:r:827b6ca36638",
+   "family": "prime",
+   "params": {
+    "a": "835838",
+    "b": "99670",
+    "p": "835841"
+   },
+   "model_json": "{\"a\":\"835838\",\"b\":\"99670\",\"field\":\"fp-835841\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"835841\",\"v\":\"1\"}",
+   "trace": 103,
+   "order": "835739",
+   "j": "622236",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-tm295-e6525945",
+   "icv1": "ICV1:fp-835841:-295:836137:747949:unk:unk:r:e65259453119",
+   "family": "prime",
+   "params": {
+    "a": "835838",
+    "b": "381414",
+    "p": "835841"
+   },
+   "model_json": "{\"a\":\"835838\",\"b\":\"381414\",\"field\":\"fp-835841\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"835841\",\"v\":\"1\"}",
+   "trace": -295,
+   "order": "836137",
+   "j": "747949",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-tm151-a0fa046c",
+   "icv1": "ICV1:fp-860417:-151:860569:576270:unk:unk:r:a0fa046c1ff9",
+   "family": "prime",
+   "params": {
+    "a": "860414",
+    "b": "581626",
+    "p": "860417"
+   },
+   "model_json": "{\"a\":\"860414\",\"b\":\"581626\",\"field\":\"fp-860417\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"860417\",\"v\":\"1\"}",
+   "trace": -151,
+   "order": "860569",
+   "j": "576270",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-tm181-f094c43b",
+   "icv1": "ICV1:fp-860417:-181:860599:83121:unk:unk:r:f094c43b0a2f",
+   "family": "prime",
+   "params": {
+    "a": "860414",
+    "b": "108750",
+    "p": "860417"
+   },
+   "model_json": "{\"a\":\"860414\",\"b\":\"108750\",\"field\":\"fp-860417\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"860417\",\"v\":\"1\"}",
+   "trace": -181,
+   "order": "860599",
+   "j": "83121",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-t803-9a78737a",
+   "icv1": "ICV1:fp-894209:803:893407:861953:unk:unk:r:9a78737a191b",
+   "family": "prime",
+   "params": {
+    "a": "894206",
+    "b": "826040",
+    "p": "894209"
+   },
+   "model_json": "{\"a\":\"894206\",\"b\":\"826040\",\"field\":\"fp-894209\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"894209\",\"v\":\"1\"}",
+   "trace": 803,
+   "order": "893407",
+   "j": "861953",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-tm479-f2d6af3d",
+   "icv1": "ICV1:fp-894209:-479:894689:891543:unk:unk:r:f2d6af3d859c",
+   "family": "prime",
+   "params": {
+    "a": "894206",
+    "b": "176370",
+    "p": "894209"
+   },
+   "model_json": "{\"a\":\"894206\",\"b\":\"176370\",\"field\":\"fp-894209\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"894209\",\"v\":\"1\"}",
+   "trace": -479,
+   "order": "894689",
+   "j": "891543",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-tm183-1f9745f6",
+   "icv1": "ICV1:fp-926977:-183:927161:591939:unk:unk:r:1f9745f6a05b",
+   "family": "prime",
+   "params": {
+    "a": "926974",
+    "b": "434957",
+    "p": "926977"
+   },
+   "model_json": "{\"a\":\"926974\",\"b\":\"434957\",\"field\":\"fp-926977\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"926977\",\"v\":\"1\"}",
+   "trace": -183,
+   "order": "927161",
+   "j": "591939",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-tm29-f83c0698",
+   "icv1": "ICV1:fp-926977:-29:927007:841994:unk:unk:r:f83c0698c6b1",
+   "family": "prime",
+   "params": {
+    "a": "926974",
+    "b": "589785",
+    "p": "926977"
+   },
+   "model_json": "{\"a\":\"926974\",\"b\":\"589785\",\"field\":\"fp-926977\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"926977\",\"v\":\"1\"}",
+   "trace": -29,
+   "order": "927007",
+   "j": "841994",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-t145-0a1a9267",
+   "icv1": "ICV1:fp-927233:145:927089:465564:unk:unk:r:0a1a92678612",
+   "family": "prime",
+   "params": {
+    "a": "927230",
+    "b": "284817",
+    "p": "927233"
+   },
+   "model_json": "{\"a\":\"927230\",\"b\":\"284817\",\"field\":\"fp-927233\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"927233\",\"v\":\"1\"}",
+   "trace": 145,
+   "order": "927089",
+   "j": "465564",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-t653-f34328c1",
+   "icv1": "ICV1:fp-927233:653:926581:108088:unk:unk:r:f34328c1305e",
+   "family": "prime",
+   "params": {
+    "a": "927230",
+    "b": "155666",
+    "p": "927233"
+   },
+   "model_json": "{\"a\":\"927230\",\"b\":\"155666\",\"field\":\"fp-927233\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"927233\",\"v\":\"1\"}",
+   "trace": 653,
+   "order": "926581",
+   "j": "108088",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp20-tm728-d215a2a1",
    "icv1": "ICV1:fp-946177:-728:946906:503689:unk:unk:r:d215a2a139a7",
    "family": "prime",
@@ -12149,6 +12809,50 @@
     "research/pkm_isogeny_tower_ecbench_20261015/sessions/q20/plan.json",
     "research/pkm_isogeny_tower_ecbench_20261015/sessions/q20/spec.json",
     "research/pkm_isogeny_tower_ecbench_20261015/specs/SPEC-q20.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-t1009-272b8796",
+   "icv1": "ICV1:fp-1043201:1009:1042193:169468:unk:unk:r:272b8796bafd",
+   "family": "prime",
+   "params": {
+    "a": "1043198",
+    "b": "540935",
+    "p": "1043201"
+   },
+   "model_json": "{\"a\":\"1043198\",\"b\":\"540935\",\"field\":\"fp-1043201\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1043201\",\"v\":\"1\"}",
+   "trace": 1009,
+   "order": "1042193",
+   "j": "169468",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp20-t679-32006d05",
+   "icv1": "ICV1:fp-1043201:679:1042523:890071:unk:unk:r:32006d05e6d2",
+   "family": "prime",
+   "params": {
+    "a": "1043198",
+    "b": "65971",
+    "p": "1043201"
+   },
+   "model_json": "{\"a\":\"1043198\",\"b\":\"65971\",\"field\":\"fp-1043201\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1043201\",\"v\":\"1\"}",
+   "trace": 679,
+   "order": "1042523",
+   "j": "890071",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
    ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
@@ -16211,6 +16915,138 @@
    ]
   },
   {
+   "slug": "icv1-fp24-tm1119-da50644b",
+   "icv1": "ICV1:fp-8489473:-1119:8490593:2419198:unk:unk:r:da50644b58e1",
+   "family": "prime",
+   "params": {
+    "a": "8489470",
+    "b": "1647988",
+    "p": "8489473"
+   },
+   "model_json": "{\"a\":\"8489470\",\"b\":\"1647988\",\"field\":\"fp-8489473\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"8489473\",\"v\":\"1\"}",
+   "trace": -1119,
+   "order": "8490593",
+   "j": "2419198",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-tm3015-22c570ce",
+   "icv1": "ICV1:fp-8489473:-3015:8492489:2092791:unk:unk:r:22c570ce5f55",
+   "family": "prime",
+   "params": {
+    "a": "8489470",
+    "b": "6324222",
+    "p": "8489473"
+   },
+   "model_json": "{\"a\":\"8489470\",\"b\":\"6324222\",\"field\":\"fp-8489473\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"8489473\",\"v\":\"1\"}",
+   "trace": -3015,
+   "order": "8492489",
+   "j": "2092791",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-t925-8af643e2",
+   "icv1": "ICV1:fp-8524801:925:8523877:5298010:unk:unk:r:8af643e2248b",
+   "family": "prime",
+   "params": {
+    "a": "8524798",
+    "b": "4232094",
+    "p": "8524801"
+   },
+   "model_json": "{\"a\":\"8524798\",\"b\":\"4232094\",\"field\":\"fp-8524801\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"8524801\",\"v\":\"1\"}",
+   "trace": 925,
+   "order": "8523877",
+   "j": "5298010",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-tm3017-9a4f2c10",
+   "icv1": "ICV1:fp-8524801:-3017:8527819:4339837:unk:unk:r:9a4f2c10ae03",
+   "family": "prime",
+   "params": {
+    "a": "8524798",
+    "b": "4150753",
+    "p": "8524801"
+   },
+   "model_json": "{\"a\":\"8524798\",\"b\":\"4150753\",\"field\":\"fp-8524801\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"8524801\",\"v\":\"1\"}",
+   "trace": -3017,
+   "order": "8527819",
+   "j": "4339837",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-t3541-4d1ee126",
+   "icv1": "ICV1:fp-10028033:3541:10024493:9634855:unk:unk:r:4d1ee1262469",
+   "family": "prime",
+   "params": {
+    "a": "10028030",
+    "b": "2302473",
+    "p": "10028033"
+   },
+   "model_json": "{\"a\":\"10028030\",\"b\":\"2302473\",\"field\":\"fp-10028033\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"10028033\",\"v\":\"1\"}",
+   "trace": 3541,
+   "order": "10024493",
+   "j": "9634855",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-tm4333-97a5fef2",
+   "icv1": "ICV1:fp-10028033:-4333:10032367:5485816:unk:unk:r:97a5fef2316f",
+   "family": "prime",
+   "params": {
+    "a": "10028030",
+    "b": "4810544",
+    "p": "10028033"
+   },
+   "model_json": "{\"a\":\"10028030\",\"b\":\"4810544\",\"field\":\"fp-10028033\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"10028033\",\"v\":\"1\"}",
+   "trace": -4333,
+   "order": "10032367",
+   "j": "5485816",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp24-t6316-2e757e7a",
    "icv1": "ICV1:fp-10796507:6316:10790192:10793132:unk:unk:r:2e757e7a7500",
    "family": "prime",
@@ -16731,6 +17567,50 @@
    ]
   },
   {
+   "slug": "icv1-fp24-tm1439-8cfd2b77",
+   "icv1": "ICV1:fp-11947009:-1439:11948449:9262126:unk:unk:r:8cfd2b77d32e",
+   "family": "prime",
+   "params": {
+    "a": "11947006",
+    "b": "373602",
+    "p": "11947009"
+   },
+   "model_json": "{\"a\":\"11947006\",\"b\":\"373602\",\"field\":\"fp-11947009\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"11947009\",\"v\":\"1\"}",
+   "trace": -1439,
+   "order": "11948449",
+   "j": "9262126",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-tm2649-d5a0a251",
+   "icv1": "ICV1:fp-11947009:-2649:11949659:8381908:unk:unk:r:d5a0a251a37b",
+   "family": "prime",
+   "params": {
+    "a": "11947006",
+    "b": "4095794",
+    "p": "11947009"
+   },
+   "model_json": "{\"a\":\"11947006\",\"b\":\"4095794\",\"field\":\"fp-11947009\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"11947009\",\"v\":\"1\"}",
+   "trace": -2649,
+   "order": "11949659",
+   "j": "8381908",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
    "slug": "icv1-fp24-t991-def56de7",
    "icv1": "ICV1:fp-12832957:991:12831967:10160944:unk:unk:r:def56de7ea9f",
    "family": "prime",
@@ -16813,6 +17693,182 @@
     "research/pkm_isogeny_tower_ecbench_20261015/sessions/q24/plan.json",
     "research/pkm_isogeny_tower_ecbench_20261015/sessions/q24/spec.json",
     "research/pkm_isogeny_tower_ecbench_20261015/specs/SPEC-q24.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-tm3573-9dca1c97",
+   "icv1": "ICV1:fp-13252609:-3573:13256183:3176397:unk:unk:r:9dca1c972f70",
+   "family": "prime",
+   "params": {
+    "a": "13252606",
+    "b": "9792151",
+    "p": "13252609"
+   },
+   "model_json": "{\"a\":\"13252606\",\"b\":\"9792151\",\"field\":\"fp-13252609\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"13252609\",\"v\":\"1\"}",
+   "trace": -3573,
+   "order": "13256183",
+   "j": "3176397",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-tm5681-df0d0d08",
+   "icv1": "ICV1:fp-13252609:-5681:13258291:1414092:unk:unk:r:df0d0d0892eb",
+   "family": "prime",
+   "params": {
+    "a": "13252606",
+    "b": "3922483",
+    "p": "13252609"
+   },
+   "model_json": "{\"a\":\"13252606\",\"b\":\"3922483\",\"field\":\"fp-13252609\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"13252609\",\"v\":\"1\"}",
+   "trace": -5681,
+   "order": "13258291",
+   "j": "1414092",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-t5279-881c5db3",
+   "icv1": "ICV1:fp-13565441:5279:13560163:2421513:unk:unk:r:881c5db33991",
+   "family": "prime",
+   "params": {
+    "a": "13565438",
+    "b": "7774082",
+    "p": "13565441"
+   },
+   "model_json": "{\"a\":\"13565438\",\"b\":\"7774082\",\"field\":\"fp-13565441\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"13565441\",\"v\":\"1\"}",
+   "trace": 5279,
+   "order": "13560163",
+   "j": "2421513",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-tm5729-6cb667b6",
+   "icv1": "ICV1:fp-13565441:-5729:13571171:2804476:unk:unk:r:6cb667b6d749",
+   "family": "prime",
+   "params": {
+    "a": "13565438",
+    "b": "4495625",
+    "p": "13565441"
+   },
+   "model_json": "{\"a\":\"13565438\",\"b\":\"4495625\",\"field\":\"fp-13565441\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"13565441\",\"v\":\"1\"}",
+   "trace": -5729,
+   "order": "13571171",
+   "j": "2804476",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-t2899-80eee43c",
+   "icv1": "ICV1:fp-14284289:2899:14281391:1508250:unk:unk:r:80eee43c38f7",
+   "family": "prime",
+   "params": {
+    "a": "14284286",
+    "b": "12542401",
+    "p": "14284289"
+   },
+   "model_json": "{\"a\":\"14284286\",\"b\":\"12542401\",\"field\":\"fp-14284289\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"14284289\",\"v\":\"1\"}",
+   "trace": 2899,
+   "order": "14281391",
+   "j": "1508250",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-t7099-b95f8805",
+   "icv1": "ICV1:fp-14284289:7099:14277191:2957384:unk:unk:r:b95f88053d4e",
+   "family": "prime",
+   "params": {
+    "a": "14284286",
+    "b": "2454253",
+    "p": "14284289"
+   },
+   "model_json": "{\"a\":\"14284286\",\"b\":\"2454253\",\"field\":\"fp-14284289\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"14284289\",\"v\":\"1\"}",
+   "trace": 7099,
+   "order": "14277191",
+   "j": "2957384",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-t1927-311e54e7",
+   "icv1": "ICV1:fp-14950913:1927:14948987:3359217:unk:unk:r:311e54e7003f",
+   "family": "prime",
+   "params": {
+    "a": "14950910",
+    "b": "14507256",
+    "p": "14950913"
+   },
+   "model_json": "{\"a\":\"14950910\",\"b\":\"14507256\",\"field\":\"fp-14950913\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"14950913\",\"v\":\"1\"}",
+   "trace": 1927,
+   "order": "14948987",
+   "j": "3359217",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
+   ],
+   "representations": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
+  },
+  {
+   "slug": "icv1-fp24-t5257-c013bcf8",
+   "icv1": "ICV1:fp-14950913:5257:14945657:4804214:unk:unk:r:c013bcf86c0b",
+   "family": "prime",
+   "params": {
+    "a": "14950910",
+    "b": "1537486",
+    "p": "14950913"
+   },
+   "model_json": "{\"a\":\"14950910\",\"b\":\"1537486\",\"field\":\"fp-14950913\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"14950913\",\"v\":\"1\"}",
+   "trace": 5257,
+   "order": "14945657",
+   "j": "4804214",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "docs/curves/sources/factor-base-evaluation-20261015.json"
    ],
    "representations": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"

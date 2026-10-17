@@ -1,0 +1,2 @@
+search: target/release/volcano-rho --j0 --ell 2 --bits 48 --depth 5 --max-cofactor 100000 --seed 20261015 --trials 1 --per-level 1 --controls 0
+measure: ca volcano --p 173805494607697 --a 0 --b 26953713445357 --ell 2 --seed 20261019 --trials 400 --per-level 16 --controls 3 --automorphisms --threads 1 --diagram volcano.diagram.json --trials-out trials.csv (ca at aburan28/cryptanalysis e4f9e25)

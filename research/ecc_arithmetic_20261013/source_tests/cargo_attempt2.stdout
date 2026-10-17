@@ -1,0 +1,23 @@
+
+running 13 tests
+test curve25519::tests::byte_roundtrip ... ok
+test curve25519::tests::canonical_decoder_rejects_p_and_above ... ok
+test curve25519::tests::prime_p ... ok
+test curve25519::tests::inverse_correctness ... ok
+test x25519::tests::checked_x25519_rejects_low_order_input ... ok
+test f25519::tests::arithmetic_matches_biguint_at_boundaries_and_seeded_inputs ... ok
+test p521_field::tests::arithmetic_matches_integer_reference ... ok
+test x25519::tests::clamp_zeros_correct_bits ... ok
+test x25519::tests::ecdh_roundtrip ... ok
+test x25519::tests::rfc7748_vector_2 ... ok
+test curve25519::tests::sqrt_correctness ... ok
+test x25519::tests::rfc7748_vector_1 ... ok
+test x25519::tests::fixed_limb_ladder_matches_original_reference ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

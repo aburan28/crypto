@@ -1,0 +1,60 @@
+{
+  "artifact_sha256": {
+    "research/p192_extension_cover_20261012/lean/LineSupport.lean": "30470e9af174cbf205d89ad2359b19a9893773e9a6cecd537afcd43238c51996",
+    "research/p192_extension_cover_20261012/line_residual_pivot_cross_fan.py": "79dea75963ec6d1f6c8f62725fb60d781ed4d11e46aede25a2579d8db5cb5edb",
+    "research/p192_extension_cover_20261012/reports/run-20261016T2243Z/REPORT.md": "0ef5709b25b2c6dbba9bd4729203ae3fe9e8b9df28a9bdcaca49b43ece02837f",
+    "research/p192_extension_cover_20261012/type_i_line_trace_full_verified_20261016T1849Z.json": "e800401cf3d451d37daa3191e7c7dd22791e25eb5c5b0e29dfcbc76f956c88fa",
+    "research/p192_extension_cover_20261012/type_i_residual_pivot000_three.json": "998911e3bafdb522ccefea7394047f1bbea8600f8aa5923e73a3bfa287644621",
+    "research/p192_extension_cover_20261012/type_i_residual_pivot001_cross.json": "3c182b4bbd5d0b27e17d44fa394894658c8d293ce70d46002237438826aea0fd",
+    "research/p192_extension_cover_20261012/type_i_residual_pivot001_cross_replay.json": "a31c958e50706efa7b4ddef919f31c15dc51e21176c3bfc2f7277e26d9251c08",
+    "research/p192_extension_cover_20261012/type_i_residual_pivot001_cross_runtime_info.json": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+    "research/p192_extension_cover_20261012/type_i_two_pivot_private_core.json": "652cfbb713c5713ab5311071a1f9ce5c91fbbf7d82f97b9952c1e2be28f6a1b8",
+    "research/p192_extension_cover_20261012/verify_line_residual_pivot001_cross.py": "8942a0777731403a81bdc92126d55dce423b04d9368fcfea00da0088d094c127",
+    "research/p192_extension_cover_20261012/verify_two_pivot_private_core.py": "018b1996a672eef6ed3eb4e074a0cce83fa5adfd5dc74fd06ec95e3807c592bf"
+  },
+  "boundary": "Two exact full residual-pivot fans and their overlap with the complete old-anchored family; other pivots and collector designs remain open.",
+  "candidate_id": null,
+  "cross_fan_exact_hits": [],
+  "cross_fan_signed_hits": [],
+  "distinct_signed_fan_columns": 20014,
+  "independent_replay_status": "verified_independent_residual_pivot001_cross_fan",
+  "non_source_rows_with_two_private_signed_columns": 10004,
+  "parent_commit": "8cb1a0b843069d147afbf33f8bb82ba3dd81d6da",
+  "pivot_000_split_cuts": 5037,
+  "pivot_001_old_family_exact_hits": [
+    [
+      1,
+      0,
+      1,
+      [
+        1,
+        0
+      ]
+    ]
+  ],
+  "pivot_001_old_family_signed_hits": [
+    [
+      1,
+      0,
+      1,
+      [
+        1,
+        0
+      ]
+    ]
+  ],
+  "pivot_001_rows_sha256": "bd3323100978ccec9bef128007c31f34bc8777f6c1d6451b4a72ea40007d7ea7",
+  "pivot_001_split_cuts": 4971,
+  "private_core_status": "verified_two_pivot_private_residual_core",
+  "proof_status": "existing_Lean_private_pair_theorem_plus_concrete_Sage_and_independent_Python_replay",
+  "publication_state_at_freeze": "local_uncommitted_pending_review",
+  "replay_commands": [
+    "/Volumes/SSD990/cryptanalysis/sage --runtime-info",
+    "/Volumes/SSD990/cryptanalysis/sage -python research/p192_extension_cover_20261012/line_residual_pivot_cross_fan.py --pivot 1 --compare research/p192_extension_cover_20261012/type_i_residual_pivot000_three.json --out research/p192_extension_cover_20261012/type_i_residual_pivot001_cross.json",
+    "python3 -B research/p192_extension_cover_20261012/verify_line_residual_pivot001_cross.py",
+    "python3 -B research/p192_extension_cover_20261012/verify_two_pivot_private_core.py"
+  ],
+  "schema_version": 1,
+  "selected_classes": 9925,
+  "status": "verified_p192_two_residual_pivots_private_columns"
+}

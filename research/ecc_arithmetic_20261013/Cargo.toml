@@ -1,0 +1,9 @@
+[package]
+name = "ecc-arithmetic-panel"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+num-bigint = "0.4.8"

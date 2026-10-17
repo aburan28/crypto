@@ -1,0 +1,51 @@
+  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+  ***   ...,32,for(j=i,32,for(k=j,32,
+  ***                               ^-
+... skipping file 'research/p192_extension_cover_20261012/type_i_signed_base_independent.gp'
+  ***   at top-level: ...ut(T,elladd(E,elladd(E,V[i],V[j]),V[k]))
+  ***                                             ^---------------
+  ***   incorrect type in gtos [integer expected] (t_POL).
+  ***   syntax error, unexpected ')', expecting end of file: )));
+  ***                                                        ^----
+  ***   at top-level: ...5984||cancellations!=512,error("signed triple 
+  ***                                             ^---------------------
+  ***   user error: signed triple count
+  ***   at top-level: if(#U!=5504,error("signed support count"))
+  ***                             ^------------------------------
+  ***   user error: signed support count
+  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+  ***   for(i=1,#U,
+  ***             ^-
+  ***   at top-level: Q=U[i];P=ellmul(E,Q,-((r+1)/2))
+  ***                     ^---------------------------
+  ***   incorrect type in gtos [integer expected] (t_POL).
+  ***   at top-level: if(elladd(E,P,P)!=ellmul(E,Q,-1),error("known-
+  ***                    ^-------------------------------------------
+  *** elladd: incorrect type in elladd (t_POL).
+  ***   at top-level: c1=char(P);c2=char(elladd(E,P,P))
+  ***                    ^------------------------------
+  ***   in function char: ...);if(#P==1,return(0));x=P[1];v=Mod(0,p);for(k=
+  ***                                                 ^---------------------
+  ***   incorrect type in _[_] OCcompo1 [not a vector] (t_POL).
+  ***   syntax error, unexpected ')', expecting end of file: );
+  ***                                                        ^--
+  ***   at top-level: ...92,1352]||accepted!=1344,error("character part
+  ***                                             ^---------------------
+  ***   user error: character partition
+  ***   syntax error, unexpected end of file, expecting )-> or ',' or ')': 
+  ***   for(i=1,#A,
+  ***             ^-
+  ***   at top-level: P=ellmul(E,G,A[i])
+  ***                                ^---
+  ***   incorrect type in gtos [integer expected] (t_POL).
+  ***   at top-level: if(char(P)!=1||char(elladd(E,P,P))!=1,error("a
+  ***                    ^-------------------------------------------
+  ***   in function char: ...);if(#P==1,return(0));x=P[1];v=Mod(0,p);for(k=
+  ***                                                 ^---------------------
+  ***   incorrect type in _[_] OCcompo1 [not a vector] (t_POL).
+  ***   at top-level: Q=ellmul(E,elladd(E,P,P),-1)
+  ***                            ^-----------------
+  *** elladd: incorrect type in elladd (t_POL).
+  ***   syntax error, unexpected ')', expecting end of file: );
+  ***                                                        ^--
+SIGNED_BASE_INDEPENDENT_PASS triples=5984 distinct=5504 accepted=1344 cancel=512 queries=64 hits=0
