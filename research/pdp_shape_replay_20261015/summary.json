@@ -1,0 +1,262 @@
+{
+  "ladders": [
+    {
+      "cells": [
+        {
+          "curve": "K_0/2^9",
+          "default_over_replay": 1.0661521322722063,
+          "f4_calls_default": 511,
+          "f4_calls_replay": 588,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 2,
+          "splits_default": 186,
+          "splits_replay": 212,
+          "targets": 40,
+          "verdicts_identical": true,
+          "word_ops_default": 266054,
+          "word_ops_replay": 249546
+        },
+        {
+          "curve": "K_0/2^9",
+          "default_over_replay": 0.9751939001393786,
+          "f4_calls_default": 210,
+          "f4_calls_replay": 212,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 3,
+          "splits_default": 152,
+          "splits_replay": 154,
+          "targets": 16,
+          "verdicts_identical": true,
+          "word_ops_default": 594722,
+          "word_ops_replay": 609850
+        },
+        {
+          "curve": "K_0/2^13",
+          "default_over_replay": 1.0398132857312792,
+          "f4_calls_default": 480,
+          "f4_calls_replay": 480,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 2,
+          "splits_default": 440,
+          "splits_replay": 440,
+          "targets": 40,
+          "verdicts_identical": true,
+          "word_ops_default": 10813009,
+          "word_ops_replay": 10398991
+        },
+        {
+          "curve": "K_1/2^15",
+          "default_over_replay": 1.17055423676334,
+          "f4_calls_default": 55,
+          "f4_calls_replay": 80,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 2,
+          "splits_default": 0,
+          "splits_replay": 5,
+          "targets": 32,
+          "verdicts_identical": true,
+          "word_ops_default": 68049,
+          "word_ops_replay": 58134
+        },
+        {
+          "curve": "K_1/2^17",
+          "default_over_replay": 0.9515333896728964,
+          "f4_calls_default": 3524,
+          "f4_calls_replay": 3525,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 2,
+          "splits_default": 876,
+          "splits_replay": 876,
+          "targets": 32,
+          "verdicts_identical": true,
+          "word_ops_default": 4936167,
+          "word_ops_replay": 5187592
+        },
+        {
+          "curve": "K_1/2^23",
+          "default_over_replay": 1.0186745507839046,
+          "f4_calls_default": 9734,
+          "f4_calls_replay": 9734,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 2,
+          "splits_default": 2447,
+          "splits_replay": 2447,
+          "targets": 16,
+          "verdicts_identical": true,
+          "word_ops_default": 28839793,
+          "word_ops_replay": 28311096
+        }
+      ],
+      "default_over_replay": 1.0156773786327762,
+      "ladder": "frozen (pilot)",
+      "total_default": 45517794,
+      "total_replay": 44815209
+    },
+    {
+      "cells": [
+        {
+          "curve": "K_0/2^9",
+          "default_over_replay": 0.9629675206810958,
+          "f4_calls_default": 210,
+          "f4_calls_replay": 220,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 3,
+          "splits_default": 152,
+          "splits_replay": 158,
+          "targets": 16,
+          "verdicts_identical": true,
+          "word_ops_default": 594722,
+          "word_ops_replay": 617593
+        },
+        {
+          "curve": "K_0/2^13",
+          "default_over_replay": 0.9720337343018011,
+          "f4_calls_default": 192,
+          "f4_calls_replay": 192,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 3,
+          "splits_default": 176,
+          "splits_replay": 176,
+          "targets": 8,
+          "verdicts_identical": true,
+          "word_ops_default": 5881711,
+          "word_ops_replay": 6050933
+        },
+        {
+          "curve": "K_0/2^9",
+          "default_over_replay": 0.9593895123469155,
+          "f4_calls_default": 151,
+          "f4_calls_replay": 161,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 4,
+          "splits_default": 114,
+          "splits_replay": 119,
+          "targets": 8,
+          "verdicts_identical": true,
+          "word_ops_default": 627411,
+          "word_ops_replay": 653969
+        }
+      ],
+      "default_over_replay": 0.9701398225604797,
+      "ladder": "chain",
+      "total_default": 7103844,
+      "total_replay": 7322495
+    },
+    {
+      "cells": [
+        {
+          "curve": "K_1/2^9",
+          "default_over_replay": 0.9289335252385016,
+          "f4_calls_default": 168,
+          "f4_calls_replay": 170,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 4,
+          "splits_default": 116,
+          "splits_replay": 118,
+          "targets": 8,
+          "verdicts_identical": true,
+          "word_ops_default": 729315,
+          "word_ops_replay": 785110
+        },
+        {
+          "curve": "K_0/2^15",
+          "default_over_replay": 0.7533494594442021,
+          "f4_calls_default": 264,
+          "f4_calls_replay": 267,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 4,
+          "splits_default": 112,
+          "splits_replay": 113,
+          "targets": 8,
+          "verdicts_identical": true,
+          "word_ops_default": 3883356,
+          "word_ops_replay": 5154787
+        },
+        {
+          "curve": "K_1/2^15",
+          "default_over_replay": 0.9846184128002844,
+          "f4_calls_default": 7855,
+          "f4_calls_replay": 7917,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 4,
+          "splits_default": 3489,
+          "splits_replay": 3512,
+          "targets": 8,
+          "verdicts_identical": true,
+          "word_ops_default": 33015368,
+          "word_ops_replay": 33531130
+        },
+        {
+          "curve": "K_0/2^13",
+          "default_over_replay": 0.9615633717960472,
+          "f4_calls_default": 192,
+          "f4_calls_replay": 196,
+          "factor_index": 0,
+          "first_target": 1000,
+          "m": 3,
+          "splits_default": 176,
+          "splits_replay": 182,
+          "targets": 8,
+          "verdicts_identical": true,
+          "word_ops_default": 5873306,
+          "word_ops_replay": 6108080
+        }
+      ],
+      "default_over_replay": 0.9544141573462596,
+      "ladder": "chain-holdout",
+      "total_default": 43501345,
+      "total_replay": 45579107
+    },
+    {
+      "cells": [
+        {
+          "curve": "K_0/2^19",
+          "default_over_replay": 0.9839073832875523,
+          "f4_calls_default": 216,
+          "f4_calls_replay": 216,
+          "factor_index": 0,
+          "first_target": 0,
+          "m": 2,
+          "splits_default": 204,
+          "splits_replay": 204,
+          "targets": 12,
+          "verdicts_identical": true,
+          "word_ops_default": 37896163,
+          "word_ops_replay": 38515986
+        },
+        {
+          "curve": "K_1/2^17",
+          "default_over_replay": 0.9716848141697707,
+          "f4_calls_default": 2376,
+          "f4_calls_replay": 2376,
+          "factor_index": 1,
+          "first_target": 0,
+          "m": 2,
+          "splits_default": 598,
+          "splits_replay": 598,
+          "targets": 24,
+          "verdicts_identical": true,
+          "word_ops_default": 3518804,
+          "word_ops_replay": 3621343
+        }
+      ],
+      "default_over_replay": 0.9828569580193371,
+      "ladder": "holdout",
+      "total_default": 41414967,
+      "total_replay": 42137329
+    }
+  ],
+  "schema": "pdp_shape_replay.summary/v1"
+}
