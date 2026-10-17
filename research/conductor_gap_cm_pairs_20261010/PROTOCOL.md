@@ -74,3 +74,14 @@ unexplained until it is re-tested. It is not automatically a harness fault,
 and it is not noise. The decision rule and the specs are unchanged. The
 ℓ = 8209 rho interval [1.005, 1.46] stays unexplained, and a re-test under
 a fresh measurement seed is the open follow-up (README §5).
+
+Addendum (2026-10-17, sheriff case SHF-20261017-e4d7f6, finding L-N2; the
+frozen text and the 2026-10-16 paragraphs above are unchanged). The sentence
+"For `bsgs.*`, `S = 1` is a theorem, and a deviation is a harness fault" is
+superseded. `lean/GenericInvariance.lean` gives pathwise equality on
+transported instances, so for BSGS-type arms `E[S] = 1` when instances and
+tapes are identically distributed. `S` is a finite-sample bootstrap statistic
+over independently drawn workloads, and the recorded BSGS ratios are 0.84
+[0.61, 1.32], 0.98 [0.65, 1.50] and 1.25 [0.82, 1.79] (README §5), not
+exactly 1. A BSGS interval excluding 1 is re-sampled and checked against the
+control arm before it is called a harness fault.
