@@ -201,3 +201,37 @@ research/secg_small_x_20261014/graphs/*.svg -diff -whitespace
 benchmarks/20261014-secg-small-x-s3-cost/*.pdf binary
 benchmarks/20261014-secg-small-x-s3-cost/*.png binary
 benchmarks/20261014-secg-small-x-s3-cost/*.svg -diff -whitespace
+# Pairing-transfer run reports and benchmark mirrors; keep raw test logs exact.
+benchmarks/20261015-torsion-pairing-transfer/*.pdf binary
+benchmarks/20261015-torsion-pairing-transfer/*.png binary
+benchmarks/20261015-torsion-pairing-transfer/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/*.pdf binary
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/*.png binary
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/reports/**/*.pdf binary
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/reports/**/*.png binary
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/reports/**/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/validation/*.log whitespace=-blank-at-eof
+
+# Native χ, different-j, and pairing-batch next-gate visual evidence.
+benchmarks/20261015-isogeny-torsion-next-gates/*.pdf binary
+benchmarks/20261015-isogeny-torsion-next-gates/*.png binary
+benchmarks/20261015-isogeny-torsion-next-gates/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/RESULTS_20261015.pdf binary
+research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/**/*.pdf binary
+research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/reports/**/*.png binary
+research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/**/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_20261015/reports/**/*.png binary
+research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/**/*.pdf binary
+research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/reports/**/*.png binary
+research/isogeny_torsion_fibers_20261012/validation_*.stdout whitespace=-blank-at-eof
+
+# Different-j full rational-image factor-base visual and verbatim test evidence.
+benchmarks/20261015-different-j-full-image/*.pdf binary
+benchmarks/20261015-different-j-full-image/*.png binary
+benchmarks/20261015-different-j-full-image/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/reports/**/*.pdf binary
+research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/reports/**/*.png binary
+research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/reports/**/*.svg -diff -whitespace
+research/isogeny_torsion_fibers_20261012/different_j_full_image_20261015/validation_*.stdout whitespace=-blank-at-eof

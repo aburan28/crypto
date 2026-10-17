@@ -1,0 +1,152 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1ha0c3d83775e32754",
+  "statement": {
+    "name": "Cubic torsion Mobius conjugacy",
+    "source": "research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/REPORT.md",
+    "variables": [
+      "y"
+    ],
+    "degree_bound": 2,
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y"
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "const",
+                    "args": 3
+                  }
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y"
+                },
+                {
+                  "op": "const",
+                  "args": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y"
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "const",
+                    "args": 1
+                  }
+                }
+              ]
+            },
+            {
+              "op": "neg",
+              "args": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "y"
+                  },
+                  {
+                    "op": "const",
+                    "args": 1
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y"
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "const",
+                    "args": 3
+                  }
+                }
+              ]
+            },
+            {
+              "op": "neg",
+              "args": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "y"
+                  },
+                  {
+                    "op": "const",
+                    "args": 1
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "args": "y"
+            },
+            {
+              "op": "neg",
+              "args": {
+                "op": "const",
+                "args": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 64,
+  "seed": 539365395,
+  "value_digest": "b559e1a827d1ca6e797abfdb6e300a0efedc6c6a624ff8ceadb23fa510f90edb",
+  "independence": "issued by examples/isogeny_torsion_identity.rs; the same native checker replays the id-bound points and a separate checker-seed stream",
+  "proof": null
+}

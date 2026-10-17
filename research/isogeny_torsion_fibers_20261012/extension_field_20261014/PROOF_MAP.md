@@ -1,0 +1,17 @@
+# Proof map for the quadratic-extension scaling control
+
+Toolchain: [`leanprover/lean4:v4.34.1`](lean/lean-toolchain). Dependency: Lean `Init` only; the empty resolved dependency manifest is [pinned](lean/lake-manifest.json). `cd lean && lake build` completed successfully in [the build receipt](lean/build.log). The four exact coefficient witnesses' `#print axioms` report no axioms. The general factorization theorem reports only the standard Lean foundations `propext` and `Quot.sound`. `lean4checker --fresh` is unavailable on this host.
+
+| Report statement | Lean declaration | Exact formal status |
+|:--|:--|:--|
+| `(u²+3)(u⁴−3u²+9)=u⁶+27` for every integer `u` | [`scaling_sixth_power_factorization`](lean/ScalingWitness.lean) | Proved over `Int`; standard `propext` and `Quot.sound` only. The separate [native certificate](CERTIFICATES.md) checks the same polynomial identity over its schema field. |
+| At `p=61`, `u=27` has `u²≡−3` and `u⁶≡−27` | [`scaling_witness_p61`](lean/ScalingWitness.lean) | Proved as `Nat` remainder equalities `27² % 61 = 58` and `27⁶ % 61 = 34`; no hypotheses or axioms. |
+| At `p=271`, `u=57` has the two coefficient congruences | [`scaling_witness_p271`](lean/ScalingWitness.lean) | Proved as `57² % 271 = 268` and `57⁶ % 271 = 244`; no hypotheses or axioms. |
+| At `p=787`, `u=28` has the two coefficient congruences | [`scaling_witness_p787`](lean/ScalingWitness.lean) | Proved as `28² % 787 = 784` and `28⁶ % 787 = 760`; no hypotheses or axioms. |
+| At `p=3319`, `u=264` has the two coefficient congruences | [`scaling_witness_p3319`](lean/ScalingWitness.lean) | Proved as `264² % 3319 = 3316` and `264⁶ % 3319 = 3292`; no hypotheses or axioms. |
+| For odd prime `p≠3`, the fixed `x³+1` and `x³−27` pair is isomorphic over `F_(p²)` | no Lean declaration | The report proves that every `a∈F_p*` is a square in the cyclic group `F_(p²)*`, then uses `a=−3` and the explicit scaling. A faithful finite-field model, square-existence lemma and curve-group isomorphism theorem are not present in this `Init`-only Lean package; the four exact coefficient witnesses and universal factorization are the compiled pieces. |
+| `ψ_u:E→E'` is an elliptic-curve group isomorphism on each exact field | no Lean declaration | The explicit equation and 64 sampled group-law pairs per field, plus fixed generator/target/base image checks, passed in [ISO_CHECK.jsonl](ISO_CHECK.jsonl). A faithful Lean `F_(p²)` curve/group-law model and a proof of bijectivity are still missing. The finite checks are not a universal theorem. |
+| Torsion translates add no quotient two-sum support | prior [`torsion_orbit_pair_support`](../torsion_orbit_20261013/lean/OrbitSupport.lean) | Proved under explicit homomorphism, kernel and identity hypotheses; the curve-level bridge remains external. See the [prior proof map](../torsion_orbit_20261013/PROOF_MAP.md). |
+| `χ(P+T)=1/(1−χ(P))` for all projective curve points | no full Lean declaration | Two prior polynomial identity certificates and finite rational-point checks support the algebraic step; a faithful projective point/group-law Lean theorem including poles and torsion exceptions remains open. |
+
+The universal polynomial identity and four exact modular witnesses establish the scaling coefficient relation. They do not promote the checked finite maps, support counts, performance ratios, or an extension-field DLP algorithm to general formal results.

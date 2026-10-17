@@ -1,0 +1,5 @@
+Command: RUST_TEST_THREADS=2 cargo test --release --lib
+Permissions: local socket and generated solver input access
+Result: interrupted with exit 130 after Nagao jv_cover test failed under shared-host wall contention
+Raw partial output: release_lib_controlled.log
+Classification: failed and censored validation attempt; not a full-suite pass

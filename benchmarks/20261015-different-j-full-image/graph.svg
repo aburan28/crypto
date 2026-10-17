@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="655" viewBox="0 0 1000 655" role="img" aria-label="Full-image factor base has median cold CPU 3962.083 microseconds versus direct rho 58.084 microseconds in three shared-host rounds; each factor base covers 56 nonzero sums but full-image support shares only 52 with projected and direct bases">
+<rect width="1000" height="655" fill="#ffffff"/>
+<g font-family="Arial,Helvetica,sans-serif" fill="#183148">
+<text x="35" y="43" font-size="25" font-weight="700">Full-image base changes support; cold setup dominates</text>
+<text x="35" y="72" font-size="15" fill="#536b7b">run 20261015T1916Z · 3 paired rounds · current-thread CPU (µs) · shared-host L0</text>
+<text x="35" y="103" font-size="14" fill="#536b7b">Dots: median · bars: round min–max · logarithmic axis · same public order-61 target</text>
+<g stroke="#d9e3e8" stroke-width="1">
+<path d="M330 120 L330 450"/><path d="M510 120 L510 450"/><path d="M690 120 L690 450"/><path d="M870 120 L870 450"/>
+<path d="M315 448 L880 448"/>
+</g>
+<g font-size="15" text-anchor="end">
+<text x="285" y="148">Direct negation rho</text>
+<text x="285" y="203">Rho A/A</text>
+<text x="285" y="258">Source projected</text>
+<text x="285" y="313">Isogeny image projected</text>
+<text x="285" y="368">Destination direct</text>
+<text x="285" y="423">Full rational image</text>
+</g>
+<g stroke-linecap="round" stroke-width="4" fill="none">
+<path d="M465 142 L539 142" stroke="#367ca0"/>
+<path d="M462 197 L482 197" stroke="#8bb1c5"/>
+<path d="M554 252 L582 252" stroke="#238a80"/>
+<path d="M535 307 L612 307" stroke="#7550ba"/>
+<path d="M532 362 L616 362" stroke="#c38527"/>
+<path d="M783 417 L804 417" stroke="#bd4d3d"/>
+</g>
+<g stroke="#fff" stroke-width="2">
+<circle cx="468" cy="142" r="8" fill="#367ca0"/>
+<circle cx="465" cy="197" r="8" fill="#8bb1c5"/>
+<circle cx="564" cy="252" r="8" fill="#238a80"/>
+<circle cx="584" cy="307" r="8" fill="#7550ba"/>
+<circle cx="533" cy="362" r="8" fill="#c38527"/>
+<circle cx="798" cy="417" r="8" fill="#bd4d3d"/>
+</g>
+<g font-size="14" fill="#183148">
+<text x="900" y="148">58.084</text><text x="900" y="203">56.041</text>
+<text x="900" y="258">198.333</text><text x="900" y="313">258.042</text>
+<text x="900" y="368">134.584</text><text x="900" y="423">3962.083</text>
+</g>
+<g font-size="13" fill="#536b7b" text-anchor="middle">
+<text x="330" y="472">10</text><text x="510" y="472">100</text>
+<text x="690" y="472">1000</text><text x="870" y="472">10000 µs</text>
+</g>
+<text x="35" y="517" font-size="18" font-weight="700">Exact order-61 two-sum support</text>
+<text x="35" y="546" font-size="15">All four bases cover 56 of 60 nonzero subgroup points.</text>
+<rect x="35" y="564" width="440" height="62" rx="8" fill="#eef6f3" stroke="#92c1b2"/>
+<text x="255" y="587" font-size="15" text-anchor="middle" font-weight="700">Full image vs projected image</text>
+<text x="255" y="613" font-size="15" text-anchor="middle">4 full-only · 52 shared · 4 projected-only</text>
+<rect x="515" y="564" width="450" height="62" rx="8" fill="#f7f2e9" stroke="#d3b985"/>
+<text x="740" y="587" font-size="15" text-anchor="middle" font-weight="700">Full image vs destination direct</text>
+<text x="740" y="613" font-size="15" text-anchor="middle">4 full-only · 52 shared · 4 direct-only</text>
+</g></svg>

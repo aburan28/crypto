@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="190" viewBox="0 0 900 190">
+ <rect width="900" height="190" fill="white"/>
+ <style>text{font-family:Arial,sans-serif;fill:#243247;font-size:15px}.title{font-size:21px;font-weight:bold}.box{fill:#f4f8fd;stroke:#567ba4;stroke-width:2}.bad{fill:#fff0f0;stroke:#b42333;stroke-width:2}</style>
+ <text x="25" y="32" class="title">Run v3: verified arithmetic, rejected output schema</text>
+ <rect class="box" x="25" y="65" width="250" height="72" rx="8"/>
+ <text x="40" y="94">Maps: 361 + 44,521 checks</text><text x="40" y="119">48 solver arms verified</text>
+ <path d="M275 101H330" stroke="#334155" stroke-width="2"/>
+ <rect class="bad" x="330" y="65" width="240" height="72" rx="8"/>
+ <text x="345" y="94">TSV header: 47 fields</text><text x="345" y="119">Data rows: 48 fields</text>
+ <path d="M570 101H625" stroke="#334155" stroke-width="2"/>
+ <rect class="box" x="625" y="65" width="250" height="72" rx="8"/>
+ <text x="640" y="94">Retain raw + replay</text><text x="640" y="119">Re-run with width assertion</text>
+ <text x="25" y="170">No v3 numerical comparison promoted; final v4 data is in the result report.</text>
+</svg>

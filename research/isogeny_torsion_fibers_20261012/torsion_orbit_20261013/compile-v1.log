@@ -1,0 +1,12 @@
+First native compile attempt, before any experiment execution.
+Source SHA-256: b637369ca2ca730ad8b88c4b7ffd383fdb71f90ca7076a92126613ed0b67ccc4
+Command: rustc --edition=2021 -O research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/screen.rs -o /private/tmp/isogeny-torsion-orbit-screen-20261013
+Exit: 1
+
+error[E0282]: type annotations needed
+  --> screen.rs:84:51
+   |
+84 |         out[square] = Some(out[square].map_or(y, |old| old.min(y)));
+   |                                                   ^^^  --- type must be known at this point
+
+The `Option<u64>` vector type was made explicit. No result rows were produced.

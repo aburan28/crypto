@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="650" viewBox="0 0 1400 650">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#475569"/></marker>
+    <style>text{font-family:Arial,sans-serif;fill:#172033}.title{font-size:26px;font-weight:bold}.head{font-size:20px;font-weight:bold}.body{font-size:16px}.small{font-size:14px}.edge{font-size:17px;font-weight:bold}</style>
+  </defs>
+  <rect width="1400" height="650" fill="#fff"/>
+  <text x="40" y="44" class="title">A non-isomorphic degree-three transport with a rational three-point fiber</text>
+  <text x="40" y="74" class="body">F617 · full curve order 618 · target subgroup order 103 · cofactor 6 · eight same-source targets, 24/24 verified arm records</text>
+  <rect x="40" y="110" width="565" height="195" rx="13" fill="#eff6ff" stroke="#0284c7" stroke-width="2"/>
+  <text x="60" y="142" class="head">Source E: y² = x³ + 1</text>
+  <text x="60" y="174" class="small">ICV1:fp-617:0:618:0:unk:unk:r:b7eaec414c43</text>
+  <text x="60" y="199" class="small">EC1P10Cfph8d1f0abcf065 · G = (66,264), order 103</text>
+  <text x="60" y="229" class="body">ker φ(F617) = {O, (0,1), (0,616)}</text>
+  <text x="60" y="258" class="body">Factor base: 12 distinct points after [6] projection</text>
+  <rect x="795" y="110" width="565" height="195" rx="13" fill="#ecfdf5" stroke="#0f766e" stroke-width="2"/>
+  <text x="815" y="142" class="head">Destination E′: y² = x³ + 590</text>
+  <text x="815" y="174" class="small">ICV1:fp-617:0:618:0:unk:unk:r:787b35c695fb</text>
+  <text x="815" y="199" class="small">EC1P10Cfph9dc6fab612fb · G′ = (483,13), order 103</text>
+  <text x="815" y="229" class="body">590 is not a sixth power in F617</text>
+  <text x="815" y="258" class="body">Factor base: 12 distinct points after [6] projection</text>
+  <path d="M608 198 L790 198" stroke="#be185d" stroke-width="4" marker-end="url(#arr)"/>
+  <text x="646" y="178" class="edge">φ degree 3</text>
+  <text x="576" y="332" class="small">φ(x,y) = ((x³+4)/x², y(x³−8)/x³) for x≠0; the kernel maps to O</text>
+  <rect x="40" y="365" width="1320" height="198" rx="12" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="60" y="399" class="head">One exact target fiber, checked for each of eight targets</text>
+  <text x="74" y="444" class="body">Q</text>
+  <text x="375" y="444" class="body">Q + (0,1)</text>
+  <text x="710" y="444" class="body">Q + (0,616)</text>
+  <text x="1120" y="444" class="body">φ(Q)</text>
+  <path d="M100 451 C390 515 890 515 1120 451" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#arr)"/>
+  <path d="M480 451 C670 492 910 492 1120 451" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#arr)"/>
+  <path d="M820 451 C925 474 1010 468 1120 451" fill="none" stroke="#0284c7" stroke-width="2.5" marker-end="url(#arr)"/>
+  <text x="60" y="543" class="small">The map has image size 206 and every rational image point has exactly three preimages; on the order-103 subgroup, φ is injective.</text>
+  <text x="40" y="603" class="small">Evidence: raw-v2.tsv, independent_v2.log, identities.tsv. Non-isomorphism uses the sixth-power criterion for short Weierstrass j=0 models.</text>
+  <text x="40" y="628" class="small">The relation and rho bars count group additions and doublings only; this diagram does not assert a complete native-cost ECDLP advantage.</text>
+</svg>

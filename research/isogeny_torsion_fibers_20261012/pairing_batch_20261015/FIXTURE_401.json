@@ -1,0 +1,49 @@
+{
+  "answer_scalar": 39,
+  "generator": {
+    "infinity": false,
+    "x": [
+      251,
+      0
+    ],
+    "y": [
+      346,
+      0
+    ]
+  },
+  "n1": 402,
+  "n2": 161604,
+  "nu": 3,
+  "p": 401,
+  "r": 67,
+  "schema": "torsion_pairing_401_fixture/v1",
+  "selected_point": {
+    "infinity": false,
+    "x": [
+      1,
+      0
+    ],
+    "y": [
+      53,
+      0
+    ]
+  },
+  "source_group_ops": {
+    "adds": 10,
+    "doubles": 23,
+    "scalar_mults": 6
+  },
+  "target": {
+    "infinity": false,
+    "x": [
+      143,
+      0
+    ],
+    "y": [
+      328,
+      0
+    ]
+  },
+  "target_seed": "pairing-batch/2026-10-15/p=401/r=67",
+  "trace_fp": 0
+}

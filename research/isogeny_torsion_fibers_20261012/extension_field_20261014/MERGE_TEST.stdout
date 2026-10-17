@@ -1,0 +1,14 @@
+
+running 9 tests
+test cryptanalysis::ecc2k130_merge::tests::a_crash_between_append_and_state_only_duplicates ... ok
+test cryptanalysis::ecc2k130_merge::tests::all_three_layouts_reach_the_same_buckets ... ok
+test cryptanalysis::ecc2k130_merge::tests::buckets_match_numpy ... ok
+test cryptanalysis::ecc2k130_merge::tests::campaign_ids_match_protocol_py ... ok
+test cryptanalysis::ecc2k130_merge::tests::file_hash_agrees_with_the_reference_sha256 ... ok
+test cryptanalysis::ecc2k130_merge::tests::max_iters_may_rise_and_nothing_else_may_move ... ok
+test cryptanalysis::ecc2k130_merge::tests::the_contract_refuses_what_protocol_py_refuses ... ok
+test cryptanalysis::ecc2k130_merge::tests::the_solver_verdict_is_read_like_the_regex ... ok
+test cryptanalysis::ecc2k130_merge::tests::torn_and_shrunk_inputs_fail_closed ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 4113 filtered out; finished in 0.21s
+

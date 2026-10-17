@@ -1,9 +1,0 @@
-# A crate for tests/local_e2e.sh: the cargo cache must skip it when its source
-# is unchanged and rebuild it when the source changes.
-[package]
-name = "fixture"
-version = "0.1.0"
-edition = "2021"
-publish = false
-
-[workspace]

@@ -1,0 +1,662 @@
+{
+  "by_cell": [
+    {
+      "answer": 12,
+      "cell": 0,
+      "p": 61,
+      "pairing_cpu_ns": {
+        "max": 109333959.0,
+        "median": 108490417.0,
+        "min": 105532126.0,
+        "n": 3
+      },
+      "pairing_fp_muls": {
+        "max": 16491269.0,
+        "median": 16491269.0,
+        "min": 16491269.0,
+        "n": 3
+      },
+      "pairing_over_rho_cpu_ratio": {
+        "max": 4344.31607113453,
+        "median": 2781.805564102564,
+        "min": 1741.2084182698434,
+        "n": 3
+      },
+      "pairing_s_cpu_gae": {
+        "max": 178065.55567988436,
+        "median": 170737.18904912134,
+        "min": 169493.46877007664,
+        "n": 3
+      },
+      "pairing_solve_cpu_ns": {
+        "max": 104896334.0,
+        "median": 103992584.0,
+        "min": 100256292.0,
+        "n": 3
+      },
+      "pairing_solve_over_rho_cpu_ratio": {
+        "max": 4127.132059937428,
+        "median": 2666.4765128205127,
+        "min": 1670.5365970187286,
+        "n": 3
+      },
+      "pairing_solve_s_cpu_gae": {
+        "max": 170683.25266504462,
+        "median": 163807.34195052588,
+        "min": 161020.0357103171,
+        "n": 3
+      },
+      "r": 19,
+      "rho_aa_cpu_ns": {
+        "max": 43291.0,
+        "median": 31209.0,
+        "min": 22166.0,
+        "n": 3
+      },
+      "rho_aa_s_cpu_gae": {
+        "max": 71.05361177603248,
+        "median": 50.1242784291612,
+        "min": 34.61468483422267,
+        "n": 3
+      },
+      "rho_cpu_ns": {
+        "max": 62792.0,
+        "median": 39000.0,
+        "min": 24292.0,
+        "n": 3
+      },
+      "rho_fp_muls": {
+        "max": 1499.0,
+        "median": 949.0,
+        "min": 940.0,
+        "n": 3
+      },
+      "rho_s_cpu_gae": {
+        "max": 98.05672156052108,
+        "median": 64.0107842106966,
+        "min": 39.01499476436874,
+        "n": 3
+      }
+    },
+    {
+      "answer": 10,
+      "cell": 1,
+      "p": 271,
+      "pairing_cpu_ns": {
+        "max": 34608166.0,
+        "median": 25681333.0,
+        "min": 24609709.0,
+        "n": 3
+      },
+      "pairing_fp_muls": {
+        "max": 5602853.0,
+        "median": 5602853.0,
+        "min": 5602853.0,
+        "n": 3
+      },
+      "pairing_over_rho_cpu_ratio": {
+        "max": 1046.1012000120909,
+        "median": 698.1477730496454,
+        "min": 697.2370700187332,
+        "n": 3
+      },
+      "pairing_s_cpu_gae": {
+        "max": 30304.7426875126,
+        "median": 23193.812104837765,
+        "min": 22872.95984042037,
+        "n": 3
+      },
+      "pairing_solve_cpu_ns": {
+        "max": 33097500.0,
+        "median": 24335958.0,
+        "min": 23247667.0,
+        "n": 3
+      },
+      "pairing_solve_over_rho_cpu_ratio": {
+        "max": 1000.4382915696883,
+        "median": 660.7107213639943,
+        "min": 659.5082836879433,
+        "n": 3
+      },
+      "pairing_solve_s_cpu_gae": {
+        "max": 28981.923546597303,
+        "median": 21978.75154078737,
+        "min": 21607.03946862866,
+        "n": 3
+      },
+      "r": 61,
+      "rho_aa_cpu_ns": {
+        "max": 79750.0,
+        "median": 45292.0,
+        "min": 32458.0,
+        "n": 3
+      },
+      "rho_aa_s_cpu_gae": {
+        "max": 74.12190640992645,
+        "median": 40.904969296271034,
+        "min": 28.421943484415902,
+        "n": 3
+      },
+      "rho_cpu_ns": {
+        "max": 36833.0,
+        "median": 35250.0,
+        "min": 33083.0,
+        "n": 3
+      },
+      "rho_fp_muls": {
+        "max": 1810.0,
+        "median": 1557.0,
+        "min": 1497.0,
+        "n": 3
+      },
+      "rho_s_cpu_gae": {
+        "max": 33.2653169232878,
+        "median": 32.76234734733426,
+        "min": 28.969226578807422,
+        "n": 3
+      }
+    }
+  ],
+  "floor_caveat": "the counting floor is not a hardware time lower bound",
+  "floor_counted_gae_per_sqrt_r": 0.886226925452758,
+  "pairing_solve_total": "cold pairing run plus independent source-scalar replay",
+  "pairing_total": "cold pairing run plus independent scalar replay plus post-solve bilinearity check; each is a separate process",
+  "rows": [
+    {
+      "cell": 0,
+      "ns_per_source_add_calibration": 142.84167,
+      "p": 61,
+      "pairing_cpu_phases_ns": {
+        "bilinearity_checks": 5275834,
+        "cold_residual": 13333,
+        "field_dlp": 48917,
+        "full_total": 105532126,
+        "independent_scalar_replay": 2167,
+        "selection_and_pairings": 100138250,
+        "setup": 53625,
+        "solve_total": 100256292
+      },
+      "pairing_extension_muls": {
+        "bilinearity_checks": 2123,
+        "field_dlp": 23,
+        "selection_and_pairings": 27169,
+        "setup": 223
+      },
+      "pairing_fp_invs": 46,
+      "pairing_fp_muls": 16491269,
+      "pairing_over_rho_cpu_ratio": 4344.31607113453,
+      "pairing_peak_rss_bytes": 6569984,
+      "pairing_solve_over_rho_cpu_ratio": 4127.132059937428,
+      "r": 19,
+      "ratio_to_floor": {
+        "pairing": 191252.89911890833,
+        "pairing_solve": 181691.65378049732,
+        "rho": 44.02370729645418,
+        "rho_aa": 56.55919154516048
+      },
+      "recovered": 12,
+      "rho_aa_cpu_ns": 31209,
+      "rho_counted_s": 9.406045088693032,
+      "rho_cpu_ns": 24292,
+      "rho_fp_invs": 35,
+      "rho_fp_muls": 949,
+      "rho_gae": 41.0,
+      "round": 0,
+      "s_cpu_gae": {
+        "pairing": 169493.46877007664,
+        "pairing_solve": 161020.0357103171,
+        "rho": 39.01499476436874,
+        "rho_aa": 50.1242784291612
+      },
+      "selection_phase_charges": {
+        "candidate_search": {
+          "cpu_ns": 98532209,
+          "extension_invs": 148,
+          "extension_muls": 26469,
+          "extension_squares_in_muls": 16573,
+          "fp_invs": 0,
+          "fp_muls": 15050300
+        },
+        "final_exponentiation": {
+          "cpu_ns": 696250,
+          "extension_invs": 0,
+          "extension_muls": 300,
+          "extension_squares_in_muls": 204,
+          "fp_invs": 0,
+          "fp_muls": 169770
+        },
+        "miller": {
+          "cpu_ns": 853667,
+          "extension_invs": 2,
+          "extension_muls": 386,
+          "extension_squares_in_muls": 228,
+          "fp_invs": 10,
+          "fp_muls": 205647
+        },
+        "pairing_checks": {
+          "cpu_ns": 30250,
+          "extension_invs": 0,
+          "extension_muls": 14,
+          "extension_squares_in_muls": 8,
+          "fp_invs": 0,
+          "fp_muls": 7110
+        }
+      },
+      "verified": true
+    },
+    {
+      "cell": 0,
+      "ns_per_source_add_calibration": 146.90959,
+      "p": 61,
+      "pairing_cpu_phases_ns": {
+        "bilinearity_checks": 4437625,
+        "cold_residual": 11042,
+        "field_dlp": 48625,
+        "full_total": 109333959,
+        "independent_scalar_replay": 2167,
+        "selection_and_pairings": 104804333,
+        "setup": 30167,
+        "solve_total": 104896334
+      },
+      "pairing_extension_muls": {
+        "bilinearity_checks": 2123,
+        "field_dlp": 23,
+        "selection_and_pairings": 27169,
+        "setup": 223
+      },
+      "pairing_fp_invs": 46,
+      "pairing_fp_muls": 16491269,
+      "pairing_over_rho_cpu_ratio": 1741.2084182698434,
+      "pairing_peak_rss_bytes": 6586368,
+      "pairing_solve_over_rho_cpu_ratio": 1670.5365970187286,
+      "r": 19,
+      "ratio_to_floor": {
+        "pairing": 192656.2871714766,
+        "pairing_solve": 184836.7920742642,
+        "rho": 110.64516180257736,
+        "rho_aa": 39.05848924251385
+      },
+      "recovered": 12,
+      "rho_aa_cpu_ns": 22166,
+      "rho_counted_s": 9.406045088693032,
+      "rho_cpu_ns": 62792,
+      "rho_fp_invs": 34,
+      "rho_fp_muls": 940,
+      "rho_gae": 41.0,
+      "round": 1,
+      "s_cpu_gae": {
+        "pairing": 170737.18904912134,
+        "pairing_solve": 163807.34195052588,
+        "rho": 98.05672156052108,
+        "rho_aa": 34.61468483422267
+      },
+      "selection_phase_charges": {
+        "candidate_search": {
+          "cpu_ns": 103023042,
+          "extension_invs": 148,
+          "extension_muls": 26469,
+          "extension_squares_in_muls": 16573,
+          "fp_invs": 0,
+          "fp_muls": 15050300
+        },
+        "final_exponentiation": {
+          "cpu_ns": 759625,
+          "extension_invs": 0,
+          "extension_muls": 300,
+          "extension_squares_in_muls": 204,
+          "fp_invs": 0,
+          "fp_muls": 169770
+        },
+        "miller": {
+          "cpu_ns": 969000,
+          "extension_invs": 2,
+          "extension_muls": 386,
+          "extension_squares_in_muls": 228,
+          "fp_invs": 10,
+          "fp_muls": 205647
+        },
+        "pairing_checks": {
+          "cpu_ns": 35000,
+          "extension_invs": 0,
+          "extension_muls": 14,
+          "extension_squares_in_muls": 8,
+          "fp_invs": 0,
+          "fp_muls": 7110
+        }
+      },
+      "verified": true
+    },
+    {
+      "cell": 0,
+      "ns_per_source_add_calibration": 139.77666,
+      "p": 61,
+      "pairing_cpu_phases_ns": {
+        "bilinearity_checks": 4497833,
+        "cold_residual": 17500,
+        "field_dlp": 65500,
+        "full_total": 108490417,
+        "independent_scalar_replay": 4917,
+        "selection_and_pairings": 103875250,
+        "setup": 29417,
+        "solve_total": 103992584
+      },
+      "pairing_extension_muls": {
+        "bilinearity_checks": 2123,
+        "field_dlp": 23,
+        "selection_and_pairings": 27169,
+        "setup": 223
+      },
+      "pairing_fp_invs": 46,
+      "pairing_fp_muls": 16491269,
+      "pairing_over_rho_cpu_ratio": 2781.805564102564,
+      "pairing_peak_rss_bytes": 6635520,
+      "pairing_solve_over_rho_cpu_ratio": 2666.4765128205127,
+      "r": 19,
+      "ratio_to_floor": {
+        "pairing": 200925.46340646752,
+        "pairing_solve": 192595.42647933596,
+        "rho": 72.22843537279641,
+        "rho_aa": 80.17541527496743
+      },
+      "recovered": 12,
+      "rho_aa_cpu_ns": 43291,
+      "rho_counted_s": 17.206180040292132,
+      "rho_cpu_ns": 39000,
+      "rho_fp_invs": 57,
+      "rho_fp_muls": 1499,
+      "rho_gae": 75.0,
+      "round": 2,
+      "s_cpu_gae": {
+        "pairing": 178065.55567988436,
+        "pairing_solve": 170683.25266504462,
+        "rho": 64.0107842106966,
+        "rho_aa": 71.05361177603248
+      },
+      "selection_phase_charges": {
+        "candidate_search": {
+          "cpu_ns": 101723959,
+          "extension_invs": 148,
+          "extension_muls": 26469,
+          "extension_squares_in_muls": 16573,
+          "fp_invs": 0,
+          "fp_muls": 15050300
+        },
+        "final_exponentiation": {
+          "cpu_ns": 803458,
+          "extension_invs": 0,
+          "extension_muls": 300,
+          "extension_squares_in_muls": 204,
+          "fp_invs": 0,
+          "fp_muls": 169770
+        },
+        "miller": {
+          "cpu_ns": 1258792,
+          "extension_invs": 2,
+          "extension_muls": 386,
+          "extension_squares_in_muls": 228,
+          "fp_invs": 10,
+          "fp_muls": 205647
+        },
+        "pairing_checks": {
+          "cpu_ns": 35291,
+          "extension_invs": 0,
+          "extension_muls": 14,
+          "extension_squares_in_muls": 8,
+          "fp_invs": 0,
+          "fp_muls": 7110
+        }
+      },
+      "verified": true
+    },
+    {
+      "cell": 1,
+      "ns_per_source_add_calibration": 137.75875,
+      "p": 271,
+      "pairing_cpu_phases_ns": {
+        "bilinearity_checks": 1362042,
+        "cold_residual": 7583,
+        "field_dlp": 19334,
+        "full_total": 24609709,
+        "independent_scalar_replay": 2875,
+        "selection_and_pairings": 23179750,
+        "setup": 38125,
+        "solve_total": 23247667
+      },
+      "pairing_extension_muls": {
+        "bilinearity_checks": 1993,
+        "field_dlp": 28,
+        "selection_and_pairings": 39673,
+        "setup": 146
+      },
+      "pairing_fp_invs": 64,
+      "pairing_fp_muls": 5602853,
+      "pairing_over_rho_cpu_ratio": 698.1477730496454,
+      "pairing_peak_rss_bytes": 6602752,
+      "pairing_solve_over_rho_cpu_ratio": 659.5082836879433,
+      "r": 61,
+      "ratio_to_floor": {
+        "pairing": 25809.371373742644,
+        "pairing_solve": 24380.933199011073,
+        "rho": 36.96835021187891,
+        "rho_aa": 83.63761501836434
+      },
+      "recovered": 10,
+      "rho_aa_cpu_ns": 79750,
+      "rho_counted_s": 9.21865535516851,
+      "rho_cpu_ns": 35250,
+      "rho_fp_invs": 72,
+      "rho_fp_muls": 1810,
+      "rho_gae": 72.0,
+      "round": 0,
+      "s_cpu_gae": {
+        "pairing": 22872.95984042037,
+        "pairing_solve": 21607.03946862866,
+        "rho": 32.76234734733426,
+        "rho_aa": 74.12190640992645
+      },
+      "selection_phase_charges": {
+        "candidate_search": {
+          "cpu_ns": 22791833,
+          "extension_invs": 293,
+          "extension_muls": 39115,
+          "extension_squares_in_muls": 24833,
+          "fp_invs": 0,
+          "fp_muls": 5188085
+        },
+        "final_exponentiation": {
+          "cpu_ns": 143166,
+          "extension_invs": 0,
+          "extension_muls": 216,
+          "extension_squares_in_muls": 148,
+          "fp_invs": 0,
+          "fp_muls": 37500
+        },
+        "miller": {
+          "cpu_ns": 209833,
+          "extension_invs": 2,
+          "extension_muls": 322,
+          "extension_squares_in_muls": 180,
+          "fp_invs": 16,
+          "fp_muls": 52480
+        },
+        "pairing_checks": {
+          "cpu_ns": 13001,
+          "extension_invs": 0,
+          "extension_muls": 20,
+          "extension_squares_in_muls": 10,
+          "fp_invs": 0,
+          "fp_muls": 3200
+        }
+      },
+      "verified": true
+    },
+    {
+      "cell": 1,
+      "ns_per_source_add_calibration": 146.21875,
+      "p": 271,
+      "pairing_cpu_phases_ns": {
+        "bilinearity_checks": 1510666,
+        "cold_residual": 18501,
+        "field_dlp": 18791,
+        "full_total": 34608166,
+        "independent_scalar_replay": 2791,
+        "selection_and_pairings": 32994542,
+        "setup": 62875,
+        "solve_total": 33097500
+      },
+      "pairing_extension_muls": {
+        "bilinearity_checks": 1993,
+        "field_dlp": 28,
+        "selection_and_pairings": 39673,
+        "setup": 146
+      },
+      "pairing_fp_invs": 64,
+      "pairing_fp_muls": 5602853,
+      "pairing_over_rho_cpu_ratio": 1046.1012000120909,
+      "pairing_peak_rss_bytes": 6619136,
+      "pairing_solve_over_rho_cpu_ratio": 1000.4382915696883,
+      "r": 61,
+      "ratio_to_floor": {
+        "pairing": 34195.24031277929,
+        "pairing_solve": 32702.59875233529,
+        "rho": 32.688271758395906,
+        "rho_aa": 32.07072891618095
+      },
+      "recovered": 10,
+      "rho_aa_cpu_ns": 32458,
+      "rho_counted_s": 7.938286555839551,
+      "rho_cpu_ns": 33083,
+      "rho_fp_invs": 61,
+      "rho_fp_muls": 1557,
+      "rho_gae": 62.0,
+      "round": 1,
+      "s_cpu_gae": {
+        "pairing": 30304.7426875126,
+        "pairing_solve": 28981.923546597303,
+        "rho": 28.969226578807422,
+        "rho_aa": 28.421943484415902
+      },
+      "selection_phase_charges": {
+        "candidate_search": {
+          "cpu_ns": 32556125,
+          "extension_invs": 293,
+          "extension_muls": 39115,
+          "extension_squares_in_muls": 24833,
+          "fp_invs": 0,
+          "fp_muls": 5188085
+        },
+        "final_exponentiation": {
+          "cpu_ns": 163041,
+          "extension_invs": 0,
+          "extension_muls": 216,
+          "extension_squares_in_muls": 148,
+          "fp_invs": 0,
+          "fp_muls": 37500
+        },
+        "miller": {
+          "cpu_ns": 249125,
+          "extension_invs": 2,
+          "extension_muls": 322,
+          "extension_squares_in_muls": 180,
+          "fp_invs": 16,
+          "fp_muls": 52480
+        },
+        "pairing_checks": {
+          "cpu_ns": 13541,
+          "extension_invs": 0,
+          "extension_muls": 20,
+          "extension_squares_in_muls": 10,
+          "fp_invs": 0,
+          "fp_muls": 3200
+        }
+      },
+      "verified": true
+    },
+    {
+      "cell": 1,
+      "ns_per_source_add_calibration": 141.76875,
+      "p": 271,
+      "pairing_cpu_phases_ns": {
+        "bilinearity_checks": 1345375,
+        "cold_residual": 15751,
+        "field_dlp": 24041,
+        "full_total": 25681333,
+        "independent_scalar_replay": 3041,
+        "selection_and_pairings": 24255167,
+        "setup": 37958,
+        "solve_total": 24335958
+      },
+      "pairing_extension_muls": {
+        "bilinearity_checks": 1993,
+        "field_dlp": 28,
+        "selection_and_pairings": 39673,
+        "setup": 146
+      },
+      "pairing_fp_invs": 64,
+      "pairing_fp_muls": 5602853,
+      "pairing_over_rho_cpu_ratio": 697.2370700187332,
+      "pairing_peak_rss_bytes": 6602752,
+      "pairing_solve_over_rho_cpu_ratio": 660.7107213639943,
+      "r": 61,
+      "ratio_to_floor": {
+        "pairing": 26171.414384626652,
+        "pairing_solve": 24800.365357392864,
+        "rho": 37.53589060306774,
+        "rho_aa": 46.15631518459382
+      },
+      "recovered": 10,
+      "rho_aa_cpu_ns": 45292,
+      "rho_counted_s": 7.426139036107966,
+      "rho_cpu_ns": 36833,
+      "rho_fp_invs": 58,
+      "rho_fp_muls": 1497,
+      "rho_gae": 58.0,
+      "round": 2,
+      "s_cpu_gae": {
+        "pairing": 23193.812104837765,
+        "pairing_solve": 21978.75154078737,
+        "rho": 33.2653169232878,
+        "rho_aa": 40.904969296271034
+      },
+      "selection_phase_charges": {
+        "candidate_search": {
+          "cpu_ns": 23873166,
+          "extension_invs": 293,
+          "extension_muls": 39115,
+          "extension_squares_in_muls": 24833,
+          "fp_invs": 0,
+          "fp_muls": 5188085
+        },
+        "final_exponentiation": {
+          "cpu_ns": 143333,
+          "extension_invs": 0,
+          "extension_muls": 216,
+          "extension_squares_in_muls": 148,
+          "fp_invs": 0,
+          "fp_muls": 37500
+        },
+        "miller": {
+          "cpu_ns": 208124,
+          "extension_invs": 2,
+          "extension_muls": 322,
+          "extension_squares_in_muls": 180,
+          "fp_invs": 16,
+          "fp_muls": 52480
+        },
+        "pairing_checks": {
+          "cpu_ns": 12999,
+          "extension_invs": 0,
+          "extension_muls": 20,
+          "extension_squares_in_muls": 10,
+          "fp_invs": 0,
+          "fp_muls": 3200
+        }
+      },
+      "verified": true
+    }
+  ],
+  "run_commit": "b4e2bff9cb753bf8412e62c1a7e090ceb56e27f8",
+  "run_directory": "runs_v2",
+  "schema": "torsion_pairing_accounting/v2",
+  "unit": "current-thread CPU ns converted by the paired rho source-add calibration, divided by sqrt(r)"
+}

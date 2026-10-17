@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="430" viewBox="0 0 900 430" role="img" aria-labelledby="title desc">
+<title id="title">χ polynomial complete-CPU cost divided by paired negation rho</title>
+<desc id="desc">Three-round paired ratios by frozen group: 29.64, 26.29, 89.42 and 142.80; all exceed one.</desc>
+<rect width="900" height="430" fill="#fff"/>
+<text x="28" y="42" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#173047">χ polynomial / matched rho · whole CPU</text>
+<text x="28" y="67" font-family="Arial,sans-serif" font-size="14" fill="#526b7d">RUN_V1 · three paired rounds per group · shared Darwin L0 · unit: paired CPU ratio</text>
+<line x1="175" y1="92" x2="175" y2="352" stroke="#8094a3"/>
+<line x1="175" y1="353" x2="835" y2="353" stroke="#8094a3"/>
+<g stroke="#dde5eb"><line x1="395" y1="90" x2="395" y2="353"/><line x1="615" y1="90" x2="615" y2="353"/><line x1="835" y1="90" x2="835" y2="353"/></g>
+<g font-family="Arial,sans-serif" font-size="14" fill="#526b7d"><text x="170" y="375">0</text><text x="386" y="375">50</text><text x="603" y="375">100</text><text x="817" y="375">150</text></g>
+<g font-family="Arial,sans-serif" font-size="17" fill="#173047"><text x="28" y="131">p=61, r=19</text><text x="28" y="196">p=271, r=61</text><text x="28" y="261">p=787, r=211</text><text x="28" y="326">p=3319, r=811</text></g>
+<g fill="#b45134"><rect x="175" y="108" width="130.4" height="31" rx="4"/><rect x="175" y="173" width="115.7" height="31" rx="4"/><rect x="175" y="238" width="393.5" height="31" rx="4"/><rect x="175" y="303" width="628.3" height="31" rx="4"/></g>
+<g font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#173047"><text x="317" y="130">29.64×</text><text x="302" y="195">26.29×</text><text x="580" y="260">89.42×</text><text x="686" y="325" fill="#fff">142.80×</text></g>
+<text x="28" y="408" font-family="Arial,sans-serif" font-size="13" fill="#526b7d">Pairwise χ/rho ratios from SUMMARY_V1.jsonl. CPU includes setup, relation collection, linear solve and verification.</text>
+</svg>

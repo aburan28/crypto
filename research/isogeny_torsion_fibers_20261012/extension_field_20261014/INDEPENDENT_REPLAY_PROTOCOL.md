@@ -1,0 +1,7 @@
+# Independent arithmetic replay of the frozen V3 DLP run
+
+Input is the immutable `FIXTURES.jsonl` (SHA-256 `1a63cc22a22e0fe27d44359325d502038d26d3ac616374fc5558c041939218b7`) and `RUN_V3.jsonl` (SHA-256 `ca9a0ec7e31de59c58a78ae5c269350b37963b62ff9de815c805c36c2ec26693`). The first replay checked scalars in another process but reused the run's field and curve code. This version must use separate native Rust field and curve arithmetic, without calling the solver's `Fp2`, `Curve`, scalar multiplication, relation oracle, or rho implementation.
+
+Parse each exact public field `F_p[s]/(s²−ν)` and implement coefficient arithmetic with integer modular operations, Fermat inversion in `F_p`, the short-Weierstrass chord/tangent law, and double-and-add from scratch. Reject an invalid generator/target, wrong order, or any recovered scalar failing `[k]G=Q` or the public known-answer fixture. Require exactly one `(p,round,arm)` row for each of the 4 × 3 × 7 frozen slots, the expected `r` and seed, and statuses consistent with scalar presence and cap state. Recompute SHA-256 over input bytes; fail closed on malformed JSON or missing/duplicate records.
+
+Output one compact receipt with hashes, count of checked answers, and count of exhausted rows. Expected counts are 75 verified and nine exhausted. A failed check remains a failed verification, not a mathematical negative result. This independent replay is arithmetic and row-integrity verification only; it does not prove relations, performance isolation, or a general theorem.

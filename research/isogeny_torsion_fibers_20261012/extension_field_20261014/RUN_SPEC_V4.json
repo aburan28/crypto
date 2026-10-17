@@ -1,0 +1,32 @@
+{
+  "schema": "torsion_extension_run_spec/v4",
+  "purpose": "same-target scaling-isomorphism attribution control with seven V3 arms rerun",
+  "fixture_sha256": "1a63cc22a22e0fe27d44359325d502038d26d3ac616374fc5558c041939218b7",
+  "iso_check_sha256": "702da686eb5e8891c3ea60c9fb7719333e45b44634be836d53e13e1ce6f7a3aa",
+  "source_revision": "c68835edc4d112e3f8f5da3e606060141ad55143",
+  "source_sha256": "04ee96dc1af8f40410a550fd36849e54e5d81ea3700c61c81355471118d315e5",
+  "entrypoint": "cargo run --release --example isogeny_torsion_extension -- solve-v4 FIXTURES.jsonl",
+  "fields_p": [61, 271, 787, 3319],
+  "subgroup_orders": [19, 61, 211, 811],
+  "rounds": 3,
+  "seed_base": "0x20261014 XOR p",
+  "seed_increment_per_round": "0x9e3779b9",
+  "trial_cap": "min(1000000,20*r)",
+  "arms": [
+    "raw-pair",
+    "projected-pair",
+    "chi-orbit-index",
+    "isogeny-projected-pair",
+    "isomorphism-projected-pair",
+    "rho-negation",
+    "rho-negation-aa",
+    "rho-six-class"
+  ],
+  "arm_order": "listed in even rounds; reversed in odd rounds",
+  "primary_unit": "cold current-thread CPU ns divided by locally measured source-addition ns and sqrt(r)",
+  "one_target_setup_reuse": 1,
+  "source_answer_scalar_use": "framework final equality assertion only; oracle and collector use G,Q,r,seed",
+  "success": "exact source relations and independent scalar replay on every recovered row",
+  "stop": "verified scalar or cap; retain every failure or exhausted row",
+  "isolation": "shared host L0, descriptive only"
+}

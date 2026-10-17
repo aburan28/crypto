@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="280" viewBox="0 0 1000 280">
+  <rect width="1000" height="280" fill="white"/>
+  <text x="30" y="35" font-family="sans-serif" font-size="20">Degree 3, rational kernel size 1: the distinction</text>
+  <text x="30" y="74" font-family="sans-serif" font-size="15">E over F₁₃: y² = x³ + 2,  #E(F₁₃) = r = 19,  h = 1</text>
+  <circle cx="225" cy="172" r="54" fill="#e8f1f7" stroke="#0a6f8c" stroke-width="2"/>
+  <text x="202" y="178" font-family="sans-serif" font-size="16">O</text>
+  <circle cx="420" cy="133" r="32" fill="#f4ebd9" stroke="#a16012" stroke-width="2"/>
+  <text x="406" y="139" font-family="sans-serif" font-size="15">T</text>
+  <circle cx="420" cy="215" r="32" fill="#f4ebd9" stroke="#a16012" stroke-width="2"/>
+  <text x="402" y="221" font-family="sans-serif" font-size="15">−T</text>
+  <path d="M420 166 L420 182" stroke="#a16012" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="462" y="179" font-family="sans-serif" font-size="14">Frobenius swaps T and −T</text>
+  <path d="M486 133 L680 133" stroke="#0a6f8c" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M486 215 L680 215" stroke="#0a6f8c" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="704" y="180" font-family="sans-serif" font-size="16">kernel M = {O, T, −T}</text>
+  <text x="704" y="210" font-family="sans-serif" font-size="15">M(F₁₃) = {O}</text>
+  <text x="40" y="252" font-family="sans-serif" font-size="15">φ: E → E': y² = x³ + 11.  [h] kills M(F₁₃), while degree 3 does not divide h = 1.</text>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#0a6f8c"/></marker></defs>
+</svg>

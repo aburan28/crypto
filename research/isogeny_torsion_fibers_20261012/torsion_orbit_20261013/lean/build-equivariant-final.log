@@ -1,0 +1,15 @@
+ℹ [2/5] Replayed OrbitSupport
+info: OrbitSupport.lean:39:0: 'torsion_orbit_pair_support' does not depend on any axioms
+✖ [4/5] Building EquivariantOrder (3.1s)
+trace: .> LEAN_PATH=/Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/EquivariantOrder.lean -o /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/lib/lean/EquivariantOrder.olean -i /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/lib/lean/EquivariantOrder.ilean -c /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/ir/EquivariantOrder.c --setup /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/torsion_orbit_20261013/lean/.lake/build/ir/EquivariantOrder.setup.json --json
+error: EquivariantOrder.lean:15:21: Unknown identifier `sub_eq_add_neg`
+error: EquivariantOrder.lean:15:37: Unknown identifier `add_comm`
+error: EquivariantOrder.lean:15:47: Unknown identifier `add_left_comm`
+error: EquivariantOrder.lean:15:62: Unknown identifier `add_assoc`
+error: EquivariantOrder.lean:14:63: unsolved goals
+u v : Int
+⊢ -(-v - (u - v)) = u ∧ -(u - v) - (-v - (u - v)) = v
+info: EquivariantOrder.lean:17:0: 'cubicAction_order_three' depends on axioms: [propext, sorryAx]
+Some required targets logged failures:
+- EquivariantOrder
+error: build failed

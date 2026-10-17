@@ -1,0 +1,21 @@
+info: isogeny_fiber_four_sizes: no previous manifest, creating one from scratch
+info: toolchain not updated; already up-to-date
+✖ [2/3] Building NonisomorphicFour (118s)
+trace: .> LEAN_PATH=/Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/full_cost_20261013/lean/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/full_cost_20261013/lean/NonisomorphicFour.lean -o /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/full_cost_20261013/lean/.lake/build/lib/lean/NonisomorphicFour.olean -i /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/full_cost_20261013/lean/.lake/build/lib/lean/NonisomorphicFour.ilean -c /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/full_cost_20261013/lean/.lake/build/ir/NonisomorphicFour.c --setup /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/full_cost_20261013/lean/.lake/build/ir/NonisomorphicFour.setup.json --json
+error: NonisomorphicFour.lean:14:66: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+error: NonisomorphicFour.lean:15:70: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+info: NonisomorphicFour.lean:22:0: 'NonisomorphicFour.ratio617' does not depend on any axioms
+info: NonisomorphicFour.lean:23:0: 'NonisomorphicFour.ratio2633' does not depend on any axioms
+info: NonisomorphicFour.lean:24:0: 'NonisomorphicFour.ratio9677' depends on axioms: [sorryAx]
+info: NonisomorphicFour.lean:25:0: 'NonisomorphicFour.ratio38561' depends on axioms: [sorryAx]
+info: NonisomorphicFour.lean:26:0: 'NonisomorphicFour.coprime103' does not depend on any axioms
+info: NonisomorphicFour.lean:27:0: 'NonisomorphicFour.coprime439' does not depend on any axioms
+info: NonisomorphicFour.lean:28:0: 'NonisomorphicFour.coprime1613' does not depend on any axioms
+info: NonisomorphicFour.lean:29:0: 'NonisomorphicFour.coprime6427' does not depend on any axioms
+Some required targets logged failures:
+- NonisomorphicFour
+error: build failed

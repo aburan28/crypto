@@ -27,10 +27,9 @@ use num_traits::Zero;
 use super::arith::lucas_v;
 use super::torsion::{
     compose, eigen_order, jac_add, jac_double, padd, pdivrem, pinv_mod, pmul, ppow, prem, psub,
-    trim, Big2, Field, Fp, FpK, Jac, Poly, Small2,
+    trim, Field, Fp, FpK, Jac, Poly,
 };
 use super::Model;
-use crate::cryptanalysis::semaev_decomp::Gf2;
 
 /// Random points tried before giving up.
 pub const TRIES: u64 = 24;
@@ -237,193 +236,19 @@ fn affine<F: Field>(f: &F, p: &Jac<F::E>) -> Option<(F::E, F::E)> {
     Some((f.mul(&p.x, &zi2), f.mul(&p.y, &f.mul(&zi2, &zi))))
 }
 
-/// The group of an elliptic curve over a finite field, as the rank test
-/// needs it: seeded points, multiples, sums, and a canonical form for
-/// comparing points.
-pub(crate) trait CurveGroup {
-    type P: Clone;
-    type A: PartialEq;
-    /// A point at the `i`-th seeded x-coordinate, or `None` when that
-    /// x-coordinate has none.
-    fn sample_point(&self, i: u64) -> Option<Self::P>;
-    fn mul(&self, p: &Self::P, n: &BigUint) -> Self::P;
-    fn add(&self, p: &Self::P, q: &Self::P) -> Self::P;
-    fn is_zero(&self, p: &Self::P) -> bool;
-    /// Affine coordinates; `None` for the point at infinity.
-    fn affine(&self, p: &Self::P) -> Option<Self::A>;
-}
-
-/// `y² = x³ + ax + b`, `|G| = order` odd, in Jacobian coordinates.
-pub(crate) struct ShortW<'a, F: Field> {
-    pub f: &'a F,
-    pub a: F::E,
-    pub b: F::E,
-    pub order: BigUint,
-}
-
-impl<F: Field> CurveGroup for ShortW<'_, F> {
-    type P = Jac<F::E>;
-    type A = (F::E, F::E);
-    fn sample_point(&self, i: u64) -> Option<Jac<F::E>> {
-        let g = self.f;
-        let x = g.sample(i);
-        let rhs = g.add(&g.mul(&g.add(&g.mul(&x, &x), &self.a), &x), &self.b);
-        let y = sqrt(g, &rhs, &self.order)?;
-        Some(Jac { x, y, z: g.one() })
-    }
-    fn mul(&self, p: &Jac<F::E>, n: &BigUint) -> Jac<F::E> {
-        mul(self.f, &self.a, p, n)
-    }
-    fn add(&self, p: &Jac<F::E>, q: &Jac<F::E>) -> Jac<F::E> {
-        jac_add(self.f, &self.a, p, q)
-    }
-    fn is_zero(&self, p: &Jac<F::E>) -> bool {
-        self.f.is_zero(&p.z)
-    }
-    fn affine(&self, p: &Jac<F::E>) -> Option<(F::E, F::E)> {
-        affine(self.f, p)
-    }
-}
-
-/// `y² + xy = x³ + ax² + b` over a field of characteristic 2 and degree
-/// `m` over GF(2), in affine coordinates (`None` is the point at
-/// infinity).
-pub(crate) struct BinaryW<'a, F: Field> {
-    pub f: &'a F,
-    pub a: F::E,
-    pub b: F::E,
-    pub m: u64,
-}
-
-impl<F: Field> BinaryW<'_, F> {
-    fn square(&self, x: &F::E) -> F::E {
-        self.f.mul(x, x)
-    }
-
-    fn trace(&self, c: &F::E) -> F::E {
-        let mut acc = c.clone();
-        let mut pow = c.clone();
-        for _ in 1..self.m {
-            pow = self.square(&pow);
-            acc = self.f.add(&acc, &pow);
-        }
-        acc
-    }
-
-    /// A root of `z² + z = c`, or `None` when `Tr(c) = 1`.  Odd degree:
-    /// the half-trace.  Any degree: with `Tr(δ) = 1`,
-    /// `z = Σ_{i<m−1} (Σ_{j>i} δ^{2^j}) c^{2^i}`.  The root is checked.
-    fn solve_artin_schreier(&self, c: &F::E) -> Option<F::E> {
-        let f = self.f;
-        if !f.is_zero(&self.trace(c)) {
-            return None;
-        }
-        let z = if self.m % 2 == 1 {
-            let mut acc = c.clone();
-            let mut pow = c.clone();
-            for _ in 0..(self.m - 1) / 2 {
-                pow = self.square(&self.square(&pow));
-                acc = f.add(&acc, &pow);
-            }
-            acc
-        } else {
-            let delta = (0u64..)
-                .map(|i| f.sample(i ^ 0xa57e))
-                .take(256)
-                .find(|d| self.trace(d) == f.one())?;
-            // δ^{2^j} for j < m, then the suffix sums D_i = Σ_{j>i} δ^{2^j}.
-            let mut dpow = Vec::with_capacity(self.m as usize);
-            let mut d = delta;
-            for _ in 0..self.m {
-                dpow.push(d.clone());
-                d = self.square(&d);
-            }
-            let mut suffix = f.zero();
-            let mut acc = f.zero();
-            // c^{2^i} for i from m − 2 down needs them in order: build up.
-            let mut cpow = Vec::with_capacity(self.m as usize);
-            let mut cc = c.clone();
-            for _ in 0..self.m {
-                cpow.push(cc.clone());
-                cc = self.square(&cc);
-            }
-            for i in (0..self.m as usize - 1).rev() {
-                suffix = f.add(&suffix, &dpow[i + 1]);
-                acc = f.add(&acc, &f.mul(&suffix, &cpow[i]));
-            }
-            acc
-        };
-        (f.add(&self.square(&z), &z) == *c).then_some(z)
-    }
-
-    fn double(&self, p: &Option<(F::E, F::E)>) -> Option<(F::E, F::E)> {
-        let f = self.f;
-        let (x, y) = p.as_ref()?;
-        if f.is_zero(x) {
-            return None;
-        }
-        let lambda = f.add(x, &f.mul(y, &f.inv(x)));
-        let x3 = f.add(&f.add(&self.square(&lambda), &lambda), &self.a);
-        let y3 = f.add(&self.square(x), &f.mul(&f.add(&lambda, &f.one()), &x3));
-        Some((x3, y3))
-    }
-}
-
-impl<F: Field> CurveGroup for BinaryW<'_, F> {
-    type P = Option<(F::E, F::E)>;
-    type A = (F::E, F::E);
-    fn sample_point(&self, i: u64) -> Option<Self::P> {
-        let f = self.f;
-        let x = f.sample(i);
-        if f.is_zero(&x) {
-            return None;
-        }
-        // y = xz: z² + z = x + a + b/x².
-        let xi = f.inv(&x);
-        let c = f.add(&f.add(&x, &self.a), &f.mul(&self.b, &self.square(&xi)));
-        let z = self.solve_artin_schreier(&c)?;
-        Some(Some((x.clone(), f.mul(&x, &z))))
-    }
-    fn mul(&self, p: &Self::P, n: &BigUint) -> Self::P {
-        let mut acc: Self::P = None;
-        for i in (0..n.bits()).rev() {
-            acc = self.double(&acc);
-            if n.bit(i) {
-                acc = self.add(&acc, p);
-            }
-        }
-        acc
-    }
-    fn add(&self, p: &Self::P, q: &Self::P) -> Self::P {
-        let f = self.f;
-        let (Some((x1, y1)), Some((x2, y2))) = (p, q) else {
-            return if p.is_none() { q.clone() } else { p.clone() };
-        };
-        if x1 == x2 {
-            // Q = P doubles; Q = −P = (x, x + y) cancels.
-            return if y1 == y2 { self.double(p) } else { None };
-        }
-        let lambda = f.mul(&f.add(y1, y2), &f.inv(&f.add(x1, x2)));
-        let x3 = f.add(
-            &f.add(&f.add(&self.square(&lambda), &lambda), &f.add(x1, x2)),
-            &self.a,
-        );
-        let y3 = f.add(&f.add(&f.mul(&lambda, &f.add(x1, &x3)), &x3), y1);
-        Some((x3, y3))
-    }
-    fn is_zero(&self, p: &Self::P) -> bool {
-        p.is_none()
-    }
-    fn affine(&self, p: &Self::P) -> Option<(F::E, F::E)> {
-        p.clone()
-    }
-}
-
-/// Decide the `ℓ`-rank of a curve group with `n = ℓ^v·m` points:
+/// Decide the `ℓ`-rank of `E(G)`, `|G| = order`, `#E(G) = n = ℓ^v·m`:
 /// `Some(true)` for rank 2, `Some(false)` for rank 1.
-fn rank_two<G: CurveGroup>(g: &G, n: &BigUint, ell: u64, budget: u64) -> Option<bool> {
+fn rank_two<F: Field>(
+    g: &F,
+    a: &F::E,
+    b: &F::E,
+    order: &BigUint,
+    n: &BigUint,
+    ell: u64,
+    budget: u64,
+) -> Option<bool> {
     let l = BigUint::from(ell);
-    // Scalar multiplications made so far, a point sample counting as one.
+    // Scalar multiplications made so far, a square root counting as one.
     let mut spent = 0u64;
     let mut v = 0u32;
     let mut cof = n.clone();
@@ -434,27 +259,30 @@ fn rank_two<G: CurveGroup>(g: &G, n: &BigUint, ell: u64, budget: u64) -> Option<
     if v == 0 {
         return None;
     }
-    let mut order_ell: Vec<G::P> = Vec::new();
+    let mut order_ell: Vec<(F::E, F::E)> = Vec::new();
     for i in 0..TRIES {
         if spent >= budget {
             return None;
         }
+        let x = g.sample(i);
+        let rhs = g.add(&g.mul(&g.add(&g.mul(&x, &x), a), &x), b);
         spent += 1;
-        let Some(p) = g.sample_point(i) else {
+        let Some(y) = sqrt(g, &rhs, order) else {
             continue;
         };
+        let p = Jac { x, y, z: g.one() };
         spent += 1;
-        let mut s = g.mul(&p, &cof);
-        if g.is_zero(&s) {
+        let mut s = mul(g, a, &p, &cof);
+        if g.is_zero(&s.z) {
             continue;
         }
         // s has order ℓ^e; step to the point of order ℓ below it.
         let mut e = 0u32;
         loop {
             // A multiplication by ℓ is a small fraction of one by N.
-            let next = g.mul(&s, &l);
+            let next = mul(g, a, &s, &l);
             e += 1;
-            if g.is_zero(&next) {
+            if g.is_zero(&next.z) {
                 break;
             }
             if e == v {
@@ -467,22 +295,27 @@ fn rank_two<G: CurveGroup>(g: &G, n: &BigUint, ell: u64, budget: u64) -> Option<
             // An ℓ-part of order ℓ^v: cyclic, rank 1.
             return Some(false);
         }
-        let t = g.affine(&s).expect("order ℓ, not O");
-        for p1 in &order_ell {
+        let t = affine(g, &s).expect("order ℓ, not O");
+        for (x1, y1) in &order_ell {
+            let p1 = Jac {
+                x: x1.clone(),
+                y: y1.clone(),
+                z: g.one(),
+            };
             let mut multiple = p1.clone();
             let mut inside = false;
             for _ in 1..ell {
-                if g.affine(&multiple).as_ref() == Some(&t) {
+                if affine(g, &multiple).as_ref() == Some(&t) {
                     inside = true;
                     break;
                 }
-                multiple = g.add(&multiple, p1);
+                multiple = jac_add(g, a, &multiple, &p1);
             }
             if !inside {
                 return Some(true);
             }
         }
-        order_ell.push(s);
+        order_ell.push(t);
     }
     None
 }
@@ -513,8 +346,6 @@ pub fn scalar_by_points(model: &Model, trace: &BigInt, ell: u64) -> Option<bool>
     let (limbs, base_k) = match model {
         Model::Prime { p, .. } => (p.bits().div_ceil(64), 1),
         Model::Extension { k: ext, .. } => (1, u64::from(*ext)),
-        // GF(2^n), n ≤ 63, is one word; above that, a word per 64 bits.
-        Model::Binary { n, .. } => (u64::from(*n).div_ceil(64), 1),
         _ => return None,
     };
     let kk = u64::from(k) * base_k;
@@ -540,55 +371,12 @@ pub fn scalar_by_points(model: &Model, trace: &BigInt, ell: u64) -> Option<bool>
         budget: u64,
     ) -> Option<bool> {
         if k == 1 {
-            let g = ShortW {
-                f,
-                a: a.clone(),
-                b: b.clone(),
-                order: order.clone(),
-            };
-            return rank_two(&g, n, ell, budget);
+            return rank_two(f, a, b, order, n, ell, budget);
         }
         let modulus = irreducible(f, q, k as usize, 0x1e1d)?;
-        let e = Ext { base: f, modulus };
-        let g = ShortW {
-            a: e.constant(a),
-            b: e.constant(b),
-            f: &e,
-            order: order.clone(),
-        };
-        rank_two(&g, n, ell, budget)
-    }
-    /// The binary analogue, `m` the degree of the base field over GF(2).
-    #[allow(clippy::too_many_arguments)]
-    fn over_binary<F: Field>(
-        f: &F,
-        a: &F::E,
-        b: &F::E,
-        q: &BigUint,
-        m: u64,
-        k: u32,
-        n: &BigUint,
-        ell: u64,
-        budget: u64,
-    ) -> Option<bool> {
-        if k == 1 {
-            let g = BinaryW {
-                f,
-                a: a.clone(),
-                b: b.clone(),
-                m,
-            };
-            return rank_two(&g, n, ell, budget);
-        }
-        let modulus = irreducible(f, q, k as usize, 0x1e1d)?;
-        let e = Ext { base: f, modulus };
-        let g = BinaryW {
-            a: e.constant(a),
-            b: e.constant(b),
-            f: &e,
-            m: m * u64::from(k),
-        };
-        rank_two(&g, n, ell, budget)
+        let g = Ext { base: f, modulus };
+        let (a, b) = (g.constant(a), g.constant(b));
+        rank_two(&g, &a, &b, order, n, ell, budget)
     }
     match model {
         Model::Prime { p, a, b } => {
@@ -606,25 +394,6 @@ pub fn scalar_by_points(model: &Model, trace: &BigInt, ell: u64) -> Option<bool>
             }
             let (a, b) = (f.element(a)?, f.element(b)?);
             over(&f, &a, &b, &q, k, &order, &n, ell, budget)
-        }
-        Model::Binary {
-            n: deg, irr, a, b, ..
-        } => {
-            if ell == 2 {
-                return None;
-            }
-            let m = u64::from(*deg);
-            if *deg <= 63 {
-                let f = Small2(Gf2::new(irr));
-                let (a, b) = (f.0.from_element(a), f.0.from_element(b));
-                over_binary(&f, &a, &b, &q, m, k, &n, ell, budget)
-            } else {
-                let f = Big2 {
-                    n: *deg,
-                    irr: irr.clone(),
-                };
-                over_binary(&f, a, b, &q, m, k, &n, ell, budget)
-            }
         }
         _ => None,
     }
@@ -667,59 +436,6 @@ mod tests {
                             continue;
                         };
                         assert_eq!(points, poly, "p={p} a={a} b={b} ℓ={ell}");
-                        seen[usize::from(points)] += 1;
-                    }
-                }
-            }
-        }
-        assert!(seen[0] > 0 && seen[1] > 0, "{seen:?}");
-    }
-
-    /// The same agreement over GF(2^n), through the binary group law and
-    /// Artin–Schreier sampling, odd and even degree.
-    #[test]
-    fn the_binary_point_test_agrees_with_the_division_polynomial_test() {
-        use crate::binary_ecc::{F2mElement, IrreduciblePoly};
-        use crate::cryptanalysis::semaev_decomp::Gf2;
-        let mut seen = [0usize; 2];
-        for (n, low) in [
-            (7u32, vec![0u32, 1]),
-            (8, vec![0, 2, 3, 4]),
-            (9, vec![0, 4]),
-            (10, vec![0, 3]),
-        ] {
-            let irr = IrreduciblePoly {
-                degree: n,
-                low_terms: low,
-            };
-            let gf = Gf2::new(&irr);
-            let q = 1i64 << n;
-            for a in 0..2u64 {
-                for b in 1..(q as u64).min(120) {
-                    let count = super::super::certify::count_binary(&gf, a, b) as i64;
-                    let t = q + 1 - count;
-                    let delta = t * t - 4 * q;
-                    for ell in [3u64, 5, 7] {
-                        let l = ell as i64;
-                        if delta % (l * l) != 0 {
-                            continue;
-                        }
-                        let el = |v: u64| F2mElement::from_biguint(&BigUint::from(v), n);
-                        let model = Model::Binary {
-                            n,
-                            modulus: BigUint::zero(),
-                            irr: irr.clone(),
-                            a: el(a),
-                            b: el(b),
-                        };
-                        let tt = BigInt::from(t);
-                        let Some(poly) = frobenius_is_scalar(&model, &tt, ell) else {
-                            continue;
-                        };
-                        let Some(points) = scalar_by_points(&model, &tt, ell) else {
-                            continue;
-                        };
-                        assert_eq!(points, poly, "GF(2^{n}) a={a} b={b} ℓ={ell}");
                         seen[usize::from(points)] += 1;
                     }
                 }

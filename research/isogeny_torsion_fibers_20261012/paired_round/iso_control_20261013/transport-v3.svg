@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="610" viewBox="0 0 1200 610">
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth"><path d="M0 0 L9 4.5 L0 9 Z" fill="#475569"/></marker>
+    <style>text{font-family:Arial,sans-serif;fill:#172033}.title{font-size:22px;font-weight:bold}.head{font-size:17px;font-weight:bold}.body{font-size:13px}.small{font-size:12px}.edge{font-size:13px;font-weight:bold}</style>
+  </defs>
+  <rect width="1200" height="610" fill="#ffffff"/>
+  <text x="34" y="37" class="title">Two explicit transports reach each same destination model</text>
+  <text x="34" y="59" class="body">v3: 8 frozen source targets per pair; relation collection, recovery, and original-source scalar checks verified in both destination arms.</text>
+  <g transform="translate(0 83)">
+    <rect x="30" y="0" width="1140" height="230" rx="13" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="50" y="30" class="head">F13 · subgroup order 19 · factor base 4</text>
+    <rect x="50" y="52" width="345" height="110" rx="8" fill="#eff6ff" stroke="#0284c7"/>
+    <text x="66" y="75" class="body">Source E: y² = x³ + 2; G = (1, 4)</text>
+    <text x="66" y="99" class="small">ICV1 icv1-fp4-tm5-c277dce2</text>
+    <text x="66" y="119" class="small">EC1 EC1P4Cfph7c32fa042bde</text>
+    <text x="66" y="143" class="small">Q: exact source target; 8 indices</text>
+    <rect x="805" y="52" width="345" height="110" rx="8" fill="#ecfdf5" stroke="#0f766e"/>
+    <text x="821" y="75" class="body">Destination E': y² = x³ + 11</text>
+    <text x="821" y="99" class="small">ICV1 icv1-fp4-tm5-90163552</text>
+    <text x="821" y="119" class="small">EC1 EC1P4Cfph47e4fecd7461</text>
+    <text x="821" y="143" class="small">Two verified (G', Q') workloads</text>
+    <path d="M395 78 C525 78 675 78 805 78" fill="none" stroke="#be185d" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="470" y="70" class="edge">φ: degree 3, geometric kernel 3, rational kernel 1</text>
+    <path d="M395 140 C525 193 675 193 805 140" fill="none" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="500" y="174" width="252" height="20" fill="#f8fafc"/>
+    <text x="512" y="187" class="edge">ψ₂: degree 1, public scaling</text>
+    <text x="50" y="213" class="small">Checked pointwise on rational E: φ = ψ₂ ◦ [10 mod 19]. Both destination relation arms verified 8/8 answers.</text>
+  </g>
+  <g transform="translate(0 330)">
+    <rect x="30" y="0" width="1140" height="230" rx="13" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="50" y="30" class="head">F199 · subgroup order 211 · factor base 12</text>
+    <rect x="50" y="52" width="345" height="110" rx="8" fill="#eff6ff" stroke="#0284c7"/>
+    <text x="66" y="75" class="body">Source E: y² = x³ + 3; G = (1, 2)</text>
+    <text x="66" y="99" class="small">ICV1 icv1-fp8-tm11-7caf6b43</text>
+    <text x="66" y="119" class="small">EC1 EC1P8Cfphdcceff26a483</text>
+    <text x="66" y="143" class="small">Q: exact source target; 8 indices</text>
+    <rect x="805" y="52" width="345" height="110" rx="8" fill="#ecfdf5" stroke="#0f766e"/>
+    <text x="821" y="75" class="body">Destination E': y² = x³ + 118</text>
+    <text x="821" y="99" class="small">ICV1 icv1-fp8-tm11-c0dfd129</text>
+    <text x="821" y="119" class="small">EC1 EC1P8Cfphb11d1e6192b3</text>
+    <text x="821" y="143" class="small">Two verified (G', Q') workloads</text>
+    <path d="M395 78 C525 78 675 78 805 78" fill="none" stroke="#be185d" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="470" y="70" class="edge">φ: degree 3, geometric kernel 3, rational kernel 1</text>
+    <path d="M395 140 C525 193 675 193 805 140" fill="none" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="500" y="174" width="252" height="20" fill="#f8fafc"/>
+    <text x="512" y="187" class="edge">ψ₁₄: degree 1, public scaling</text>
+    <text x="50" y="213" class="small">Checked pointwise on rational E: φ = ψ₁₄ ◦ [29 mod 211]. Both destination relation arms verified 8/8 answers.</text>
+  </g>
+  <text x="34" y="595" class="small">Source: raw-v3.tsv, independent_v3.log, and frozen v4 map/isomorphism checks. Diagram shows named models, not an asymptotic transfer claim.</text>
+</svg>

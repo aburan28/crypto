@@ -1,0 +1,11 @@
+✖ [2/3] Building DifferentJ67 (1.4s)
+trace: .> LEAN_PATH=/Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_20261015/lean/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_20261015/lean/DifferentJ67.lean -o /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_20261015/lean/.lake/build/lib/lean/DifferentJ67.olean -i /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_20261015/lean/.lake/build/lib/lean/DifferentJ67.ilean -c /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_20261015/lean/.lake/build/ir/DifferentJ67.c --setup /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/different_j_20261015/lean/.lake/build/ir/DifferentJ67.setup.json --json
+error: DifferentJ67.lean:23:8: Unknown identifier `sub_eq_zero.mp`
+info: DifferentJ67.lean:31:0: 'DifferentJ67.distinctJ' depends on axioms: [propext]
+info: DifferentJ67.lean:32:0: 'DifferentJ67.targetCoprimeKernel' does not depend on any axioms
+info: DifferentJ67.lean:33:0: 'DifferentJ67.kernelScalarVanishes' depends on axioms: [propext]
+info: DifferentJ67.lean:34:0: 'DifferentJ67.injectiveOfThreeKernel' depends on axioms: [propext, sorryAx]
+info: DifferentJ67.lean:35:0: 'DifferentJ67.recordedFiberCardinality' does not depend on any axioms
+info: DifferentJ67.lean:36:0: 'DifferentJ67.recordedSubgroupOrder' does not depend on any axioms
+Some required targets logged failures:
+- DifferentJ67

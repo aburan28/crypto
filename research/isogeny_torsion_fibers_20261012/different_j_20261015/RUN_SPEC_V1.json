@@ -1,0 +1,23 @@
+{
+  "schema": "different_j_paired_relations_spec/v1",
+  "status": "frozen before paired relation and rho runs",
+  "source_sha256": "7c475200d985365981a326cdb368c3f602e2cee56fef919d9f8ddfb8acc5c2f6",
+  "screen_sha256": "be2094594f2ca0e7ec49d221a8d9865b5d5ecf640922cd0541520f414ac29707",
+  "post_solve_fixture_sha256": "3a3504b14887f20ecde8e894a7a57363f3ba9834d45f14d89568023822cbe94b",
+  "solver_public_fixture_sha256": "fa41958038b0fe01ec1664ca69acf3c44cc67af9feb38a7c8dbf6bf6a3041b65",
+  "cell": {"p":67,"nu":2,"source_a":46,"source_b":37,"destination_a":53,"destination_b":25,"source_j":7,"destination_j":11,"r":61,"cofactor":75,"map_degree":3},
+  "arms": ["source","isogeny-image","destination-direct","rho-negation","rho-negation-aa"],
+  "rounds": 3,
+  "query_seed": "(0x20261015 XOR 67) + round*0x9e3779b9, wrapping u64",
+  "rho_aa_seed_offset": "0x00aa0000",
+  "rho_retry_seed_stride": "0x01000000",
+  "rho_retry_limit": 32,
+  "per_attempt_step_cap": 1220,
+  "relation_trial_cap": 1220,
+  "relation_base_columns": 8,
+  "success": "all three relation arms attain rank nine, recover a scalar without answer input, verify source and destination, and independent replay checks all 15 rows",
+  "censored_if": "any arm exhausts its cap, mismatches its frozen base, yields an invalid relation or fails replay",
+  "cost": "cold base scan, projection, pair table, map evaluations, failed queries, relation checks, linear algebra, recovery, verification, every rho retry, CPU, wall, field and group counts, peak RSS",
+  "measurement": "L0 shared host; current-thread CPU and wall descriptive; counted S only after complete primitive conversion",
+  "command_template": "target/release/examples/nonisomorphic_extension_isogeny run PUBLIC_V1.json ROUND ARM; rho PUBLIC_V1.json ROUND reference|aa; replay PUBLIC_V1.json FIXTURE_V1.json RUN_V1.jsonl"
+}

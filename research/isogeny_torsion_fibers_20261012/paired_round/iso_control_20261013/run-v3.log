@@ -1,0 +1,23 @@
+map_check p=13 b=2 target_b=11 order=19 homomorphism_pairs=361 generator=(1, 4) image_generator=(9, 5) status=pass
+six_attempt p=13 index=0 attempt=0 seed=5929076107021582349 status=verified gae=38 steps=4 walks=4 dp=4 canonicalisations=8
+six_attempt p=13 index=1 attempt=0 seed=5929076107021516813 status=verified gae=40 steps=2 walks=2 dp=2 canonicalisations=4
+six_attempt p=13 index=2 attempt=0 seed=5929076107021451277 status=verified gae=40 steps=4 walks=4 dp=4 canonicalisations=11
+six_attempt p=13 index=3 attempt=0 seed=5929076107021385741 status=verified gae=37 steps=4 walks=4 dp=4 canonicalisations=8
+six_attempt p=13 index=4 attempt=0 seed=5929076107021320205 status=cap_or_no_collision gae=179194 steps=75000 walks=79166 dp=50000 canonicalisations=175000
+six_attempt p=13 index=4 attempt=1 seed=14735556941238074392 status=verified gae=31 steps=2 walks=2 dp=2 canonicalisations=4
+six_attempt p=13 index=5 attempt=0 seed=5929076107021254669 status=cap_or_no_collision gae=194763 steps=94737 walks=100000 dp=63159 canonicalisations=189474
+six_attempt p=13 index=5 attempt=1 seed=14735556941238008856 status=verified gae=42 steps=4 walks=4 dp=4 canonicalisations=9
+six_attempt p=13 index=6 attempt=0 seed=5929076107021189133 status=cap_or_no_collision gae=194765 steps=94737 walks=100000 dp=63158 canonicalisations=189474
+six_attempt p=13 index=6 attempt=1 seed=14735556941238205464 status=verified gae=33 steps=4 walks=4 dp=4 canonicalisations=11
+six_attempt p=13 index=7 attempt=0 seed=5929076107021123597 status=verified gae=44 steps=4 walks=4 dp=4 canonicalisations=8
+map_check p=199 b=3 target_b=118 order=211 homomorphism_pairs=44521 generator=(1, 2) image_generator=(13, 153) status=pass
+six_attempt p=199 index=0 attempt=0 seed=5929076107021582535 status=verified gae=77 steps=10 walks=10 dp=10 canonicalisations=21
+six_attempt p=199 index=1 attempt=0 seed=5929076107021516999 status=verified gae=63 steps=3 walks=3 dp=3 canonicalisations=6
+six_attempt p=199 index=2 attempt=0 seed=5929076107021451463 status=verified gae=73 steps=7 walks=7 dp=7 canonicalisations=14
+six_attempt p=199 index=3 attempt=0 seed=5929076107021385927 status=verified gae=73 steps=7 walks=7 dp=7 canonicalisations=14
+six_attempt p=199 index=4 attempt=0 seed=5929076107021320391 status=verified gae=73 steps=11 walks=11 dp=11 canonicalisations=22
+six_attempt p=199 index=5 attempt=0 seed=5929076107021254855 status=verified gae=60 steps=5 walks=5 dp=5 canonicalisations=11
+six_attempt p=199 index=6 attempt=0 seed=5929076107021189319 status=verified gae=66 steps=12 walks=12 dp=12 canonicalisations=24
+six_attempt p=199 index=7 attempt=0 seed=5929076107021123783 status=verified gae=72 steps=7 walks=7 dp=7 canonicalisations=14
+workloads=16 arms=80 failed_workloads=0
+all_workloads_verified=16 arms_verified=80

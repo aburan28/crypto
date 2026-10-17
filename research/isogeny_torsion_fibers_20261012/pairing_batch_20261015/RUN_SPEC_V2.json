@@ -1,0 +1,11 @@
+{
+  "schema": "torsion_pairing_batch_run_spec/v2",
+  "status": "frozen after V1 first-rho failure and before V2 rerun",
+  "inherits": "RUN_SPEC_V1.json",
+  "amendment": "AMENDMENT_V2.md",
+  "source_sha256": "78669f1aa43a50e6a4a4fce463685323cde37d85d30bf983a440676c03c83914",
+  "changed_rule": "for each target, retry rho with seed_base + retry*0x01000000, retry=0..15; charge and record every attempt",
+  "unchanged_public_batch_sha256": ["40935b2d9d8c31103a51992bda8a99b21b54f66ca2efbec2b4d6ab4ef8c0d2d0", "1d3174df436836d3770c40c0e732a181aec330c0487dc82d98d32ac022fe174b"],
+  "unchanged_selection_sha256": ["911d9a45e554812a26e554965f117fa4397bc6e2bb9317b2dc8ba9c65d28c9c4", "958e910e8ad22092ffbef9a97b9a4636382a261273db0bd4e971b243dab210bc"],
+  "censored_if": "16 rho attempts fail for any target; no prefix ratio past that point"
+}

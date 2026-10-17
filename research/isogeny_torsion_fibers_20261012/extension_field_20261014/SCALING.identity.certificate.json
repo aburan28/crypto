@@ -1,0 +1,168 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1hc0fabee63dedc307",
+  "statement": {
+    "name": "Scaling coefficient sixth-power factorization",
+    "source": "research/isogeny_torsion_fibers_20261012/extension_field_20261014/REPORT.md",
+    "variables": [
+      "u"
+    ],
+    "degree_bound": 6,
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "u"
+                },
+                {
+                  "op": "var",
+                  "args": "u"
+                }
+              ]
+            },
+            {
+              "op": "const",
+              "args": 3
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "u"
+                    },
+                    {
+                      "op": "var",
+                      "args": "u"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "u"
+                    },
+                    {
+                      "op": "var",
+                      "args": "u"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "neg",
+              "args": {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 3
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "u"
+                      },
+                      {
+                        "op": "var",
+                        "args": "u"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "op": "const",
+              "args": 9
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "u"
+                    },
+                    {
+                      "op": "var",
+                      "args": "u"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "u"
+                    },
+                    {
+                      "op": "var",
+                      "args": "u"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "u"
+                },
+                {
+                  "op": "var",
+                  "args": "u"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "const",
+          "args": 27
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 64,
+  "seed": 539365396,
+  "value_digest": "6f908f3a38b601c6cb027251b86d7a92420f1ca2768d39167bc8d8c0b116cbcc",
+  "independence": "issued by isogeny_torsion_extension; separate native checker-seed replay",
+  "proof": null
+}

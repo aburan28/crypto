@@ -1,0 +1,18 @@
+{
+  "schema": "different_j_full_image_protocol/v1",
+  "status": "frozen before implementation and measurement",
+  "parent_pr": 1920,
+  "source_public_sha256": "fa41958038b0fe01ec1664ca69acf3c44cc67af9feb38a7c8dbf6bf6a3041b65",
+  "private_checker_sha256": "3a3504b14887f20ecde8e894a7a57363f3ba9834d45f14d89568023822cbe94b",
+  "cell": {"p": 67, "field_degree": 2, "source_a": 46, "source_b": 37, "source_j": 7, "destination_a": 53, "destination_b": 25, "destination_j": 11, "r": 61, "cofactor": 75, "isogeny_degree": 3},
+  "image_census": {"source_points": 4575, "image_points": 1525, "preimages_each": 3},
+  "base": {"columns": 8, "order": "ascending destination packed key", "projection": "[75]", "sign_orbit": "min(key(P),key(-P))", "witness": "first source preimage in enumeration order"},
+  "arms": ["source", "isogeny-image", "destination-direct", "full-image", "rho-negation", "rho-negation-aa"],
+  "rounds": 3,
+  "relation_trial_cap": 1220,
+  "peak_rss_cap_bytes": 536870912,
+  "success": "all four relation arms reach rank nine, recover and verify the target scalar; separate arithmetic checker verifies all 18 rows and full-image witnesses",
+  "censored_if": "any arm exhausts its cap, violates the frozen base, fails a relation/addition or scalar check, or exceeds its memory cap",
+  "cost": "cold full-image enumeration and map, deduplication and projection, pair table, failed queries, rank and linear algebra, recovery and final verification, with field/group counters and CPU/wall/RSS",
+  "measurement": "shared-host L0 descriptive CPU; no portable counted S or wall-time claim"
+}
