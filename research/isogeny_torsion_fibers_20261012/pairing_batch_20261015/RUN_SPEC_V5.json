@@ -1,0 +1,21 @@
+{
+  "schema": "torsion_pairing_compact_spec/v5",
+  "status": "frozen after V4 replay and before compact timed runs",
+  "source_sha256": "a9ab2c0bd928d38de3dbd900a64a6f6d7c9a098e0b4de4c2b858c02fcde716d5",
+  "amendment": "AMENDMENT_V5.md",
+  "inherits": ["RUN_SPEC_V3.json", "RUN_SPEC_V4_401.json"],
+  "historical_order67_run_sha256": "c4ac091859c4d09dd40cdb462c46d38255007f41beef930d362dbe060e406c5f",
+  "historical_order67_replay_sha256": "9a34ef623d811543e2eb4134ab8ca91ced76363669a9f173be8207f2a09949f3",
+  "cells": [
+    {"cell":0,"p":61,"r":19,"prefixes":[1,4,16],"targets":18},
+    {"cell":1,"p":271,"r":61,"prefixes":[1,4,16,60],"targets":60},
+    {"cell":2,"p":401,"r":67,"prefixes":[1,4,16,64,66],"targets":66}
+  ],
+  "rounds": 3,
+  "order": "round 0 and 2 pairing then rho; round 1 rho then pairing",
+  "input_validation": "one measured common cost added to both arm totals",
+  "measurement": "cold whole-method current-thread CPU and wall at prefix; no per-target output during either timer; L0 shared host",
+  "verification": "matching recovered scalar arrays, then separate ReplayField native process against public points and post-solve fixture",
+  "reference": "same-target negation rho, subgroup-sized step cap, 32 charged retries",
+  "censored_if": "either method or independent replay fails on any target"
+}

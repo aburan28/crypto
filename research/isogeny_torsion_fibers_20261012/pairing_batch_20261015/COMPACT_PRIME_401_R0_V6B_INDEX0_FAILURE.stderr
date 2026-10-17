@@ -1,0 +1,6 @@
+
+thread 'main' (1120805) panicked at examples/torsion_pairing_batch.rs:1596:5:
+assertion `left == right` failed
+  left: 0
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

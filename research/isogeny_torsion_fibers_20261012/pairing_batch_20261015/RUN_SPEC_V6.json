@@ -1,0 +1,19 @@
+{
+  "schema": "torsion_pairing_prime_rho_spec/v6",
+  "status": "frozen before three-arm order-67 timing",
+  "source_sha256": "ad0cab1eeab279f3f47344b2b94e5f93998861df0e4bde78ebede904f1d37015",
+  "amendment": "AMENDMENT_V6.md",
+  "inherits": "RUN_SPEC_V5.json",
+  "historical_v5_records_sha256": "5c6a927cf5e1d6b570b80c009367e8cd98f1a84778c6b1ccd1441e6c8125d8eb",
+  "historical_v5_replay_sha256": "8b0c1f4ba04a32c9bf2de20c389344394bae80e01bdfa2e0e0fa316b414585d0",
+  "cell": {"p":401,"r":67,"targets":66,"generator_x":251,"generator_y":346},
+  "arms": ["pairing","extension-field-negation-rho","prime-field-negation-rho"],
+  "prefixes": [1,4,16,64,66],
+  "rounds": 3,
+  "order": ["pairing,extension-rho,prime-rho", "prime-rho,extension-rho,pairing", "extension-rho,pairing,prime-rho"],
+  "rho_step_cap": 144,
+  "rho_retries": 32,
+  "success": "all arms return the same 66 answers each round, all 594 scalars pass independent source replay, and every prefix includes cold setup and failed attempts",
+  "censored_if": "any arm exhausts or any scalar mismatches",
+  "measurement": "whole-method current-thread CPU and wall, common input parsing separate, shared-host L0; field and group counts retained"
+}

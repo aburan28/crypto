@@ -1,0 +1,17 @@
+{
+  "schema": "torsion_pairing_batch_run_spec/v3",
+  "status": "frozen after V2 diagnostic and before V3 runs",
+  "inherits": "RUN_SPEC_V2.json",
+  "amendment": "AMENDMENT_V3.md",
+  "source_sha256": "fc7d8d8a2d3100d434ab4fbf3f9afc2259ea8f134058b3d057a41b486d745d94",
+  "unchanged_public_batch_sha256": ["40935b2d9d8c31103a51992bda8a99b21b54f66ca2efbec2b4d6ab4ef8c0d2d0", "1d3174df436836d3770c40c0e732a181aec330c0487dc82d98d32ac022fe174b"],
+  "unchanged_selection_sha256": ["911d9a45e554812a26e554965f117fa4397bc6e2bb9317b2dc8ba9c65d28c9c4", "958e910e8ad22092ffbef9a97b9a4636382a261273db0bd4e971b243dab210bc"],
+  "rho_step_cap": "max(64, 16*ceil(sqrt(r)))",
+  "rho_retries": 32,
+  "rho_seed_stride": "0x01000000",
+  "six_class_action": "negation and zeta_3 on E:y^2=x^3+1; eigenvalue search charged once per round",
+  "requested_rounds": 3,
+  "requested_prefixes": {"r19": [1,4,16], "r61": [1,4,16,60]},
+  "pending_prefix": {"n": 64, "reason": "requires a distinct-target group of order at least 67 and a verified practical pairing field"},
+  "censored_if": "either charged rho control exhausts 32 attempts on a target"
+}

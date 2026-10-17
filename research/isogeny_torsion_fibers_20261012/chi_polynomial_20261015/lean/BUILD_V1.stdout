@@ -1,0 +1,19 @@
+✖ [2/3] Building SemaevRootTransfer (2.6s)
+trace: .> LEAN_PATH=/Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/lean/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/lean/SemaevRootTransfer.lean -o /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/lean/.lake/build/lib/lean/SemaevRootTransfer.olean -i /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/lean/.lake/build/lib/lean/SemaevRootTransfer.ilean -c /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/lean/.lake/build/ir/SemaevRootTransfer.c --setup /Volumes/SSD990-2/.codex/worktrees/d92d/crypto/research/isogeny_torsion_fibers_20261012/chi_polynomial_20261015/lean/.lake/build/ir/SemaevRootTransfer.setup.json --json
+error: SemaevRootTransfer.lean:23:79: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+error: SemaevRootTransfer.lean:24:79: maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+info: SemaevRootTransfer.lean:56:0: 'SemaevRootTransfer.imageRelationIff' does not depend on any axioms
+info: SemaevRootTransfer.lean:57:0: 'SemaevRootTransfer.kernelVanishes19' depends on axioms: [propext]
+info: SemaevRootTransfer.lean:58:0: 'SemaevRootTransfer.kernelVanishes61' depends on axioms: [propext]
+info: SemaevRootTransfer.lean:59:0: 'SemaevRootTransfer.kernelVanishes211' depends on axioms: [propext, sorryAx]
+info: SemaevRootTransfer.lean:60:0: 'SemaevRootTransfer.kernelVanishes811' depends on axioms: [propext, sorryAx]
+info: SemaevRootTransfer.lean:61:0: 'SemaevRootTransfer.injectiveOfKernel19' depends on axioms: [propext, Quot.sound]
+info: SemaevRootTransfer.lean:62:0: 'SemaevRootTransfer.injectiveOfKernel61' depends on axioms: [propext, Quot.sound]
+info: SemaevRootTransfer.lean:63:0: 'SemaevRootTransfer.injectiveOfKernel211' depends on axioms: [propext, sorryAx, Quot.sound]
+info: SemaevRootTransfer.lean:64:0: 'SemaevRootTransfer.injectiveOfKernel811' depends on axioms: [propext, sorryAx, Quot.sound]
+Some required targets logged failures:
+- SemaevRootTransfer

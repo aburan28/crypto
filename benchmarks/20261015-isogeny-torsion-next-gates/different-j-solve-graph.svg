@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="450" viewBox="0 0 900 450" role="img" aria-labelledby="title desc">
+<title id="title">Median complete current-thread CPU for different-j paired relation arms</title>
+<desc id="desc">Three-round medians in microseconds: source 151.541, isogeny image 178.958, destination direct 216.625, rho 75.709 and A/A rho 52.125.</desc>
+<rect width="900" height="450" fill="#fff"/>
+<text x="25" y="42" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#173047">Different-j transfer · cold solve CPU</text>
+<text x="25" y="68" font-family="Arial,sans-serif" font-size="14" fill="#526b7d">RUN_V1 · p=67, r=61 · 3 rounds per arm · shared-host L0 · microseconds</text>
+<line x1="290" y1="98" x2="290" y2="386" stroke="#8798a7"/>
+<line x1="290" y1="386" x2="810" y2="386" stroke="#8798a7"/>
+<g stroke="#dfe6ea"><line x1="420" y1="95" x2="420" y2="386"/><line x1="550" y1="95" x2="550" y2="386"/><line x1="680" y1="95" x2="680" y2="386"/><line x1="810" y1="95" x2="810" y2="386"/></g>
+<g font-family="Arial,sans-serif" font-size="14" fill="#526b7d"><text x="285" y="409">0</text><text x="408" y="409">100</text><text x="538" y="409">200</text><text x="668" y="409">300</text><text x="798" y="409">400</text></g>
+<g font-family="Arial,sans-serif" font-size="16" fill="#173047"><text x="25" y="131">Source projected pair</text><text x="25" y="191">Isogeny-image pair</text><text x="25" y="251">Destination-direct pair</text><text x="25" y="311">Negation rho</text><text x="25" y="371">Negation rho A/A</text></g>
+<g fill="#377aa5"><rect x="290" y="108" width="197" height="31" rx="4"/><rect x="290" y="168" width="233" height="31" rx="4"/><rect x="290" y="228" width="282" height="31" rx="4"/></g>
+<g fill="#438b64"><rect x="290" y="288" width="98" height="31" rx="4"/><rect x="290" y="348" width="68" height="31" rx="4"/></g>
+<g font-family="Arial,sans-serif" font-size="16" font-weight="700" fill="#173047"><text x="498" y="130">151.541</text><text x="534" y="190">178.958</text><text x="583" y="250">216.625</text><text x="400" y="310">75.709</text><text x="370" y="370">52.125</text></g>
+<text x="25" y="438" font-family="Arial,sans-serif" font-size="13" fill="#526b7d">All 15 answers replayed on both curves. The isogeny-image arm had the same relation outcomes as source.</text>
+</svg>

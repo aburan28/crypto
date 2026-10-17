@@ -1,0 +1,11 @@
+{
+  "purpose": "Extend the checked implementation pilot to every outgoing rational horizontal prime-degree edge with ell<=61, without redefining the full-class request",
+  "source": "Same frozen p=2^61-1 curve, subgroup and target as PROTOCOL.json",
+  "prime_degrees_constructed": [3,7,11,13,19,23,53,61],
+  "other_degrees_up_to_61": "Degree 2 is checked through the complete rational 2-kernel solver. Odd inert primes are excluded using the exact discriminant splitting; ell=5 was also constructed as a zero-root control in the first pilot.",
+  "expected_maps": "One ramified degree-3 map and two at each listed split prime; verify every kernel and count roots, preserving self-loops/parallel maps separately.",
+  "factor_base_run": "Same three inverse pairs, twelve matched seeds and 100000-target cap per seed on the identity and every edge image, with transported G and Q and a transported-pair-support control.",
+  "caps": "300 seconds for construction; 300 seconds for verification; 300 seconds for all factor-base streams. These pilot caps do not define final horizontal-class coverage.",
+  "class_number_crosscheck": "Use PARI quadclassunit and bnfinit with bnfcertify(flag=0) under 300-second process limits. qfbclassno alone is not a certified full-class count at this discriminant. Keep conditional or timed-out results explicit.",
+  "original_scope": "Entire horizontal class remains unexecuted unless its own finite coverage certificate is obtained. All horizontal maps of arbitrary degree form no finite edge list; distinguish this from all class vertices."
+}

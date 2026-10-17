@@ -1,0 +1,19 @@
+{
+  "schema": "prime61.factor-base-protocol/v1",
+  "requested": "Run the screenshot factor-base/isogeny candidate experiment at GF(2^83) or p=2^61-1 using aburan28/crypto",
+  "selected_field": "p=2^61-1",
+  "hypothesis": "The existing native two-summand relation collector can be executed and replayed at the requested prime-field size with a three-inverse-pair base.",
+  "scope": "Bounded baseline diagnostic; exact screenshot driver and degree-7 map are not located, so neither candidate pool is reproduced.",
+  "curve_policy": "Unmodified prime_fast::find_a3_curve(61,3), first prime-order a=-3 curve at the exact requested modulus. This is a new instance, not a lift or isogenous transport of the screenshot's F83 instance.",
+  "target": "One synthetic known-answer point, scalar 0x20261016 modulo r-1 plus one. The collector receives only G and Q.",
+  "factor_base": "Unmodified FastFactorBase::build(curve,3), small-x canonical inverse pairs; validate all points and [r]P=O.",
+  "runs": 12,
+  "seeds": "2026101600..2026101611",
+  "max_targets_per_run": 100000,
+  "stop": "At base size plus 17 relations or 100000 target trials per run; external process cap 300 seconds.",
+  "controls": "Before the large-field run, execute the same native driver at 20 bits, base size 16, 100000 trials, one seed; require VERIFIED_SOLVE. This control does not satisfy the large-field request.",
+  "verification": "Replay every collected relation with ordinary curve arithmetic; independently check every recovered scalar by [k]G=Q; retain all cap outcomes.",
+  "accounting": "Report targets, relation rows, rejected decompositions, and completion status only. These are stage counters, not total operations. No wall-clock ranking, S, IC/rho ratio or full-cost comparison.",
+  "completion": "Complete only as a bounded baseline. Original 1000/2000-candidate search, degree-7 map, complete solves and candidate ranking remain unresolved.",
+  "workflow_limits": "conductor check exited 127 (not installed); .conductor/WORKFLOW.md is not tracked at the source revision. No reservation could be obtained."
+}

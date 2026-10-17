@@ -1,0 +1,7 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990-2/.codex/worktrees/d92d/crypto)
+    Finished `release` profile [optimized] target(s) in 6.99s
+     Running `target/release/examples/torsion_pairing_batch batch-run research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/INPUTS.jsonl 0 0 research/isogeny_torsion_fibers_20261012/pairing_batch_20261015/PUBLIC_61.json research/isogeny_torsion_fibers_20261012/pairing_transfer_20261015/SELECTION_61.json`
+
+thread 'main' (475018) panicked at examples/torsion_pairing_batch.rs:1103:9:
+assertion failed: rho.verified && rho.recovered == Some(scalar)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

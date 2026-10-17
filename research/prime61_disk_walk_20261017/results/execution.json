@@ -1,0 +1,42 @@
+{
+  "schema": "prime61.disk-execution/v1",
+  "protocol_commit": "1c3fbcce",
+  "library_commit": "b9f91437db914698d5397dabb7d4e1f86e606bdb",
+  "pilot_driver_commit": "a01ce6b3",
+  "validation_refinement_commit": "b68341cd72b51acf9c5ce6c4f755351cc83053db",
+  "pilot_commands": {
+    "worker": "target/release/examples/isogeny_disk_walk",
+    "spec": "research/prime61_disk_walk_20261017/spec.json",
+    "database": "/workspace/prime61-disk-pilot-20261017/walk.db",
+    "outer_timeout_seconds_per_phase": 300,
+    "phases": [
+      ["init"],
+      ["advance", "1"], ["measure", "16"], ["verify", "16"], ["snapshot", "checkpoint-1.db"], ["dump", "checkpoint-1.db"],
+      ["advance", "8"], ["measure", "64"], ["verify", "16"], ["snapshot", "checkpoint-8.db"], ["dump", "checkpoint-8.db"],
+      ["advance", "32"], ["measure", "64"], ["verify", "16"], ["snapshot", "checkpoint-32.db"], ["dump", "checkpoint-32.db"],
+      ["status"]
+    ],
+    "notes": "All worker invocations receive SPEC DB before the final phase-specific argument. Dumps read the named snapshot instead of the live database. stdout/stderr and zero exits are retained in pilot/. gzip uses -n. reproduce.sh is the equivalent executable thin orchestration, not a separate additional measured run."
+  },
+  "validation": {
+    "initial_example_tests": {"exit":0,"disk_worker_tests":4,"previous_map_tests":1,"log":"prime61-disk-tests-initial.log","note":"One unused-local warning subsequently removed"},
+    "final_example_tests": {"exit":0,"disk_worker_tests":4,"previous_map_tests":1,"log":"prime61-disk-tests-final.log"},
+    "library_release_tests": {"command":"cargo test --release --lib -j 2","exit":0,"passed":4168,"failed":0,"ignored":117,"log":"prime61-disk-library-tests-final.log"},
+    "scoped_clippy": {"command":"cargo clippy --release --no-default-features --example isogeny_disk_walk --example prime61_isogeny_experiment --no-deps -- -D warnings -A clippy::mismatched_bit_width_type","exit":0,"log":"prime61-disk-clippy.log","note":"Existing unrelated pmac.rs lint allowed; no strict whole-repository Clippy pass claimed"},
+    "frozen_panel_comparison": {"exit":0,"workloads":16,"paired_rows":192,"receipt":"baseline-audit.json"},
+    "final_refined_driver_verification": {"exit":0,"maps":480,"expanded_rosters":32,"scalar_checks":3840,"collector_replays":0,"receipt":"prime61-disk-final-verification.jsonl","note":"Earlier pilot receipts replay 192 collection streams each; the final refinement checks all records without rerunning the sampler"},
+    "final_logical_dump_cmp": {"exit":0,"note":"Refined driver dump exactly matches the frozen pilot checkpoint"},
+    "drive_restore": {"exit":0,"receipt":"storage-receipt.json"}
+  },
+  "retained_attempts": [
+    "Initial rustfmt found an incorrect child-module path; it was corrected before compilation and tests passed.",
+    "The first queued whole-library command was terminated with exit 143 while waiting on Cargo's build lock; its log is retained. The full command was then run successfully to completion, without weakening the suite.",
+    "Backlog validation first rejected an unsupported artifact placeholder. It was corrected to the existing out/walk.db path and the native validator passed; both logs are retained.",
+    "Conductor check was attempted before edits and is unavailable."
+  ],
+  "cost_scope": "Committed relation-stage counters and process capacity diagnostics only; no isolated wall-time or complete-cost measurement",
+  "remaining": ["selected-prime frontier exhausted", "selected degree set certified to cover the entire horizontal class", "complete class-group certification", "all-class mapped workloads", "full-run disk and compute envelope"],
+  "future_jobs_running": false,
+  "full_cost": null,
+  "speedup": null
+}

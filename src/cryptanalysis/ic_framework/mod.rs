@@ -234,7 +234,8 @@ pub struct RunReport {
     pub decomposition: DecompositionReport,
     pub linear_algebra: LinearAlgebraReport,
     pub verify: PhaseCost,
-    /// The recovered logarithm, and whether it is the planted one.
+    /// The recovered logarithm, and whether source-point verification
+    /// succeeded plus any optional planted-answer assertion matched.
     pub recovered: Option<u64>,
     pub verified: bool,
     /// Group-addition equivalents over the whole pipeline.
@@ -314,6 +315,34 @@ pub fn run_pipeline<G: CountedGroup>(
     base_builder: &dyn FactorBaseBuilder<G>,
     oracle: &mut dyn DecompositionOracle<G>,
     planted: u64,
+    calib: &Calibration,
+    rho_s: Option<f64>,
+) -> Result<RunReport, String> {
+    run_pipeline_inner(ctx, spec, base_builder, oracle, Some(planted), calib, rho_s)
+}
+
+/// Run the same pipeline using public curve and target inputs only. The
+/// collector still checks `[k]G=Q` before setting `verified`; a separate
+/// independent process can compare the recovered scalar to a held answer.
+#[allow(clippy::too_many_arguments)]
+pub fn run_pipeline_public<G: CountedGroup>(
+    ctx: &InstanceCtx<G>,
+    spec: &PipelineSpec,
+    base_builder: &dyn FactorBaseBuilder<G>,
+    oracle: &mut dyn DecompositionOracle<G>,
+    calib: &Calibration,
+    rho_s: Option<f64>,
+) -> Result<RunReport, String> {
+    run_pipeline_inner(ctx, spec, base_builder, oracle, None, calib, rho_s)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_pipeline_inner<G: CountedGroup>(
+    ctx: &InstanceCtx<G>,
+    spec: &PipelineSpec,
+    base_builder: &dyn FactorBaseBuilder<G>,
+    oracle: &mut dyn DecompositionOracle<G>,
+    planted: Option<u64>,
     calib: &Calibration,
     rho_s: Option<f64>,
 ) -> Result<RunReport, String> {
@@ -583,7 +612,7 @@ pub fn run_pipeline<G: CountedGroup>(
         },
         verify: ver,
         recovered: outcome.recovered,
-        verified: outcome.verified && outcome.recovered == Some(planted),
+        verified: outcome.verified && planted.is_none_or(|known| outcome.recovered == Some(known)),
         total_gae,
         s,
         rho_s,
@@ -708,6 +737,25 @@ mod tests {
         assert!(report.s > 0.0 && report.s.is_finite());
         assert!(report.factor_base.columns > 0);
         assert!(report.decomposition.relations_found >= report.linear_algebra.rank);
+        let mut public_oracle = MitmOracle::new(2);
+        let public_report = run_pipeline_public(
+            &ctx,
+            &spec,
+            &base,
+            &mut public_oracle,
+            &Calibration::default(),
+            None,
+        )
+        .expect("public-only pipeline should run");
+        assert!(
+            public_report.verified,
+            "public-only source point check failed"
+        );
+        assert_eq!(public_report.recovered, report.recovered);
+        assert_eq!(
+            public_report.decomposition.relations_found,
+            report.decomposition.relations_found
+        );
     }
 
     /// **The stride reaches the walk's answer without the walk's jump
