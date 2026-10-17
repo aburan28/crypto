@@ -1,0 +1,5682 @@
+[
+  {
+    "curve": 0,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76283,
+        "mean": 93197,
+        "max": 2206750
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76072,
+        "mean": 92824.375,
+        "max": 2204534
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 0,
+        "order": "72057979853368804",
+        "cpu_ms": 218,
+        "wall_ms": 237
+      },
+      {
+        "stage": "factorization",
+        "curve": 0,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 0,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 1,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76213,
+        "mean": 80405.265,
+        "max": 140288
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75980,
+        "mean": 80100.165,
+        "max": 139942
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 1,
+        "order": "72057979853368804",
+        "cpu_ms": 186,
+        "wall_ms": 180
+      },
+      {
+        "stage": "factorization",
+        "curve": 1,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 1,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  },
+  {
+    "curve": 2,
+    "level": 2,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76256,
+        "mean": 84330.815,
+        "max": 404426
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76042,
+        "mean": 82712.79,
+        "max": 402201
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 2,
+        "order": "72057979853368804",
+        "cpu_ms": 173,
+        "wall_ms": 179
+      },
+      {
+        "stage": "factorization",
+        "curve": 2,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 2,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 2,
+        "wall_ms": 1
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 3,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 74131,
+        "mean": 113946.715,
+        "max": 4121560
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73915,
+        "mean": 113660.13,
+        "max": 4120616
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 3,
+        "order": "72057979853368804",
+        "cpu_ms": 201,
+        "wall_ms": 182
+      },
+      {
+        "stage": "factorization",
+        "curve": 3,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 3,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 4,
+    "level": 1,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 73825,
+        "mean": 79734.995,
+        "max": 143291
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73610,
+        "mean": 79426.84,
+        "max": 142917
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 4,
+        "order": "72057979853368804",
+        "cpu_ms": 179,
+        "wall_ms": 175
+      },
+      {
+        "stage": "factorization",
+        "curve": 4,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 4,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    }
+  },
+  {
+    "curve": 5,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76180,
+        "mean": 83881.375,
+        "max": 465991
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75929,
+        "mean": 83578.57,
+        "max": 465206
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 5,
+        "order": "72057979853368804",
+        "cpu_ms": 188,
+        "wall_ms": 176
+      },
+      {
+        "stage": "factorization",
+        "curve": 5,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 5,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 1
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 6,
+    "level": 0,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 74240,
+        "mean": 90145.94,
+        "max": 2083304
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 74022,
+        "mean": 89539.26,
+        "max": 2024564
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 6,
+        "order": "72057979853368804",
+        "cpu_ms": 178,
+        "wall_ms": 203
+      },
+      {
+        "stage": "factorization",
+        "curve": 6,
+        "cpu_ms": 0,
+        "wall_ms": 1
+      },
+      {
+        "stage": "group_structure",
+        "curve": 6,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 1,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  },
+  {
+    "curve": 7,
+    "level": 2,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76121,
+        "mean": 78996.005,
+        "max": 121268
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75900,
+        "mean": 78564.155,
+        "max": 100360
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 7,
+        "order": "72057979853368804",
+        "cpu_ms": 182,
+        "wall_ms": 176
+      },
+      {
+        "stage": "factorization",
+        "curve": 7,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 7,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 1,
+        "wall_ms": 1
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 8,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76184,
+        "mean": 79331.22,
+        "max": 157148
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75973,
+        "mean": 79043.075,
+        "max": 156803
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 8,
+        "order": "72057979853368804",
+        "cpu_ms": 179,
+        "wall_ms": 174
+      },
+      {
+        "stage": "factorization",
+        "curve": 8,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 8,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  },
+  {
+    "curve": 9,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 75884,
+        "mean": 125787.675,
+        "max": 3702621
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75011,
+        "mean": 125438.72,
+        "max": 3701751
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 9,
+        "order": "72057979853368804",
+        "cpu_ms": 177,
+        "wall_ms": 176
+      },
+      {
+        "stage": "factorization",
+        "curve": 9,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 9,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    }
+  },
+  {
+    "curve": 10,
+    "level": 1,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 73925,
+        "mean": 163615.105,
+        "max": 2440675
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73707,
+        "mean": 161772.44,
+        "max": 2179852
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 10,
+        "order": "72057979853368804",
+        "cpu_ms": 172,
+        "wall_ms": 177
+      },
+      {
+        "stage": "factorization",
+        "curve": 10,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 10,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0,
+      "max": 0
+    }
+  },
+  {
+    "curve": 11,
+    "level": 1,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76317,
+        "mean": 149423.595,
+        "max": 2182384
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76103,
+        "mean": 149013.785,
+        "max": 2175293
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 11,
+        "order": "72057979853368804",
+        "cpu_ms": 171,
+        "wall_ms": 176
+      },
+      {
+        "stage": "factorization",
+        "curve": 11,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 11,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    }
+  },
+  {
+    "curve": 12,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76158,
+        "mean": 129898.435,
+        "max": 2158756
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75942,
+        "mean": 129538.78,
+        "max": 2157029
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 12,
+        "order": "72057979853368804",
+        "cpu_ms": 171,
+        "wall_ms": 172
+      },
+      {
+        "stage": "factorization",
+        "curve": 12,
+        "cpu_ms": 1,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 12,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 13,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76311,
+        "mean": 143968.415,
+        "max": 2269026
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76097,
+        "mean": 143609.67,
+        "max": 2261758
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 13,
+        "order": "72057979853368804",
+        "cpu_ms": 192,
+        "wall_ms": 177
+      },
+      {
+        "stage": "factorization",
+        "curve": 13,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 13,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 1,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    }
+  },
+  {
+    "curve": 14,
+    "level": 2,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76189,
+        "mean": 83814.015,
+        "max": 443985
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75967,
+        "mean": 83376.535,
+        "max": 443415
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 14,
+        "order": "72057979853368804",
+        "cpu_ms": 164,
+        "wall_ms": 172
+      },
+      {
+        "stage": "factorization",
+        "curve": 14,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 14,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 1,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    }
+  },
+  {
+    "curve": 15,
+    "level": 2,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76226,
+        "mean": 88825.015,
+        "max": 1415135
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76000,
+        "mean": 88508,
+        "max": 1413861
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 15,
+        "order": "72057979853368804",
+        "cpu_ms": 168,
+        "wall_ms": 172
+      },
+      {
+        "stage": "factorization",
+        "curve": 15,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 15,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    }
+  },
+  {
+    "curve": 16,
+    "level": 2,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76257,
+        "mean": 81711.02,
+        "max": 336388
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76041,
+        "mean": 79860.375,
+        "max": 166094
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 16,
+        "order": "72057979853368804",
+        "cpu_ms": 170,
+        "wall_ms": 171
+      },
+      {
+        "stage": "factorization",
+        "curve": 16,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 16,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  },
+  {
+    "curve": 17,
+    "level": 2,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76170,
+        "mean": 84969.505,
+        "max": 525142
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75950,
+        "mean": 84622.935,
+        "max": 523702
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 17,
+        "order": "72057979853368804",
+        "cpu_ms": 191,
+        "wall_ms": 174
+      },
+      {
+        "stage": "factorization",
+        "curve": 17,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 17,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 1,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    }
+  },
+  {
+    "curve": 18,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76096,
+        "mean": 78706.66,
+        "max": 129067
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75871,
+        "mean": 78445.315,
+        "max": 128697
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 18,
+        "order": "72057979853368804",
+        "cpu_ms": 168,
+        "wall_ms": 171
+      },
+      {
+        "stage": "factorization",
+        "curve": 18,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 18,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 1
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  },
+  {
+    "curve": 19,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76286,
+        "mean": 78778.59,
+        "max": 137169
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76067,
+        "mean": 78532.835,
+        "max": 136823
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 19,
+        "order": "72057979853368804",
+        "cpu_ms": 184,
+        "wall_ms": 173
+      },
+      {
+        "stage": "factorization",
+        "curve": 19,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 19,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  },
+  {
+    "curve": 20,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76275,
+        "mean": 95989.09,
+        "max": 2403785
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76057,
+        "mean": 95395.33,
+        "max": 2401461
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 20,
+        "order": "72057979853368804",
+        "cpu_ms": 189,
+        "wall_ms": 174
+      },
+      {
+        "stage": "factorization",
+        "curve": 20,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 20,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 1
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.025,
+      "max": 1
+    }
+  },
+  {
+    "curve": 21,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76258,
+        "mean": 81512.665,
+        "max": 182330
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76042,
+        "mean": 81195.615,
+        "max": 181987
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 21,
+        "order": "72057979853368804",
+        "cpu_ms": 177,
+        "wall_ms": 173
+      },
+      {
+        "stage": "factorization",
+        "curve": 21,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 21,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 1
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 22,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76261,
+        "mean": 79686.41,
+        "max": 136036
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76046,
+        "mean": 79419.59,
+        "max": 135680
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 22,
+        "order": "72057979853368804",
+        "cpu_ms": 183,
+        "wall_ms": 174
+      },
+      {
+        "stage": "factorization",
+        "curve": 22,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 22,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 1
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0,
+      "max": 0
+    }
+  },
+  {
+    "curve": 23,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 74646,
+        "mean": 79166.225,
+        "max": 117976
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 74432,
+        "mean": 78767.595,
+        "max": 111958
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 23,
+        "order": "72057979853368804",
+        "cpu_ms": 183,
+        "wall_ms": 174
+      },
+      {
+        "stage": "factorization",
+        "curve": 23,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 23,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  },
+  {
+    "curve": 24,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 74008,
+        "mean": 86649.955,
+        "max": 519793
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73796,
+        "mean": 85837.725,
+        "max": 518780
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 24,
+        "order": "72057979853368804",
+        "cpu_ms": 175,
+        "wall_ms": 173
+      },
+      {
+        "stage": "factorization",
+        "curve": 24,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 24,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    }
+  },
+  {
+    "curve": 25,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 73738,
+        "mean": 78963.03,
+        "max": 140426
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73527,
+        "mean": 78690.415,
+        "max": 140069
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 25,
+        "order": "72057979853368804",
+        "cpu_ms": 167,
+        "wall_ms": 174
+      },
+      {
+        "stage": "factorization",
+        "curve": 25,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 25,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.025,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.025,
+      "max": 1
+    }
+  },
+  {
+    "curve": 26,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 73908,
+        "mean": 78707.54,
+        "max": 100471
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73706,
+        "mean": 78440.345,
+        "max": 100118
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 26,
+        "order": "72057979853368804",
+        "cpu_ms": 181,
+        "wall_ms": 176
+      },
+      {
+        "stage": "factorization",
+        "curve": 26,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 26,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 1,
+        "wall_ms": 1
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0,
+      "max": 0
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 27,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 71532,
+        "mean": 80395.28,
+        "max": 407307
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 71330,
+        "mean": 80140.435,
+        "max": 406931
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 27,
+        "order": "72057979853368804",
+        "cpu_ms": 173,
+        "wall_ms": 189
+      },
+      {
+        "stage": "factorization",
+        "curve": 27,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 27,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    }
+  },
+  {
+    "curve": 28,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 74319,
+        "mean": 84338.39,
+        "max": 408034
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 74108,
+        "mean": 83700.08,
+        "max": 406474
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 28,
+        "order": "72057979853368804",
+        "cpu_ms": 191,
+        "wall_ms": 200
+      },
+      {
+        "stage": "factorization",
+        "curve": 28,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 28,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    }
+  },
+  {
+    "curve": 29,
+    "level": 3,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "36028989926684402",
+      "2"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 74168,
+        "mean": 79026.775,
+        "max": 187007
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73959,
+        "mean": 78730.545,
+        "max": 186605
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 29,
+        "order": "72057979853368804",
+        "cpu_ms": 193,
+        "wall_ms": 205
+      },
+      {
+        "stage": "factorization",
+        "curve": 29,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 29,
+        "invariants": "[36028989926684402, 2]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    }
+  },
+  {
+    "curve": 30,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76236,
+        "mean": 79262.03,
+        "max": 131036
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76022,
+        "mean": 78938.69,
+        "max": 130480
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 30,
+        "order": "72057979853368804",
+        "cpu_ms": 175,
+        "wall_ms": 177
+      },
+      {
+        "stage": "factorization",
+        "curve": 30,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 30,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 31,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76238,
+        "mean": 80323.53,
+        "max": 235513
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76005,
+        "mean": 80012.34,
+        "max": 235170
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 31,
+        "order": "72057979853368804",
+        "cpu_ms": 189,
+        "wall_ms": 182
+      },
+      {
+        "stage": "factorization",
+        "curve": 31,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 31,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 32,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 73895,
+        "mean": 97060.085,
+        "max": 1445691
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73677,
+        "mean": 96698.57,
+        "max": 1444274
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 32,
+        "order": "72057979853368804",
+        "cpu_ms": 174,
+        "wall_ms": 184
+      },
+      {
+        "stage": "factorization",
+        "curve": 32,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 32,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.03,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 33,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76251,
+        "mean": 81153.365,
+        "max": 166088
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76033,
+        "mean": 80663.945,
+        "max": 165754
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 33,
+        "order": "72057979853368804",
+        "cpu_ms": 189,
+        "wall_ms": 176
+      },
+      {
+        "stage": "factorization",
+        "curve": 33,
+        "cpu_ms": 1,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 33,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 34,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 74099,
+        "mean": 87534.61,
+        "max": 1400689
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73881,
+        "mean": 87253.145,
+        "max": 1399630
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 34,
+        "order": "72057979853368804",
+        "cpu_ms": 184,
+        "wall_ms": 176
+      },
+      {
+        "stage": "factorization",
+        "curve": 34,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 34,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  },
+  {
+    "curve": 35,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76191,
+        "mean": 92622.825,
+        "max": 522426
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75969,
+        "mean": 92300.99,
+        "max": 521519
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 35,
+        "order": "72057979853368804",
+        "cpu_ms": 164,
+        "wall_ms": 177
+      },
+      {
+        "stage": "factorization",
+        "curve": 35,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 35,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 36,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76100,
+        "mean": 141684.01,
+        "max": 4571066
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75881,
+        "mean": 141344.71,
+        "max": 4569334
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 36,
+        "order": "72057979853368804",
+        "cpu_ms": 188,
+        "wall_ms": 177
+      },
+      {
+        "stage": "factorization",
+        "curve": 36,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 36,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.03,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 37,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76272,
+        "mean": 101807.77,
+        "max": 1611404
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76056,
+        "mean": 101352.93,
+        "max": 1610516
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 37,
+        "order": "72057979853368804",
+        "cpu_ms": 184,
+        "wall_ms": 172
+      },
+      {
+        "stage": "factorization",
+        "curve": 37,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 37,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.025,
+      "max": 1
+    }
+  },
+  {
+    "curve": 38,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 73859,
+        "mean": 90115.54,
+        "max": 749478
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 73645,
+        "mean": 86250.665,
+        "max": 475027
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 38,
+        "order": "72057979853368804",
+        "cpu_ms": 182,
+        "wall_ms": 175
+      },
+      {
+        "stage": "factorization",
+        "curve": 38,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 38,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    }
+  },
+  {
+    "curve": 39,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 74388,
+        "mean": 81082.315,
+        "max": 179032
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 74169,
+        "mean": 79688.215,
+        "max": 136497
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 39,
+        "order": "72057979853368804",
+        "cpu_ms": 176,
+        "wall_ms": 176
+      },
+      {
+        "stage": "factorization",
+        "curve": 39,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 39,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  },
+  {
+    "curve": 40,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76269,
+        "mean": 78576.56,
+        "max": 102012
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76057,
+        "mean": 78313.995,
+        "max": 101409
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 40,
+        "order": "72057979853368804",
+        "cpu_ms": 164,
+        "wall_ms": 174
+      },
+      {
+        "stage": "factorization",
+        "curve": 40,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 40,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    }
+  },
+  {
+    "curve": 41,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76189,
+        "mean": 85720.86,
+        "max": 614888
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75957,
+        "mean": 85329.145,
+        "max": 613729
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 41,
+        "order": "72057979853368804",
+        "cpu_ms": 168,
+        "wall_ms": 175
+      },
+      {
+        "stage": "factorization",
+        "curve": 41,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 41,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    }
+  },
+  {
+    "curve": 42,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 74713,
+        "mean": 80094.36,
+        "max": 147053
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 74497,
+        "mean": 79836.2,
+        "max": 146696
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 42,
+        "order": "72057979853368804",
+        "cpu_ms": 187,
+        "wall_ms": 180
+      },
+      {
+        "stage": "factorization",
+        "curve": 42,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 42,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 1
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.025,
+      "max": 1
+    }
+  },
+  {
+    "curve": 43,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76233,
+        "mean": 81093.155,
+        "max": 284782
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76018,
+        "mean": 80582.035,
+        "max": 284289
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 43,
+        "order": "72057979853368804",
+        "cpu_ms": 167,
+        "wall_ms": 176
+      },
+      {
+        "stage": "factorization",
+        "curve": 43,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 43,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.025,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    }
+  },
+  {
+    "curve": 44,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76203,
+        "mean": 78944.015,
+        "max": 152554
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 75993,
+        "mean": 78660.995,
+        "max": 151839
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 44,
+        "order": "72057979853368804",
+        "cpu_ms": 187,
+        "wall_ms": 177
+      },
+      {
+        "stage": "factorization",
+        "curve": 44,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 44,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.02,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.015,
+      "max": 1
+    }
+  },
+  {
+    "curve": 45,
+    "level": 4,
+    "curve_order": "72057979853368804",
+    "subgroup_order": "18014494963342201",
+    "group_invariant_factors": [
+      "72057979853368804"
+    ],
+    "native": {
+      "wall_ns": {
+        "n": 200,
+        "min": 76293,
+        "mean": 92524.5,
+        "max": 1030995
+      },
+      "process_cpu_ns": {
+        "n": 200,
+        "min": 76087,
+        "mean": 86911.32,
+        "max": 575252
+      },
+      "counters.field_add_sub": {
+        "n": 200,
+        "min": 884,
+        "mean": 884,
+        "max": 884
+      },
+      "counters.field_inverse": {
+        "n": 200,
+        "min": 147,
+        "mean": 147,
+        "max": 147
+      },
+      "counters.field_multiply_excluding_square": {
+        "n": 200,
+        "min": 3746,
+        "mean": 3746,
+        "max": 3746
+      },
+      "counters.field_multiply_including_square": {
+        "n": 200,
+        "min": 12381,
+        "mean": 12381,
+        "max": 12381
+      },
+      "counters.field_square": {
+        "n": 200,
+        "min": 8635,
+        "mean": 8635,
+        "max": 8635
+      },
+      "counters.group_op_calls": {
+        "n": 200,
+        "min": 152,
+        "mean": 152,
+        "max": 152
+      },
+      "counters.identity_shortcuts": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      },
+      "counters.inverse_pair_results": {
+        "n": 200,
+        "min": 2,
+        "mean": 2,
+        "max": 2
+      },
+      "counters.nontrivial_additions": {
+        "n": 200,
+        "min": 38,
+        "mean": 38,
+        "max": 38
+      },
+      "counters.nontrivial_doublings": {
+        "n": 200,
+        "min": 109,
+        "mean": 109,
+        "max": 109
+      },
+      "counters.scalar_calls": {
+        "n": 200,
+        "min": 3,
+        "mean": 3,
+        "max": 3
+      }
+    },
+    "GP": [
+      {
+        "stage": "curve_order",
+        "curve": 45,
+        "order": "72057979853368804",
+        "cpu_ms": 185,
+        "wall_ms": 177
+      },
+      {
+        "stage": "factorization",
+        "curve": 45,
+        "cpu_ms": 0,
+        "wall_ms": 0
+      },
+      {
+        "stage": "group_structure",
+        "curve": 45,
+        "invariants": "[72057979853368804]",
+        "cpu_ms": 0,
+        "wall_ms": 0
+      }
+    ],
+    "GP_point_wall_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.01,
+      "max": 1
+    },
+    "GP_point_cpu_ms": {
+      "n": 200,
+      "min": 0,
+      "mean": 0.005,
+      "max": 1
+    }
+  }
+]

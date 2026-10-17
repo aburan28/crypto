@@ -22,12 +22,13 @@ with sync_playwright() as api:
     page.pdf(path=str(root / 'RUN_REPORT.pdf'),print_background=True,prefer_css_page_size=True)
     # A short results companion selects the actual observations and two key
     # diagnostic figures from exactly the same report source; no recomputation.
-    page.evaluate("""() => {
+    selected_sections = [4,5,7] if len(charts) >= 7 else [0,2]
+    page.evaluate("""(selected) => {
       document.querySelector('h1').textContent='Photographed-curve restart: results and limits';
       document.querySelectorAll('section.page').forEach((section,index)=>{
-        if (![4,5,7].includes(index)) section.remove();
+        if (!selected.includes(index)) section.remove();
       });
-    }""")
+    }""", selected_sections)
     assert not (root / 'RESULTS_REPORT.pdf').exists()
     page.pdf(path=str(root / 'RESULTS_REPORT.pdf'),print_background=True,prefer_css_page_size=True)
     for chart in charts:

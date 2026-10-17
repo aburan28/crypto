@@ -1,0 +1,371 @@
+{
+  "archive": "artifacts/public_field_replay.tar.xz",
+  "bytes": 426764,
+  "sha256": "6e2c032853f53003a5fbacc2c821f334f001c8930e646b170bd75b650d9a21f3",
+  "archive_extracted_and_every_file_matched_staging": true,
+  "main_and_IC_setup_scalar_values_absent": true,
+  "private_journals_and_recovered_scalar_records_absent": true,
+  "raw_RNG_journals_absent": true,
+  "files": [
+    {
+      "path": "FIELD_FROZEN.json",
+      "bytes": 5208,
+      "sha256": "b4e24926a8919d0fd0a79cc7af22b3d55431915a6db87ffa1879c6bf27a7988c",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "FIELD_FROZEN.sha256",
+      "bytes": 4862,
+      "sha256": "703e301a2895a670d1f29238e32384d862f10e342d1200d4a22738ff0048c352",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "FIELD_PROTOCOL.md",
+      "bytes": 2971,
+      "sha256": "2d8c5d6dc8fa9816b818e295ba34245e5e4ac95e9347510ee83504bd3e85db61",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "FROZEN.json",
+      "bytes": 1378,
+      "sha256": "4231769ef968bf9a1b7f9c5bac11530912a8925bc983c4cad27ff0c7172e2406",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "PUBLIC_SCOPE.json",
+      "bytes": 458,
+      "sha256": "51bb86dd5c63df8578a8c250759d4c23a22265a5daccaf8adc383bdd7251f2ef",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "data/family.json",
+      "bytes": 41053,
+      "sha256": "7aa5ebb99f4aa2d8f8027c0acb05436f1caa4001ecd001e66c77eb33450d8c12",
+      "classification": "previously published public curve/PQ/walk-seed input"
+    },
+    {
+      "path": "data/fixtures.json",
+      "bytes": 1636561,
+      "sha256": "980d931ce1a804684b160bdab9b213b87688ab9100f0cdf1cd14c390e809acb8",
+      "classification": "previously published public curve/PQ/walk-seed input"
+    },
+    {
+      "path": "data/rho_seeds.json",
+      "bytes": 2539,
+      "sha256": "5c766a40d71a029c1a399788e6cc3d25e318bc7bf26365f7a088c61b03b52634",
+      "classification": "previously published public curve/PQ/walk-seed input"
+    },
+    {
+      "path": "field/libcryptanalysis.so",
+      "bytes": 144456,
+      "sha256": "69bce5658e24d50170882ddef8ede46baa9208ad08353ab579a532a80bf95fc1",
+      "classification": "compiled executable from supplied public source; no fixture/scalar data compiled in"
+    },
+    {
+      "path": "field_backend/INSTRUMENTATION.json",
+      "bytes": 2140,
+      "sha256": "64bbce9f692da95abc0502d08c690c7c538429a43092b6c9d4289317a9fa1bfa",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "field_backend/LICENSE",
+      "bytes": 1087,
+      "sha256": "f9df02d446c6aeb66d2131a8516f119888960229cb41e272f204d075676c5e51",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_bsgs.h",
+      "bytes": 1625,
+      "sha256": "83e8f746208628f99c8fb261d68e26ab04a3aea86a137b549265c92406f32c4a",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_cheon.h",
+      "bytes": 3680,
+      "sha256": "14c6388584c1331d757d9abbaef04deef6cba23eceb387b9a98602c154a10e9d",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_coord.h",
+      "bytes": 24175,
+      "sha256": "6a70305b9ef2614de5faa89afa7f5756afc4f403fe8bc711b4925d28015c4766",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_curve.h",
+      "bytes": 3784,
+      "sha256": "c59aeb54f3b63c9a5fdfaeab5ea4796d32723a5d5ccd18b9cfce7040f7dff085",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_ffi.h",
+      "bytes": 9779,
+      "sha256": "7d2e9431e3a4f2f97d6b9c8a4ba5ee9ef3dca2644fa1d83fd19c48971228c533",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_gpu.h",
+      "bytes": 2852,
+      "sha256": "74664ba4c1c9f7afa480a23da9fd4509d8d2048d699cd454202702ce9cf5d8dc",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_group.h",
+      "bytes": 9115,
+      "sha256": "5b826b40802e366d025ee86607769600c24882a873a510b8cd05b04061c65a6c",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_grumpy.h",
+      "bytes": 1436,
+      "sha256": "f1d78829074bc8d055b7f9716d30e1ff930c2351d3c5f3d5a8c58c49b15a502e",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_indexcalc.h",
+      "bytes": 4332,
+      "sha256": "07c8205860762b6688ced27f45e09fa13e6028dbf3f12a8b308f7ab2463dc70e",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_kangaroo.h",
+      "bytes": 1587,
+      "sha256": "f25024f5d8f6b68129c728ed535795c7d9ceffe3881057e3217ae86830a86a07",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_modarith.h",
+      "bytes": 4861,
+      "sha256": "197c9eb8e5ea3cb102e392c0c0033dac5272ed631c4feb22be4773c1d7cc1c72",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_pohlig.h",
+      "bytes": 2077,
+      "sha256": "790550addfe41467f693fe5f5b1f83781e3253d964d8bed796b64448221c3ffe",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_precomp.h",
+      "bytes": 5188,
+      "sha256": "58a52a920f745f8d129a09199f2f01040e3d311d8c55527148159dec70f89963",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_probe.h",
+      "bytes": 928,
+      "sha256": "91f5383456fdc7fc2aebd1e148649c21964259e4fa330e88d9c454a406172f14",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_rho.h",
+      "bytes": 1785,
+      "sha256": "31b412574bdd2d47d9f19f61db20d7ece5afff712cbe2bdc33380b3d1a620e60",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/ca_types.h",
+      "bytes": 2963,
+      "sha256": "68743b5d57bd16153591b21d39c8bb9560a3bc4e86def196679c6b3f6fef30a9",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/include/cryptanalysis/cryptanalysis.h",
+      "bytes": 1618,
+      "sha256": "cc09fa600182d2efc87105abe83dc3866f39c8204b3b42342828f427a16a66d1",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/bsgs.c",
+      "bytes": 7098,
+      "sha256": "97c32bad364b68e8f68d7a6ea175d92b20e830b9ffc54a465e77d73d22406e99",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/ca_internal.h",
+      "bytes": 5248,
+      "sha256": "995414c5843bd6645ba0272b788dd9e4dc24fbb8bc8952eb092a3e395e6f3267",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/coord_internal.h",
+      "bytes": 5120,
+      "sha256": "2e9287688dc9acc3eadce8f20f6c24fddf1fa2c158436c43b6561c7b6e7129fa",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/curve_internal.h",
+      "bytes": 286,
+      "sha256": "831cda1fc9a6da22401c6b013816d0aaa018f8ab79f7a3f3242bc1f6c1b1fdcb",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/dlog_internal.h",
+      "bytes": 2532,
+      "sha256": "3f143108e0b5d4c06c22edf072a4e3e9c7115b06be20292d5b93d9d6e7e7defe",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/ec_tau.c",
+      "bytes": 22517,
+      "sha256": "070366b6af3cc5b6f623a1f60ed34f0b77bc6a2e8dfa6f585d7442a751240c59",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/ec_tau_internal.h",
+      "bytes": 865,
+      "sha256": "a68fc570b946858b56c073f48847ab57b709ede9cdcb3741632f42a005fb6790",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/gpu_internal.h",
+      "bytes": 1395,
+      "sha256": "707320547f71b2cd69f69d381da416f19aedf268268ec2033154a53c539e66a7",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/group_common.c",
+      "bytes": 4608,
+      "sha256": "993eb485b46a11d068e40c2ed61a538bb263f198bdc22393a5f738f06cb316d0",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/group_ec.c",
+      "bytes": 20742,
+      "sha256": "65b67071acfad409e4466c41ca04ad943174188626b62ce2f3e6d6d416e9f638",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/group_zp.c",
+      "bytes": 3273,
+      "sha256": "09fbec1fcd74fcd7471d37483eec22d306f5f011570458ffe256646648b7f260",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/linalg.h",
+      "bytes": 2172,
+      "sha256": "cd173243861c150bbac330bb0466178620bdffd5247d220841fa456b42c4ba2d",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/modarith.c",
+      "bytes": 11944,
+      "sha256": "698ce4138e1b8b2257e581995701cd09e061bc4d5aeff59a5fb118842a8bb2c3",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/probe.c",
+      "bytes": 347,
+      "sha256": "0cee918267e64fed779ad45de0596e6f793364cdac33f14c67bd2199f74b3327",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/rho.c",
+      "bytes": 17799,
+      "sha256": "f70185777c179275343313e451a18ccb5c06f863fb3b34f4db96ec3b00f34199",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_backend/src/util.c",
+      "bytes": 6419,
+      "sha256": "793e13df3fc46c714faae1e0107f1cc4a105bcec56d290129c6ea5f8984e07fa",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "field_replay_public",
+      "bytes": 194864,
+      "sha256": "2c6c03355ee0c6503ef3fe4ae15e23e7e194b3d832b804d9ee24cf11ae1d469d",
+      "classification": "compiled executable from supplied public source; no fixture/scalar data compiled in"
+    },
+    {
+      "path": "field_worker",
+      "bytes": 247800,
+      "sha256": "97721dfe23ee96797c85c2a3ee59426e29468ac4ded90bc7cfbf065aff463999",
+      "classification": "compiled executable from supplied public source; no fixture/scalar data compiled in"
+    },
+    {
+      "path": "source/build_field_backend.mjs",
+      "bytes": 3634,
+      "sha256": "10996f34c1232bb1aaf653df70e65d3b8d33862da6ab39e1f8d33de6c11149a8",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/ec.hpp",
+      "bytes": 4284,
+      "sha256": "353ea4a49f88dd0b3cc2af6c439e7771e819338b800fe537e5a31b1e1810bedc",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/field_controller.mjs",
+      "bytes": 3544,
+      "sha256": "f737c7bd1c2896b898aede7c0221fc9aefba173d3150c1a242c581d68ef80b3c",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/field_replay_public.cpp",
+      "bytes": 2730,
+      "sha256": "daf53514a5451f7757ec90078735333e2039b8a3998483732244bd1b0cbec3e3",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/field_worker.cpp",
+      "bytes": 6841,
+      "sha256": "12cb9bd7a1b4516a55848e83a9a9fc41e803640deee42000e8a04c455ba633e8",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/json.hpp",
+      "bytes": 919975,
+      "sha256": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/launch_field.sh",
+      "bytes": 560,
+      "sha256": "3ac510cd30b8f1f9d3dc4359c30f2132b5afc7924ab15a7f5c7000339c9d7f47",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/probe_test.c",
+      "bytes": 840,
+      "sha256": "f2ca54d8a25a96d6c3c61760ead2ae7eff5b65812ebbd736507e34e82c78ed99",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "validation/field_initial_tls_test_bsgs.log",
+      "bytes": 16,
+      "sha256": "a25393db4e29dc9771ef5c2e3adff5e487a8a3856102db1b4dab79bbf82d4c35",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "validation/field_initial_tls_test_group.log",
+      "bytes": 18,
+      "sha256": "dbcc2d747af01afdb2a2aefbdd83c4cc0e46d126d55e512775590f049307b9b3",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "validation/field_initial_tls_test_rho.log",
+      "bytes": 207,
+      "sha256": "3eefc7f33b5019189985e50efb0ad554f5e1bd114f358207ad0e2b327ee2413e",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "validation/field_probe_test.log",
+      "bytes": 66,
+      "sha256": "0c0158c386bd65254ad5e4b795c863e83cce5afea556ab5e4ddaea54f5c9e1b5",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "validation/field_public_smoke.err",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "validation/field_public_smoke.json",
+      "bytes": 1186,
+      "sha256": "962eb54483a5517d191d67112a125b62a5de2e2d8ec408121bfcd7f59ba58a87",
+      "classification": "public metadata, validation, protocol or hashes"
+    }
+  ]
+}
