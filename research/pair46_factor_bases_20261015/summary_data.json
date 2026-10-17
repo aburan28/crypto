@@ -1,0 +1,15 @@
+{
+  "source": "headline values quoted from each item's RESULTS.md / results.json; no recomputation",
+  "ratios": [
+    {"label": "01 endo-chain known / ±BSGS", "verdict": "negative", "point": 1.54, "lo": 1.30, "hi": 1.82, "note": "cost ratio, 22-bit toy (>1 = worse)"},
+    {"label": "03 pushed base A1 / random-x", "verdict": "exact_obstruction", "point": null, "lo": 0.9966, "hi": 1.0027, "note": "2-term yield, CI-end range over 8 toys"},
+    {"label": "04 family M1 / random D=-19", "verdict": "null", "point": 0.984, "lo": 0.964, "hi": 1.005, "note": "Semaev m=2 yield, 20-30 bit"},
+    {"label": "04 family M3 / random D=-19", "verdict": "null", "point": 1.0011, "lo": 0.998, "hi": 1.004, "note": "small-x yield"},
+    {"label": "05 QR filter density gain", "verdict": "constant_only", "point": 2.00004, "lo": 1.99967, "hi": 2.00042, "note": "pair-46 crater window; relations ratio = 1 exactly"},
+    {"label": "08 learned_success / random", "verdict": "exact_obstruction", "point": 1.001, "lo": 0.999, "hi": 1.003, "note": "held-out success, 18 bit, mu=1 (exp of log-ratio)"},
+    {"label": "09 CM norm base / random (B=256)", "verdict": "exact_obstruction", "point": 0.0159, "lo": 0.0156, "hi": 0.0161, "note": "2-sum coverage, 8 toy curves"},
+    {"label": "09 CM norm base / random (B=1024)", "verdict": "exact_obstruction", "point": 0.0079, "lo": 0.0064, "hi": 0.0089, "note": "2-sum coverage"},
+    {"label": "13 |y|-box 1/4 / x-window", "verdict": "null", "point": 0.9885, "lo": 0.961, "hi": 1.018, "note": "matched-size yield; costs 8 vs 2 x-scans"},
+    {"label": "13 y-bits 1/16 / x-window", "verdict": "null", "point": 0.9946, "lo": 0.963, "hi": 1.026, "note": "matched-size yield; costs 32 vs 2 x-scans"}
+  ]
+}
