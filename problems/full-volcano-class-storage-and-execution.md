@@ -6,7 +6,7 @@
 - **Affected work:** [fixed five-class protocol](../research/full_volcano_classes_20261016/PROTOCOL.md)
 - **Next action owner:** current implementation session for code and controls;
   full-run infrastructure owner unassigned
-- **Last updated:** 2026-10-16
+- **Last updated:** 2026-10-17
 
 ## Problem
 
@@ -23,6 +23,23 @@ verified graph-wide DLP results, operation distributions, timing and IC yields.
 Those are separate acceptance conditions; merging tooling cannot discharge them.
 
 ## Evidence and uncertainty
+
+- **2026-10-17 additional corpus:** three separate 57/59-bit classes are
+  complete and uploaded: 24,823 vertices, 51 strata and 69,300 selected-degree
+  maps. This does not complete the original A/C/D/E inputs. Native full-vertex
+  workload preparation certified the actual largest-prime subgroup and a
+  nonzero generator at every vertex; see
+  [the full-graph IC protocol](../research/full_volcano_graphwide_ic_20261017/PROTOCOL.md)
+  and its `evidence/inventory.json`. There are zero solver runs so far.
+- **Execution gaps for that corpus:** exact per-vertex subgroup/generator
+  representation registration, validated subgroup/quotient factor-base
+  adapters, resumable ecbench matrix execution and full accounting still
+  need implementation/validation. The measured matrix and its storage/core
+  cost have not been provisioned or estimated from a qualified pilot. The
+  available MOV implementation supports a supersingular k=2 teaching path
+  with BSGS/PH, not finite-field IC for the exact embedding degrees 30875,
+  3953777913734 and 2126 here. Large k does not prove that a reduction does
+  not exist. No generic solver fallback is counted as index calculus.
 
 - **Observed:** the workspace filesystem is 32 GiB; approximately 10 GiB was
   free after preserving the complete historical B graph and its compressed
