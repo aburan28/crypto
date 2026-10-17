@@ -1,0 +1,59 @@
+.............F....E.........E....................
+======================================================================
+ERROR: test_lab_browser_index_is_current_and_self_consistent (__main__.BuildTests.test_lab_browser_index_is_current_and_self_consistent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 870, in test_lab_browser_index_is_current_and_self_consistent
+    fresh = builder.build()
+            ^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/build_lab_browser.py", line 737, in build
+    sessions, methods, fbs, yields = ecbench_sessions(by_slug, source)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/build_lab_browser.py", line 416, in ecbench_sessions
+    s = load_file(session_path, source)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/build_lab_browser.py", line 287, in load_file
+    return json.loads(source.read_text(path))
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/build_lab_browser.py", line 282, in read_text
+    return self.read_bytes(path).decode("utf-8", errors)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/crypto/scripts/build_lab_browser.py", line 278, in read_bytes
+    with self.open_binary(path) as fh:
+         ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "/workspace/crypto/scripts/build_lab_browser.py", line 275, in open_binary
+    raise OSError(f"cannot read sparse input HEAD:{relative}: {detail}")
+OSError: cannot read sparse input HEAD:research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/session.json: fatal: git cat-file HEAD:research/ecbench_all_candidates_20261003/sessions/koblitz-followup-3/session.json: bad file
+
+======================================================================
+ERROR: test_progress_chart_data_file_is_canonical_and_fully_plotted (__main__.BuildTests.test_progress_chart_data_file_is_canonical_and_fully_plotted)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 144, in test_progress_chart_data_file_is_canonical_and_fully_plotted
+    self.assertEqual(json.loads(embedded.group(1)), timeline, "embedded progress chart data differs from docs/ic/progress-timeline.json")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py", line 338, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/json/decoder.py", line 354, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting ',' delimiter: line 174 column 11 (char 12749)
+
+======================================================================
+FAIL: test_every_scoreboard_panel_has_a_summary_and_the_index_cites_them_all (__main__.BuildTests.test_every_scoreboard_panel_has_a_summary_and_the_index_cites_them_all)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/crypto/scripts/site/test_build.py", line 221, in test_every_scoreboard_panel_has_a_summary_and_the_index_cites_them_all
+    self.assertEqual(panel_index.splice(page, panel_index.render(items)), page)
+AssertionError: '<!do[21805 chars]ll 305 panels, one line each</summary>\n    <o[107845 chars]l>\n' != '<!do[21805 chars]ll 303 panels, one line each</summary>\n    <o[107845 chars]l>\n'
+
+----------------------------------------------------------------------
+Ran 49 tests in 2.312s
+
+FAILED (failures=1, errors=2)

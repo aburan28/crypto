@@ -1,0 +1,565 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded foreign-types-shared v0.1.1
+  Downloaded form_urlencoded v1.2.2
+  Downloaded heck v0.5.0
+  Downloaded ppv-lite86 v0.2.21
+  Downloaded openssl-probe v0.2.1
+  Downloaded cfg-if v1.0.5
+  Downloaded generic-array v0.14.7
+  Downloaded potential_utf v0.1.6
+  Downloaded zmij v1.0.23
+  Downloaded yoke-derive v0.8.4
+  Downloaded rand_chacha v0.3.1
+  Downloaded openssl-macros v0.1.1
+  Downloaded utf8_iter v1.0.4
+  Downloaded zeroize_derive v1.5.0
+  Downloaded version_check v0.9.5
+  Downloaded cpufeatures v0.3.1
+  Downloaded hex v0.4.3
+  Downloaded once_cell v1.21.4
+  Downloaded anstyle-query v1.1.5
+  Downloaded is_terminal_polyfill v1.70.2
+  Downloaded yoke v0.8.3
+  Downloaded cpufeatures v0.2.17
+  Downloaded shlex v2.0.1
+  Downloaded block-buffer v0.10.4
+  Downloaded subtle v2.6.1
+  Downloaded colorchoice v1.0.5
+  Downloaded crossbeam-epoch v0.9.21
+  Downloaded serde_core v1.0.229
+  Downloaded arrayvec v0.7.8
+  Downloaded zerovec-derive v0.11.6
+  Downloaded url v2.5.8
+  Downloaded proc-macro2 v1.0.107
+  Downloaded quote v1.0.47
+  Downloaded itoa v1.0.18
+  Downloaded fallible-streaming-iterator v0.1.9
+  Downloaded simd-adler32 v0.3.10
+  Downloaded synstructure v0.14.0
+  Downloaded xxhash-rust v0.8.19
+  Downloaded either v1.18.0
+  Downloaded pkg-config v0.3.34
+  Downloaded constant_time_eq v0.4.2
+  Downloaded writeable v0.6.4
+  Downloaded clap v4.6.7
+  Downloaded find-msvc-tools v0.1.14
+  Downloaded utf8parse v0.2.2
+  Downloaded percent-encoding v2.3.2
+  Downloaded displaydoc v0.2.7
+  Downloaded zerofrom-derive v0.1.8
+  Downloaded fallible-iterator v0.3.0
+  Downloaded num-integer v0.1.47
+  Downloaded rand_core v0.6.4
+  Downloaded sha1_smol v1.0.1
+  Downloaded vcpkg v0.2.15
+  Downloaded anstream v1.0.0
+  Downloaded arcstr v1.2.0
+  Downloaded hashbrown v0.14.5
+  Downloaded ahash v0.8.12
+  Downloaded num-traits v0.2.19
+  Downloaded clap_builder v4.6.7
+  Downloaded litemap v0.8.3
+  Downloaded rusqlite v0.32.1
+  Downloaded rayon v1.12.0
+  Downloaded openssl-sys v0.9.117
+  Downloaded bitflags v2.13.2
+  Downloaded icu_normalizer_data v2.3.0
+  Downloaded base64 v0.21.7
+  Downloaded bytes v1.12.1
+  Downloaded serde_derive v1.0.229
+  Downloaded flate2 v1.1.10
+  Downloaded miniz_oxide v0.9.1
+  Downloaded rand v0.8.8
+  Downloaded num-bigint v0.5.1
+  Downloaded num-bigint v0.4.8
+  Downloaded cc v1.6.0
+  Downloaded combine v4.6.8
+  Downloaded stable_deref_trait v1.2.1
+  Downloaded idna_adapter v1.2.2
+  Downloaded typenum v1.20.1
+  Downloaded unicode-ident v1.0.26
+  Downloaded blake3 v1.8.7
+  Downloaded clap_derive v4.6.7
+  Downloaded smallvec v1.16.2
+  Downloaded openssl v0.10.81
+  Downloaded icu_normalizer v2.3.0
+  Downloaded zerotrie v0.2.5
+  Downloaded zlib-rs v0.6.8
+  Downloaded zerofrom v0.1.8
+  Downloaded socket2 v0.6.5
+  Downloaded adler2 v2.0.1
+  Downloaded hashlink v0.9.1
+  Downloaded rayon-core v1.13.0
+  Downloaded icu_locale_core v2.3.0
+  Downloaded syn v2.0.119
+  Downloaded syn v3.0.6
+  Downloaded zerocopy v0.8.60
+  Downloaded tinystr v0.8.4
+  Downloaded zeroize v1.9.0
+  Downloaded crypto-common v0.1.7
+  Downloaded idna v1.1.0
+  Downloaded icu_properties_data v2.3.0
+  Downloaded digest v0.10.7
+  Downloaded zerovec v0.11.8
+  Downloaded sha2 v0.10.9
+  Downloaded crossbeam-deque v0.8.8
+  Downloaded crossbeam-utils v0.8.23
+  Downloaded ryu v1.0.23
+  Downloaded icu_collections v2.3.0
+  Downloaded serde v1.0.229
+  Downloaded clap_lex v1.1.1
+  Downloaded foreign-types v0.3.2
+  Downloaded strsim v0.11.1
+  Downloaded serde_json v1.0.151
+  Downloaded native-tls v0.2.18
+  Downloaded crc32fast v1.5.2
+  Downloaded anstyle v1.0.14
+  Downloaded anstyle-parse v1.0.0
+  Downloaded log v0.4.34
+  Downloaded autocfg v1.5.1
+  Downloaded getrandom v0.2.17
+  Downloaded icu_provider v2.3.1
+  Downloaded icu_properties v2.3.0
+  Downloaded memchr v2.8.3
+  Downloaded redis v1.7.1
+  Downloaded libc v0.2.190
+  Downloaded libsqlite3-sys v0.30.1
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.26
+   Compiling shlex v2.0.1
+   Compiling cfg-if v1.0.5
+   Compiling find-msvc-tools v0.1.14
+   Compiling version_check v0.9.5
+   Compiling cc v1.6.0
+   Compiling stable_deref_trait v1.2.1
+   Compiling vcpkg v0.2.15
+   Compiling pkg-config v0.3.34
+   Compiling libc v0.2.190
+   Compiling zerocopy v0.8.60
+   Compiling syn v3.0.6
+   Compiling writeable v0.6.4
+   Compiling litemap v0.8.3
+   Compiling openssl-sys v0.9.117
+   Compiling generic-array v0.14.7
+   Compiling utf8_iter v1.0.4
+   Compiling icu_properties_data v2.3.0
+   Compiling autocfg v1.5.1
+   Compiling smallvec v1.16.2
+   Compiling icu_normalizer_data v2.3.0
+   Compiling num-traits v0.2.19
+   Compiling syn v2.0.119
+   Compiling ahash v0.8.12
+   Compiling typenum v1.20.1
+   Compiling crossbeam-utils v0.8.23
+   Compiling synstructure v0.14.0
+   Compiling crossbeam-epoch v0.9.21
+   Compiling serde_core v1.0.229
+   Compiling once_cell v1.21.4
+   Compiling bitflags v2.13.2
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.6
+   Compiling zerofrom v0.1.8
+   Compiling displaydoc v0.2.7
+   Compiling yoke v0.8.3
+   Compiling getrandom v0.2.17
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling libsqlite3-sys v0.30.1
+   Compiling memchr v2.8.3
+   Compiling openssl v0.10.81
+   Compiling utf8parse v0.2.2
+   Compiling crossbeam-deque v0.8.8
+   Compiling foreign-types-shared v0.1.1
+   Compiling zmij v1.0.23
+   Compiling foreign-types v0.3.2
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling anstyle-parse v1.0.0
+   Compiling icu_collections v2.3.0
+   Compiling icu_locale_core v2.3.0
+   Compiling openssl-macros v0.1.1
+   Compiling rand_core v0.6.4
+   Compiling num-integer v0.1.47
+   Compiling icu_provider v2.3.1
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling hashbrown v0.14.5
+   Compiling ppv-lite86 v0.2.21
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling anstyle-query v1.1.5
+   Compiling colorchoice v1.0.5
+   Compiling native-tls v0.2.18
+   Compiling idna_adapter v1.2.2
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle v1.0.14
+   Compiling serde v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling rayon-core v1.13.0
+   Compiling percent-encoding v2.3.2
+   Compiling crc32fast v1.5.2
+   Compiling itoa v1.0.18
+   Compiling form_urlencoded v1.2.2
+   Compiling anstream v1.0.0
+   Compiling idna v1.1.0
+   Compiling digest v0.10.7
+   Compiling rand_chacha v0.3.1
+   Compiling hashlink v0.9.1
+   Compiling serde_derive v1.0.229
+   Compiling blake3 v1.8.7
+   Compiling bytes v1.12.1
+   Compiling log v0.4.34
+   Compiling heck v0.5.0
+   Compiling adler2 v2.0.1
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling fallible-iterator v0.3.0
+   Compiling simd-adler32 v0.3.10
+   Compiling openssl-probe v0.2.1
+   Compiling strsim v0.11.1
+   Compiling cpufeatures v0.2.17
+   Compiling clap_lex v1.1.1
+   Compiling clap_builder v4.6.7
+   Compiling sha2 v0.10.9
+   Compiling miniz_oxide v0.9.1
+   Compiling clap_derive v4.6.7
+   Compiling combine v4.6.8
+   Compiling rand v0.8.8
+   Compiling url v2.5.8
+   Compiling num-bigint v0.5.1
+   Compiling zeroize_derive v1.5.0
+   Compiling socket2 v0.6.5
+   Compiling cpufeatures v0.3.1
+   Compiling isogeny_algos v0.1.0 (/workspace/crypto/isogeny_algos)
+   Compiling arrayvec v0.7.8
+   Compiling arcstr v1.2.0
+   Compiling sha1_smol v1.0.1
+   Compiling ryu v1.0.23
+   Compiling either v1.18.0
+   Compiling xxhash-rust v0.8.19
+   Compiling constant_time_eq v0.4.2
+   Compiling redis v1.7.1
+   Compiling rayon v1.12.0
+   Compiling zeroize v1.9.0
+   Compiling flate2 v1.1.10
+   Compiling num-bigint v0.4.8
+   Compiling clap v4.6.7
+   Compiling subtle v2.6.1
+   Compiling hex v0.4.3
+   Compiling base64 v0.21.7
+   Compiling rusqlite v0.32.1
+   Compiling volcano-cli v0.1.0 (/workspace/crypto/tools/volcano-cli)
+   Compiling crypto v0.1.0 (/workspace/crypto)
+error[E0428]: the name `Fp4` is defined multiple times
+   --> src/cryptanalysis/ecbench/workload.rs:385:5
+    |
+377 |     Fp4(Box<D4Curve>),
+    |     ----------------- previous definition of the type `Fp4` here
+...
+385 |     Fp4(Box<Fp4Instance>),
+    |     ^^^^^^^^^^^^^^^^^^^^^ `Fp4` redefined here
+    |
+    = note: `Fp4` must be defined only once in the type namespace of this enum
+
+error[E0432]: unresolved import `crate::cryptanalysis::ecbench::fbm`
+  --> src/cryptanalysis/ecbench/runner.rs:39:36
+   |
+39 | use crate::cryptanalysis::ecbench::fbm::{self, INSTRUMENT_IC_PIPELINE};
+   |                                    ^^^ could not find `fbm` in `ecbench`
+
+error[E0433]: cannot find `fbm` in `ecbench`
+   --> src/cryptanalysis/ecbench/db.rs:200:54
+    |
+200 |             let cfg = crate::cryptanalysis::ecbench::fbm::config_from_ic_method(
+    |                                                      ^^^ could not find `fbm` in `ecbench`
+
+error[E0433]: cannot find `fbm` in `ecbench`
+   --> src/cryptanalysis/ecbench/db.rs:204:48
+    |
+204 |                 crate::cryptanalysis::ecbench::fbm::INSTRUMENT_IC_PIPELINE,
+    |                                                ^^^ could not find `fbm` in `ecbench`
+
+error[E0422]: cannot find struct, variant or union type `OnbWeightBase` in this scope
+    --> src/cryptanalysis/ecbench/methods.rs:2431:22
+     |
+2431 |     let onb_weight = OnbWeightBase { instance: inst };
+     |                      ^^^^^^^^^^^^^ not found in this scope
+     |
+help: consider importing this struct
+     |
+  17 + use crate::cryptanalysis::ic_framework::plugins::OnbWeightBase;
+     |
+
+error[E0422]: cannot find struct, variant or union type `OnbWeightBase` in this scope
+    --> src/cryptanalysis/ecbench/methods.rs:2879:30
+     |
+2879 |             let onb_weight = OnbWeightBase { instance: i };
+     |                              ^^^^^^^^^^^^^ not found in this scope
+     |
+help: consider importing this struct
+     |
+  17 + use crate::cryptanalysis::ic_framework::plugins::OnbWeightBase;
+     |
+
+error[E0425]: cannot find value `sparsest` in this scope
+    --> src/cryptanalysis/gaudry_quartic.rs:1119:36
+     |
+1119 |     let mut row_nnz: Vec<u32> = if sparsest {
+     |                                    ^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `sparsest` in this scope
+    --> src/cryptanalysis/gaudry_quartic.rs:1135:12
+     |
+1135 |         if sparsest && b.len() > 1 {
+     |            ^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `sparsest` in this scope
+    --> src/cryptanalysis/gaudry_quartic.rs:1170:16
+     |
+1170 |             if sparsest {
+     |                ^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `sparsest` in this scope
+    --> src/cryptanalysis/gaudry_quartic.rs:1177:16
+     |
+1177 |             if sparsest {
+     |                ^^^^^^^^ not found in this scope
+
+warning: unused import: `crate::cryptanalysis::ic_framework::cm_orbit::CmOrbitBase`
+  --> src/cryptanalysis/ecbench/methods.rs:46:5
+   |
+46 | use crate::cryptanalysis::ic_framework::cm_orbit::CmOrbitBase;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::gaudry_quartic::Pt4`
+  --> src/cryptanalysis/ecbench/workload.rs:24:5
+   |
+24 | use crate::cryptanalysis::gaudry_quartic::Pt4;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `PtB` and `find_bin_curve`
+  --> src/cryptanalysis/ecbench/workload.rs:25:48
+   |
+25 | use crate::cryptanalysis::gaudry_quartic_bin::{find_bin_curve, BinCurve, PtB, TowerBasis};
+   |                                                ^^^^^^^^^^^^^^            ^^^
+
+warning: unused imports: `find_d4_curve` and `unpack_e4`
+  --> src/cryptanalysis/ecbench/workload.rs:26:47
+   |
+26 | use crate::cryptanalysis::gaudry_quartic_d4::{find_d4_curve, pack_e4, unpack_e4, D4Curve};
+   |                                               ^^^^^^^^^^^^^           ^^^^^^^^^
+
+warning: unused import: `crate::cryptanalysis::residual_walk::is_prime_u64`
+  --> src/cryptanalysis/ecbench/workload.rs:33:5
+   |
+33 | use crate::cryptanalysis::residual_walk::is_prime_u64;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> src/cryptanalysis/ecbench/methods.rs:1170:29
+     |
+1170 |         return solve_fp4(m, i, tx, ty, seed);
+     |                ---------    ^ expected `&Fp4Instance`, found `&Box<D4Curve>`
+     |                |
+     |                arguments to this function are incorrect
+     |
+     = note: expected reference `&Fp4Instance`
+                found reference `&Box<D4Curve>`
+note: function defined here
+    --> src/cryptanalysis/ecbench/methods.rs:1312:4
+     |
+1312 | fn solve_fp4(
+     |    ^^^^^^^^^
+1313 |     m: &ResolvedMethod,
+1314 |     i: &Fp4Instance,
+     |     ---------------
+
+error[E0599]: no variant named `PrimePublicFixture` found for enum `CurveSpec`
+   --> src/cryptanalysis/ecbench/workload.rs:127:33
+    |
+ 39 | pub enum CurveSpec {
+    | ------------------ variant `PrimePublicFixture` not found here
+...
+127 |         if matches!(self, Self::PrimePublicFixture { .. }) {
+    |                                 ^^^^^^^^^^^^^^^^^^ variant not found in `CurveSpec`
+
+error[E0599]: no variant named `PrimePublicFixture` found for enum `CurveSpec`
+   --> src/cryptanalysis/ecbench/workload.rs:136:24
+    |
+ 39 | pub enum CurveSpec {
+    | ------------------ variant `PrimePublicFixture` not found here
+...
+136 |             CurveSpec::PrimePublicFixture {
+    |                        ^^^^^^^^^^^^^^^^^^ variant not found in `CurveSpec`
+
+error[E0689]: can't call method `is_multiple_of` on ambiguous numeric type `{integer}`
+   --> src/cryptanalysis/ecbench/workload.rs:169:39
+    |
+169 |                 if (4 * a3 + 27 * b2).is_multiple_of(p as u128) || gx >= p || gy >= p {
+    |                                       ^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> src/cryptanalysis/ecbench/workload.rs:292:76
+    |
+292 |                 Fp4Instance::build(p, seed).map(|i| Instance::Fp4(Box::new(i)))
+    |                                                                   -------- ^ expected `D4Curve`, found `Fp4Instance`
+    |                                                                   |
+    |                                                                   arguments to this function are incorrect
+    |
+note: associated function defined here
+   --> /rustc/58cf8f9c35b355199727627d07ae34a4e2846d67/library/alloc/src/boxed.rs:288:11
+
+error[E0599]: no variant named `PrimePublicFixture` found for enum `CurveSpec`
+   --> src/cryptanalysis/ecbench/workload.rs:360:26
+    |
+ 39 | pub enum CurveSpec {
+    | ------------------ variant `PrimePublicFixture` not found here
+...
+360 |             | CurveSpec::PrimePublicFixture { p, a, b, .. } => {
+    |                          ^^^^^^^^^^^^^^^^^^ variant not found in `CurveSpec`
+
+error[E0599]: no method named `names` found for reference `&Box<D4Curve>` in the current scope
+   --> src/cryptanalysis/ecbench/workload.rs:502:34
+    |
+502 |             let (icv1, slug) = i.names();
+    |                                  ^^^^^ method not found in `&Box<D4Curve>`
+
+error[E0609]: no field `g` on type `&Box<D4Curve>`
+   --> src/cryptanalysis/ecbench/workload.rs:503:44
+    |
+503 |             let g = Fp4Instance::encode(&i.g).unwrap_or_default();
+    |                                            ^ unknown field
+    |
+help: a field with a similar name exists
+    |
+503 -             let g = Fp4Instance::encode(&i.g).unwrap_or_default();
+503 +             let g = Fp4Instance::encode(&i.r).unwrap_or_default();
+    |
+
+error[E0615]: attempted to take value of method `p` on type `&Box<D4Curve>`
+   --> src/cryptanalysis/ecbench/workload.rs:510:41
+    |
+510 |                 field_bits: Some(64 - i.p.leading_zeros()),
+    |                                         ^ method, not a field
+    |
+help: use parentheses to call the method
+    |
+510 |                 field_bits: Some(64 - i.p().leading_zeros()),
+    |                                          ++
+
+error[E0599]: no method named `mul_generator_hex` found for reference `&Box<D4Curve>` in the current scope
+   --> src/cryptanalysis/ecbench/workload.rs:654:22
+    |
+654 |             return i.mul_generator_hex(k);
+    |                      ^^^^^^^^^^^^^^^^^ method not found in `&Box<D4Curve>`
+
+error[E0599]: no variant named `PrimePublicFixture` found for enum `CurveSpec`
+   --> src/cryptanalysis/ecbench/workload.rs:904:31
+    |
+ 39 | pub enum CurveSpec {
+    | ------------------ variant `PrimePublicFixture` not found here
+...
+904 |             if let CurveSpec::PrimePublicFixture { qx, qy, .. } = *spec {
+    |                               ^^^^^^^^^^^^^^^^^^ variant not found in `CurveSpec`
+
+error[E0425]: cannot find function `echelon_by_lead_with` in this scope
+    --> src/cryptanalysis/gaudry_quartic.rs:1719:19
+     |
+1099 | / pub(crate) fn echelon_by_lead(
+1100 | |     mut rows: Vec<Vec<u16>>,
+1101 | |     p: u32,
+1102 | |     muls: &mut u64,
+...    |
+1207 | | }
+     | |_- similarly named function `echelon_by_lead` defined here
+...
+1719 |       let mut ech = echelon_by_lead_with(rows, p as u32, &mut ech_muls, debug, sparsest);
+     |                     ^^^^^^^^^^^^^^^^^^^^
+     |
+help: a function with a similar name exists
+     |
+1719 -     let mut ech = echelon_by_lead_with(rows, p as u32, &mut ech_muls, debug, sparsest);
+1719 +     let mut ech = echelon_by_lead(rows, p as u32, &mut ech_muls, debug, sparsest);
+     |
+
+error[E0004]: non-exhaustive patterns: `&workload::Instance::F2m4(_)` and `&workload::Instance::Fp4(_)` not covered
+   --> src/cryptanalysis/ecbench/workload.rs:300:15
+    |
+300 |         match inst {
+    |               ^^^^ patterns `&workload::Instance::F2m4(_)` and `&workload::Instance::Fp4(_)` not covered
+    |
+note: `workload::Instance` defined here
+   --> src/cryptanalysis/ecbench/workload.rs:374:10
+    |
+374 | pub enum Instance {
+    |          ^^^^^^^^
+...
+379 |     F2m4(Box<BinCurve>),
+    |     ---- not covered
+...
+385 |     Fp4(Box<Fp4Instance>),
+    |     --- not covered
+    = note: the matched value is of type `&workload::Instance`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern, a match arm with multiple or-patterns as shown, or multiple match arms
+    |
+330 ~             Instance::Binary(_) | Instance::Wide(_) | Instance::Fp4(_) => None,
+331 ~             &workload::Instance::F2m4(_) | &workload::Instance::Fp4(_) => todo!(),
+    |
+
+error[E0004]: non-exhaustive patterns: `&workload::Instance::F2m4(_)` and `&workload::Instance::Fp4(_)` not covered
+   --> src/cryptanalysis/ecbench/workload.rs:492:15
+    |
+492 |         match self {
+    |               ^^^^ patterns `&workload::Instance::F2m4(_)` and `&workload::Instance::Fp4(_)` not covered
+    |
+note: `workload::Instance` defined here
+   --> src/cryptanalysis/ecbench/workload.rs:374:10
+    |
+374 | pub enum Instance {
+    |          ^^^^^^^^
+...
+379 |     F2m4(Box<BinCurve>),
+    |     ---- not covered
+...
+385 |     Fp4(Box<Fp4Instance>),
+    |     --- not covered
+    = note: the matched value is of type `&workload::Instance`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern, a match arm with multiple or-patterns as shown, or multiple match arms
+    |
+496 ~             Instance::Fp4(i) => u128::from(i.r),
+497 ~             &workload::Instance::F2m4(_) | &workload::Instance::Fp4(_) => todo!(),
+    |
+
+error[E0004]: non-exhaustive patterns: `&workload::Instance::F2m4(_)` and `&workload::Instance::Fp4(_)` not covered
+   --> src/cryptanalysis/ecbench/workload.rs:720:19
+    |
+720 |             match self {
+    |                   ^^^^ patterns `&workload::Instance::F2m4(_)` and `&workload::Instance::Fp4(_)` not covered
+    |
+note: `workload::Instance` defined here
+   --> src/cryptanalysis/ecbench/workload.rs:374:10
+    |
+374 | pub enum Instance {
+    |          ^^^^^^^^
+...
+379 |     F2m4(Box<BinCurve>),
+    |     ---- not covered
+...
+385 |     Fp4(Box<Fp4Instance>),
+    |     --- not covered
+    = note: the matched value is of type `&workload::Instance`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern, a match arm with multiple or-patterns as shown, or multiple match arms
+    |
+751 ~                 },
+752 +                 &workload::Instance::F2m4(_) | &workload::Instance::Fp4(_) => todo!()
+    |
+
+Some errors have detailed explanations: E0004, E0308, E0422, E0425, E0428, E0432, E0433, E0599, E0609...
+For more information about an error, try `rustc --explain E0004`.
+warning: `crypto` (lib) generated 5 warnings
+error: could not compile `crypto` (lib) due to 25 previous errors; 5 warnings emitted
+warning: build failed, waiting for other jobs to finish...

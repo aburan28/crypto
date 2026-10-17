@@ -12,6 +12,11 @@ as AGENTS.md requires of measurement work. It does not replace the
 repository's accounting rules; it is the machinery that applies them to
 every method at once.
 
+For F4/F5/F6-IC, custom root finding, SAT and full backend combinations, open
+the [backend frontier leaderboard](../backend-leaderboard/index.html) and its
+[measurement and agent workflow](BACKEND_FRONTIER.md). It shows exact-target
+count frontiers, cold/online timing diagnostics and missing field-size coverage.
+
 ```
 spec.json ──ecbench run──► session/                ──ecbench verify──► audit receipt (replay certificate)
                            ├─ spec.json            ──ecbench compare─► comparison.json

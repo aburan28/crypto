@@ -1,0 +1,55 @@
+Reproduction-contract follow-up, 2026-10-17
+Original PR head before this update: a86219ad2ef684675edca528a1e166e4cbd9000d
+Root integration base: c6d64436a33359320ad9d5b42c4acebee2968b9a
+Trusted lock SHA-256 for this update:
+0871cabc1de47a7b47f972e312295a181e8be0e23de9d71a8cd16ddbeabba8ee
+
+Run from the repository root, on the reviewed commit containing this lock.
+Rust toolchain: rustc 1.99.1 (58cf8f9c3 2026-10-13).
+Workspace setup used CARGO_HOME=/workspace/crypto-tools/cargo and
+RUSTUP_HOME=/workspace/crypto-tools/rustup, with its cargo/bin on PATH.
+Dependencies were already fetched; all final native checks used --offline.
+
+Passed (exit 0):
+cargo +1.99.1 test --locked --offline --manifest-path tools/backend-leaderboard/Cargo.toml
+  20 tests; reproduction-native-tests.log.gz
+cargo +1.99.1 clippy --locked --offline --manifest-path tools/backend-leaderboard/Cargo.toml --all-targets -- -D warnings
+  reproduction-clippy.log
+cargo +1.99.1 fmt --manifest-path tools/backend-leaderboard/Cargo.toml --check
+  reproduction-format.log (empty stdout/stderr)
+cargo +1.99.1 build --locked --offline --release --manifest-path tools/backend-leaderboard/Cargo.toml
+  reproduction-release.log
+tools/backend-leaderboard/target/release/backend-leaderboard reproduce --expected-lock-sha256 0871cabc1de47a7b47f972e312295a181e8be0e23de9d71a8cd16ddbeabba8ee
+  reproduction-receipt.json: 115 pinned files and 5 output hashes; no solver execution
+tools/backend-leaderboard/target/release/backend-leaderboard --check
+  reproduction-release.log
+tools/backend-leaderboard/target/release/backend-leaderboard --out /tmp/crypto-reproduction-isolated
+tools/backend-leaderboard/target/release/backend-leaderboard --out /tmp/crypto-reproduction-isolated --check
+  reproduction-isolated.log; generated fresh copies, then checked all files
+
+python3 scripts/site/test_build.py BuildTests.test_publishes_every_expected_path BuildTests.test_internal_links_resolve BuildTests.test_every_page_declares_title_viewport_and_description BuildTests.test_sitemap_and_robots_point_at_the_published_urls BuildTests.test_build_is_idempotent WorkflowTests.test_site_sources_trigger_the_workflow
+  6 tests; reproduction-publication.log
+NODE_PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules node docs/ecbench/backend-frontier-report/validation/ui-check.cjs /workspace/crypto
+  reproduction-browser.log; includes links to reproduction criteria/cards/lock
+
+Attempted; blocked before tests (exit 101):
+cargo +1.99.1 test --locked --offline --release --lib
+  26 existing integration compiler errors; reproduction-root-lib.log.gz
+  Root solver/library source was not modified. Earlier full site-suite
+  failures remain recorded in commands.txt and site-suite.log.
+
+Report PDF, exit 0, one page, no overfull/underfull warnings:
+dot -Tsvg flow.dot -o flow.svg
+dot -Tpdf flow.dot -o flow.pdf
+pdflatex -halt-on-error -interaction=nonstopmode -output-directory=/tmp REPORT.tex
+pdftoppm -scale-to 1600 -png /tmp/REPORT.pdf /tmp/crypto-reproduction-report
+  reproduction-pdf.log.gz; rendered PDF visually inspected.
+
+Native negative tests cover input/output/lock mismatches, incomplete lock
+inventory, stale compiled source, missing/duplicate/failed replay coverage,
+misbound native receipts, resealed solver-counter differences, exact large
+integers, and runtime-worktree provenance rejection. Positive fresh-session
+comparison tests use explicitly synthetic fixtures, not solver executions.
+
+No new algorithm benchmark, fresh arithmetic/independent-host campaign,
+timing replication, external-tool comparison or ledger promotion occurred.

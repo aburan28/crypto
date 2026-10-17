@@ -1,0 +1,24 @@
+{
+  "schema": "ecbench.backend_leaderboard_manifest/v1",
+  "description": "A curated, reproducible view of frozen F4, F5, F6-IC, root-finding, SAT and reference sessions. Observations stay separate by exact target, configuration, binary and host. This imports historical evidence without rerunning a solver; it is not an exhaustive or globally fastest claim. The IC recipe leaderboard remains the source for admitted whole-pipeline comparisons outside these sessions.",
+  "field_degrees": [3, 4, 5, 31, 51, 53, 83],
+  "sessions": [
+    {"dir": "research/f4_f5_f6_cross_family_20261011/sessions/K13", "replay_receipt": "research/f4_f5_f6_cross_family_20261011/audits/K13-replay-all.json"},
+    {"dir": "research/f4_f5_f6_cross_family_20261011/sessions/K19", "replay_receipt": "research/f4_f5_f6_cross_family_20261011/audits/K19-replay-all.json"},
+    {"dir": "research/f4_f5_f6_cross_family_20261011/sessions/R13", "replay_receipt": "research/f4_f5_f6_cross_family_20261011/audits/R13-replay-all.json"},
+    {"dir": "research/f4_f5_f6_cross_family_20261011/sessions/R19", "replay_receipt": "research/f4_f5_f6_cross_family_20261011/audits/R19-replay-all.json"},
+    {"dir": "research/f4_f5_f6_cross_family_20261011/sessions/X19", "replay_receipt": "research/f4_f5_f6_cross_family_20261011/audits/X19-replay-all.json"},
+    {"dir": "research/f6_ic_ecbench_ladder_20261005/sessions/n7", "replay_receipt": "research/f6_ic_ecbench_ladder_20261005/audits/n7-replay-12.json"},
+    {"dir": "research/f6_ic_ecbench_ladder_20261005/sessions/n13", "replay_receipt": "research/f6_ic_ecbench_ladder_20261005/audits/n13-replay-all-after-1365.json"},
+    {"dir": "research/f6_ic_ecbench_ladder_20261005/sessions/n19", "replay_receipt": "research/f6_ic_ecbench_ladder_20261005/audits/n19-replay-all-after-1365.json"},
+    {"dir": "research/f6_ic_ecbench_ladder_20261005/sessions/n23", "replay_receipt": "research/f6_ic_ecbench_ladder_20261005/audits/n23-replay-4.json"},
+    {"dir": "research/f6_ic_ecbench_ladder_20261005/sessions/n31-interrupted-01", "replay_receipt": null},
+    {"dir": "research/f6_ic_ecbench_ladder_20261005/sessions/n31-killed-02", "replay_receipt": null},
+    {"dir": "research/ecbench_rootfind_engine_20261012/sessions/claim-n13", "replay_receipt": "research/ecbench_rootfind_engine_20261012/audits/audit-claim-n13.json"},
+    {"dir": "research/ecbench_rootfind_engine_20261012/sessions/claim-n19", "replay_receipt": "research/ecbench_rootfind_engine_20261012/audits/audit-claim-n19.json"},
+    {"dir": "research/ecbench_sat_pdp_20261009/sessions/count-qualified-main", "replay_receipt": "research/ecbench_sat_pdp_20261009/count-qualified-main.audit.json"},
+    {"dir": "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0", "replay_receipt": null},
+    {"dir": "research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0-02", "replay_receipt": null},
+    {"dir": "research/ecbench_m83_rho_20261005/sessions/calibration", "replay_receipt": "research/ecbench_m83_rho_20261005/audit-calibration.json"}
+  ]
+}

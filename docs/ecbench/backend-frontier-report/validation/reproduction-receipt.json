@@ -1,0 +1,28 @@
+{
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "expected": {
+    "count_eligible": 464,
+    "cross_method_frontiers": 123,
+    "entries": 626,
+    "failed_samples": 513,
+    "ic_frontiers": 180,
+    "planned_without_measurements": 170,
+    "sessions": 17,
+    "timing_winners": 0
+  },
+  "files_checked": 115,
+  "fresh_arithmetic_replay": false,
+  "independent_host": "not_established",
+  "lock_sha256": "0871cabc1de47a7b47f972e312295a181e8be0e23de9d71a8cd16ddbeabba8ee",
+  "ok": true,
+  "outputs": {
+    "LEADERBOARD.md": "cb19b72a5b4cb212f30e63882c028b403ae5cd60e85f0a048455a80bfb15f49f",
+    "REPLAY_PLAN.json": "438cb3df72dd7fdec8b2e527e9a57262abe8d13a8c4ecfdc4e4058f19a11057c",
+    "REPRODUCING.md": "6e87db169d0fc27892431c019af36c7d2257727a9ea2ea105224b29694e1dca8",
+    "index.html": "c16843802f1a3738365e175154afcd0a412051fd56d25a7c49513a4949019a2e",
+    "leaderboard.json": "91d30a0f5d72dd191b5361f5c5a2699d8b0e6ac074b2f21957d8155daa75cab9"
+  },
+  "schema": "ecbench.backend_report_reproduction/v1",
+  "solver_executed": false,
+  "timing_reproduction": "not_tested"
+}

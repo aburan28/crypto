@@ -1,0 +1,18 @@
+digraph backend_frontier {
+  rankdir=TB;
+  graph [bgcolor="white",pad="0.25",nodesep="0.25",ranksep="0.35",fontname="Helvetica",label="Observed frontier: exact target, configuration, session and seeds",labelloc="t"];
+  node [shape=box,style="rounded,filled",fillcolor="#edf3ee",color="#a9baae",fontname="Helvetica",fontsize=11,margin="0.13,0.1"];
+  edge [color="#537b67",arrowsize=0.7];
+  source [label="Sealed historical sessions\nF4 · F5 · F6-IC · roots · SAT · rho"];
+  pins [label="R0: reviewed input/output lock\nPinned producer + Rust + dependencies\nExact report bytes; no solver execution",fillcolor="#e4edf8"];
+  integrity [label="File hashes + raw seals + plan\nBound historical native arithmetic audit"];
+  cohort [label="One exact public target\nSame session, rounds and seeds"];
+  counts [label="Count sensitivity at 0 / 0.1 / 1\nMemory tradeoffs; retain unknowns"];
+  timing [label="Cold + online + phase clocks\nTiming verdict only after L2 + 5 pairs\nand A/A + paired 95% interval"];
+  next [label="Freeze incumbent + challenger\nFresh holdouts + independent replay\nExternal reference + full-operation cost",fillcolor="#e4edf8"];
+  gaps [label="Missing / failed / interrupted\nVisible; never a win",fillcolor="#fff2d6"];
+  pins -> source -> integrity -> cohort;
+  integrity -> gaps;
+  cohort -> counts -> next;
+  cohort -> timing -> next;
+}

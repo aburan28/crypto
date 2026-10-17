@@ -3,6 +3,9 @@ research/weak_curve_leaderboard_20261012/validation/ghs128_*.log -whitespace
 research/weak_curve_leaderboard_20261012/reports/run-*/*.svg -whitespace
 research/weak_curve_leaderboard_20261012/reports/run-*/*.log -whitespace
 # Canonical catalog data is rebuilt by the repository's metadata tools.
+docs/backend-leaderboard/REPLAY_PLAN.json linguist-generated=true
+docs/backend-leaderboard/REPRODUCING.md linguist-generated=true
+docs/backend-leaderboard/reproduction.lock.json linguist-generated=true
 docs/browser/data.json linguist-generated=true
 docs/curves/registry.json linguist-generated=true
 docs/curves/covers.json linguist-generated=true
