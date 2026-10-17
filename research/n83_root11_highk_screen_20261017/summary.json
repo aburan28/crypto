@@ -1,0 +1,44 @@
+{
+  "baseline_k3072_geometric_target_ms": 16.405335631063423,
+  "baseline_k3072_sha256": "b6c3cc7c092fd5a712c79acd199ee863899ea81f1167066cc3f37dc47ab57838",
+  "hardware_tier": "ordinary_local_exploratory",
+  "lowest_observed_target_ms_k": 3584,
+  "plan_sha256": "89812f798ad2625af7eb1069013abd21fe6d9b68af76bc0e4800dee753f11bb9",
+  "role": "descriptive_candidate_discovery",
+  "rows": [
+    {
+      "actual_usable_points": 594944,
+      "analysis_sha256": "48990ca1dbff025983f6802820bc3d58b9921cf0c840049be023ad63a74dc9b3",
+      "cold_process_seconds": 808.509014541,
+      "descriptive_95_interval_vs_k3072": [
+        0.6554743268048379,
+        1.2836925662398178
+      ],
+      "effective_columns": 3584,
+      "faster_point_count_vs_k3072": 62,
+      "geometric_target_ms": 17.884498380068496,
+      "index_allocated_gib": 15.46107792854309,
+      "k": 3584,
+      "mean_probes": 51096.328125,
+      "median_target_ms": 21.944854,
+      "paired_geometric_speedup_vs_k3072": 0.9172935847810227,
+      "status": "PASS_INDEPENDENT_BASE_RELATION_SCALAR_REPLAY"
+    },
+    {
+      "k": 4096,
+      "outer_wall_seconds": 1.4626094579944038,
+      "producer_status": "PROCESS_FAILED",
+      "status": "CENSORED_PRODUCER"
+    },
+    {
+      "k": 4608,
+      "status": "NOT_RUN_AFTER_STOP_RULE"
+    },
+    {
+      "k": 5120,
+      "status": "NOT_RUN_AFTER_STOP_RULE"
+    }
+  ],
+  "schema": "n83.root11-highk-screen-summary/v1",
+  "status": "PARTIAL_OR_CENSORED"
+}

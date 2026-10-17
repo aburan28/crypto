@@ -1,0 +1,30 @@
+{
+  "binary_path": "/Volumes/SSD990/crypto/artifacts/n83_k_intermediate_screen_20261017/target/release/examples/koblitz_orbit_dlp_fast",
+  "cap_seconds_per_arm": 1800,
+  "hardware_tier": "ordinary_local_exploratory",
+  "k_values": [
+    3088,
+    3104,
+    3114,
+    3136
+  ],
+  "layout": "root11_dynamic_indexed5_original",
+  "role": "secondary_shared_setup_candidate_discovery",
+  "schema": "n83.root11-midk-screen-plan/v1",
+  "sha256": {
+    "answers": "3ceee12fb848cc261433f3cd9e7d297f961effede1974e8c95fa25d9bac68720",
+    "baseline_k3072": "b6c3cc7c092fd5a712c79acd199ee863899ea81f1167066cc3f37dc47ab57838",
+    "binary": "faaac22aa6228c8d486875d6947fa654417d1122191fbe0eb9bde59bb45eb98f",
+    "control_k3584": "48990ca1dbff025983f6802820bc3d58b9921cf0c840049be023ad63a74dc9b3",
+    "group": "e34d06b3275d86dcb3a659b79adf87dcdc078cebb6f510c4b5c42403d83a1804",
+    "protocol": "1149a4f59a1c13a6e13bc9d5e55e80fd23ad6057a4d196efeb0e5b3d9a26727d",
+    "reference_environment": "aaaed229d7bd2731ee211f3a3cf7f670963ccde1f88f6bfe932dd789079746c3",
+    "runner": "5421d9c307726cf90cbca117216ae79aae3c6a691bf9049d9b1dccabcec6b3d0",
+    "source": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+    "summarizer": "70638ae7963600e02d9c4d025a9ba275e9dd50fe745ba834a3a33513364e7ec1",
+    "targets": "72486b7d708023838db1104a4a5e75a04b915d6f6d4013057c934fb31000aa87",
+    "verifier": "4895891375e4c15e0d48792985386eae26a72d821f3659d982a6e706bd843d86"
+  },
+  "stop_rule": "stop_after_first_non_pass_arm",
+  "target_count": 128
+}

@@ -1,0 +1,18 @@
+{
+  "cap_seconds_per_arm": 1800,
+  "k3584_analysis_sha256": "48990ca1dbff025983f6802820bc3d58b9921cf0c840049be023ad63a74dc9b3",
+  "k3584_raw_receipt_sha256": "424c2f5bfff69e109892b7b3c02a7a979b5628f1b7e90a559ea2db3d0dda96ab",
+  "orchestration_failure_sha256": "9f02a581ccf58e158f540ffd3e3866fdf6b98da6c3a8fb1791657b2a52d2ff98",
+  "original_plan_sha256": "89812f798ad2625af7eb1069013abd21fe6d9b68af76bc0e4800dee753f11bb9",
+  "original_runner_sha256": "576712a3bd8f6c45e54eb475c3ff7dbb4f5256d007352c604a3fd9db97fee8dc",
+  "raw_root": "/Volumes/SSD990/crypto/artifacts/n83_root11_highk_screen_20261017",
+  "resume_k_values": [
+    4096,
+    4608,
+    5120
+  ],
+  "resume_script_sha256": "0ac474572749565659bdb093ee427b35a5e043869eb26ea3768a096546c01a26",
+  "reuse_verified_k3584_without_rerun": true,
+  "schema": "n83.root11-highk-resume-plan/v1",
+  "stop_rule": "stop_after_first_non_pass_arm"
+}

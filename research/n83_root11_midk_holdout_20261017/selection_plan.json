@@ -1,0 +1,32 @@
+{
+  "answers_sha256": "f3c74059d1fda5335ac5dbd50859d0d33f9daaaed660b18788841acc25c593a3",
+  "baseline_path": "research/n83_root11_finegrid_holdout_20261017/results/batch_k3072_result.json",
+  "baseline_sha256": "b6c3cc7c092fd5a712c79acd199ee863899ea81f1167066cc3f37dc47ab57838",
+  "choice_rule": "two_lowest_complete_geometric_online_if_any_below_k3072_then_lower_k",
+  "control_candidate_id": "IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a",
+  "control_k": 3072,
+  "new_candidate_ids": [
+    null,
+    null
+  ],
+  "schema": "n83.root11-midk-holdout-selection-plan/v1",
+  "screen_k_values": [
+    3088,
+    3104,
+    3114,
+    3136
+  ],
+  "screen_plan_sha256": "195b30d83fd5b31e55640cd84d7af7088d83cb91fa4672fd26b42161689c8801",
+  "sha256": {
+    "research/n83_root11_finegrid_holdout_20261017/results/batch_k3072_result.json": "b6c3cc7c092fd5a712c79acd199ee863899ea81f1167066cc3f37dc47ab57838",
+    "research/n83_root11_midk_holdout_20261017/PROTOCOL.md": "e101ffe84a54b69cddfdb08542b3b4c59639282b2c2735e36d7ac10cc08f8200",
+    "research/n83_root11_midk_holdout_20261017/answers.jsonl": "f3c74059d1fda5335ac5dbd50859d0d33f9daaaed660b18788841acc25c593a3",
+    "research/n83_root11_midk_holdout_20261017/choose.py": "ee26298d55f521818dc74461c77dbba2478b68dcf7084bb6170795fa1e63f7ce",
+    "research/n83_root11_midk_holdout_20261017/generate.py": "6206b4dc25c92b7b015aac24cc426011890349f00b02e691efd1d5fba14832fb",
+    "research/n83_root11_midk_holdout_20261017/manifest.json": "245ce5f881acab9ccd3b7068dc6590c82bef3fc91409fd4d46fe6975b2e1e459",
+    "research/n83_root11_midk_holdout_20261017/targets.jsonl": "725a36ccc58ecbe2904faeaf59a492ecb0acb58b9078d6589ab8e21efb0e404e",
+    "research/n83_root11_midk_screen_20261017/plan.json": "195b30d83fd5b31e55640cd84d7af7088d83cb91fa4672fd26b42161689c8801"
+  },
+  "status": "SEALED_BEFORE_SCREEN_OUTCOME",
+  "targets_sha256": "725a36ccc58ecbe2904faeaf59a492ecb0acb58b9078d6589ab8e21efb0e404e"
+}

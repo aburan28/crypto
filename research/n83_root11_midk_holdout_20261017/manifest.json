@@ -1,0 +1,12 @@
+{
+  "answers_sha256": "f3c74059d1fda5335ac5dbd50859d0d33f9daaaed660b18788841acc25c593a3",
+  "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+  "domain": "n83-root11-midk-holdout24-20261017-v1",
+  "generator_sha256": "6206b4dc25c92b7b015aac24cc426011890349f00b02e691efd1d5fba14832fb",
+  "point_count": 24,
+  "scalar_rule": "1+little_endian(SHA256(domain||u32_le(index))) mod (r-1)",
+  "schema": "n83.root11-midk-holdout-fixture/v1",
+  "status": "SEALED_UNMEASURED",
+  "subgroup_order": 8569786107849059,
+  "targets_sha256": "725a36ccc58ecbe2904faeaf59a492ecb0acb58b9078d6589ab8e21efb0e404e"
+}

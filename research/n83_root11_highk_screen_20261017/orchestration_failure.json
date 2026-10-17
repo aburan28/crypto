@@ -1,0 +1,11 @@
+{
+  "cause": "The pinned runner removed its importlib import while retaining the post-producer dynamic verifier import.",
+  "correction": "Retain original runner and plan unchanged; independently replay K3584; seal a separate resume script and plan for K4096 onward.",
+  "error": "NameError: name importlib is not defined at run.py line 135",
+  "k3584_analysis_sha256": "48990ca1dbff025983f6802820bc3d58b9921cf0c840049be023ad63a74dc9b3",
+  "k3584_run_receipt_sha256": "424c2f5bfff69e109892b7b3c02a7a979b5628f1b7e90a559ea2db3d0dda96ab",
+  "producer_exit_code": 0,
+  "schema": "n83.root11-highk-orchestration-failure/v1",
+  "stage": "post_producer_verifier_import",
+  "status": "IMPLEMENTATION_ERROR_AFTER_SUCCESSFUL_K3584_PRODUCER"
+}
