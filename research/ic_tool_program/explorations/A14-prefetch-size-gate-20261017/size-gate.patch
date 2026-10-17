@@ -1,0 +1,31 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index b255ce6d8..b06cda62a 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -6580,6 +6580,13 @@ impl PairSumTable {
+         // stopping at its first witness has not paid for the rest.
+         const BLOCK: usize = 1024;
+         const LOOKAHEAD: usize = 32;
++        // The runs' prefetch pays only where a run is a cache miss: R12
++        // measured it 1.06x faster in cold time at 3.7M-6.3M stored pairs
++        // and 1-5% slower at 0.15M-0.27M, where the table is a few MiB.
++        // Below this many pairs (16 MiB in the folded tier) the pass is
++        // skipped; the lookups read the same values either way.
++        const RUN_PREFETCH_MIN_PAIRS: usize = 1 << 20;
++        let prefetch_runs = self.len() >= RUN_PREFETCH_MIN_PAIRS;
+         let mut admitted_offsets = Vec::with_capacity(BLOCK / 8);
+         let count = if fused { x3s.len() } else { rests.len() };
+         for lo in (0..count).step_by(BLOCK) {
+@@ -6605,8 +6612,10 @@ impl PairSumTable {
+             // The bucket entries arrived during the filter pass: read them
+             // and send for every admitted key's run before looking any up,
+             // so the runs' misses overlap instead of following one another.
+-            for &within in &admitted_offsets {
+-                self.prefetch_run(keys[within]);
++            if prefetch_runs {
++                for &within in &admitted_offsets {
++                    self.prefetch_run(keys[within]);
++                }
+             }
+             for &within in &admitted_offsets {
+                 let offset = lo + within;
