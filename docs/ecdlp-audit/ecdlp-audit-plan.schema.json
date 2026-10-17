@@ -1,0 +1,655 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aburan28/crypto/blob/main/docs/ecdlp-audit/ecdlp-audit-plan.schema.json",
+  "title": "ECDLP audit program planning record",
+  "description": "Strict schema for the non-authoritative eight-workstream planning mock. Schema validity is structural; the native ecdlp-audit verifier also checks identities, metrics, dependency acyclicity, path confinement, source and deliverable hashes, and fail-closed status rules.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_state",
+    "plan_uid",
+    "title",
+    "as_of",
+    "authoritative",
+    "promotion_allowed",
+    "scope",
+    "source_artifacts",
+    "vocabularies",
+    "inventory_freeze",
+    "workstreams",
+    "attack_routes",
+    "subjects",
+    "assessments",
+    "dependencies",
+    "completion_metrics",
+    "governance",
+    "open_obligations",
+    "report"
+  ],
+  "properties": {
+    "schema_version": {"const": "ecdlp-audit-plan/v1"},
+    "record_state": {"const": "mock_non_authoritative"},
+    "plan_uid": {
+      "type": "string",
+      "pattern": "^urn:ecdlp-audit-plan:1:sha256:[0-9a-f]{64}$",
+      "description": "SHA-256 of canonical compact sorted raw-UTF-8 JSON for the complete record with only top-level plan_uid removed; no trailing newline."
+    },
+    "title": {"type": "string", "minLength": 1},
+    "as_of": {"type": "string", "format": "date"},
+    "authoritative": {"const": false},
+    "promotion_allowed": {"const": false},
+    "scope": {"$ref": "#/$defs/scope"},
+    "source_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/sourceArtifact"}
+    },
+    "vocabularies": {"$ref": "#/$defs/vocabularies"},
+    "inventory_freeze": {"$ref": "#/$defs/inventoryFreeze"},
+    "workstreams": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/workstream"}
+    },
+    "attack_routes": {
+      "type": "array",
+      "minItems": 5,
+      "items": {"$ref": "#/$defs/attackRoute"}
+    },
+    "subjects": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/subject"}
+    },
+    "assessments": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/assessment"}
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/dependency"}
+    },
+    "completion_metrics": {"$ref": "#/$defs/completionMetrics"},
+    "governance": {"$ref": "#/$defs/governance"},
+    "open_obligations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/obligation"}
+    },
+    "report": {"$ref": "#/$defs/report"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "claimStatus": {
+      "enum": ["unknown", "supported", "refuted", "not_applicable"]
+    },
+    "requirementStatus": {
+      "enum": [
+        "verified_complete",
+        "implemented_unverified",
+        "partial",
+        "blocked",
+        "not_attempted"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "objective",
+        "claim_boundary",
+        "execution_fixture_classes",
+        "default_authorization_tiers",
+        "live_target_execution",
+        "secret_key_material",
+        "production_exploitation",
+        "outcome_classes"
+      ],
+      "properties": {
+        "objective": {"type": "string", "minLength": 1},
+        "claim_boundary": {"const": "This is a planning mock, not an authoritative ledger, attack result, completion claim, authorization instrument, or full Jacobian index-calculus solver."},
+        "execution_fixture_classes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "passive_public",
+              "public_synthetic",
+              "known_answer",
+              "authorized_public_challenge",
+              "owned_authorized"
+            ]
+          }
+        },
+        "default_authorization_tiers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["T0", "T1", "T2", "T3", "T4"]}
+        },
+        "live_target_execution": {"const": false},
+        "secret_key_material": {"const": false},
+        "production_exploitation": {"const": false},
+        "outcome_classes": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "exact_scalar_recovery",
+              "equivalent_capability",
+              "partial_secret_leakage",
+              "property_or_provenance_finding",
+              "no_recovery_within_boundary"
+            ]
+          }
+        }
+      }
+    },
+    "sourceArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "role", "revision", "sha256", "status"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^source\\.[a-z0-9._-]+$"},
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Repository-relative path; for a pinned source it is resolved inside the named commit, not against mutable worktree bytes."
+        },
+        "role": {"type": "string", "minLength": 1},
+        "revision": {
+          "type": ["string", "null"],
+          "description": "Exact commit object for pinned provenance; null for current-worktree and planned sources."
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256",
+          "description": "For pinned provenance, SHA-256 of the raw Git blob at revision:path; for current-worktree provenance, SHA-256 of the raw path bytes."
+        },
+        "status": {"enum": ["pinned", "current_worktree", "planned"]}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"status": {"const": "pinned"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"status": {"const": "current_worktree"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "revision": {"type": "null"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"status": {"const": "planned"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "revision": {"type": "null"},
+              "sha256": {"type": "null"}
+            }
+          }
+        }
+      ]
+    },
+    "vocabularies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_status",
+        "requirement_status",
+        "maturity_levels",
+        "independence_levels",
+        "authorization_tiers",
+        "cost_status",
+        "execution_outcome",
+        "review_decision"
+      ],
+      "properties": {
+        "claim_status": {
+          "const": ["unknown", "supported", "refuted", "not_applicable"]
+        },
+        "requirement_status": {
+          "const": [
+            "verified_complete",
+            "implemented_unverified",
+            "partial",
+            "blocked",
+            "not_attempted"
+          ]
+        },
+        "maturity_levels": {
+          "const": ["E0", "E1", "E2", "E3", "E4", "E5", "E6", "E7"]
+        },
+        "independence_levels": {
+          "const": ["R0", "R1", "R2", "R3", "R4", "R5"]
+        },
+        "authorization_tiers": {
+          "const": ["T0", "T1", "T2", "T3", "T4"]
+        },
+        "cost_status": {
+          "const": ["measured", "modeled", "extrapolated", "unknown", "not_applicable"]
+        },
+        "execution_outcome": {
+          "const": ["complete", "insufficient_relations", "budget", "timeout", "oom", "error"]
+        },
+        "review_decision": {
+          "const": ["approved", "changes_requested", "pending", "conflicted"]
+        }
+      }
+    },
+    "inventoryFreeze": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "frozen_at",
+        "unit_expression",
+        "denominator_manifest_sha256",
+        "expected_units",
+        "note"
+      ],
+      "properties": {
+        "status": {"enum": ["not_frozen", "frozen"]},
+        "frozen_at": {"type": ["string", "null"], "format": "date-time"},
+        "unit_expression": {"type": "string", "minLength": 1},
+        "denominator_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "expected_units": {"type": ["integer", "null"], "minimum": 0},
+        "note": {"type": "string", "minLength": 1}
+      }
+    },
+    "deliverable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "description", "path", "artifact_sha256", "status", "acceptance_gate_ids"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^WS[1-8]-D[0-9]+$"},
+        "kind": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "description": {"type": "string", "minLength": 1},
+        "path": {
+          "type": ["string", "null"],
+          "description": "Exact repository-relative path for this fixed mock deliverable, or null when no artifact exists."
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/sha256",
+          "description": "SHA-256 of the exact raw file bytes at path; byte identity is not semantic validation."
+        },
+        "status": {"$ref": "#/$defs/requirementStatus"},
+        "acceptance_gate_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^WS[1-8]-G[0-9]+$"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {"enum": ["partial", "implemented_unverified", "verified_complete"]}
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "path": {"type": "string", "minLength": 1},
+              "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"status": {"const": "not_attempted"}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "path": {"type": "null"},
+              "artifact_sha256": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"path": {"type": "string"}},
+            "required": ["path"]
+          },
+          "then": {
+            "properties": {
+              "path": {"type": "string", "minLength": 1},
+              "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"artifact_sha256": {"type": "string"}},
+            "required": ["artifact_sha256"]
+          },
+          "then": {
+            "properties": {"path": {"type": "string", "minLength": 1}}
+          }
+        }
+      ]
+    },
+    "acceptanceGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "required",
+        "claim_status",
+        "scope",
+        "rationale",
+        "evidence_refs",
+        "obligation_id"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^WS[1-8]-G[0-9]+$"},
+        "required": {"type": "boolean"},
+        "claim_status": {"$ref": "#/$defs/claimStatus"},
+        "scope": {"type": "string", "minLength": 1},
+        "rationale": {"type": "string", "minLength": 1},
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "obligation_id": {"type": ["string", "null"], "pattern": "^[a-z][a-z0-9._-]+$"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {"claim_status": {"enum": ["supported", "refuted"]}}
+          },
+          "then": {
+            "type": "object",
+            "properties": {"evidence_refs": {"type": "array", "minItems": 1}}
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {"claim_status": {"const": "unknown"}}
+          },
+          "then": {
+            "type": "object",
+            "properties": {"obligation_id": {"type": "string", "minLength": 1}}
+          }
+        }
+      ]
+    },
+    "workstreamMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_gates",
+        "classified_gates",
+        "supported_gates",
+        "open_required_gates"
+      ],
+      "properties": {
+        "required_gates": {"type": "integer", "minimum": 0},
+        "classified_gates": {"type": "integer", "minimum": 0},
+        "supported_gates": {"type": "integer", "minimum": 0},
+        "open_required_gates": {"type": "integer", "minimum": 0}
+      }
+    },
+    "workstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slug",
+        "title",
+        "requirement_status",
+        "depends_on",
+        "summary",
+        "deliverables",
+        "acceptance_gates",
+        "metrics",
+        "non_claims"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^WS[1-8]$"},
+        "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "title": {"type": "string", "minLength": 1},
+        "requirement_status": {"$ref": "#/$defs/requirementStatus"},
+        "depends_on": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^WS[1-8]$"}
+        },
+        "summary": {"type": "string", "minLength": 1},
+        "deliverables": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/deliverable"}
+        },
+        "acceptance_gates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/acceptanceGate"}
+        },
+        "metrics": {"$ref": "#/$defs/workstreamMetrics"},
+        "non_claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "attackRoute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "lane", "title", "claim_status", "scope", "obligation_id"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^route\\.[a-e]\\.[a-z0-9._-]+$"},
+        "lane": {"enum": ["A", "B", "C", "D", "E"]},
+        "title": {"type": "string", "minLength": 1},
+        "claim_status": {"const": "unknown"},
+        "scope": {"type": "string", "minLength": 1},
+        "obligation_id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]+$"}
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit_uid", "unit_key"],
+      "properties": {
+        "unit_uid": {
+          "type": "string",
+          "pattern": "^urn:ecdlp-audit-unit:1:sha256:[0-9a-f]{64}$"
+        },
+        "unit_key": {"type": "object"}
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assessment_uid", "unit_uid", "revision", "supersedes", "claim_status"],
+      "properties": {
+        "assessment_uid": {
+          "type": "string",
+          "pattern": "^urn:ecdlp-audit-assessment:1:sha256:[0-9a-f]{64}$"
+        },
+        "unit_uid": {
+          "type": "string",
+          "pattern": "^urn:ecdlp-audit-unit:1:sha256:[0-9a-f]{64}$"
+        },
+        "revision": {"type": "integer", "minimum": 1},
+        "supersedes": {"type": ["string", "null"]},
+        "claim_status": {"$ref": "#/$defs/claimStatus"}
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "relation", "status", "rationale"],
+      "properties": {
+        "from": {"type": "string", "pattern": "^WS[1-8]$"},
+        "to": {"type": "string", "pattern": "^WS[1-8]$"},
+        "relation": {"enum": ["requires", "blocks", "validates", "governs", "supplies"]},
+        "status": {"enum": ["active", "resolved", "planned"]},
+        "rationale": {"type": "string", "minLength": 1}
+      }
+    },
+    "countBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected", "present", "missing"],
+      "properties": {
+        "expected": {"type": ["integer", "null"], "minimum": 0},
+        "present": {"type": "integer", "minimum": 0},
+        "missing": {"type": ["integer", "null"], "minimum": 0}
+      }
+    },
+    "completionMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inventory",
+        "classification",
+        "evidence",
+        "authorization",
+        "governance",
+        "obligations",
+        "derived"
+      ],
+      "properties": {
+        "inventory": {"$ref": "#/$defs/countBlock"},
+        "classification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required_claim_cells", "classified_claim_cells", "unknown", "supported", "refuted", "not_applicable"],
+          "properties": {
+            "required_claim_cells": {"type": ["integer", "null"], "minimum": 0},
+            "classified_claim_cells": {"type": "integer", "minimum": 0},
+            "unknown": {"type": "integer", "minimum": 0},
+            "supported": {"type": "integer", "minimum": 0},
+            "refuted": {"type": "integer", "minimum": 0},
+            "not_applicable": {"type": "integer", "minimum": 0}
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["independently_replayed", "matched_controlled", "end_to_end_certified"],
+          "properties": {
+            "independently_replayed": {"type": "integer", "minimum": 0},
+            "matched_controlled": {"type": "integer", "minimum": 0},
+            "end_to_end_certified": {"type": "integer", "minimum": 0}
+          }
+        },
+        "authorization": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["execution_units", "documented", "blocked_or_unknown"],
+          "properties": {
+            "execution_units": {"type": "integer", "minimum": 0},
+            "documented": {"type": "integer", "minimum": 0},
+            "blocked_or_unknown": {"type": "integer", "minimum": 0}
+          }
+        },
+        "governance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["promotion_candidates", "fully_reviewed", "conflicted_reviews"],
+          "properties": {
+            "promotion_candidates": {"type": "integer", "minimum": 0},
+            "fully_reviewed": {"type": "integer", "minimum": 0},
+            "conflicted_reviews": {"type": "integer", "minimum": 0}
+          }
+        },
+        "obligations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["open_required", "blocked"],
+          "properties": {
+            "open_required": {"type": "integer", "minimum": 0},
+            "blocked": {"type": "integer", "minimum": 0}
+          }
+        },
+        "derived": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["inventory_complete", "classification_complete", "authorization_complete", "promotion_ready"],
+          "properties": {
+            "inventory_complete": {"const": false},
+            "classification_complete": {"const": false},
+            "authorization_complete": {"const": false},
+            "promotion_ready": {"const": false}
+          }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "required_roles", "self_promotion_allowed", "immutable_evidence", "promotion_rule", "correction_rule"],
+      "properties": {
+        "status": {"const": "proposed"},
+        "required_roles": {
+          "const": [
+            "author",
+            "mathematical_reviewer",
+            "implementation_reviewer",
+            "evidence_replay_reviewer",
+            "release_approver"
+          ]
+        },
+        "self_promotion_allowed": {"const": false},
+        "immutable_evidence": {"const": true},
+        "promotion_rule": {"type": "string", "minLength": 1},
+        "correction_rule": {"type": "string", "minLength": 1}
+      }
+    },
+    "obligation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "workstream_id", "status", "required", "description", "exit_evidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9._-]+$"},
+        "workstream_id": {"type": "string", "pattern": "^WS[1-8]$"},
+        "status": {"enum": ["open", "blocked", "resolved"]},
+        "required": {"type": "boolean"},
+        "description": {"type": "string", "minLength": 1},
+        "exit_evidence": {"type": "string", "minLength": 1}
+      }
+    },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_path", "plan_path", "pdf_path", "diagram_path", "validator_path", "claim_boundary"],
+      "properties": {
+        "record_path": {"type": "string", "minLength": 1},
+        "plan_path": {"type": "string", "minLength": 1},
+        "pdf_path": {"type": "string", "minLength": 1},
+        "diagram_path": {"type": "string", "minLength": 1},
+        "validator_path": {"type": "string", "minLength": 1},
+        "claim_boundary": {"const": "The mock verifies the planning contract only. It cannot promote an attack, safety, completeness, arithmetic, transfer, solver, performance, or historical-superlative claim."}
+      }
+    }
+  }
+}
