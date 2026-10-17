@@ -1,0 +1,31 @@
+binary feature                       P true/10  S true/11  undecided  perfect
+H7 D has no l^2, l<1e6                    8         10          0      no
+H8 lpf(twist) >= 160                      4          4          0      no
+H8 lpf(twist) >= pbits-32                 3          2          0      no
+H8 twist cofactor <= 32 bits              3          2          0      no
+H9 lpf(n-1) >= 160                        2          6          1      no
+H9 lpf(n-1) >= pbits-32                   1          4          1      no
+H9 lpf(n+1) >= 160                        3          4          2      no
+H9 lpf(n+1) >= pbits-32                   1          3          2      no
+H10 (p/n) = 1                             8          5          0      no
+H10 (-p/n) = 1                            4          7          0      no
+H10 p primitive root mod n                0          2          0      no
+H10 (n-1)/k <= 2                          2          3          0      no
+H11 kr_m1_n = 1                           6          5          0      no
+H11 kr_2_n = 1                            5          8          0      no
+H11 kr_3_n = 1                            3          6          0      no
+H11 kr_t_n = 1                            7          5          0      no
+H11 kr_nt_n = 1                           6          4          0      no
+H11 kr_n_p = 1                            4          8          0      no
+H11 kr_t_p = 1                            8          7          0      no
+H11 kr_D_p = 1                           10         11          0      no
+H11 kr_nt_p = 1                           3          5          0      no
+
+continuous feature        median P   median S   U      exact p   Bonferroni   perfect threshold
+H8 lpf(twist)/pbits          0.684      0.577    65.0   0.5116    1.0000       no
+H9 lpf(n-1)/pbits            0.484      0.711    36.0   0.1971    0.7885       no
+H9 lpf(n+1)/pbits            0.600      0.640    45.5   0.5233    1.0000       no
+H7 #{l<1e6: l^2|D}           0.000      0.000    61.0   0.5865    1.0000       no
+
+positive control (planted label on n mod 2^20): detected = 1; that feature splits the real labels = 0
+negative control: 2 of 100000 random labellings split perfectly on some binary feature (family-wise rate 2.0000000000000000000000000000000000000 E-5)

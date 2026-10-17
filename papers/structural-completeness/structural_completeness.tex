@@ -71,8 +71,10 @@ $\rho\}$ reduces ECDLP cost below $\sqrt{r / |\Aut(E)|}$ (plain
 Pollard~$\rho$ with full automorphism folding).  The theorem says
 nothing about algorithms outside this family.
 
-The theorem is proven by case analysis over seven structural blocks
-(Section~\ref{sec:blocks}) under standing assumptions: Tate's
+The theorem is argued by case analysis over seven structural blocks
+(Section~\ref{sec:blocks}; proof sketches in
+Section~\ref{sec:theorem}, not yet independently reviewed) under
+standing assumptions: Tate's
 isogeny theorem, Howe's gluing theorem, Gaudry's and Diem--Thom\'e's
 complexity bounds for hyperelliptic index calculus, and the
 assumption that prime-field hyperelliptic DLP is not
@@ -362,16 +364,18 @@ across 25 kernel-curve pairs (Exp~U--Y, script
 confirming $\#\Jac \approx p^2$ at every node.
 Lemma~\ref{lem:ell-rank} was checked numerically on the curves
 $y^2 = x^3 + b$ ($j = 0$; $b = 1,\ldots,p{-}1$) over $\FF_p$, $5 \le p < 500$,
-counting every instance $(\ell, p, b)$ with $\ell \mid \#E$.
+counting every instance $(\ell, p, b)$ with $\ell \mid \#E$ and
+$p \not\equiv 0 \pmod \ell$ (both scripts skip $r = 0$, which drops one
+instance, $(\ell,p,b) = (7,7,5)$ with $\#E = 7$).
 For $\ell \in \{3,5,7\}$
 (script \texttt{exp\_zprime2\_generalized\_lemma.py}; the $\ell \in \{3,5\}$
 rows also in \texttt{exp\_zprime\_l\_residue.py}) there are 24\,476
 instances: 8\,734 on ordinary curves ($p \equiv 1 \pmod 3$) and 15\,742 on
 supersingular ones ($p \equiv 2 \pmod 3$).  All 8\,156 instances in the
 lemma's hypothesis classes $r = p \bmod \ell \notin \{0, \ell{-}1\}$ are
-ordinary, and none has $\ell \mid \#E^t$.  The residue classes that contain
-any instance are $r = 1$ for $\ell \in \{3,5\}$ and $r \in \{1,\ldots,5\}$
-for $\ell = 7$; for $\ell = 5$ the classes $r \in \{2,3\}$ contain none, so
+ordinary, and none has $\ell \mid \#E^t$.  The hypothesis classes that
+contain any instance are $r = 1$ for $\ell \in \{3,5\}$ and
+$r \in \{1,\ldots,5\}$ for $\ell = 7$; for $\ell = 5$ the classes $r \in \{2,3\}$ contain none, so
 they are not tested.  All 16\,320 instances in the excluded class
 $r = \ell{-}1$ (578 ordinary, 15\,742 supersingular) have $\ell \mid \#E^t$,
 as the tightness remark predicts.
@@ -382,7 +386,10 @@ For $\ell = 11$ only $r = 1$ contains instances (198); for $\ell = 13$, all
 (1\,510 instances) with $0$ failures, and $r = 12 = \ell{-}1$ yields 94
 failures as predicted.  Total for $\ell \in \{3,5,7,11,13\}$: 26\,278
 instances, of which 10\,536 are ordinary; the 9\,864 ordinary instances that
-satisfy the lemma's hypothesis give $0$ violations.  The counts and the
+satisfy the lemma's hypothesis give $0$ violations.  The lemma depends on
+$(\ell, p, \#E)$ only, so these are 336 and 249 distinct
+$(\ell, p, \#E)$ checks respectively (for $\ell \in \{3,5,7\}$: 292 and,
+in the hypothesis classes, 209).  The counts and the
 re-run outputs are committed in
 \texttt{papers/structural-completeness/recount/}
 (\texttt{count.txt}, \texttt{exp\_*.txt}).

@@ -1,0 +1,92 @@
+{
+  "claims": [
+    {
+      "id": "S1",
+      "statement": "max(r1, r2) over 6 arms tsy.* (batch ≥ 0)",
+      "threshold": 1.1,
+      "value": 1.0832236933212114,
+      "verdict": "PASS"
+    },
+    {
+      "id": "K1",
+      "statement": "max(r1, r2) over 6 arms kernel.fp64.* (batch ≥ 4096)",
+      "threshold": 0.85,
+      "value": 0.44146341275177386,
+      "verdict": "PASS"
+    },
+    {
+      "id": "C1",
+      "statement": "max |r_k − 1| over 6 arms kernel.w1.* (batch ≥ 4096)",
+      "threshold": 0.1,
+      "value": 0.04446233383357767,
+      "verdict": "PASS"
+    }
+  ],
+  "classes": [
+    {
+      "arms": 2,
+      "class": "no detected effect",
+      "group": "clock"
+    },
+    {
+      "arms": 1,
+      "class": "candidate slower",
+      "group": "fp64"
+    },
+    {
+      "arms": 7,
+      "class": "no detected effect",
+      "group": "fp64"
+    },
+    {
+      "arms": 10,
+      "class": "candidate faster",
+      "group": "kernel"
+    },
+    {
+      "arms": 10,
+      "class": "no detected effect",
+      "group": "kernel"
+    },
+    {
+      "arms": 1,
+      "class": "candidate faster",
+      "group": "mem"
+    },
+    {
+      "arms": 4,
+      "class": "candidate slower",
+      "group": "mem"
+    },
+    {
+      "arms": 15,
+      "class": "no detected effect",
+      "group": "mem"
+    },
+    {
+      "arms": 3,
+      "class": "candidate faster",
+      "group": "scaling"
+    },
+    {
+      "arms": 3,
+      "class": "no detected effect",
+      "group": "scaling"
+    },
+    {
+      "arms": 1,
+      "class": "candidate slower",
+      "group": "tsy"
+    },
+    {
+      "arms": 5,
+      "class": "no detected effect",
+      "group": "tsy"
+    },
+    {
+      "arms": 8,
+      "class": "no detected effect",
+      "group": "w1"
+    }
+  ]
+}
