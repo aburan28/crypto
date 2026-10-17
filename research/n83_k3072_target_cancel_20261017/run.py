@@ -5,7 +5,9 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import resource
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -96,6 +98,7 @@ def run(policy, binary, output):
         'plan_sha256': digest(HERE / 'plan.json'),
         'cap_seconds': plan['cap_seconds']})
     started = time.monotonic()
+    child_rss_before = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
     try:
         process = subprocess.run(command, cwd=ROOT, env=environment,
                                  capture_output=True, text=True,
@@ -108,6 +111,7 @@ def run(policy, binary, output):
         stdout = (error.stdout or b'').decode(errors='replace')
         stderr = (error.stderr or b'').decode(errors='replace')
     wall = time.monotonic() - started
+    child_rss_after = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
     (output / 'stdout.jsonl').write_text(stdout)
     (output / 'stderr.txt').write_text(stderr)
     summary = None
@@ -120,6 +124,9 @@ def run(policy, binary, output):
                'policy': policy, 'candidate_id': candidate_id,
                'producer_status': status,
                'exit_code': exit_code, 'outer_wall_seconds': wall,
+               'children_maxrss_before_raw': child_rss_before,
+               'children_maxrss_after_raw': child_rss_after,
+               'children_maxrss_unit': 'bytes' if sys.platform == 'darwin' else 'kib',
                'source_sha256': plan['sha256']['source'],
                'binary_sha256': plan['sha256']['binary'],
                'stdout_sha256': digest(output / 'stdout.jsonl'),

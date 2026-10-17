@@ -98,7 +98,10 @@ def replay_one(policy, folder, plan, targets, answers):
             receipt['target_result_sha256'] !=
                 runner.digest(folder / 'targets_result.jsonl') or
             receipt['base_dump_sha256'] !=
-                runner.digest(folder / 'base_dump.jsonl')):
+                runner.digest(folder / 'base_dump.jsonl') or
+            not isinstance(receipt['children_maxrss_after_raw'], int) or
+            receipt['children_maxrss_after_raw'] < 0 or
+            receipt['children_maxrss_unit'] not in ('bytes', 'kib')):
         raise ValueError('producer, source, command or raw digest differs')
     summary = read(folder / 'stdout.jsonl')
     if (summary != receipt['summary'] or summary['n'] != 83 or
@@ -153,6 +156,10 @@ def replay_one(policy, folder, plan, targets, answers):
                 math.exp(statistics.mean(math.log(value) for value in times)),
             'online_median_ms': statistics.median(times),
             'cold_process_ms': summary['timing_ms']['process_total'],
+            'children_maxrss_after_raw': receipt['children_maxrss_after_raw'],
+            'children_maxrss_unit': receipt['children_maxrss_unit'],
+            'root_state_allocated_bytes': summary['root_state_allocated_bytes'],
+            'root_table_allocated_bytes': summary['root_table_allocated_bytes'],
             'per_target_online_ms': times,
             'per_target_winning_worker_probes': probes,
             'raw_receipt_sha256': runner.digest(folder / 'run_receipt.json')}
