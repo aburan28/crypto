@@ -8,6 +8,13 @@ p,role,observed_zero_rows,predicted,lo95,hi95,dispersion,auc,source
 61,forward,273,275.3,247.0,303.6,0.992,0.9841,model_v2_results.txt
 67,forward,320,301.1,271.5,330.8,0.996,0.9870,model_v2_results.txt
 71,forward,317,317.9,287.5,348.3,1.000,0.9893,model_v2_results.txt
-73,pending,,327.1,296.3,357.9,,,predictions_v2.txt
-79,pending,,353.5,321.5,385.5,,,predictions_v2.txt
-83,pending,,372.6,339.7,405.4,,,predictions_v2.txt
+73,forward,311,327.1,296.3,357.9,1.011,0.9889,model_v2_results.txt
+79,forward,373,353.5,321.5,385.5,0.998,0.9925,model_v2_results.txt
+83,forward,399,372.6,339.7,405.4,1.001,0.9925,model_v2_results.txt
+89,forward,404,397.8,363.9,431.7,1.000,0.9946,model_v2_results.txt
+97,forward,467,434.1,398.7,469.6,1.001,0.9959,model_v2_results.txt
+101,forward,454,453.3,417.1,489.5,0.995,0.9957,model_v2_results.txt
+103,forward,442,460.3,423.8,496.8,1.004,0.9956,model_v2_results.txt
+107,pending,,480.2,443.0,517.5,,,predictions_v2.txt
+109,pending,,488.9,451.3,526.5,,,predictions_v2.txt
+113,pending,,505.8,467.6,544.0,,,predictions_v2.txt

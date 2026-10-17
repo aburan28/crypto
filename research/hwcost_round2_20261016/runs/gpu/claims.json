@@ -1,0 +1,65 @@
+[
+  {
+    "id": "G1",
+    "statement": "a priori, all 46 builds, median |error|",
+    "value": 0.17915772566151333,
+    "threshold": 0.3,
+    "verdict": "PASS"
+  },
+  {
+    "id": "G1.eta>1",
+    "statement": "builds measured above the a priori ceiling (η > 1)",
+    "value": 0.0,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "G2",
+    "statement": "η from each GPU's base build, 44 other builds, median |error|",
+    "value": 0.01448685675586292,
+    "threshold": 0.3,
+    "verdict": "PASS"
+  },
+  {
+    "id": "G2.10",
+    "statement": "the same, against 10%",
+    "value": 0.01448685675586292,
+    "threshold": 0.1,
+    "verdict": "PASS"
+  },
+  {
+    "id": "G3",
+    "statement": "η from the RTX PRO 6000 base build carried to 25 B200 builds, median |error|",
+    "value": 0.1949653453235769,
+    "threshold": 0.3,
+    "verdict": "PASS"
+  },
+  {
+    "id": "G1.shared",
+    "statement": "shared-int pipes: a priori, median |error|",
+    "value": 0.12367938500033626,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "G1.shared.eta>1",
+    "statement": "shared-int pipes: builds with η > 1",
+    "value": 0.0,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "G2.shared",
+    "statement": "shared-int pipes: η per GPU, median |error|",
+    "value": 0.019187534842847298,
+    "threshold": null,
+    "verdict": "REPORT"
+  },
+  {
+    "id": "G3.shared",
+    "statement": "shared-int pipes: η carried across GPUs, median |error|",
+    "value": 0.10724575346184073,
+    "threshold": null,
+    "verdict": "REPORT"
+  }
+]

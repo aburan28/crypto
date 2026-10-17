@@ -86,6 +86,34 @@ pub struct Claim {
     pub verdict: String,
 }
 
+impl Claim {
+    /// `PASS` when `value ≤ threshold`, else `FAIL`.
+    pub fn at_most(id: &str, statement: &str, value: f64, threshold: f64) -> Claim {
+        Claim {
+            id: id.into(),
+            statement: statement.into(),
+            value,
+            threshold,
+            verdict: if value.is_finite() && value <= threshold {
+                "PASS"
+            } else {
+                "FAIL"
+            }
+            .into(),
+        }
+    }
+    /// A pre-registered quantity reported without a threshold.
+    pub fn report(id: &str, statement: &str, value: f64) -> Claim {
+        Claim {
+            id: id.into(),
+            statement: statement.into(),
+            value,
+            threshold: f64::NAN,
+            verdict: "REPORT".into(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SizeFit {
     pub op: String,
@@ -239,6 +267,17 @@ fn level_for(levels: &[MemLevel], ws: f64) -> Option<&MemLevel> {
 }
 
 pub fn validate(m: &Measurements, fit_max_batch: usize) -> Result<(Validation, Hardware), String> {
+    validate_with(m, fit_max_batch, None)
+}
+
+/// [`validate`], with model C's per-field residual taken from `residual_from`
+/// (another run's fitted residuals, ns) instead of fitted on this run: the
+/// test of whether a calibration carries to another build or host.
+pub fn validate_with(
+    m: &Measurements,
+    fit_max_batch: usize,
+    residual_from: Option<&BTreeMap<String, f64>>,
+) -> Result<(Validation, Hardware), String> {
     let (ghz, clock_src) = clock_ghz(m);
     let cores = *m.params.threads.last().unwrap_or(&1) as u32;
     let levels = memory_levels(m);
@@ -308,7 +347,14 @@ pub fn validate(m: &Measurements, fit_max_batch: usize) -> Result<(Validation, H
                 "{f}: no batch ≤ {fit_max_batch} to fit the residual on"
             ));
         }
-        residual.insert(f.clone(), res.iter().sum::<f64>() / res.len() as f64);
+        let fitted = res.iter().sum::<f64>() / res.len() as f64;
+        let r = match residual_from {
+            Some(other) => *other
+                .get(f)
+                .ok_or_else(|| format!("{f}: no residual in the run it is taken from"))?,
+            None => fitted,
+        };
+        residual.insert(f.clone(), r);
     }
 
     // Model S: per-op costs and residual against limbs on the FpWide fields
@@ -449,6 +495,7 @@ pub fn validate(m: &Measurements, fit_max_batch: usize) -> Result<(Validation, H
                 OpCost {
                     cycles: t * ghz,
                     latency_cycles: Some(l * ghz),
+                    pipe: None,
                     source: src(&format!(
                         "{f}.{op} throughput (8 chains; inv 4) and latency"
                     )),
@@ -460,6 +507,7 @@ pub fn validate(m: &Measurements, fit_max_batch: usize) -> Result<(Validation, H
             OpCost {
                 cycles: residual[f] * ghz,
                 latency_cycles: None,
+                pipe: None,
                 source: format!(
                     "measured: fitted per-iteration residual (measured − a priori) of the rho kernel over batches ≤ {fit_max_batch} (hwcost fit)"
                 ),
@@ -556,7 +604,7 @@ pub fn validate(m: &Measurements, fit_max_batch: usize) -> Result<(Validation, H
     ))
 }
 
-fn median_abs(v: impl Iterator<Item = f64>) -> f64 {
+pub fn median_abs(v: impl Iterator<Item = f64>) -> f64 {
     let mut v: Vec<f64> = v.map(f64::abs).collect();
     super::measure::median(&mut v).unwrap_or(f64::NAN)
 }
