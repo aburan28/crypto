@@ -1,0 +1,242 @@
+warning: unused import: `ToPrimitive`
+  --> src/cryptanalysis/curve_traits/mod.rs:50:31
+   |
+50 | use num_traits::{One, Signed, ToPrimitive, Zero};
+   |                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `super::koblitz_fast_arith::FastBinaryCurve`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:77:5
+   |
+77 | use super::koblitz_fast_arith::FastBinaryCurve;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unnecessary trailing semicolons
+    --> src/cryptanalysis/prime_fast.rs:1629:15
+     |
+1629 |             );;;;
+     |               ^^^ help: remove these semicolons
+     |
+     = note: `#[warn(redundant_semicolons)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:727:13
+    |
+727 |         let current = LegacyFloatFixture {
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:733:13
+    |
+733 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:734:13
+    |
+734 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `current`
+   --> src/cryptanalysis/ecbench/record.rs:735:13
+    |
+735 |         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+    |             ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_current`
+
+warning: unused variable: `sums`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:3236:9
+     |
+3236 |     let sums = fast.batch_add(&pairs);
+     |         ^^^^ help: if this is intentional, prefix it with an underscore: `_sums`
+
+warning: field `plans` is never read
+   --> src/cryptanalysis/inherited_f4.rs:513:5
+    |
+505 | struct LayoutStep {
+    |        ---------- field in this struct
+...
+513 |     plans: RefCell<HashMap<u32, Rc<RewritePlan>>>,
+    |     ^^^^^
+    |
+    = note: `LayoutStep` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `zeroed_words` is never used
+    --> src/cryptanalysis/inherited_f4.rs:1019:4
+     |
+1019 | fn zeroed_words(n: usize) -> Rc<[u64]> {
+     |    ^^^^^^^^^^^^
+
+warning: method `rewrite_plan` is never used
+    --> src/cryptanalysis/inherited_f4.rs:1808:8
+     |
+1330 | impl ReducedBasis {
+     | ----------------- method in this implementation
+...
+1808 |     fn rewrite_plan(&self, from: u32) -> Rc<RewritePlan> {
+     |        ^^^^^^^^^^^^
+
+warning: function `trace_on` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:9072:4
+     |
+9072 | fn trace_on() -> bool {
+     |    ^^^^^^^^
+
+warning: function `trace_cost` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:9078:4
+     |
+9078 | fn trace_cost(w0: Option<u64>, refuted: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `trace` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:9092:4
+     |
+9092 | fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
+     |    ^^^^^
+
+
+running 4113 tests
+iiiiiii......................i.................................i....................... 87/4113
+.....................................................iiii...i........i.............i..i 174/4113
+.....................i....i.......i.................................................... 261/4113
+.....i....................i......................i..................................... 348/4113
+....................................................................................... 435/4113
+.......................iiiiii.......i.................................................. 522/4113
+....................................................................................... 609/4113
+....................................................................................... 696/4113
+...............................i....................................................... 783/4113
+....................................................................................... 870/4113
+.....i................................................................................. 957/4113
+....................................................................................... 1044/4113
+....................................................ii.i.......i....................... 1131/4113
+...................i................................................................... 1218/4113
+.....i...........................i........i........................i................... 1305/4113
+..................................................................test asymmetric::ec_elgamal::tests::encrypt_decrypt_roundtrip_one has been running for over 60 seconds
+............itest cryptanalysis::ecbench::claw::tests::claw_recovers_planted_logs_on_koblitz_curves has been running for over 60 seconds
+test cryptanalysis::ecbench::claw::tests::wide_claw_recovers_planted_logs has been running for over 60 seconds
+.......i 1392/4113
+................test cryptanalysis::ic_framework::solvers::tests::every_engine_agrees_on_random_quadratic_systems has been running for over 60 seconds
+test cryptanalysis::isogeny_class_search::tests::above_floor_count_is_explained_by_decomposition_yield has been running for over 60 seconds
+test cryptanalysis::isogeny_degree_search::profile::tests::exhaustive_small_field_sweep_is_flat has been running for over 60 seconds
+......test cryptanalysis::isogeny_degree_search::profile::tests::target_variation_explains_the_on_curve_spread has been running for over 60 seconds
+.test cryptanalysis::jacobian_transfer::tests::the_whole_registry_builds_and_round_trips has been running for over 60 seconds
+test cryptanalysis::jv_cover::tests::nagao_finds_planted_six_sums_and_agrees_with_the_oracle has been running for over 60 seconds
+test cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle has been running for over 60 seconds
+...i....i..........test cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle has been running for over 60 seconds
+.................................test cryptanalysis::jv_cover::tests::the_solver_loses_no_rational_solution_at_small_p has been running for over 60 seconds
+............ 1479/4113
+............................................iiii....................................... 1566/4113
+....................................................................................... 1653/4113
+.....................................i.....i............i.............................. 1740/4113
+................................................................i...................... 1827/4113
+....................................................................................... 1914/4113
+...............................................................i....................... 2001/4113
+..............................................................i........................ 2088/4113
+............................................................iiiiiiiiii..iiii.iiiiiii... 2175/4113
+............ii.........................i..iii...........i.................. 2250/4113
+cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies --- FAILED
+. 2252/4113
+cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly --- FAILED
+.. 2255/4113
+cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox --- FAILED
+cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence --- FAILED
+cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart --- FAILED
+cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve --- FAILED
+cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http --- FAILED
+......... 2269/4113
+cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused --- FAILED
+. 2271/4113
+cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge --- FAILED
+.........................i............................................................. 2359/4113
+.................................................................................i....i 2446/4113
+....................................................................................... 2533/4113
+..i..................................................................i......i.......... 2620/4113
+............ii.........................................iii........ii.....i............i 2707/4113
+...................................................................................i..i 2794/4113
+.test cryptanalysis::koblitz_index_calculus::tests::the_u64_factorisation_matches_trial_division has been running for over 60 seconds
+..i.....i..ii......................................................................... 2881/4113
+....................................................................................... 2968/4113
+...........test cryptanalysis::koblitz_sym_s4::tests::symmetric_solver_agrees_with_chain_and_brute_force has been running for over 60 seconds
+............................................................................ 3055/4113
+..............i........................................................................ 3142/4113
+....................................................................................... 3229/4113
+.i..................................................................................... 3316/4113
+....................................................................................... 3403/4113
+....................................................................................... 3490/4113
+....................................................................................... 3577/4113
+.......................................i............................................... 3664/4113
+....................................................................................... 3751/4113
+....................................................................................... 3838/4113
+....................................................................................... 3925/4113
+.........iii................................................................i.......... 4012/4113
+...................................test cryptanalysis::p192_cm_relation_search::tests::full_exact_search_reaches_frozen_relation_inventory has been running for over 60 seconds
+......i...i......................................... 4099/4113
+..test cryptanalysis::pdp_split::tests::plans_agree_with_exhaustive_m3 has been running for over 60 seconds
+........test cryptanalysis::sig_fp_tower::tests::long_towers_with_one_generator_match_f4 has been running for over 60 seconds
+.test ecc::barrett_ecdsa::tests::full_param_generation_tiny_prime has been running for over 60 seconds
+...
+failures:
+
+---- cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies' (15666667) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly' (15666669) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox' (15666672) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence' (15666673) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart' (15666675) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve' (15666676) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http stdout ----
+
+thread 'cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http' (15666678) panicked at src/cryptanalysis/pollard_collab/cairn.rs:1217:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused stdout ----
+
+thread 'cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused' (15666689) panicked at src/cryptanalysis/pollard_collab/net.rs:359:84:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge stdout ----
+
+thread 'cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge' (15666691) panicked at src/cryptanalysis/pollard_collab/net.rs:304:88:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+
+failures:
+    cryptanalysis::pollard_collab::cairn::tests::a_key_submitter_signs_what_cairn_verifies
+    cryptanalysis::pollard_collab::cairn::tests::an_older_node_without_progress_turns_heartbeats_off_quietly
+    cryptanalysis::pollard_collab::cairn::tests::generic_artifacts_use_the_persisted_commit_reveal_outbox
+    cryptanalysis::pollard_collab::cairn::tests::heartbeats_carry_the_sessions_own_counters_at_the_cadence
+    cryptanalysis::pollard_collab::cairn::tests::pending_commitments_survive_a_restart
+    cryptanalysis::pollard_collab::cairn::tests::points_travel_through_cairn_as_commit_reveal_claims_and_solve
+    cryptanalysis::pollard_collab::cairn::tests::the_client_speaks_enough_http
+    cryptanalysis::pollard_collab::net::tests::foreign_job_is_refused
+    cryptanalysis::pollard_collab::net::tests::three_nodes_in_a_chain_converge
+
+test result: FAILED. 3991 passed; 9 failed; 113 ignored; 0 measured; 0 filtered out; finished in 632.33s
+
+error: test failed, to rerun pass `--lib`

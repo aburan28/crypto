@@ -304,6 +304,13 @@ fn main() {
             wall_ns as f64 / 1e9,
         );
 
+        if std::env::var("KIC_F4_ROOT_REPLAY").as_deref() == Ok("1") {
+            let (rec, rep, dropped) = crypto_lib::cryptanalysis::inherited_f4::root_replay_counts();
+            eprintln!(
+                "root replay so far: {rec} roots recorded, {rep} replayed, {dropped} rows dropped (after K_{}/2^{} m={})",
+                inst.a, inst.n, inst.m
+            );
+        }
         rows.push(serde_json::json!({
             "curve": format!("K_{}/2^{}", inst.a, inst.n),
             "a": inst.a, "n": inst.n, "m": inst.m,

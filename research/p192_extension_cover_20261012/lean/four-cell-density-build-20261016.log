@@ -1,0 +1,7 @@
+ℹ [805/806] Built FourCellDensity (6.0s)
+info: FourCellDensity.lean:66:0: 'P192ExtensionCover.four_cell_character_lower_bound' depends on axioms: [propext, Quot.sound]
+info: FourCellDensity.lean:67:0: 'P192ExtensionCover.p192_four_cell_nonzero_scalar_lower_bound' depends on axioms: [propext, Quot.sound]
+info: FourCellDensity.lean:68:0: 'P192ExtensionCover.p192_205_class_four_cell_hit_integer_certificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+Build completed successfully (806 jobs).

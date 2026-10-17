@@ -1,0 +1,31 @@
+End-to-end DLP: root-finding vs F4 decomposition (baseline given every advantage)
+All times are CPU time (process + reaped children, getrusage), not wall-clock.
+
+=== Prime a=−3 curves: complete DLP, root finding vs Buchberger vs msolve ===
+
+msolve found; charged its own process CPU only (harness spawn/file I/O excluded). Each decide is paired with an adjacent trivial-ideal control run (order alternating) and the mean paired difference is what is charged. For scale: one msolve process on the trivial ideal costs 4.83 ms child CPU (σ 830.7 µs, 200 up-front runs). A per-decide value is reported only if it clears 2 standard errors of the paired mean; otherwise the 2·SE bound is charged.
+A baseline is measured in full when its projected wall is under 900.00 s (E2E_FULL_BUDGET_S); otherwise it is COMPOSED
+from a sampled per-target cost (100 targets for Buchberger, 400 for msolve) × the root finder's measured target count on the same stream.
+
+-- 16-bit  p=65519  n=65447  |F|=8  d=13054 --
+   root-finding :   31.71 ms measured  (oracle 5.21 ms, 6544 targets, 13 relations)
+   Buchberger   : skipped (E2E_SKIP_BUCHBERGER)
+   (msolve: 6543 decides, net child CPU 256.0 µs per decide, 2·SE 27.3 µs)
+   msolve (F4)  :     1.72 s measured  (256.0 µs per target × 6544 targets)   → 54× vs root
+
+-- 16-bit: each method at its own best |F| (F4 total = composed, oracle only; root total = measured wall incl. target generation) --
+     |F|  msolve/decide    root/decide E[targets] msolve composed
+       4       133.6 µs         0.6 µs      18407         2.46 s
+       6       207.4 µs         0.7 µs       9999         2.07 s
+       8       296.8 µs         0.8 µs       6647         1.97 s
+      12       357.4 µs         0.8 µs       3864         1.38 s
+      16       564.1 µs         1.0 µs       2685         1.51 s
+      24        1.13 ms         0.8 µs       1648         1.86 s
+      32        1.69 ms         1.7 µs       1183         2.00 s
+      64        5.97 ms         3.2 µs        552         3.29 s
+     120       17.63 ms         4.7 µs        285         5.02 s
+   F4 best (resolved rows): |F|=12 → 1.38 s composed.  Root best: |F|=120 → 8.60 ms measured (829 targets).  → 161× at each method's own best
+   F4 best (unresolved rows charged their 2·SE bound, an upper bound on F4's cost): |F|=12 → 1.38 s composed  → speed-up is at most 161×
+
+Every solve above recovered and verified the planted logarithm. Not a security claim.
+wrote research/rootfind_faster_e2e_20261015/sessions/cycle3-prime/results.json

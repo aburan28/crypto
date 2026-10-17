@@ -1,0 +1,21 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261016-screenshot-factor-base-port",
+  "title": "Identify and port the screenshot factor-base/isogeny candidate search",
+  "created": "2026-10-16",
+  "authors": ["native research lane"],
+  "status": "blocked",
+  "status_note": "The exact original driver and degree-7 map have not been located; a bounded prime61 baseline is retained separately.",
+  "blocked_on": ["problem:problems/screenshot-factor-base-driver-unlocated.md"],
+  "links": {"lead": "research/prime61_factor_base_20261016/README.md", "notes": [], "prs": []},
+  "question": "Does the screenshot candidate-ranking experiment complete and how does it rank at p=2^61-1 or GF(2^83)?",
+  "decision_value": "A faithful source identification and native port would make the user's requested 1000/2000-candidate benchmark executable. The existing bounded small-base baseline does not resolve its rankings; retaining failures and costs will distinguish a completed ranking from cap-limited evidence.",
+  "protocol": {"path": null, "blob": null},
+  "code": {"repo": "crypto", "commit": "de0c9391480155ebdd5a8495d2c79e4508d4795d", "branch": null, "build": []},
+  "resources": {"cpus": 1, "ram_gb": 16, "disk_gb": 2, "gpu": null, "est_core_hours": null, "est_wall_hours": null, "notes": "Scheduling envelope only; no cost estimate is possible until the exact driver and map are identified."},
+  "run": {"argv": ["target/release/screenshot_factor_base_port", "--field", "prime61", "--candidate-pools", "1000,2000", "--paired-runs", "12", "--out", "{out}"], "env": {}, "timeout_per_shard_s": 300},
+  "shards": {"count": 1, "scheme": "single", "params": {}, "stop": "all"},
+  "checkpoint": {"file": null, "resume_flag": null},
+  "outputs": {"result_schema": "Not yet specified; retain original candidate and operation semantics", "verify": [], "land": "research/prime61_factor_base_20261016"},
+  "cairn": {"mode": "lab-task", "space": "TBD", "tasks": ["XP-20261016-screenshot-factor-base-port"], "ttl_s": 3600, "env": {"name": "crypto-native", "recipe": "Native Rust toolchain; exact build frozen after source identification"}, "exec": {"cpus": 1, "memory_mb": 16384, "timeout_s": 300, "sandbox": "auto", "publish": "runs/XP-20261016-screenshot-factor-base-port"}, "funding": {"units": 131072, "rationale": "Blocked source-identification follow-up; no experiment is scheduled or funded externally by this card."}}
+}

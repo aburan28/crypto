@@ -1,0 +1,14 @@
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|
+| ECBS1h0a529afe360d | rho-neg | rho.negation | icv1-fp26-tm6998-e162b8d9 | 21.57 | 256/256 | 1.175 | [1.104, 1.245] | 0.886 | 1.326 | 1.326 | 1.000 | yes | 8.817 | L1×20 L2×236 |
+| ECBS1h0a529afe360d | rho-neg | rho.negation | icv1-fp26-tm6998-fded543d | 21.57 | 256/256 | 1.166 | [1.076, 1.256] | 0.886 | 1.316 | 1.316 | 1.000 | yes | 8.473 | L1×21 L2×235 |
+| ECBS1h0a529afe360d | rho-plain | rho.plain | icv1-fp26-tm6998-e162b8d9 | 21.57 | 256/256 | 1.517 | [1.417, 1.623] | 1.253 | 1.211 | 1.712 | 1.291 | no | 8.900 | L1×20 L2×236 |
+| ECBS1h0a529afe360d | rho-plain | rho.plain | icv1-fp26-tm6998-fded543d | 21.57 | 256/256 | 1.403 | [1.309, 1.499] | 1.253 | 1.119 | 1.583 | 1.203 | no | 8.413 | L1×24 L2×232 |
+| ECBS1h0a529afe360d | bsgs | bsgs.textbook | icv1-fp26-tm6998-e162b8d9 | 21.57 | 256/256 | 1.403 | [1.247, 1.578] | 1.500 | 0.936 | 1.584 | 1.195 | yes | 8.069 | L1×15 L2×241 |
+| ECBS1h0a529afe360d | bsgs | bsgs.textbook | icv1-fp26-tm6998-fded543d | 21.57 | 256/256 | 1.403 | [1.242, 1.576] | 1.500 | 0.936 | 1.584 | 1.203 | yes | 7.895 | L1×9 L2×247 |
+| ECBS1h0a529afe360d | bsgs-neg | bsgs.negation | icv1-fp26-tm6998-e162b8d9 | 21.57 | 256/256 | 0.903 | [0.747, 1.078] | 1.000 | 0.903 | 1.019 | 0.769 | yes | 7.868 | L1×21 L2×235 |
+| ECBS1h0a529afe360d | bsgs-neg | bsgs.negation | icv1-fp26-tm6998-fded543d | 21.57 | 256/256 | 0.903 | [0.742, 1.075] | 1.000 | 0.903 | 1.019 | 0.775 | yes | 7.733 | L1×24 L2×232 |
+| ECBS1h0a529afe360d | ic | ic.pipeline | icv1-fp26-tm6998-e162b8d9 | 21.57 | 256/256 | 66.017 | [60.861, 70.941] | – | – | 74.492 | 56.194 | yes | 36.477 | L1×28 L2×228 |
+| ECBS1h0a529afe360d | ic | ic.pipeline | icv1-fp26-tm6998-fded543d | 21.57 | 256/256 | 72.999 | [67.989, 77.905] | – | – | 82.370 | 62.596 | yes | 39.728 | L1×33 L2×223 |
+| ECBS1h0a529afe360d | rho-neg-aa | rho.negation | icv1-fp26-tm6998-e162b8d9 | 21.57 | 256/256 | 1.175 | [1.104, 1.245] | 0.886 | 1.326 | 1.326 | 1.000 | yes | 8.957 | L1×21 L2×235 |
+| ECBS1h0a529afe360d | rho-neg-aa | rho.negation | icv1-fp26-tm6998-fded543d | 21.57 | 256/256 | 1.166 | [1.076, 1.256] | 0.886 | 1.316 | 1.316 | 1.000 | yes | 8.180 | L1×14 L2×242 |

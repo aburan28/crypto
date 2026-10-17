@@ -1,0 +1,50 @@
+{
+  "round": 3,
+  "n_seeds": 1048576,
+  "b_samples": 1048170,
+  "seed_generator": "splitmix64 counters 0..2^20, deterministic",
+  "probes_bonferroni_6": [
+    {
+      "name": "QR(b) vs honest pool",
+      "published": "true",
+      "honest": "0.500 of 1048170",
+      "p": 1.0
+    },
+    {
+      "name": "cubic residuosity of b vs honest pool",
+      "published": "false",
+      "honest": "0.332 of 1048170",
+      "p": 1.0
+    },
+    {
+      "name": "Hamming weight of b vs honest pool",
+      "published": "134",
+      "honest": "mean 128.00, sd 8.00, n 1048170",
+      "p": 1.0
+    },
+    {
+      "name": "CF max quotient of b/p vs honest pool",
+      "published": "1275 (11 bits)",
+      "honest": "bucket >= published 0.5092; <= 0.9565; max seen 30 bits",
+      "p": 1.0
+    },
+    {
+      "name": "Hamming weight of r vs honest pool",
+      "published": "125",
+      "honest": "mean 127.50, sd 7.99, n 1048576",
+      "p": 1.0
+    },
+    {
+      "name": "QR(r) vs honest pool",
+      "published": "true",
+      "honest": "0.500 of 1048576",
+      "p": 1.0
+    }
+  ],
+  "seed_preimage_probe": {
+    "target": "c49d360886e704936a6678e1139d26b7819f7e90",
+    "phrases": 1000,
+    "result": "no preimage found"
+  },
+  "command": "cargo run --release --example p256_trapdoor_round3 -- 1048576"
+}

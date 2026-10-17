@@ -49,6 +49,15 @@ NAMED_BUDGET_EXCEPTIONS = {
         # were cancelled at the 25-minute cap on several PRs (2026-10-17).
         "reason": "CodeQL Rust queries over the whole repository",
     },
+    (".github/workflows/koblitz-sota-reproduction.yml", "reproduce-toy-controls"): {
+        "timeout": 45,
+        # The workflow's pull_request budget expression evaluates to 45.
+        "reason": "Koblitz SOTA-gate reproduction toy controls; runs 22-25 min on healthy runners and hit the 25-minute cap on slow shared runners (2026-10-17)",
+    },
+    (".github/workflows/polynomial-reuse.yml", "correctness"): {
+        "timeout": 30,
+        "reason": "Polynomial-reuse correctness job; 15-minute runs that hit the 25-minute cap on slow shared runners (2026-10-17)",
+    },
 }
 
 
