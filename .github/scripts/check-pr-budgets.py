@@ -37,6 +37,13 @@ FROZEN_BUDGET_EXCEPTIONS = {
         "pin_path": "../../.github/workflows/weak-curve-conjectures.yml",
     },
 }
+# Narrow, documented allowance: the CodeQL Rust query phase (job `analyze`)
+# needs ~25 minutes on pull requests and was cancelled by the 25-minute cap.
+# Exactly this workflow, job and 45-minute value is allowed on PR/merge-group;
+# no other job, workflow or larger budget is covered.
+PR_BUDGET_ALLOWANCES = {
+    ".github/workflows/codeql.yml": {"job": "analyze", "timeout": 45},
+}
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -63,6 +70,15 @@ def frozen_proof_budget_exception(label, job_name, budget, event, root=REPO_ROOT
         return hashlib.sha256(workflow_path.read_bytes()).hexdigest() == pinned_hashes[0]
     except (OSError, UnicodeError, ValueError):
         return False
+
+
+def documented_pr_budget_allowance(label, job_name, budget):
+    """Allow only the documented CodeQL `analyze` 45-minute PR budget."""
+    allowance = PR_BUDGET_ALLOWANCES.get(Path(label).as_posix())
+    return (allowance is not None
+            and job_name == allowance["job"]
+            and not isinstance(budget, bool)
+            and budget == allowance["timeout"])
 
 
 def expression(value, event, action=None):
@@ -184,6 +200,8 @@ def job_problems(jobs, event, action, label):
         budget = expression(job.get("timeout-minutes", UNKNOWN), event, action)
         if isinstance(budget, bool) or not isinstance(budget, (int, float)) or not 0 < budget <= 25:
             if frozen_proof_budget_exception(label, name, budget, event):
+                continue
+            if documented_pr_budget_allowance(label, name, budget):
                 continue
             found.append(f"{label}: {name} can run on {event}/{action} without a proven 1–25 minute timeout")
     return found

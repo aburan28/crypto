@@ -75,7 +75,7 @@ embedded-data changes cannot disappear behind an incomplete trigger allowlist.
 
 Every job eligible for an ordinary PR or merge group has an explicit execution
 budget of at most 25 minutes, except the two exact frozen Lean proof workflows
-described below. Longer scientific budgets remain available on
+and the CodeQL `analyze` job (45 minutes), both described below. Longer scientific budgets remain available on
 manual dispatch, scheduled work and main-branch recording, and explicitly
 requested one-shot label experiments retain their existing limits. Historical
 campaigns disabled by their owners remain disabled.
@@ -115,11 +115,19 @@ either timeout requires new proof evidence and a separate review. These
 exceptions do not permit other long jobs or justify altering scientific
 workloads.
 
+The third exception is the `analyze` job in `codeql.yml`, which may carry a
+45-minute timeout on pull requests and merge groups. Its Rust query phase
+measured about 25 minutes on PRs and was cancelled by the former cap (the
+`build-rust-database` job stays at 25). The checker allows exactly that
+workflow, job name and value; any other job, workflow or larger value still
+fails.
+
 | Lane | Execution budget |
 | --- | --- |
 | Scope / syntax / changed-file format | Five minutes |
 | Each clippy crate | 15 minutes |
-| Root all-target compile / CodeQL language | 25 minutes |
+| Root all-target compile / CodeQL database build | 25 minutes |
+| CodeQL `analyze` (documented exception) | 45 minutes |
 | Each PR or merge-group packaging component | 25 minutes |
 | ecbench PR harness | 25 minutes, including a 12-minute historical integrity step |
 | ecbench weekly/manual exhaustive audit | Existing 300-minute scientific budget |

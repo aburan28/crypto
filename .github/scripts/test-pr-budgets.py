@@ -114,6 +114,22 @@ class BudgetPolicyTests(unittest.TestCase):
                 self.assertFalse(policy.frozen_proof_budget_exception(
                     workflow_path, job, timeout, "pull_request", root=root))
 
+    def test_codeql_analyze_45_minute_allowance_is_exact(self):
+        path = ".github/workflows/codeql.yml"
+        expr = "${{ (github.event_name != 'pull_request' && github.event_name != 'merge_group') && 60 || 45 }}"
+        for event in ("pull_request", "merge_group"):
+            self.assertEqual(policy.expression(expr, event), 45)
+            self.assertFalse(policy.problems(
+                {"on": {event: None}, "jobs": {"analyze": {"timeout-minutes": expr}}}, path))
+            # Same job elsewhere, other jobs, other values: still rejected.
+            self.assertTrue(policy.problems(
+                {"on": {event: None}, "jobs": {"analyze": {"timeout-minutes": expr}}}, ".github/workflows/other.yml"))
+            self.assertTrue(policy.problems(
+                {"on": {event: None}, "jobs": {"other": {"timeout-minutes": expr}}}, path))
+            for value in (46, 60, 300):
+                self.assertTrue(policy.problems(
+                    {"on": {event: None}, "jobs": {"analyze": {"timeout-minutes": value}}}, path))
+
     def test_metadata_is_not_executed(self):
         self.assertIs(policy.expression("__import__('os').system('false')", "pull_request"), policy.UNKNOWN)
 

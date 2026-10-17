@@ -72,8 +72,11 @@ jobs:
     needs: [scope, build-rust-database]
     # Routine Rust scans consume the finalized database from the first job;
     # queries retain this existing job identity and /language:rust category.
-    # Both routine phases keep a 25-minute cap. Other events keep their envelope.
-    timeout-minutes: ${{ (github.event_name != 'pull_request' && github.event_name != 'merge_group') && 60 || 25 }}
+    # The database build keeps a 25-minute cap. The Rust query phase measured
+    # ~25 minutes on PRs and was cancelled by the former cap, so this job alone
+    # gets 45 on pull_request/merge_group (documented exception in
+    # .github/scripts/check-pr-budgets.py). Other events keep their envelope.
+    timeout-minutes: ${{ (github.event_name != 'pull_request' && github.event_name != 'merge_group') && 60 || 45 }}
     name: Analyze (${{ matrix.language }})
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
