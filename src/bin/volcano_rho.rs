@@ -434,6 +434,62 @@ impl Velu {
     }
 }
 
+// ---------------------------------------------------------------- pull-back walk
+
+/// One step back toward the root curve: a dual isogeny followed by the
+/// isomorphism `(x, y) ↦ (u²x, u³y)` onto the previous curve's model, or
+/// that isomorphism alone (an isomorphic control).
+#[derive(Clone, Copy)]
+enum Pull {
+    Dual(Velu, u64),
+    Scale(u64),
+}
+
+/// How a walk reads a point: the point itself (`native`), or its canonical
+/// image `[ℓ^lift] · φ̂_1 ∘ … ∘ φ̂_m(R)` on the root curve (`pullback`), which
+/// is `±ℓ^M φ⁻¹(R)` for every curve, so every curve steers by the same
+/// numbers.
+#[derive(Clone)]
+struct Lens {
+    chain: Vec<Pull>,
+    root: Curve,
+    lift: u64,
+    native: bool,
+}
+
+impl Lens {
+    fn native() -> Self {
+        Lens {
+            chain: Vec::new(),
+            root: Curve { a: 0, b: 0 },
+            lift: 1,
+            native: true,
+        }
+    }
+    fn read(&self, f: &Fp, pt: (u64, u64)) -> (u64, u64) {
+        if self.native {
+            return pt;
+        }
+        let mut q = pt;
+        for step in &self.chain {
+            let (v, u) = match step {
+                Pull::Dual(v, u) => (Some(v), *u),
+                Pull::Scale(u) => (None, *u),
+            };
+            if let Some(v) = v {
+                q = v
+                    .map(f, Some(q))
+                    .expect("a point of order n is never in a dual kernel");
+            }
+            let u2 = f.mul(u, u);
+            q = (f.mul(u2, q.0), f.mul(f.mul(u2, u), q.1));
+        }
+        self.root
+            .mul(f, Some(q), self.lift)
+            .expect("l^lift is invertible mod n")
+    }
+}
+
 // ---------------------------------------------------------------- rho
 
 struct Instance {
@@ -449,7 +505,7 @@ struct Solve {
     ns: u128,
 }
 
-fn rho(f: &Fp, inst: &Instance, n: u64, seed: u64, dp_bits: u32) -> Solve {
+fn rho(f: &Fp, inst: &Instance, n: u64, seed: u64, dp_bits: u32, lens: &Lens) -> Solve {
     let e = &inst.curve;
     let (p, q) = (Some(inst.p), Some(inst.q));
     let mut rng = SmallRng::seed_from_u64(seed);
@@ -473,14 +529,18 @@ fn rho(f: &Fp, inst: &Instance, n: u64, seed: u64, dp_bits: u32) -> Solve {
             continue;
         };
         let mut run = 0u64;
+        let mut c = lens.read(f, x);
         loop {
-            let s = &steps[(x.0.wrapping_mul(0x9E37_79B9_7F4A_7C15) >> 59) as usize];
+            let s = &steps[(c.0.wrapping_mul(0x9E37_79B9_7F4A_7C15) >> 59) as usize];
             iters += 1;
             run += 1;
             a = (a + s.0) % n;
             b = (b + s.1) % n;
             match e.add(f, Some(x), Some(s.2)) {
-                Some(nx) => x = nx,
+                Some(nx) => {
+                    x = nx;
+                    c = lens.read(f, x);
+                }
                 None => {
                     // aP + bQ = O.
                     if b != 0 {
@@ -496,10 +556,10 @@ fn rho(f: &Fp, inst: &Instance, n: u64, seed: u64, dp_bits: u32) -> Solve {
                     continue 'restart;
                 }
             }
-            if x.0.wrapping_mul(0xC2B2_AE3D_27D4_EB4F) >> 40 & dp_mask == 0 {
-                if let Some(&(y2, a2, b2)) = table.get(&x.0) {
+            if c.0.wrapping_mul(0xC2B2_AE3D_27D4_EB4F) >> 40 & dp_mask == 0 {
+                if let Some(&(y2, a2, b2)) = table.get(&c.0) {
                     // Same point: (a − a2)P = (b2 − b)Q; opposite: (a + a2)P = −(b + b2)Q.
-                    let (num, den) = if y2 == x.1 {
+                    let (num, den) = if y2 == c.1 {
                         ((a + n - a2) % n, (b2 + n - b) % n)
                     } else {
                         ((n - (a + a2) % n) % n, (b + b2) % n)
@@ -516,7 +576,7 @@ fn rho(f: &Fp, inst: &Instance, n: u64, seed: u64, dp_bits: u32) -> Solve {
                     restarts += 1;
                     continue 'restart;
                 }
-                table.insert(x.0, (x.1, a, b));
+                table.insert(c.0, (c.1, a, b));
                 run = 0;
             }
             if run > max_run {
@@ -596,6 +656,9 @@ struct Args {
     order: Option<u64>,
     /// `native` (this binary's walk) or `ca` (`ca solve --alg rho`).
     engine: String,
+    /// `native` (each curve hashes its own x) or `pullback` (every curve
+    /// hashes the root's canonical point, so walks coincide across curves).
+    walk: String,
     ca: String,
     ca_args: Vec<String>,
     controls: usize,
@@ -616,6 +679,7 @@ fn parse_args() -> Args {
         curve: None,
         order: None,
         engine: "native".into(),
+        walk: "native".into(),
         ca: "ca".into(),
         ca_args: Vec::new(),
         controls: 3,
@@ -661,6 +725,7 @@ fn parse_args() -> Args {
                 )
             }
             "--engine" => a.engine = val.clone(),
+            "--walk" => a.walk = val.clone(),
             "--ca" => a.ca = val.clone(),
             "--ca-arg" => a.ca_args.push(val.clone()),
             "--controls" => a.controls = val.parse().unwrap(),
@@ -675,7 +740,7 @@ Pollard rho measured on each curve.
                             [--max-cofactor 64] [options]
 
 options: [--ell 3] [--seed 1] [--trials 100] [--per-level 10] [--controls 3]
-         [--dp-bits auto] [--engine native|ca] [--ca PATH] [--ca-arg ARG]... [--out DIR]
+         [--dp-bits auto] [--engine native|ca] [--walk native|pullback] [--ca PATH] [--ca-arg ARG]... [--out DIR]
 
 --curve takes y^2 = x^3 + Ax + B over F_P, P prime < 2^62, in decimal. The
 generator (cofactor times a seeded random point) and the secret k are drawn
@@ -694,6 +759,12 @@ Writes results.json, trials.csv and instances.jsonl to --out."
     }
     if !["any", "split", "inert", "ramified"].contains(&a.crater.as_str()) {
         die("--crater must be any, split, inert or ramified");
+    }
+    if !["native", "pullback"].contains(&a.walk.as_str()) {
+        die("--walk must be native or pullback");
+    }
+    if a.walk == "pullback" && a.engine != "native" {
+        die("--walk pullback needs --engine native");
     }
     if !["native", "ca"].contains(&a.engine.as_str()) {
         die("--engine must be native or ca");
@@ -1089,7 +1160,61 @@ fn main() {
         vertex: Option<usize>,
         level: Option<u32>,
         inst: Instance,
+        lens: Lens,
     }
+    let pullback = args.walk == "pullback";
+    // Each measured vertex's dual edge back to its parent: the rational
+    // kernel whose codomain has the parent's j, the model isomorphism onto
+    // the parent's model, and a check that φ̂(φ(P)) = ±[ℓ]P.
+    let lift_to = measured.iter().map(|&v| vs[v].dist).max().unwrap_or(0);
+    let mut duals: HashMap<usize, Pull> = HashMap::new();
+    if pullback {
+        for &v0 in &measured {
+            let mut v = v0;
+            while let Some(par) = vs[v].parent {
+                if duals.contains_key(&v) {
+                    break;
+                }
+                let (ev, ep) = (vs[v].curve, vs[par].curve);
+                let want = ep.mul(&f, Some(vs[par].p), ell).expect("[l]P is not O").0;
+                let found = kernel_xs(&f, &field, &ev, ell).into_iter().find_map(|x0| {
+                    let d = velu(&f, &ev, ell, x0);
+                    let c = d.codomain;
+                    if c.j(&f) != Some(vs[par].j) {
+                        return None;
+                    }
+                    let u2 = f.mul(f.mul(ep.b, c.a), f.inv(f.mul(c.b, ep.a)));
+                    let u = f.sqrt(u2)?;
+                    let q = d.map(&f, Some(vs[v].p))?;
+                    (f.mul(u2, q.0) == want).then_some(Pull::Dual(d, u))
+                });
+                duals.insert(
+                    v,
+                    found.unwrap_or_else(|| {
+                        die("internal: no dual isogeny found for a volcano edge")
+                    }),
+                );
+                v = par;
+            }
+        }
+    }
+    let lens_for = |v: usize| -> Lens {
+        if !pullback {
+            return Lens::native();
+        }
+        let mut chain = Vec::new();
+        let mut cur = v;
+        while vs[cur].parent.is_some() {
+            chain.push(duals[&cur]);
+            cur = vs[cur].parent.unwrap();
+        }
+        Lens {
+            chain,
+            root: e0,
+            lift: ell.pow(lift_to - vs[v].dist),
+            native: false,
+        }
+    };
     let mut arms: Vec<Arm> = measured
         .iter()
         .map(|&v| Arm {
@@ -1101,6 +1226,7 @@ fn main() {
                 p: vs[v].p,
                 q: vs[v].q,
             },
+            lens: lens_for(v),
         })
         .collect();
     for c in 0..args.controls {
@@ -1122,6 +1248,16 @@ fn main() {
                 curve: cv,
                 p: cp,
                 q: cq,
+            },
+            lens: if pullback {
+                Lens {
+                    chain: vec![Pull::Scale(f.inv(u))],
+                    root: e0,
+                    lift: ell.pow(lift_to),
+                    native: false,
+                }
+            } else {
+                Lens::native()
             },
         });
     }
@@ -1161,7 +1297,7 @@ fn main() {
             let r = if args.engine == "ca" {
                 rho_ca(&args.ca, &args.ca_args, &f, inst, n, seed_base ^ s)
             } else {
-                rho(&f, inst, n, seed_base ^ s, dp_bits)
+                rho(&f, inst, n, seed_base ^ s, dp_bits, &arms[a].lens)
             };
             (a, s, r)
         })
@@ -1172,6 +1308,22 @@ fn main() {
         die(&format!(
             "{wrong} rho solves returned no or the wrong logarithm"
         ));
+    }
+
+    // In pullback mode every curve should take exactly the same walk.
+    let mut seed_iters: HashMap<u64, Vec<u64>> = HashMap::new();
+    for (_, s, r) in &results {
+        seed_iters.entry(*s).or_default().push(r.iters);
+    }
+    let identical_seeds = seed_iters
+        .values()
+        .filter(|v| v.iter().all(|&x| x == v[0]))
+        .count();
+    if pullback {
+        eprintln!(
+            "pullback: {identical_seeds}/{} seeds took the same number of steps on every curve",
+            seed_iters.len()
+        );
     }
 
     // 5. Records and summaries.
@@ -1265,7 +1417,7 @@ fn main() {
         "command": std::env::args().collect::<Vec<_>>().join(" "),
         "params": {"bits": args.bits, "ell": ell, "depth": args.depth, "seed": args.seed, "crater": args.crater,
                    "curve": args.curve.map(|(p, a, b)| [p, a, b]), "order": args.order,
-                   "engine": args.engine, "ca": (args.engine == "ca").then_some(&args.ca), "ca_args": args.ca_args,
+                   "engine": args.engine, "walk": args.walk, "ca": (args.engine == "ca").then_some(&args.ca), "ca_args": args.ca_args,
                    "trials": args.trials, "per_level": args.per_level, "dp_bits": dp_bits,
                    "max_cofactor": args.max_cofactor, "controls": args.controls},
         "host": {"cpu": host, "threads": rayon::current_num_threads()},
@@ -1277,6 +1429,8 @@ fn main() {
         "walk": {"radius_measured": r_meas, "radius_explored": r_explore, "vertices": vs.len(),
                  "edges_verified": edges_checked, "special_j_skipped": skipped_special,
                  "per_level_found": per_level.iter().map(|l| l.len()).collect::<Vec<_>>()},
+        "pullback": {"enabled": pullback, "lift_to_dist": lift_to,
+                     "seeds_identical_on_every_curve": identical_seeds, "seeds": seed_iters.len()},
         "rho": {"walk": if args.engine == "ca" {
                     "ca solve --alg rho (cryptanalysis repository; its defaults plus ca_args); iters = its reported ops, time = its reported seconds"
                 } else {
