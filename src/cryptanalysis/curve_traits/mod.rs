@@ -1126,7 +1126,7 @@ fn settle_by_walks(
             .fold(BigUint::one(), |acc, (p, &e)| acc * p.pow(e));
         let h = class(cand);
         walks.closed.iter().all(|cy| {
-            cy.multiples.iter().any(|y| (y % &f).is_zero())
+            (cy.multiples.is_empty() || cy.multiples.iter().any(|y| (y % &f).is_zero()))
                 && h.as_ref().is_none_or(|h| (h % cy.steps).is_zero())
         }) && walks
             .open
@@ -1175,7 +1175,7 @@ fn settle_by_walks(
         }
     }
     if used || !walks.closed.is_empty() {
-        for cy in &walks.closed {
+        for cy in walks.closed.iter().filter(|cy| !cy.multiples.is_empty()) {
             let shown: Vec<String> = cy.multiples.iter().map(BigUint::to_string).collect();
             contains.push(format!(
                 "Z[α], α the endomorphism of a cycle of {} {}-isogenies through E (f divides {})",
@@ -1192,7 +1192,7 @@ fn settle_by_walks(
 const MAX_CANDIDATE_ORDERS: usize = 4096;
 
 /// How far past its budget [`settle_by_walks`] may lengthen an open walk.
-const WALK_EXTENSION: u64 = 8;
+const WALK_EXTENSION: u64 = 4;
 
 /// Stage timing for profiling (TRAITS_TIMING).
 fn timed<T>(what: &str, slug: &str, f: impl FnOnce() -> T) -> T {

@@ -54,7 +54,7 @@ pub struct Cycle {
     /// The cycle length `r`.
     pub steps: u32,
     /// The conductor of `End(E)` divides one of these (one unless
-    /// `d_K = −3, −4`).
+    /// `d_K = −3, −4`); empty for a cycle too long to be worth it.
     pub multiples: Vec<BigUint>,
 }
 
@@ -130,9 +130,6 @@ pub fn walks(model: &Model, dk: &BigInt, v: &BigUint) -> Walks {
 /// The bound the cycles put on `v_ℓ(f)`: each caps it by the largest
 /// valuation among its multiples, together by the smallest such cap.
 pub fn cap(cycles: &[Cycle], ell: &BigUint) -> u32 {
-    if cycles.is_empty() {
-        return u32::MAX;
-    }
     let val = |n: &BigUint| {
         let (mut n, mut e) = (n.clone(), 0u32);
         while !n.is_zero() && (&n % ell).is_zero() {
@@ -143,9 +140,10 @@ pub fn cap(cycles: &[Cycle], ell: &BigUint) -> u32 {
     };
     cycles
         .iter()
+        .filter(|cy| !cy.multiples.is_empty())
         .map(|cy| cy.multiples.iter().map(val).max().unwrap_or(0))
         .min()
-        .unwrap_or(0)
+        .unwrap_or(u32::MAX)
 }
 
 /// "a cycle of r l-isogenies", or "cycles of …" for several.
@@ -160,6 +158,10 @@ pub fn describe(cycles: &[Cycle]) -> String {
         format!("cycles of {}", walks.join(", "))
     }
 }
+
+/// The largest norm `l^r`, in bits, whose generator [`walk_degree`] finds
+/// by Cornacchia's algorithm.
+pub const CORNACCHIA_BITS: f64 = 4096.0;
 
 /// The largest `|d_K|`, in bits, for which [`walks`]
 /// walks.
@@ -464,11 +466,12 @@ fn primitive_solution(d: &BigInt, l: u64, r: u32) -> Option<Quad> {
     let li = BigInt::from(l);
     let m = li.pow(r);
     let s0 = (1..l).find(|&x| BigInt::from(x * x).mod_floor(&li) == d.mod_floor(&li))?;
-    // Hensel: s² ≡ d mod l^k for k up to r.
+    // Hensel, doubling the precision: s² ≡ d mod l^k for k up to r.
     let mut s = BigInt::from(s0);
-    let mut modulus = li.clone();
-    for _ in 1..r {
-        modulus *= &li;
+    let mut k = 1u32;
+    while k < r {
+        k = (2 * k).min(r);
+        let modulus = li.pow(k);
         let fix = (&s * &s - d).mod_floor(&modulus);
         let inv = (BigInt::from(2) * &s).extended_gcd(&modulus);
         if !inv.gcd.is_one() {
@@ -603,6 +606,15 @@ pub fn walk_degree(model: &Model, dk: &BigInt, l: u64, max_steps: u32) -> Option
         Ok(r) => r,
         Err(n) => return Some(Walked::Open { degree: l, steps: n }),
     };
+    if (l as f64).log2() * f64::from(steps) > CORNACCHIA_BITS {
+        // The conductor of Z[α] is near l^{r/2}: no use as a bound, and
+        // costly to find.  The cycle length still counts.
+        return Some(Walked::Closed(Cycle {
+            degree: l,
+            steps,
+            multiples: Vec::new(),
+        }));
+    }
     let alpha = primitive_solution(dk, l, steps)?;
     // Unit multiples for d_K = −4 (i) and −3 (a sixth root of unity).
     let unit = match dk.to_i64() {
