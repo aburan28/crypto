@@ -60,3 +60,7 @@ rejected as a parameter-free description (it is miscalibrated by about 2%)
 and a V3 is registered with its own holdouts; otherwise V2 stands, and H is
 reported as not confirmed. If fewer than five of these primes complete, the
 test is run on those that do and reported as underpowered.
+
+## Outcome (2026-10-17)
+
+All five fresh primes completed. Observed against predicted zero rows: 101: 454/453.3, 103: 442/460.3, 107: 488/480.2, 109: 516/488.9, 113: 467/505.8. Pooled obs - exp = -21.5, sd = 42.4, one-sided z = -0.51 (threshold 2.0). V2 stands; H is reported as not confirmed. p = 113 lies 0.6 below its 95% interval; the e = 5 and e >= 4 fresh-prime lines of `iso1_residual_model pool` (z = -1.99, -2.12) were not registered and are exploratory. Output: `model_v2_results.txt`.
