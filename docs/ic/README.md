@@ -26,6 +26,17 @@ reports, and launches the public-synthetic `koblitz_rank_fixture` /
 
 ## Commands
 
+Factor-base generation is a plug-in stage: `ic bench --list` lists the
+compiled-in builders and their parameters. Choose one with, for example,
+`ic bench --bits 16 --factor-base prime-abscissa:size=24 --oracle mitm -v`.
+Builders implement `FactorBaseBuilder` in
+`src/cryptanalysis/ic_framework/stages.rs`; implementations and registration
+examples are in `src/cryptanalysis/ic_framework/plugins.rs` and
+`src/bin/ic/bench.rs`. This is a native Rust extension interface, not a
+runtime shared-library or executable loader. `ic search --spec-out PATH`
+writes a recipe for `ic run --factor-base PATH` and `ic logs --factor-base PATH`;
+`ic workflow` also accepts an explicit recipe in its parameter file.
+
     cargo build --release --bin ic
     ./target/release/ic --help
     ./target/release/ic list
@@ -1248,26 +1259,53 @@ bounded observation, not a global optimum, scaling claim, or challenge result.
 
 ## Reports and resource accounting
 
-Use `ic --verbose` (or `ic -v`) for a live, line-by-line trace:
+Use repeated `--verbose` (or `-v`, `-vv`, `-vvv`) for live output:
+
+| level | output |
+| --- | --- |
+| none | existing stage summaries and final report |
+| `-v` | live setup, successful relation equations, matrix/rank and verification milestones; unsuccessful attempts are omitted |
+| `-vv` | `-v` plus generator/target and factor-base witness coordinates; `bench` also lists its materialized factor base |
+| `-vvv` | `-vv` plus every completed unsuccessful attempt and `run` batch starts |
+
+`run`, `logs`, `solve`, `workflow`, and `bench` support these live equation
+levels. Other subcommands retain their existing command-specific output.
 
 ```sh
 ic run --degree 9 --solver enumerate --verbose
 ic workflow --params params.json --dir run-directory --verbose
 ic logs --degree 9 --database logs.json --verbose
 ic solve --degree 9 --logs logs.json --known-log 53 --verbose
+ic bench --bits 16 --factor-base prime-abscissa:size=24 --oracle mitm -v
+ic run --degree 9 --solver enumerate --batch 1 -vvv | tee ic.log
 ```
 
-Verbose `run` output includes elapsed time, factor-base and pair-table
-construction, batch starts, every trial's outcome (including unsuccessful
-attempts), relation counts, matrix dimensions and rank, and scalar
-verification. Parallel `run` batches report their outcomes in trial order
+Relation lines show the actual probe coefficients and witness, for example
+`R = [a]G + [b]Q = F[i] + F[j] + …`, with decimal coefficients replacing
+`a` and `b`. `G` is the generator, `Q` the target, and `F[i]` is point `i`
+of this run's materialized factor base, including repeated summands.
+Target-independent collection (`logs` and workflow units) prints
+`R = [a]G`. A found witness is labelled **pending verification**, separately
+from relation admission and final scalar or column-log certification.
+At `-vv`, binary coordinates are hexadecimal polynomial-basis field elements;
+bench points use the selected group's native debug representation.
+
+Parallel `run` batches report their outcomes in trial order
 after the batch completes; use `--batch 1` for one attempt at a time.
-Workflow collection reports each probe as its worker finishes, so probe IDs
-can appear out of order. Workflow descent and `solve` report each completed
-decomposition attempt; a found decomposition is verified before a target
-is reported solved. `logs` reports collection batches, coefficient rank,
+Workflow collection reports probes as workers finish, so their one-based,
+global probe IDs can appear out of order. Workflow descent and `solve` use
+the same relation filter at each verbosity. `logs` reports equations as
+collection workers finish, as well as collection batches, coefficient rank,
 and the start and completion of linear algebra and column verification.
 Each trace line is flushed immediately, including when piped to `tee`.
+`bench` uses the same live setup/query hooks for every factor-base plug-in.
+Its query index counts completed oracle calls; the final trial count also
+includes generated trials rejected by the collector's guards.
+Merged large-prime relations print their own coefficients and a congruence
+over projected column logarithms, rather than a false point-sum equation
+for the current probe. The residual collector reports setup and its final
+rank, and explicitly says per-query equations are unavailable for its
+different pair-difference query law.
 Verbose logging adds I/O work; use ordinary or JSON output for measurements.
 
 The flag is global and can appear before or after the subcommand. `--json`

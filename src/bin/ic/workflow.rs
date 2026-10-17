@@ -2011,14 +2011,18 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 // only, not the construction of the target.
                 let t = Instant::now();
                 super::progress::line(format_args!("[4/4] target {i}: descent started"));
+                super::progress::inputs(format_args!("[4/4] target {i}"), c.generator(), Some(&q));
                 let outcome = solver.as_ref().and_then(|s| {
                     if super::progress::enabled() {
-                        let report = s.solve_report_with_progress(&q, &mut |trial, outcome| {
-                            super::progress::line(format_args!(
-                                "[4/4] target {i}, trial {trial}/{}: {}",
-                                ic.max_trials,
-                                super::progress::outcome(outcome)
-                            ));
+                        // Include the target index on every line: independent
+                        // descents may finish concurrently.
+                        let report = s.solve_report_with_trace(&q, &|trace| {
+                            super::progress::query(
+                                format_args!("[4/4] target {i}, trial"),
+                                trace,
+                                ic.max_trials as u64,
+                                &fb,
+                            );
                         });
                         report.log.clone().map(|d| (d, report))
                     } else {
@@ -2326,13 +2330,13 @@ fn collect_unit(
             "[2/4] unit {unit:05}: starting {} probes",
             work.count
         ));
-        collector.collect_aimed_with_progress(work, aim, &|trial, outcome| {
-            super::progress::line(format_args!(
-                "[2/4] unit {unit:05}, trial {}/{} (probe {trial}): {}",
-                trial - work.start + 1,
-                work.count,
-                super::progress::outcome(outcome)
-            ));
+        collector.collect_aimed_with_trace(work, aim, &|trace| {
+            super::progress::query(
+                format_args!("[2/4] unit {unit:05}, probe"),
+                trace,
+                work.start.saturating_add(work.count),
+                collector.factor_base(),
+            );
         })
     } else {
         collector.collect_aimed(work, aim)

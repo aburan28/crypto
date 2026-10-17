@@ -9721,7 +9721,7 @@ pub fn koblitz_index_calculus_dlp_with_progress(
 ) -> Option<KoblitzIcReport> {
     progress(KoblitzIcEvent::FactorBaseStarted);
     let fb = build_frobenius_factor_base(kc, opts.factor_index)?;
-    koblitz_index_calculus_dlp_observed(kc, q, &fb, opts, progress)
+    koblitz_index_calculus_dlp_observed(kc, q, &fb, opts, progress, None)
 }
 
 /// Run index calculus with a caller-supplied invariant factor base.
@@ -9735,7 +9735,7 @@ pub fn koblitz_index_calculus_dlp_with_factor_base(
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
 ) -> Option<KoblitzIcReport> {
-    koblitz_index_calculus_dlp_observed(kc, q, fb, opts, &mut |_| {})
+    koblitz_index_calculus_dlp_observed(kc, q, fb, opts, &mut |_| {}, None)
 }
 
 /// Run index calculus on an arbitrary public subgroup target with a
@@ -9749,7 +9749,20 @@ pub fn koblitz_index_calculus_dlp_with_factor_base_and_progress(
     opts: &KoblitzIcOptions,
     progress: &mut dyn FnMut(KoblitzIcEvent),
 ) -> Option<KoblitzIcReport> {
-    koblitz_index_calculus_dlp_observed(kc, q, fb, opts, progress)
+    koblitz_index_calculus_dlp_observed(kc, q, fb, opts, progress, None)
+}
+
+/// The same pipeline with borrowed, live query equations. The observer sees
+/// existing attempts, without replaying queries or cloning their witnesses.
+pub fn koblitz_index_calculus_dlp_with_factor_base_and_trace(
+    kc: &KoblitzCurve,
+    q: &BinaryPoint,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(KoblitzIcEvent),
+    observer: Option<&QueryObserver<'_>>,
+) -> Option<KoblitzIcReport> {
+    koblitz_index_calculus_dlp_observed(kc, q, fb, opts, progress, observer)
 }
 
 /// Draw a nonzero relation coefficient from the entire prime subgroup.
@@ -9792,6 +9805,7 @@ fn koblitz_index_calculus_dlp_observed(
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
     progress: &mut dyn FnMut(KoblitzIcEvent),
+    observer: Option<&QueryObserver<'_>>,
 ) -> Option<KoblitzIcReport> {
     if let Some(plan) = &opts.weil_charts {
         if opts.strategy != DecompositionStrategy::Groebner
@@ -10227,6 +10241,7 @@ fn koblitz_index_calculus_dlp_observed(
                             conflicts,
                             implied_rows,
                         });
+                        trace_relation_attempt(observer, report.attempt_records.last()?);
                         progress(KoblitzIcEvent::RelationAttemptFinished {
                             trial,
                             disposition: KoblitzRelationAttemptDisposition::DirectSolved,
@@ -10381,6 +10396,7 @@ fn koblitz_index_calculus_dlp_observed(
                 conflicts,
                 implied_rows,
             });
+            trace_relation_attempt(observer, report.attempt_records.last()?);
             progress(KoblitzIcEvent::RelationAttemptFinished {
                 trial,
                 disposition,
@@ -11694,6 +11710,74 @@ pub enum PdpOutcome {
     Identity,
 }
 
+/// A query coefficient, borrowed at full width or held in one machine word.
+#[derive(Clone, Copy, Debug)]
+pub enum TraceScalar<'a> {
+    Word(u64),
+    Wide(&'a BigUint),
+}
+
+impl std::fmt::Display for TraceScalar<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Word(value) => value.fmt(f),
+            Self::Wide(value) => value.fmt(f),
+        }
+    }
+}
+
+/// One completed query `R = [a]G + [b]Q`. Indices name the actual materialized
+/// factor base, with repetition. A witness still awaits the caller's admission
+/// and scalar verification. Trial indices are zero based in every producer.
+#[derive(Clone, Copy, Debug)]
+pub struct QueryTrace<'a> {
+    pub trial: u64,
+    pub a: TraceScalar<'a>,
+    pub b: TraceScalar<'a>,
+    pub outcome: PdpOutcome,
+    pub points: Option<&'a [usize]>,
+}
+
+impl<'a> QueryTrace<'a> {
+    fn word(trial: u64, a: u64, b: u64, pdp: &'a PdpAttempt) -> Self {
+        Self {
+            trial,
+            a: TraceScalar::Word(a),
+            b: TraceScalar::Word(b),
+            outcome: pdp.outcome,
+            points: pdp.points.as_deref(),
+        }
+    }
+}
+
+/// Synchronous observation only: no attempt history or replay is required.
+/// Collection callbacks run on workers in completion order.
+pub type QueryObserver<'a> = dyn Fn(QueryTrace<'_>) + Sync + 'a;
+
+fn trace_relation_attempt(
+    observer: Option<&QueryObserver<'_>>,
+    record: &KoblitzRelationAttemptRecord,
+) {
+    if let Some(observer) = observer {
+        let outcome = match record.disposition {
+            KoblitzRelationAttemptDisposition::RelationFound => PdpOutcome::Witness,
+            KoblitzRelationAttemptDisposition::Refuted => PdpOutcome::ProvedUnsat,
+            KoblitzRelationAttemptDisposition::Unsupported => PdpOutcome::Unsupported,
+            KoblitzRelationAttemptDisposition::Unknown => PdpOutcome::Unresolved,
+            KoblitzRelationAttemptDisposition::InvalidModel => PdpOutcome::InvalidModel,
+            KoblitzRelationAttemptDisposition::DirectSkipped
+            | KoblitzRelationAttemptDisposition::DirectSolved => PdpOutcome::Identity,
+        };
+        observer(QueryTrace {
+            trial: record.trial.saturating_sub(1) as u64,
+            a: TraceScalar::Wide(&record.coefficient_a),
+            b: TraceScalar::Wide(&record.coefficient_b),
+            outcome,
+            points: record.decomposition_indices.as_deref(),
+        });
+    }
+}
+
 /// SAT-like frontend that actually produced the retained counters.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -12338,7 +12422,7 @@ impl<'a> RelationCollector<'a> {
         unit: RelationWorkUnit,
         points: Option<&[u32]>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
-        self.collect_impl(unit, points, false, None)
+        self.collect_impl(unit, points, false, None, None)
     }
 
     /// Collect once while retaining every query and frontend outcome.
@@ -12346,7 +12430,7 @@ impl<'a> RelationCollector<'a> {
         &self,
         unit: RelationWorkUnit,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
-        self.collect_impl(unit, None, true, None)
+        self.collect_impl(unit, None, true, None, None)
     }
 
     /// Observed counterpart of [`Self::collect_aimed`].
@@ -12355,7 +12439,7 @@ impl<'a> RelationCollector<'a> {
         unit: RelationWorkUnit,
         points: Option<&[u32]>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
-        self.collect_impl(unit, points, true, None)
+        self.collect_impl(unit, points, true, None, None)
     }
 
     /// Like [`Self::collect_aimed`], notifying once for every completed probe.
@@ -12368,7 +12452,23 @@ impl<'a> RelationCollector<'a> {
         points: Option<&[u32]>,
         progress: &(dyn Fn(u64, PdpOutcome) + Sync),
     ) -> (Vec<CollectedRelation>, CollectionReport) {
-        self.collect_impl(unit, points, false, Some(progress))
+        self.collect_impl(unit, points, false, Some(progress), None)
+    }
+
+    /// Like [`Self::collect_aimed`], borrowing each actual probe's coefficients
+    /// and decomposition as soon as it finishes, without retaining attempts.
+    pub fn collect_aimed_with_trace(
+        &self,
+        unit: RelationWorkUnit,
+        points: Option<&[u32]>,
+        observer: &QueryObserver<'_>,
+    ) -> (Vec<CollectedRelation>, CollectionReport) {
+        self.collect_impl(unit, points, false, None, Some(observer))
+    }
+
+    /// The materialized point list indexed by collection witnesses.
+    pub fn factor_base(&self) -> &FrobeniusFactorBase {
+        self.fb
     }
 
     fn collect_impl(
@@ -12377,18 +12477,19 @@ impl<'a> RelationCollector<'a> {
         points: Option<&[u32]>,
         observe: bool,
         progress: Option<&(dyn Fn(u64, PdpOutcome) + Sync)>,
+        observer: Option<&QueryObserver<'_>>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
         let _collection = measurement::scope(Phase::Queries);
         // Aiming takes precedence over sweeping: a run that names the
         // summands it still needs has said the sweep is what it wants to
         // stop doing.
         if let Some(targets) = points.and_then(|c| self.aimed(c)) {
-            return self.collect_walked(unit, targets, observe, progress);
+            return self.collect_walked(unit, targets, observe, progress, observer);
         }
         if let Some(window) = self.window() {
-            return self.collect_walked(unit, Targets::Window(window), observe, progress);
+            return self.collect_walked(unit, Targets::Window(window), observe, progress, observer);
         }
-        self.collect_swept(unit, observe, progress)
+        self.collect_swept(unit, observe, progress, observer)
     }
 
     /// [`Self::collect`] without the walked, windowed path: one scalar
@@ -12398,6 +12499,7 @@ impl<'a> RelationCollector<'a> {
         unit: RelationWorkUnit,
         observe: bool,
         progress: Option<&(dyn Fn(u64, PdpOutcome) + Sync)>,
+        observer: Option<&QueryObserver<'_>>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
         let begin = std::time::Instant::now();
         let g = self.kc.generator();
@@ -12447,6 +12549,9 @@ impl<'a> RelationCollector<'a> {
             };
             if let Some(progress) = progress {
                 progress(t, pdp.outcome);
+            }
+            if let Some(observer) = observer {
+                observer(QueryTrace::word(t, a, 0, &pdp));
             }
             (t, a, pdp)
         };
@@ -12503,6 +12608,7 @@ impl<'a> RelationCollector<'a> {
         targets: Targets,
         observe: bool,
         progress: Option<&(dyn Fn(u64, PdpOutcome) + Sync)>,
+        observer: Option<&QueryObserver<'_>>,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
         let window = targets.len();
         let begin = std::time::Instant::now();
@@ -12551,6 +12657,9 @@ impl<'a> RelationCollector<'a> {
                 };
                 if let Some(progress) = progress {
                     progress(t, pdp.outcome);
+                }
+                if let Some(observer) = observer {
+                    observer(QueryTrace::word(t, a, 0, &pdp));
                 }
                 found.push(t, a, pdp, observe);
                 measurement::mark(Phase::Queries);
@@ -12923,7 +13032,19 @@ pub fn solve_factor_base_logs_with_progress(
     opts: &KoblitzIcOptions,
     progress: &mut dyn FnMut(LogTableStage, &LogTableReport),
 ) -> Option<(FactorBaseLogTable, LogTableReport)> {
-    let result = solve_factor_base_logs_progress_impl(kc, fb, opts, progress);
+    solve_factor_base_logs_with_trace(kc, fb, opts, progress, None)
+}
+
+/// Precomputation with optional live query equations as well as stage/rank
+/// notifications. The original batches, rank gates and query law are retained.
+pub fn solve_factor_base_logs_with_trace(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    opts: &KoblitzIcOptions,
+    progress: &mut dyn FnMut(LogTableStage, &LogTableReport),
+    observer: Option<&QueryObserver<'_>>,
+) -> Option<(FactorBaseLogTable, LogTableReport)> {
+    let result = solve_factor_base_logs_progress_impl(kc, fb, opts, progress, observer);
     if let Some((_, report)) = &result {
         progress(LogTableStage::Finished, report);
     }
@@ -12935,9 +13056,10 @@ fn solve_factor_base_logs_progress_impl(
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
     progress: &mut dyn FnMut(LogTableStage, &LogTableReport),
+    observer: Option<&QueryObserver<'_>>,
 ) -> Option<(FactorBaseLogTable, LogTableReport)> {
     if kc.subgroup_order.bits() > 64 {
-        return solve_factor_base_logs_wide(kc, fb, opts, progress);
+        return solve_factor_base_logs_wide(kc, fb, opts, progress, observer);
     }
     let mut system = LogSystem::new(kc, fb, opts)?;
     let collector = RelationCollector::new(kc, fb, opts)?;
@@ -12959,7 +13081,7 @@ fn solve_factor_base_logs_progress_impl(
             start: report.trials as u64,
             count: count as u64,
         };
-        let (relations, creport) = collector.collect(unit);
+        let (relations, creport) = collector.collect_impl(unit, None, false, None, observer);
         report.trials += creport.trials;
         report.collection_seconds += creport.elapsed_seconds;
         for rel in &relations {
@@ -13016,6 +13138,7 @@ fn solve_factor_base_logs_wide(
     fb: &FrobeniusFactorBase,
     opts: &KoblitzIcOptions,
     progress: &mut dyn FnMut(LogTableStage, &LogTableReport),
+    observer: Option<&QueryObserver<'_>>,
 ) -> Option<(FactorBaseLogTable, LogTableReport)> {
     if fb.points.is_empty() || opts.strategy == DecompositionStrategy::PairTable {
         return None;
@@ -13040,9 +13163,27 @@ fn solve_factor_base_logs_wide(
         let a = wide_probe_scalar(&mut rng, &kc.subgroup_order, true);
         let target = kc.mul(generator, &a);
         if target == BinaryPoint::Infinity {
+            if let Some(observer) = observer {
+                observer(QueryTrace {
+                    trial: (report.trials - 1) as u64,
+                    a: TraceScalar::Wide(&a),
+                    b: TraceScalar::Word(0),
+                    outcome: PdpOutcome::Identity,
+                    points: None,
+                });
+            }
             continue;
         }
         let attempt = decompose_once(kc, fb, &index_of, &field, None, opts, &target);
+        if let Some(observer) = observer {
+            observer(QueryTrace {
+                trial: (report.trials - 1) as u64,
+                a: TraceScalar::Wide(&a),
+                b: TraceScalar::Word(0),
+                outcome: attempt.outcome,
+                points: attempt.points.as_deref(),
+            });
+        }
         let Some(points) = attempt.points else {
             continue;
         };
@@ -13374,12 +13515,16 @@ impl IndividualLogReport {
         a: u64,
         b: u64,
         progress: &mut Option<&mut dyn FnMut(usize, PdpOutcome)>,
+        observer: Option<&QueryObserver<'_>>,
         pdp: impl FnOnce() -> PdpAttempt,
     ) {
-        if self.attempts.is_some() || progress.is_some() {
+        if self.attempts.is_some() || progress.is_some() || observer.is_some() {
             let pdp = pdp();
             if let Some(progress) = progress {
                 progress(self.trials, pdp.outcome);
+            }
+            if let Some(observer) = observer {
+                observer(QueryTrace::word((self.trials - 1) as u64, a, b, &pdp));
             }
             if let Some(attempts) = &mut self.attempts {
                 attempts.push(QueryAttempt {
@@ -13437,7 +13582,7 @@ pub fn individual_log_with_pair_table(
     pair: Option<&PairSumTable>,
 ) -> Option<(BigUint, IndividualLogReport)> {
     if kc.subgroup_order.bits() > 64 {
-        return individual_log_wide(kc, fb, table, q, opts, None);
+        return individual_log_wide(kc, fb, table, q, opts, None, None);
     }
     IndividualLogSolver::new(kc, fb, table, opts, pair)?.solve(q)
 }
@@ -13453,7 +13598,7 @@ pub fn individual_log_with_progress(
     progress: &mut dyn FnMut(usize, PdpOutcome),
 ) -> Option<(BigUint, IndividualLogReport)> {
     if kc.subgroup_order.bits() > 64 {
-        return individual_log_wide(kc, fb, table, q, opts, Some(progress));
+        return individual_log_wide(kc, fb, table, q, opts, Some(progress), None);
     }
     let pair = if opts.strategy == DecompositionStrategy::PairTable {
         Some(PairSumTable::build(kc, fb)?)
@@ -13462,6 +13607,29 @@ pub fn individual_log_with_progress(
     };
     let report = IndividualLogSolver::new(kc, fb, table, opts, pair.as_ref())?
         .solve_report_with_progress(q, progress);
+    report.log.clone().map(|d| (d, report))
+}
+
+/// Individual descent with live coefficients and borrowed decomposition indices.
+/// It follows the same sampled or walked queries as [`individual_log`].
+pub fn individual_log_with_trace(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    table: &FactorBaseLogTable,
+    q: &BinaryPoint,
+    opts: &KoblitzIcOptions,
+    observer: &QueryObserver<'_>,
+) -> Option<(BigUint, IndividualLogReport)> {
+    if kc.subgroup_order.bits() > 64 {
+        return individual_log_wide(kc, fb, table, q, opts, None, Some(observer));
+    }
+    let pair = if opts.strategy == DecompositionStrategy::PairTable {
+        Some(PairSumTable::build(kc, fb)?)
+    } else {
+        None
+    };
+    let report = IndividualLogSolver::new(kc, fb, table, opts, pair.as_ref())?
+        .solve_report_with_trace(q, observer);
     report.log.clone().map(|d| (d, report))
 }
 
@@ -13475,6 +13643,7 @@ fn individual_log_wide(
     q: &BinaryPoint,
     opts: &KoblitzIcOptions,
     mut progress: Option<&mut dyn FnMut(usize, PdpOutcome)>,
+    observer: Option<&QueryObserver<'_>>,
 ) -> Option<(BigUint, IndividualLogReport)> {
     if fb.points.is_empty() || opts.strategy == DecompositionStrategy::PairTable {
         return None;
@@ -13509,6 +13678,15 @@ fn individual_log_wide(
             if let Some(progress) = &mut progress {
                 progress(report.trials, PdpOutcome::Identity);
             }
+            if let Some(observer) = observer {
+                observer(QueryTrace {
+                    trial: (report.trials - 1) as u64,
+                    a: TraceScalar::Wide(&a),
+                    b: TraceScalar::Wide(&b),
+                    outcome: PdpOutcome::Identity,
+                    points: None,
+                });
+            }
             if opts.allow_direct_relation {
                 if let Some(d) = solve_for_d(&a, &b, r) {
                     if kc.mul(generator, &d) == *q {
@@ -13527,6 +13705,15 @@ fn individual_log_wide(
         let attempt = decompose_once(kc, fb, &index_of, &field, None, opts, &target);
         if let Some(progress) = &mut progress {
             progress(report.trials, attempt.outcome);
+        }
+        if let Some(observer) = observer {
+            observer(QueryTrace {
+                trial: (report.trials - 1) as u64,
+                a: TraceScalar::Wide(&a),
+                b: TraceScalar::Wide(&b),
+                outcome: attempt.outcome,
+                points: attempt.points.as_deref(),
+            });
         }
         let Some(points) = attempt.points else {
             continue;
@@ -13943,6 +14130,7 @@ impl<'a> IndividualLogSolver<'a> {
         q: &BinaryPoint,
         report: &mut IndividualLogReport,
         progress: &mut Option<&mut dyn FnMut(usize, PdpOutcome)>,
+        observer: Option<&QueryObserver<'_>>,
     ) -> Option<Option<BigUint>> {
         let _query = measurement::scope(Phase::TargetQuery);
         let (fc, g) = self.fast.as_ref()?;
@@ -14006,7 +14194,7 @@ impl<'a> IndividualLogSolver<'a> {
                 }
                 report.trials += 1;
                 if state.infinity {
-                    report.record(*a, *b, progress, || {
+                    report.record(*a, *b, progress, observer, || {
                         PdpAttempt::bare(None, PdpOutcome::Identity)
                     });
                     if !self.opts.allow_direct_relation {
@@ -14032,7 +14220,7 @@ impl<'a> IndividualLogSolver<'a> {
                 }
                 if m == 2 {
                     if !pair.contains_key_hash(key, h) {
-                        report.record(*a, *b, progress, || {
+                        report.record(*a, *b, progress, observer, || {
                             PdpAttempt::bare(None, PdpOutcome::Unresolved)
                         });
                         continue;
@@ -14043,7 +14231,7 @@ impl<'a> IndividualLogSolver<'a> {
                         pair.decompose_fast_m2_known(*state, key, h, &mut hit_pairs),
                         PdpOutcome::Unresolved,
                     );
-                    report.record(*a, *b, progress, || pdp.clone());
+                    report.record(*a, *b, progress, observer, || pdp.clone());
                     let Some(idxs) = pdp.points else {
                         continue;
                     };
@@ -14065,7 +14253,7 @@ impl<'a> IndividualLogSolver<'a> {
                         PdpOutcome::Unsupported
                     },
                 );
-                report.record(*a, *b, progress, || pdp.clone());
+                report.record(*a, *b, progress, observer, || pdp.clone());
                 let Some(idxs) = pdp.points else {
                     continue;
                 };
@@ -14114,12 +14302,12 @@ impl<'a> IndividualLogSolver<'a> {
 
     /// Return the terminal report even when the trial budget is exhausted.
     pub fn solve_report(&self, q: &BinaryPoint) -> IndividualLogReport {
-        self.solve_impl(q, false, None)
+        self.solve_impl(q, false, None, None)
     }
 
     /// Like [`Self::solve_report`], retaining every attempted query in order.
     pub fn solve_observed(&self, q: &BinaryPoint) -> IndividualLogReport {
-        self.solve_impl(q, true, None)
+        self.solve_impl(q, true, None, None)
     }
 
     /// Like [`Self::solve_report`], notifying synchronously after every PDP
@@ -14130,7 +14318,17 @@ impl<'a> IndividualLogSolver<'a> {
         q: &BinaryPoint,
         progress: &mut dyn FnMut(usize, PdpOutcome),
     ) -> IndividualLogReport {
-        self.solve_impl(q, false, Some(progress))
+        self.solve_impl(q, false, Some(progress), None)
+    }
+
+    /// Like [`Self::solve_report`], borrowing each completed query for live
+    /// display. Failed queries are not retained in the returned report.
+    pub fn solve_report_with_trace(
+        &self,
+        q: &BinaryPoint,
+        observer: &QueryObserver<'_>,
+    ) -> IndividualLogReport {
+        self.solve_impl(q, false, None, Some(observer))
     }
 
     fn solve_impl(
@@ -14138,6 +14336,7 @@ impl<'a> IndividualLogSolver<'a> {
         q: &BinaryPoint,
         observe: bool,
         mut progress: Option<&mut dyn FnMut(usize, PdpOutcome)>,
+        observer: Option<&QueryObserver<'_>>,
     ) -> IndividualLogReport {
         let _query = measurement::scope(Phase::TargetQuery);
         let kc = self.kc;
@@ -14155,7 +14354,7 @@ impl<'a> IndividualLogSolver<'a> {
         // The walk needs the single-word arithmetic and a pair table;
         // without either, fall through to drawing probes.
         if self.opts.strategy == DecompositionStrategy::PairTable {
-            if let Some(found) = self.solve_by_walking(q, &mut report, &mut progress) {
+            if let Some(found) = self.solve_by_walking(q, &mut report, &mut progress, observer) {
                 report.log = found;
                 return report;
             }
@@ -14168,7 +14367,7 @@ impl<'a> IndividualLogSolver<'a> {
             let a = rng.gen_range(1..self.r_u64);
             let b = rng.gen_range(1..self.r_u64);
             let pdp = self.probe(q, q_fast, a, b);
-            report.record(a, b, &mut progress, || pdp.clone());
+            report.record(a, b, &mut progress, observer, || pdp.clone());
             let idxs = match pdp.points {
                 Some(idxs) => idxs,
                 None if pdp.outcome == PdpOutcome::Identity => {
@@ -14251,6 +14450,41 @@ mod tests {
                     });
                 let mut calls = calls.into_inner().unwrap();
                 calls.sort_by_key(|&(trial, _)| trial);
+                let traced_calls = std::sync::Mutex::new(Vec::new());
+                let (traced, traced_report) =
+                    collector.collect_aimed_with_trace(unit, aim, &|trace| {
+                        traced_calls.lock().unwrap().push((
+                            trace.trial,
+                            trace.a.to_string(),
+                            trace.b.to_string(),
+                            trace.outcome,
+                            trace.points.map(<[usize]>::to_vec),
+                        ));
+                    });
+                let mut traced_calls = traced_calls.into_inner().unwrap();
+                traced_calls.sort_by_key(|call| call.0);
+                let expected_traces: Vec<_> = observed
+                    .attempts
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .map(|attempt| {
+                        (
+                            attempt.trial,
+                            attempt.a.to_string(),
+                            attempt.b.to_string(),
+                            attempt.pdp.outcome,
+                            attempt.pdp.points.clone(),
+                        )
+                    })
+                    .collect();
+                assert_eq!(traced_calls, expected_traces);
+                assert_eq!(traced, expected);
+                assert!(traced_report.attempts.is_none());
+                assert_eq!(traced_report.summands_scanned, observed.summands_scanned);
+                for relation in &traced {
+                    assert!(verify_collected_relation(&kc, &fb, opts.m, relation));
+                }
                 let expected_calls: Vec<_> = observed
                     .attempts
                     .unwrap()
@@ -14313,6 +14547,35 @@ mod tests {
                 let actual = solver.solve_report_with_progress(&q, &mut |trial, outcome| {
                     calls.push((trial, outcome))
                 });
+                let traced_calls = std::sync::Mutex::new(Vec::new());
+                let traced = solver.solve_report_with_trace(&q, &|trace| {
+                    traced_calls.lock().unwrap().push((
+                        trace.trial,
+                        trace.a.to_string(),
+                        trace.b.to_string(),
+                        trace.outcome,
+                        trace.points.map(<[usize]>::to_vec),
+                    ));
+                });
+                let expected_traces: Vec<_> = expected
+                    .attempts
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .map(|attempt| {
+                        (
+                            attempt.trial,
+                            attempt.a.to_string(),
+                            attempt.b.to_string(),
+                            attempt.pdp.outcome,
+                            attempt.pdp.points.clone(),
+                        )
+                    })
+                    .collect();
+                assert_eq!(traced_calls.into_inner().unwrap(), expected_traces);
+                assert_eq!(traced.log, expected.log);
+                assert_eq!(traced.trials, expected.trials);
+                assert!(traced.attempts.is_none());
                 assert_eq!(actual.log, expected.log);
                 assert_eq!(actual.trials, expected.trials);
                 assert!(actual.attempts.is_none());
@@ -15350,7 +15613,7 @@ mod tests {
         for d in 1..100u64 {
             let q = kc.mul(kc.generator(), &BigUint::from(d));
             let mut report = IndividualLogReport::default();
-            solver.solve_by_walking(&q, &mut report, &mut None);
+            solver.solve_by_walking(&q, &mut report, &mut None, None);
             assert!(report.trials <= 1);
             assert!(report
                 .relation

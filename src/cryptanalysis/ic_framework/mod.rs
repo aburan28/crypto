@@ -80,7 +80,8 @@ use serde::Serialize;
 
 use crate::cryptanalysis::ic_boundary::{
     collect_and_solve_relations, price_phase, Calibration, CompletionRule, CountedGroup,
-    FactorBase, GroupOps, PhaseCost, PipelineOutcome, RelationSolver, RestartPool, TargetSource,
+    FactorBase, GroupOps, PhaseCost, PipelineOutcome, Relation, RelationSolver, RestartPool,
+    TargetSource,
 };
 use crate::cryptanalysis::ic_framework::residual as residual_mod;
 use crate::cryptanalysis::ic_measurement as measurement;
@@ -304,6 +305,32 @@ fn check_full_rank_base_columns<G: CountedGroup>(
     valid
 }
 
+/// Borrowed live observations from the pluggable pipeline. An oracle witness
+/// is emitted before matrix admission and final verification, not as a claim
+/// that the target logarithm has been recovered.
+pub enum PipelineEvent<'a, E> {
+    FactorBaseStarted,
+    FactorBaseReady {
+        points: &'a [E],
+        columns: usize,
+    },
+    PrecomputeStarted,
+    PrecomputeFinished,
+    Query {
+        trial: u64,
+        a: u64,
+        b: u64,
+        point: E,
+        relations: &'a [Relation],
+    },
+    Finished {
+        trials: u64,
+        relations: u64,
+        rank: u64,
+        verified: bool,
+    },
+}
+
 /// Run one configuration end to end.
 ///
 /// `planted` is the logarithm the runner checks the answer against.  No
@@ -318,6 +345,45 @@ pub fn run_pipeline<G: CountedGroup>(
     calib: &Calibration,
     rho_s: Option<f64>,
 ) -> Result<RunReport, String> {
+    run_pipeline_observed(ctx, spec, base_builder, oracle, planted, calib, rho_s, None)
+}
+
+/// [`run_pipeline`] with live setup and query notifications. Callbacks borrow
+/// the existing points and oracle output; no query is replayed or retained.
+#[allow(clippy::too_many_arguments)]
+pub fn run_pipeline_with_progress<G: CountedGroup>(
+    ctx: &InstanceCtx<G>,
+    spec: &PipelineSpec,
+    base_builder: &dyn FactorBaseBuilder<G>,
+    oracle: &mut dyn DecompositionOracle<G>,
+    planted: u64,
+    calib: &Calibration,
+    rho_s: Option<f64>,
+    progress: &mut dyn FnMut(PipelineEvent<'_, G::Elt>),
+) -> Result<RunReport, String> {
+    run_pipeline_observed(
+        ctx,
+        spec,
+        base_builder,
+        oracle,
+        planted,
+        calib,
+        rho_s,
+        Some(progress),
+    )
+}
+
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
+fn run_pipeline_observed<G: CountedGroup>(
+    ctx: &InstanceCtx<G>,
+    spec: &PipelineSpec,
+    base_builder: &dyn FactorBaseBuilder<G>,
+    oracle: &mut dyn DecompositionOracle<G>,
+    planted: u64,
+    calib: &Calibration,
+    rho_s: Option<f64>,
+    mut progress: Option<&mut dyn FnMut(PipelineEvent<'_, G::Elt>)>,
+) -> Result<RunReport, String> {
     let started = Instant::now();
 
     // ── Stage 1: the factor base ───────────────────────────────────
@@ -329,11 +395,21 @@ pub fn run_pipeline<G: CountedGroup>(
     // `collect_and_solve_with`) and closes after the verified recovery.
     measurement::mark(measurement::Phase::FactorBase);
     let mut fb_ops = GroupOps::default();
+    if let Some(progress) = &mut progress {
+        progress(PipelineEvent::FactorBaseStarted);
+    }
     let fb_started = Instant::now();
     let fb = base_builder.build(ctx, &spec.factor_base_params, &mut fb_ops)?;
     let mut fb_cost = fb.cost.clone();
     fb_cost.group_ops.merge(fb_ops);
     fb_cost.wall_ns = fb_cost.wall_ns.max(fb_started.elapsed().as_nanos() as u64);
+    if let Some(progress) = &mut progress {
+        progress(PipelineEvent::FactorBaseReady {
+            points: &fb.points,
+            columns: fb.columns,
+        });
+        progress(PipelineEvent::PrecomputeStarted);
+    }
 
     // ── Stage 2: whatever the oracle precomputes ───────────────────
     //
@@ -349,6 +425,9 @@ pub fn run_pipeline<G: CountedGroup>(
     prep_cost.group_ops.merge(prep_ops);
     prep_cost.native = oracle.setup_native();
     prep_cost.wall_ns = prep_started.elapsed().as_nanos() as u64;
+    if let Some(progress) = &mut progress {
+        progress(PipelineEvent::PrecomputeFinished);
+    }
 
     // ── Stages 3 and 4: relations, then the matrix ─────────────────
     //
@@ -420,6 +499,8 @@ pub fn run_pipeline<G: CountedGroup>(
                     .into(),
             );
         }
+        // The residual collector uses its own query law. Do not fabricate
+        // [a]G + [b]Q events for its pair-difference relations.
         residual_mod::collect_residual_and_solve(
             ctx.group,
             ctx.generator,
@@ -436,6 +517,7 @@ pub fn run_pipeline<G: CountedGroup>(
         // large primes (the trait default), so this is the loop every
         // recorded run took; the large-prime collector returns merged
         // rows through the same call.
+        let mut trial = 0u64;
         collect_and_solve_relations(
             ctx.group,
             ctx.generator,
@@ -450,7 +532,18 @@ pub fn run_pipeline<G: CountedGroup>(
             matrix.as_mut(),
             completion,
             |ops, counters, point, a, b| {
-                oracle.decompose_relations(ctx, &fb, ops, counters, point, a, b)
+                let relations = oracle.decompose_relations(ctx, &fb, ops, counters, point, a, b);
+                if let Some(progress) = &mut progress {
+                    progress(PipelineEvent::Query {
+                        trial,
+                        a,
+                        b,
+                        point,
+                        relations: &relations,
+                    });
+                }
+                trial += 1;
+                relations
             },
         )
     };
@@ -466,6 +559,14 @@ pub fn run_pipeline<G: CountedGroup>(
             check_full_rank_base_columns(ctx, &fb, matrix.as_ref(), &mut outcome.verify);
     }
     measurement::end_online();
+    if let Some(progress) = &mut progress {
+        progress(PipelineEvent::Finished {
+            trials: outcome.trials,
+            relations: outcome.relations_found,
+            rank: outcome.rank,
+            verified: outcome.verified,
+        });
+    }
 
     // ── The report ─────────────────────────────────────────────────
     let mut fb_phase = fb_cost;
@@ -669,6 +770,90 @@ mod tests {
     use super::stages::{InstanceCtx, Params, Targets};
     use super::*;
     use crate::cryptanalysis::ic_boundary::{roster_prime_instance, Calibration};
+
+    #[test]
+    fn live_pipeline_witnesses_are_real_equations_and_preserve_the_result() {
+        let inst = roster_prime_instance(16).unwrap();
+        let (ctx, planted) = ctx_and_planted(&inst);
+        let base = PrimeAbscissaBase { instance: &inst };
+        let mut spec = PipelineSpec {
+            factor_base: "prime-abscissa".into(),
+            oracle: "mitm".into(),
+            targets: Targets::Walk,
+            max_trials: 100_000,
+            seed: 7,
+            ..Default::default()
+        };
+        spec.factor_base_params.set("size", "24");
+        let original = run_pipeline(
+            &ctx,
+            &spec,
+            &base,
+            &mut MitmOracle::new(2),
+            planted,
+            &Calibration::default(),
+            None,
+        )
+        .unwrap();
+        let mut points = Vec::new();
+        let mut witnesses = 0;
+        let mut finished = false;
+        let traced = run_pipeline_with_progress(
+            &ctx,
+            &spec,
+            &base,
+            &mut MitmOracle::new(2),
+            planted,
+            &Calibration::default(),
+            None,
+            &mut |event| {
+                match event {
+                    PipelineEvent::FactorBaseReady { points: base, .. } => points = base.to_vec(),
+                    PipelineEvent::Query {
+                        a,
+                        b,
+                        point,
+                        relations,
+                        ..
+                    } => {
+                        // Separate counters for test replay must never enter the
+                        // pipeline's operation accounting.
+                        let mut replay = GroupOps::default();
+                        let ag = ctx.group.mul(&mut replay, ctx.generator, a);
+                        let bq = ctx.group.mul(&mut replay, ctx.target, b);
+                        assert_eq!(ctx.group.add(&mut replay, ag, bq), point);
+                        for relation in relations {
+                            if let Relation::Summands(indices) = relation {
+                                let sum = indices.iter().fold(ctx.group.identity(), |sum, &i| {
+                                    ctx.group.add(&mut replay, sum, points[i])
+                                });
+                                assert_eq!(sum, point);
+                                witnesses += 1;
+                            }
+                        }
+                    }
+                    PipelineEvent::Finished { verified, .. } => {
+                        assert!(verified);
+                        finished = true;
+                    }
+                    _ => {}
+                }
+            },
+        )
+        .unwrap();
+        assert!(witnesses > 0 && finished);
+        assert!(traced.verified && original.verified);
+        assert_eq!(traced.recovered, original.recovered);
+        assert_eq!(
+            traced.decomposition.targets_tried,
+            original.decomposition.targets_tried
+        );
+        assert_eq!(
+            traced.decomposition.relations_found,
+            original.decomposition.relations_found
+        );
+        assert_eq!(traced.linear_algebra.rank, original.linear_algebra.rank);
+    }
 
     fn ctx_and_planted(
         inst: &crate::cryptanalysis::ic_boundary::PrimeInstance,
