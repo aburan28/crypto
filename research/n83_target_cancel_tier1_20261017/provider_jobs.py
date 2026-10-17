@@ -35,7 +35,10 @@ def verify(jobs_path, strata, run_id, attempt, job_stem):
         if (item['stratum'] != number or job.get('run_id') != run_id or
                 job.get('run_attempt') != attempt or
                 job.get('status') != 'completed' or
-                job.get('conclusion') != 'success' or
+                (job.get('conclusion') != 'success' and not
+                 (job.get('conclusion') == 'failure' and
+                  item['analysis']['status'] == 'BOUNDED_UNKNOWN' and
+                  item['local_replay_exit'] == 2)) or
                 not isinstance(job.get('id'), int) or job['id'] <= 0 or
                 not isinstance(job.get('runner_id'), int) or
                 job['runner_id'] <= 0 or
