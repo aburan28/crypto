@@ -1,0 +1,41 @@
+{
+  "answers_sha256": "270b48e9d60974c3c7c7bb39449ffb8bff17b28f33565432c1f2733c017ebf5a",
+  "host_strata": 4,
+  "ordered_candidate_ids": [
+    "IC1N83Ckb1a1fb164672PDP4rootRCguidedLAgaussTDdirectISO0h33c9c3b2f933",
+    "IC1N83Ckb1a1fb164672PDP4rootRCguidedLAgaussTDdirectISO0h58ec337f71f7"
+  ],
+  "point_count": 24,
+  "points_per_host": 6,
+  "resource_caps": {
+    "ic_seconds": 900,
+    "job_minutes": 330,
+    "producer_seconds": 18000,
+    "rho_seconds": 120
+  },
+  "schema": "n83.target-cancel-tier1-dispatch/v1",
+  "sha256": {
+    ".github/workflows/n83-target-cancel-tier1.yml": "ef6d25c9bccc7dc66c94e7ab89656af6d86784d898fe6c9730d0ec1d25ec82e1",
+    "Cargo.lock": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "examples/koblitz_orbit_dlp_fast.rs": "8109fb33374ce2aa66c6a5a0b6e144d3b0143168ac756f9e0bd70af60a911829",
+    "examples/n83_rho_optimization_eval.rs": "fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0",
+    "research/n83_parallel_target_cancel_20261017/results/analysis.json": "d9fc2555bf6db24b4bfdd71eb3db5523c7cf90bcc6fde399cfb488d21245f020",
+    "research/n83_target_cancel_tier1_20261017/PROTOCOL.md": "72e5933aad67bea8de3c99f6a948c4265cadd5d6dcccea4ab2d2f70c612beff6",
+    "research/n83_target_cancel_tier1_20261017/aggregate.py": "9f0face7a9f4e0c336477c195ba7961b5f872341fef9c10bec3339845ec8a0f0",
+    "research/n83_target_cancel_tier1_20261017/answers.jsonl": "270b48e9d60974c3c7c7bb39449ffb8bff17b28f33565432c1f2733c017ebf5a",
+    "research/n83_target_cancel_tier1_20261017/candidate_IC1N83Ckb1a1fb164672PDP4rootRCguidedLAgaussTDdirectISO0h33c9c3b2f933.json": "70cd31183b769bf86f72b7c124b9e2cb725c02eee9f838c60b8451cce81ca50d",
+    "research/n83_target_cancel_tier1_20261017/candidate_IC1N83Ckb1a1fb164672PDP4rootRCguidedLAgaussTDdirectISO0h58ec337f71f7.json": "6396d4fe061f54dc5d3707c91375c66aa7b4b8c2f9768c0e70bdfe96cb9a4f8c",
+    "research/n83_target_cancel_tier1_20261017/check_dispatch.py": "d4a370331b0a134736de7181305d4a4abb8ea530c89413c1c44d10a731676eab",
+    "research/n83_target_cancel_tier1_20261017/generate.py": "6669e236148bd654c2d826979977dc22f09d1fd4d719e226481a15b56325c16a",
+    "research/n83_target_cancel_tier1_20261017/manifest.json": "f09667012473343de1e31435a47427d65b94c869210b3dc03e7c774304561fa2",
+    "research/n83_target_cancel_tier1_20261017/provider_jobs.py": "d3b52618f84dae71c4d091a86544585ceecba35ce23b46b73559fe7b104c5c4e",
+    "research/n83_target_cancel_tier1_20261017/run.py": "4b6d849f5815ead6b3b2ecff9aa806c1965aa7f2a2001d3f7b50eabf4ec1ec4a",
+    "research/n83_target_cancel_tier1_20261017/selector.py": "ae4003b7c25561b2a6b8734ca90d101555fbb2f3734c3890726749a16bb740ff",
+    "research/n83_target_cancel_tier1_20261017/targets.jsonl": "b18623d86a131cef7b40ebd83c0465598f6a55554fa83bfa3d4f5634f34c74ba",
+    "research/n83_target_cancel_tier1_20261017/test_protocol.py": "e686e91cc96639e2bfe4a159a1cf8743614bd440399fd1b6983c50d14a0e3f70",
+    "research/n83_target_cancel_tier1_20261017/verify.py": "c4cd5675fa349a04e8b0abf7d4260727ee6a57a1ea3c8fb80ac20da72a3b4679"
+  },
+  "source_sha256": "8109fb33374ce2aa66c6a5a0b6e144d3b0143168ac756f9e0bd70af60a911829",
+  "status": "SEALED_BEFORE_HOLDOUT",
+  "targets_sha256": "b18623d86a131cef7b40ebd83c0465598f6a55554fa83bfa3d4f5634f34c74ba"
+}

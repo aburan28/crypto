@@ -1,0 +1,12 @@
+{
+  "answers_sha256": "270b48e9d60974c3c7c7bb39449ffb8bff17b28f33565432c1f2733c017ebf5a",
+  "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+  "domain": "n83-target-cancel-tier1-holdout24-20261017-v1",
+  "generator_sha256": "6669e236148bd654c2d826979977dc22f09d1fd4d719e226481a15b56325c16a",
+  "point_count": 24,
+  "scalar_rule": "1+little_endian(SHA256(domain||u32_le(index))) mod (r-1)",
+  "schema": "n83.target-cancel-tier1-fixture/v1",
+  "status": "SEALED_UNMEASURED",
+  "subgroup_order": 8569786107849059,
+  "targets_sha256": "b18623d86a131cef7b40ebd83c0465598f6a55554fa83bfa3d4f5634f34c74ba"
+}
