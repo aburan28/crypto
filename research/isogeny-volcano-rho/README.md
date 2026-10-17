@@ -5,9 +5,12 @@ every level of an ℓ-isogeny volcano, and run Pollard rho on each curve:
 does the level (crater → floor), or the particular curve, change how fast
 rho solves it? Report min, max and mean.
 
-**Update:** a fourth curve, D (j = 0 crater, `run-20261017T0140Z`), shows
-the one place the curve matters: there, rho folded by the order-6
-automorphism needs 1.89 ± 0.09× fewer operations (√3 predicted).
+**Update:** curves D (j = 0 crater, `run-20261017T0140Z`) and E (j = 1728
+crater, `run-20261017T0305Z`) show the one place the curve matters. Rho
+folded by the crater's automorphisms needs 1.89 ± 0.09× (j = 0, √3
+predicted) and 1.32 ± 0.06× (j = 1728, √2 predicted) fewer operations.
+In wall time that is 1.33× faster on j = 0 and 2.3× slower on j = 1728,
+because `ca` has a tuned walk only for j = 0.
 
 **Answer (measured on three curves: A, `run-20261016T2302Z`, ℓ = 3,
 ramified crater; B, `run-20261016T2315Z`, ℓ = 3, split crater; C,
@@ -333,6 +336,82 @@ automorphism-folded rho on the same instance with the same seeds.
 ![volcano D](runs/run-20261017T0140Z/volcano.svg)
 ![per level D](runs/run-20261017T0140Z/per_level.svg)
 ![crater cdf D](runs/run-20261017T0140Z/crater_cdf.svg)
+
+## The j = 1728 crater (`run-20261017T0305Z`)
+
+The other prime-field case is j = 1728, y² = x³ + ax over p ≡ 1 (mod 4),
+whose four automorphisms give classes of four points. That predicts √(4/2)
+= √2 ≈ 1.41× fewer steps than the negation-map walk. Its class has
+D_K = −4, which is ramified at 2: the crater is the single j = 1728 vertex,
+and its horizontal 2-isogeny is the degree-2 endomorphism `1 + i`, a loop.
+The two other 2-kernels are swapped by the automorphism and land on one
+curve below.
+
+**Curve E.** It was found by `volcano-rho --j1728 --ell 2 --bits 48 --depth
+5 --max-cofactor 100000 --seed 20261025` and measured by `ca volcano …
+--automorphisms` (aburan28/cryptanalysis `5841fd7`); exact commands are in
+`runs/run-20261017T0305Z/command.txt`.
+
+| | |
+|:--|:--|
+| p | 213656134960913 (48 bits, ≡ 1 mod 8) |
+| root E | y² = x³ + 122917133887808x, j = 1728 |
+| #E | 213656154587108 = 116 · n, n = 1841863401613 (prime, 40.7 bits) |
+| trace t | −19626194; D_K = −4, 2-volcano depth 5, ramified crater |
+| walk | 32 curves = 1 + 1 + 2 + 4 + 8 + 16, 31 edges verified (the whole volcano) |
+| rho | 32 curves + 3 controls (plain) + the crater curve (folded), 400 seeds each: 14,400 solves, all correct; 1,147.7 s |
+
+| arm | curves | solves | min | mean ± 95 % CI | max | mean ms |
+|:--|--:|--:|--:|--:|--:|--:|
+| L0, the j = 1728 crater, plain | 1 | 400 | 156,527 | 1,360,140 ± 66,271 | 3,954,060 | |
+| L1 | 1 | 400 | 137,160 | 1,333,500 ± 65,462 | 3,891,950 | |
+| L2 | 2 | 800 | 127,700 | 1,353,380 ± 44,854 | 4,141,490 | |
+| L3 | 4 | 1,600 | 135,195 | 1,332,150 ± 30,476 | 3,972,090 | |
+| L4 | 8 | 3,200 | 122,902 | 1,347,930 ± 22,393 | 4,807,580 | |
+| L5, the floor | 16 | 6,400 | 113,777 | 1,334,080 ± 15,370 | 3,946,280 | |
+| all isogenous, plain | 32 | 12,800 | 113,777 | 1,339,300 ± 11,010 | 4,807,580 | 77.0 |
+| isomorphic controls, plain | 3 | 1,200 | 162,329 | 1,320,980 ± 35,656 | 4,098,680 | 76.1 |
+| **j = 1728 crater, automorphism-folded** | 1 | 400 | 161,794 | **1,018,110 ± 47,342** | 2,604,700 | 176.9 |
+
+**Curves D and E side by side**
+
+| | j = 0 (curve D) | j = 1728 (curve E) |
+|:--|--:|--:|
+| automorphism order | 6 | 4 |
+| predicted operation speed-up | √3 = 1.73 | √2 = 1.41 |
+| measured operation speed-up | **1.89 ± 0.09** | **1.32 ± 0.06** |
+| plain rho / its ideal √(πn/4) | 1.23 | 1.11 |
+| folded rho / its ideal √(πn/(2m)) | 1.13 | 1.20 |
+| ns per operation, plain / folded | 62 / 88 | 57 / 174 |
+| wall-time speed-up | 1.33× | **0.44× (2.3× slower)** |
+| `ca` code path for the folded arm | `glv_covariant_rho_solve` (tuned j = 0 walk) | `glv_rho_solve` (generic) |
+
+- **Measured:** plain rho is again flat on every level, and the controls
+  match. The folded crater arm needs 1.32 ± 0.06× fewer operations, and its
+  interval excludes √2. It is 2.3× slower in wall time.
+- **Why the two craters differ (derived from reading `ca`'s source, not
+  measured separately):** the comparison is between implementations as
+  much as automorphism groups. `ca`'s default build routes j = 0 to a
+  dedicated covariant walk (`CA_J0_RHO_COVARIANT_WALK=ON`), which labels
+  the six-point class without canonicalising the point. j = 1728 runs the
+  generic `glv_rho_solve`, which on every step:
+  - applies the automorphism three times and hashes four points to pick
+    the class representative, consistent with the 3× cost per operation;
+  - walks with at most r = 32 multipliers (plain rho uses 1,024) and
+    escapes only 2-cycles by look-ahead. Longer fruitless cycles wait for
+    a 24·2^dp-step abandon and restart, which is consistent with landing
+    20 % above the folded ideal.
+
+  So curve E measures this implementation, not the √2 limit. A j = 1728
+  counterpart of the covariant walk is the obvious follow-up in `ca`.
+- **Implication for the volcano (derived):** the j = 1728 crater lowers
+  the operation count as theory says it should, but with this solver,
+  moving there costs wall time. On curve D the same move gained 1.33× in
+  wall time.
+
+![volcano E](runs/run-20261017T0305Z/volcano.svg)
+![per level E](runs/run-20261017T0305Z/per_level.svg)
+![crater cdf E](runs/run-20261017T0305Z/crater_cdf.svg)
 
 ## Reading it
 
