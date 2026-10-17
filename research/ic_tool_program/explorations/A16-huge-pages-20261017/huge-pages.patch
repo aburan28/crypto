@@ -1,0 +1,67 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index b255ce6d8..606915537 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -5290,13 +5290,33 @@ impl PairSumTable {
+         (bucket_start, rests, present, present_mask)
+     }
+ 
++    /// The scan's random reads (the filter, the bucket starts and the
++    /// stored keys) moved onto 2 MiB pages, where the kernel allows it:
++    /// one TLB entry then covers 512 times the bytes.  Only whole 2 MiB
++    /// pages inside each array are collapsed; the values are unchanged.
++    /// `KIC_HUGE_PAGES=0` leaves the table on base pages, and
++    /// `KIC_HUGE_PAGES=filter` collapses the filter alone.
++    fn on_huge_pages(self) -> Self {
++        let mode = std::env::var("KIC_HUGE_PAGES");
++        if mode.as_deref() != Ok("0") {
++            collapse_to_huge_pages(&self.present);
++        }
++        if mode.is_err() || mode.as_deref() == Ok("all") {
++            collapse_to_huge_pages(&self.bucket_start);
++            collapse_to_huge_pages(&self.rests);
++            collapse_to_huge_pages(&self.entries);
++            collapse_to_huge_pages(&self.compact_witnesses);
++        }
++        self
++    }
++
+     pub fn build_folded_within(
+         kc: &KoblitzCurve,
+         fb: &FrobeniusFactorBase,
+         byte_budget: u128,
+     ) -> Option<Self> {
+         let bulk = std::env::var("KIC_FOLD_BUILD").as_deref() != Ok("scalar");
+-        Self::build_folded_with(kc, fb, byte_budget, bulk)
++        Self::build_folded_with(kc, fb, byte_budget, bulk).map(Self::on_huge_pages)
+     }
+ 
+     /// [`Self::build_folded_within`] with its build path chosen: `bulk`
+@@ -21745,3 +21765,27 @@ mod admissibility_walk_differential {
+         assert!(answers[0] > 0 && answers[1] > 0, "{answers:?}");
+     }
+ }
++
++/// Asks the kernel to back the whole 2 MiB pages inside `data` with huge
++/// pages now (`MADV_HUGEPAGE`, then `MADV_COLLAPSE`).  A request the kernel
++/// refuses leaves the pages as they were; nothing is read or written.
++fn collapse_to_huge_pages<T>(data: &[T]) {
++    #[cfg(all(target_os = "linux", target_env = "gnu"))]
++    {
++        const HUGE: usize = 2 << 20;
++        let start = data.as_ptr() as usize;
++        let end = start + std::mem::size_of_val(data);
++        let lo = (start + HUGE - 1) & !(HUGE - 1);
++        let hi = end & !(HUGE - 1);
++        if hi > lo {
++            // SAFETY: `lo..hi` lies inside `data`'s live allocation, and
++            // both advices change only how its pages are backed.
++            unsafe {
++                libc::madvise(lo as *mut libc::c_void, hi - lo, libc::MADV_HUGEPAGE);
++                libc::madvise(lo as *mut libc::c_void, hi - lo, libc::MADV_COLLAPSE);
++            }
++        }
++    }
++    #[cfg(not(all(target_os = "linux", target_env = "gnu")))]
++    let _ = data;
++}
