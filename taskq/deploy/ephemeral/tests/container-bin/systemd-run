@@ -1,0 +1,3 @@
+#!/bin/bash
+# Inside the test container: record the deadline timer instead of arming it.
+echo "systemd-run $*" >>"$FAKE_AWS/ec2/$FAKE_IID.timer"

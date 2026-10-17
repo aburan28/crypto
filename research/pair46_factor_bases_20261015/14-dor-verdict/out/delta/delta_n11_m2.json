@@ -1,0 +1,42 @@
+{
+ "source": "../../factor_base_dor_campaign_20261013/raw/delta_n11_m2.json",
+ "field_degree": 11,
+ "rows": [
+  {
+   "delta": -1,
+   "dim": 6,
+   "complete": true,
+   "decomposable_fraction": 0.875,
+   "fraction_match": true,
+   "d_star_mean": 4,
+   "mean_match": true,
+   "macaulay_rows_mean": 869,
+   "macaulay_cols_mean": 794,
+   "d_star": [4, 4, 4]
+  },
+  {
+   "delta": 1,
+   "dim": 5,
+   "complete": true,
+   "decomposable_fraction": 0.16666666666666663,
+   "fraction_match": true,
+   "d_star_mean": 3.2,
+   "mean_match": true,
+   "macaulay_rows_mean": 239.25,
+   "macaulay_cols_mean": 222.5,
+   "d_star": [3, 4, 3, 3, 3, 3, 3, 3, 2, 3, 3, 3, 4, 3, 4, 3, 3, 3, 4, 4]
+  },
+  {
+   "delta": 3,
+   "dim": 4,
+   "complete": true,
+   "decomposable_fraction": 0.04166666666666663,
+   "fraction_match": true,
+   "d_star_mean": 2.652173913043478,
+   "mean_match": true,
+   "macaulay_rows_mean": 68.3913043478261,
+   "macaulay_cols_mean": 73.52173913043478,
+   "d_star": [3, 3, 3, 3, 2, 2, 2, 2, 3, 2, 3, 3, 3, 3, 3, 2, 3, 3, 3, 2, 3, 3, 2]
+  }
+ ]
+}

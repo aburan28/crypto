@@ -55,17 +55,19 @@ pub fn scale<F: Field>(f: &F, a: &Poly<F>, c: F::E) -> Poly<F> {
 /// Karatsuba threshold (schoolbook below this many coefficients).
 pub const KARATSUBA_THRESHOLD: usize = 32;
 
-/// Longest modulus (coefficient count) `powmod`/`powmod_big` reduce with the table of x^k mod m;
-/// longer ones use the Newton/Barrett `PolyModulus`.
+/// Longest modulus (coefficient count) `powmod`/`powmod_big` reduce with the table of x^k mod m
+/// by default (`Field::powmod_table_max`); longer ones use the Newton/Barrett `PolyModulus`.
 pub const POWMOD_TABLE_MAX: usize = 160;
 
 thread_local! {
-    /// Override of `POWMOD_TABLE_MAX` (for tuning runs; None = built-in default).
+    /// Override of `Field::powmod_table_max` (for tuning runs; None = the field's default).
     pub static POWMOD_TABLE_N: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
 }
 
-fn powmod_table_max() -> usize {
-    POWMOD_TABLE_N.with(|k| k.get()).unwrap_or(POWMOD_TABLE_MAX)
+fn powmod_table_max<F: Field>(f: &F) -> usize {
+    POWMOD_TABLE_N
+        .with(|k| k.get())
+        .unwrap_or_else(|| f.powmod_table_max())
 }
 
 fn school<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
@@ -254,6 +256,9 @@ pub struct PolyModulus<F: Field> {
     pub m: Poly<F>,
     n: usize,
     rinv: Vec<F::E>,
+    /// rinv[..n-1] and m prepared for the products of `rem` on full-length inputs (2n - 1
+    /// coefficients), when the field supports it: the quotient product, and q m mod x^L - 1
+    prep: Option<(crate::field::Prepared, crate::field::Prepared)>,
 }
 
 impl<F: Field> PolyModulus<F> {
@@ -266,7 +271,14 @@ impl<F: Field> PolyModulus<F> {
         } else {
             vec![f.one()]
         };
-        PolyModulus { m, n, rinv }
+        let prep = (n >= 2)
+            .then(|| {
+                let q = f.prepare(&rinv[..n - 1], n - 1, usize::MAX)?;
+                let c = f.prepare(&m, n - 1, n.next_power_of_two())?;
+                Some((q, c))
+            })
+            .flatten();
+        PolyModulus { m, n, rinv, prep }
     }
     pub fn rem(&self, f: &F, a: &Poly<F>) -> Poly<F> {
         let n = self.n;
@@ -282,10 +294,43 @@ impl<F: Field> PolyModulus<F> {
         }
         let k = a.len() - n; // number of quotient coefficients (<= n-1)
         let rev_a: Vec<F::E> = a.iter().rev().take(k).copied().collect();
-        let mut qr = mul_raw(f, &rev_a, &self.rinv[..k]);
+        // full-length input (the usual case in powering): the prepared operands
+        let prep = self.prep.as_ref().filter(|_| k == n - 1);
+        // short: only the k low coefficients (a truncated schoolbook product)
+        let short = k < f.karatsuba_threshold();
+        let mut qr = prep
+            .and_then(|(q, _)| f.conv_prepared(&rev_a, q))
+            .unwrap_or_else(|| {
+                if short {
+                    f.conv_trunc(&rev_a, &self.rinv[..k], k)
+                } else {
+                    mul_raw(f, &rev_a, &self.rinv[..k])
+                }
+            });
         qr.truncate(k);
         let q: Vec<F::E> = qr.into_iter().rev().collect();
-        let qm = mul_raw(f, &q, &self.m);
+        // only q m mod x^n is needed: mod x^L - 1 (L >= n a power of two) coefficient i < n is
+        // (q m)_i + (q m)_(i+L), and (q m)_(i+L) = a_(i+L) since a - q m has degree below n
+        let cyc = n.next_power_of_two();
+        let qm = match prep {
+            Some((_, c)) => f.conv_prepared(&q, c),
+            None => None,
+        };
+        if let Some(c) = qm.or_else(|| f.conv_cyclic(&q, &self.m, cyc)) {
+            let mut r: Vec<F::E> = (0..n)
+                .map(|i| {
+                    let hi = a.get(i + cyc).copied().unwrap_or(f.zero());
+                    f.sub(f.add(a[i], hi), c[i])
+                })
+                .collect();
+            trim(f, &mut r);
+            return r;
+        }
+        let qm = if short {
+            f.conv_trunc(&q, &self.m, n)
+        } else {
+            mul_raw(f, &q, &self.m)
+        };
         let mut r: Vec<F::E> = (0..n).map(|i| f.sub(a[i], qm[i])).collect();
         trim(f, &mut r);
         r
@@ -299,10 +344,25 @@ impl<F: Field> PolyModulus<F> {
         if b.len() > 2 {
             return pow_window(r, &b, e.bits(), |i| e.bit(i), |x, y| self.mulmod(f, x, y));
         }
+        // a base of degree <= 1 (x, x + c, ..) multiplies in by a shift: with m monic,
+        // x r = (r shifted) - r_(n-1) m, so r (b0 + b1 x) costs O(n), not a product and a
+        // reduction
+        let (b0, b1) = (b.first().copied(), b.get(1).copied());
+        let (b0, b1) = (b0.unwrap_or(f.zero()), b1.unwrap_or(f.zero()));
+        let n = self.n;
         for i in (0..e.bits()).rev() {
             r = self.mulmod(f, &r, &r);
             if e.bit(i) {
-                r = self.mulmod(f, &r, &b);
+                r.resize(n, f.zero());
+                let lead = r[n - 1];
+                r = (0..n)
+                    .map(|k| {
+                        let low = if k == 0 { f.zero() } else { r[k - 1] };
+                        let xr = f.sub(low, f.mul(lead, self.m[k]));
+                        f.add(f.mul(b0, r[k]), f.mul(b1, xr))
+                    })
+                    .collect();
+                trim(f, &mut r);
             }
         }
         r
@@ -391,7 +451,7 @@ pub fn mulmod<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>, m: &Poly<F>) -> Poly<F>
     rem(f, &mul(f, a, b), m)
 }
 pub fn powmod<F: Field>(f: &F, a: &Poly<F>, e: u128, m: &Poly<F>) -> Poly<F> {
-    if m.len() > powmod_table_max() {
+    if m.len() > powmod_table_max(f) {
         return PolyModulus::new(f, m).powmod_big(f, a, &Big::from_u128(e));
     }
     if m.len() >= 3 {
@@ -413,7 +473,7 @@ pub fn powmod<F: Field>(f: &F, a: &Poly<F>, e: u128, m: &Poly<F>) -> Poly<F> {
     r
 }
 pub fn powmod_big<F: Field>(f: &F, a: &Poly<F>, e: &Big, m: &Poly<F>) -> Poly<F> {
-    if m.len() > powmod_table_max() {
+    if m.len() > powmod_table_max(f) {
         return PolyModulus::new(f, m).powmod_big(f, a, e);
     }
     if m.len() >= 3 {
@@ -479,8 +539,11 @@ impl<F: Field> TableModulus<F> {
         }
         let hi = &a[n..];
         let h = hi.len();
-        (0..n)
-            .map(|i| f.add(a[i], f.dot_rev(hi, &self.cols[i][n - 1 - h..])))
+        let rows: Vec<&[F::E]> = self.cols.iter().map(|c| &c[n - 1 - h..]).collect();
+        f.dot_rev_rows(hi, &rows)
+            .into_iter()
+            .zip(a)
+            .map(|(d, &x)| f.add(x, d))
             .collect()
     }
     /// a^e mod m, the bits of e given by `bit(i)` for i < nbits, left to right. A base of
@@ -534,7 +597,7 @@ impl<F: Field> TableModulus<F> {
 /// g(Y^q) = g(Y)^q = 0 mod g.
 pub struct Composer<F: Field> {
     m: PolyModulus<F>,
-    /// table reducer for the products when the modulus is short (`POWMOD_TABLE_MAX`)
+    /// table reducer for the products when the modulus is short (`Field::powmod_table_max`)
     tab: Option<TableModulus<F>>,
     n: usize,
     s: usize,
@@ -553,7 +616,7 @@ impl<F: Field> Composer<F> {
         let n = m.m.len() - 1;
         let s = s.clamp(1, n.max(1));
         let xi = rem(f, xi, &m.m);
-        let tab = (n >= 2 && n < powmod_table_max()).then(|| TableModulus::new(f, &m.m));
+        let tab = (n >= 2 && n < powmod_table_max(f)).then(|| TableModulus::new(f, &m.m));
         let mul = |a: &Poly<F>, b: &Poly<F>| -> Poly<F> {
             match &tab {
                 Some(t) if !a.is_empty() && !b.is_empty() => {
@@ -595,9 +658,8 @@ impl<F: Field> Composer<F> {
         for j in (0..blocks).rev() {
             let hb = &h[j * s..((j + 1) * s).min(h.len())];
             let k = hb.len();
-            let mut block: Poly<F> = (0..n)
-                .map(|t| f.dot_rev(hb, &self.cols[t][s - k..]))
-                .collect();
+            let rows: Vec<&[F::E]> = (0..n).map(|t| &self.cols[t][s - k..]).collect();
+            let mut block: Poly<F> = f.dot_rev_rows(hb, &rows);
             trim(f, &mut block);
             acc = if acc.is_empty() {
                 block

@@ -64,6 +64,42 @@ fn sea_at_128_bits() {
     );
 }
 
+#[test]
+fn sea_at_127_bits_matches_pari_orders() {
+    // y^2 = x^3 + (k + 3) x + (7 k + 11) over 2^127 - 1: group orders from PARI/GP 2.15.4
+    // `ellcard` (results/p16-external/round1/pari.sea.p127.jsonl). The final search here
+    // enumerates residues allowed by the Atkin sets (`search_plan`).
+    let f = FpM::<2>::from_dec("170141183460469231731687303715884105727");
+    let want = [
+        "170141183460469231724611413447479410576",
+        "170141183460469231738122322584987206350",
+        "170141183460469231750349193209823416107",
+        "170141183460469231741090682990937231968",
+    ];
+    let ells: Vec<usize> = (3..=89).filter(|&l| is_prime(l as u64)).collect();
+    let mut phis: HashMap<usize, _> = ells
+        .iter()
+        .copied()
+        .zip(isogeny_algos::find::modpoly::Phi::compute_many(&f, &ells))
+        .collect();
+    let mut rng = Rng::new(42);
+    let mut used_atkin = false;
+    for (k, w) in want.iter().enumerate() {
+        let k = k as u64;
+        let e = Curve::new(f.from_u64(k + 3), f.from_u64(7 * k + 11));
+        let (n, st) = sea_opts(&f, &e, 89, &mut phis, &mut rng, CYCLE_DEGREE).expect("SEA");
+        assert_eq!(n.to_dec(), *w, "curve {k}, stats {st:?}");
+        let sets: Vec<(u64, Vec<u64>)> = st
+            .atkin
+            .iter()
+            .map(|&(l, _, c)| (l, vec![0; c]))
+            .filter(|(l, s)| !s.is_empty() && (s.len() as u64) < *l)
+            .collect();
+        used_atkin |= !search_plan(st.candidates as f64, &sets).1.is_empty();
+    }
+    assert!(used_atkin, "no curve exercised the Atkin-residue search");
+}
+
 /// (lambda, mu, ord(lambda/mu)) in F_{l^2} from the true trace, for the independent check.
 fn eig_mod_l(ell: u64, p: u64, t: u64) -> ((u64, u64), (u64, u64), u64) {
     let l = ell;

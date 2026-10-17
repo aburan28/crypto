@@ -1,11 +1,20 @@
 //! The multi-prime NTT product (`FpM::conv_long`) equals the Karatsuba/schoolbook product
 //! exactly: every limb count, balanced and unbalanced lengths, squarings, lengths around the
-//! thresholds, and operands at the top of the range (p - 1).
+//! thresholds and just past powers of two, and operands at the top of the range (p - 1).
 use isogeny_algos::field::*;
 use isogeny_algos::fpm::{FpM, NTT_N};
 use isogeny_algos::poly;
 
 fn check<const N: usize>(f: &FpM<N>, seed: u64) {
+    // both transform families: AVX-512 IFMA where the CPU has it, and the portable one
+    for simd in [true, false] {
+        isogeny_algos::ntt::SIMD.with(|s| s.set(simd));
+        check_mode(f, seed);
+    }
+    isogeny_algos::ntt::SIMD.with(|s| s.set(true));
+}
+
+fn check_mode<const N: usize>(f: &FpM<N>, seed: u64) {
     let mut rng = Rng::new(seed);
     let thr = f.ntt_threshold();
     let lens: Vec<(usize, usize)> = vec![
@@ -18,6 +27,11 @@ fn check<const N: usize>(f: &FpM<N>, seed: u64) {
         (3 * thr, thr),
         (700, 333),
         (1500, 1500),
+        // just past a power of two: cyclic transform plus the wrapped top (`FpM::conv_long`)
+        (129, 129),
+        (160, 160),
+        (130, 128),
+        (257, 200),
     ];
     // the integer p - 1 as a residue (largest operand: the CRT bound is tight there)
     let mut pm1 = f.p;
