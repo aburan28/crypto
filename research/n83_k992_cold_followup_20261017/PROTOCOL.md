@@ -74,6 +74,10 @@ comparison. A fresh-point rank/full-solve failure or noisy stratum remains
 in the evidence and makes its selection unknown.
 
 The fixture and method are frozen independently of the pending five-arm
-outcome. A later dispatch must bind completed candidate manifests, binary
-hashes, runner/verifier source, resource envelope and a fresh cloud run;
-no cloud allocation starts from this fixture commit alone.
+outcome. `materialize_candidates.py` reconstructs the three versioned IC1
+manifests from independently replayed base dumps. The dispatch record binds
+their bytes, the fixture, runner, verifier, selector, aggregator, workflow,
+source hash, candidate identities and resource envelope; `check_dispatch.py`
+checks those bindings before either cloud stratum builds a binary. The runner
+records each executed binary hash and the verifier checks the archived copy.
+The workflow starts only when a separate `dispatch.json` commit is pushed.

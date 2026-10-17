@@ -5,7 +5,7 @@ screen, 95.223 s. Every size reached full rank, produced a four-point target
 relation, recovered the fixed scalar, and passed independent arithmetic replay.
 The screen uses one previously exposed point on a shared Apple M4 Pro host;
 the result identifies K992 as a candidate for a fresh-point Tier 1 cold
-comparison. The running ten-point cloud panel addresses the separate primary
+comparison. The queued ten-point cloud panel addresses the separate primary
 target-online question for K1248, K1280, K2543, K3072 and K1120.
 
 | K | Usable base points | Root entries | Index build, s | Rank stage, s | Cold process, s | Target online, ms | Target probes |
@@ -30,7 +30,7 @@ The source is `examples/koblitz_orbit_dlp_fast.rs` at SHA-256
 `8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12`,
 executed binary SHA-256
 `d71a9662c9d4e2dde58443bfc646a05737c6b9ca6b3d5e831b632ce09384c906`.
-All five runs used the exact root11 flags in their receipts and the same
+All eight runs used the exact root11 flags in their receipts and the same
 point-file SHA-256
 `2c068d2f659588edcdbaa685fc73bb146e2bfee3be123d377d537658f8021c6d`.
 Each fresh process built the base, root index and factor-base logs, then
