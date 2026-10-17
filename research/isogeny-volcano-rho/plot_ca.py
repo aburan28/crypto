@@ -22,6 +22,9 @@ from volcano_diagram import render  # noqa: E402
 run = Path(sys.argv[1])
 R = json.loads((run / "results.json").read_text())
 rid = run.name
+# The crater's automorphism group (6 for j = 0, 4 for j = 1728) and its j.
+aut = R["automorphism"]["aut_order"]
+jname = {6: "j = 0", 4: "j = 1728"}.get(aut, "crater")
 
 
 def save(fig, name):
@@ -38,7 +41,7 @@ plain = {c["vertex"]: c["ops"]["mean"] for c in R["curves"] if c["kind"] == "iso
 for v in spec["vertices"]:
     v["value"] = plain.get(v["id"])
 spec["subtitle"] = f"{rid}  (colour: mean plain negation-map rho operations, ca)"
-spec["vertices"][0]["highlight"] = "root, j = 0 (order-6 automorphism)"
+spec["vertices"][0]["highlight"] = f"root, {jname} (order-{aut} automorphism)"
 render(spec, str(run / "volcano"))
 
 # 2. Mean ± 95% CI by level, the controls, and the folded crater arm.
@@ -46,17 +49,18 @@ fig, ax = plt.subplots(figsize=(8, 4))
 groups = [(f"L{l['level']}\n({l['curves']} curve{'s' if l['curves'] > 1 else ''})", l["ops"], "#2a6fdb")
           for l in R["levels"]]
 groups.append(("isomorphic\ncontrols", R["controls"]["ops"], "#000000"))
-groups.append(("j = 0 crater,\nautomorphism-\nfolded", R["automorphism"]["ops"], "#d1495b"))
+groups.append((f"{jname} crater,\nautomorphism-\nfolded", R["automorphism"]["ops"], "#d1495b"))
 for i, (g, s, c) in enumerate(groups):
     ax.vlines(i, s["min"], s["max"], color=c, alpha=0.35)
     ax.errorbar(i, s["mean"], yerr=s["ci95_half"], fmt="o", color=c, capsize=3)
     ax.annotate(f"{s['mean']:,.0f}", (i, s["mean"]), xytext=(6, 0), textcoords="offset points", fontsize=7)
 ax.axhline(R["rho"]["expected_ops"], color="#2a6fdb", ls="--", lw=1, label=f"sqrt(pi n/4) = {R['rho']['expected_ops']:,.0f} (negation map)")
-ax.axhline(R["rho"]["expected_ops"] / 3 ** 0.5, color="#d1495b", ls="--", lw=1, label=f"sqrt(pi n/12) = {R['rho']['expected_ops'] / 3 ** 0.5:,.0f} (order-6 folding)")
+folded = R["rho"]["expected_ops"] / (aut / 2) ** 0.5  # sqrt(pi n / (2 aut))
+ax.axhline(folded, color="#d1495b", ls="--", lw=1, label=f"sqrt(pi n/{2 * aut}) = {folded:,.0f} (order-{aut} folding)")
 ax.set_xticks(range(len(groups)), [g for g, _, _ in groups], fontsize=7)
 ax.set_ylabel("group operations to solve (ca ops)")
 a = R["automorphism"]
-ax.set_title(f"Same DLP on every curve: plain rho by level vs the folded walk on the j = 0 crater\n"
+ax.set_title(f"Same DLP on every curve: plain rho by level vs the folded walk on the {jname} crater\n"
              f"speed-up {a['ops_speedup_vs_isogenous']:.2f} ± {a['ops_speedup_ci95_half']:.2f} (predicted {a['predicted']:.2f}); "
              f"{R['rho']['trials']} solves per curve; {rid}", fontsize=8)
 ax.legend(fontsize=7, loc="upper right")
@@ -67,8 +71,8 @@ by = defaultdict(list)
 for r in csv.DictReader(open(run / "trials.csv")):
     by[r["arm"]].append(int(r["ops"]))
 fig, ax = plt.subplots(figsize=(7, 3.6))
-for arm, c, lab in [("v0", "#2a6fdb", "j = 0 crater, plain negation-map rho"),
-                    ("v0+aut", "#d1495b", "j = 0 crater, automorphism-folded rho")]:
+for arm, c, lab in [("v0", "#2a6fdb", f"{jname} crater, plain negation-map rho"),
+                    ("v0+aut", "#d1495b", f"{jname} crater, automorphism-folded rho")]:
     xs = sorted(by[arm])
     ax.step(xs, [(i + 1) / len(xs) for i in range(len(xs))], where="post", color=c, label=f"{lab} (mean {sum(xs) / len(xs):,.0f})")
 ax.set_xlabel("group operations to solve")

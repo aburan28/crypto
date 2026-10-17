@@ -653,6 +653,9 @@ struct Args {
     /// Search j = 0 curves y² = x³ + b only (class D_K = −3, with the
     /// order-6 automorphism on its crater).
     j0: bool,
+    /// Search j = 1728 curves y² = x³ + ax only (class D_K = −4, with the
+    /// order-4 automorphism on its crater).
+    j1728: bool,
     /// `p,a,b`: measure this curve instead of searching for one.
     curve: Option<(u64, u64, u64)>,
     /// `#E(F_p)` for `--curve`; counted when absent.
@@ -680,6 +683,7 @@ fn parse_args() -> Args {
         max_cofactor: 64,
         crater: "any".into(),
         j0: false,
+        j1728: false,
         curve: None,
         order: None,
         engine: "native".into(),
@@ -708,6 +712,11 @@ fn parse_args() -> Args {
             }
             "--max-cofactor" => a.max_cofactor = val.parse().unwrap(),
             "--crater" => a.crater = val.clone(),
+            "--j1728" => {
+                a.j1728 = true;
+                i += 1; // a flag: no value
+                continue;
+            }
             "--j0" => {
                 a.j0 = true;
                 i += 1; // a flag: no value
@@ -745,7 +754,7 @@ fn parse_args() -> Args {
 Pollard rho measured on each curve.
 
   your curve:   volcano-rho --curve P,A,B [--order N] [options]
-  search one:   volcano-rho [--bits 40] [--depth 3] [--crater any|split|inert|ramified] [--j0]
+  search one:   volcano-rho [--bits 40] [--depth 3] [--crater any|split|inert|ramified] [--j0|--j1728]
                             [--max-cofactor 64] [options]
 
 options: [--ell 3] [--seed 1] [--trials 100] [--per-level 10] [--controls 3]
@@ -762,6 +771,9 @@ Writes results.json, trials.csv and instances.jsonl to --out."
             o => die(&format!("unknown argument {o} (see --help)")),
         }
         i += 2;
+    }
+    if a.j0 && a.j1728 {
+        die("--j0 and --j1728 exclude each other");
     }
     if a.ell != 2 && a.ell != 3 {
         die("--ell must be 2 or 3");
@@ -833,6 +845,9 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
             // for ℓ = 2, 7 mod 12 for ℓ = 3).
             let c = if args.j0 {
                 c - c % 24 + if args.ell == 2 { 1 } else { 7 }
+            } else if args.j1728 {
+                // An ordinary j = 1728 curve needs p ≡ 1 mod 4 (1 mod 8 for ℓ = 2 above).
+                (c & !3) | 1
             } else {
                 c
             };
@@ -845,11 +860,12 @@ fn search(args: &Args, rng: &mut SmallRng) -> Found {
             tried += 1;
             let e = Curve {
                 a: if args.j0 { 0 } else { rng.gen_range(1..p) },
-                b: rng.gen_range(1..p),
+                b: if args.j1728 { 0 } else { rng.gen_range(1..p) },
             };
             match e.j(&f) {
                 Some(0) if args.j0 => {}
-                Some(j) if !args.j0 && j != 0 && j != 1728 % p => {}
+                Some(j) if args.j1728 && j == 1728 % p => {}
+                Some(j) if !args.j0 && !args.j1728 && j != 0 && j != 1728 % p => {}
                 _ => continue,
             }
             let Some(order) = group_order(&f, &e, rng) else {
