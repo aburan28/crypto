@@ -19,7 +19,14 @@ cat > "$fixture/bin/cairn" <<'STUB'
 set -euo pipefail
 [[ -z "${CONDUCTOR_TOKEN+x}" ]] || { echo 'Conductor credential leaked into Cairn' >&2; exit 1; }
 case "${1:-}" in
-  --version) echo 'cairn fixture (embedded)'; exit 0 ;;
+  --version)
+    echo 'cairn fixture'
+    if [[ "${PRIVATE_TEST_HEADLESS:-0}" == 1 ]]; then
+      echo '  ui       not embedded -- cairn run refuses'
+    else
+      echo '  ui       embedded -- cairn run will start'
+    fi
+    exit 0 ;;
   run)
     if [[ "${2:-}" == --help ]]; then
       [[ "${PRIVATE_TEST_LEGACY:-0}" == 1 ]] || echo 'CAIRN_NETWORK=private'
@@ -59,6 +66,8 @@ bash "$repo/scripts/setup-workstation.sh" > "$fixture/out"
 
 expect_failure env PRIVATE_TEST_LEGACY=1 bash "$repo/scripts/private-workspace.sh" check
 expect_failure env PRIVATE_TEST_LEGACY=1 bash "$repo/scripts/setup-cloud-environment.sh"
+expect_failure env PRIVATE_TEST_HEADLESS=1 bash "$repo/scripts/private-workspace.sh" check
+expect_failure env PRIVATE_TEST_HEADLESS=1 bash "$repo/scripts/setup-workstation.sh"
 expect_failure env CONDUCTOR_TOKEN= bash "$repo/.claude/hooks/session-start.sh"
 expect_failure env CONDUCTOR_ENDPOINT=http://10.77.0.1:8080 bash "$repo/scripts/private-workspace.sh" check
 expect_failure env CONDUCTOR_ENDPOINT=https://user:secret@controller.internal bash "$repo/scripts/private-workspace.sh" check

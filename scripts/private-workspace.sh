@@ -13,7 +13,8 @@ done
 
 # A legacy binary silently ignores unknown environment variables. Require the
 # native profile's help marker before permitting it to open any network sockets.
-env -u CONDUCTOR_TOKEN cairn --version 2>/dev/null | grep embedded >/dev/null \
+# Match the affirmative status line: headless builds say "ui not embedded".
+env -u CONDUCTOR_TOKEN cairn --version 2>/dev/null | grep -E '^[[:space:]]*ui[[:space:]]+embedded([[:space:]]|$)' >/dev/null \
   || fail "preinstall Cairn with its embedded UI; offline mode never downloads a replacement"
 env -u CONDUCTOR_TOKEN cairn run --help 2>&1 | grep -F 'CAIRN_NETWORK=private' >/dev/null \
   || fail "this Cairn binary does not advertise the private-network profile; install a compatible approved release"
