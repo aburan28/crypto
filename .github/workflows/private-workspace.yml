@@ -1,0 +1,34 @@
+name: Private workspace startup
+on:
+  pull_request:
+    paths:
+      - '.claude/hooks/session-start.sh'
+      - 'scripts/private-workspace.sh'
+      - 'scripts/test-private-workspace.sh'
+      - 'scripts/setup-cloud-environment.sh'
+      - 'scripts/setup-workstation.sh'
+      - '.github/workflows/private-workspace.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.claude/hooks/session-start.sh'
+      - 'scripts/private-workspace.sh'
+      - 'scripts/test-private-workspace.sh'
+      - 'scripts/setup-cloud-environment.sh'
+      - 'scripts/setup-workstation.sh'
+      - '.github/workflows/private-workspace.yml'
+permissions:
+  contents: read
+jobs:
+  private-startup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .claude/hooks
+            scripts
+      - name: Shell syntax
+        run: bash -n scripts/private-workspace.sh scripts/test-private-workspace.sh scripts/setup-cloud-environment.sh scripts/setup-workstation.sh .claude/hooks/session-start.sh
+      - name: Fail-closed offline contracts
+        run: bash scripts/test-private-workspace.sh
