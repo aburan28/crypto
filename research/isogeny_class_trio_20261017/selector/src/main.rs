@@ -774,7 +774,7 @@ mod tests {
 
     #[test]
     fn koblitz_orders_match_registry() {
-        // k0n41: subgroup 40 bits, cofactor 4 (docs/curves/registry.json)
+        // icv1-f2m41-tm2308219-7f48b14a: subgroup 40 bits, cofactor 4 (docs/curves/registry.json)
         let (t, _) = lucas(41, -1);
         let n = (1u128 << 41) as i128 + 1 - t;
         assert_eq!(n % 4, 0);

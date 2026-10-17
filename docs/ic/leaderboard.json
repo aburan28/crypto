@@ -108,7 +108,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf"
+   "sha256": "1dd8f41e6ca463adac11951600097a78b1053d5439b72a4e5feb63d892dfeac9"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -8852,6 +8852,42 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-f2m47-t4276051-826c5755",
+   "family": "binary",
+   "field": "GF(2^47)",
+   "coefficients": "a = 0x1, b = 0x52e3db551eb3",
+   "order_bits": 47,
+   "standard": [],
+   "ec1": [
+    "EC1N47Crbhba8a6d89475b"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "isogeny-class-trio B-47"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-f2m61-tm2657393969-b9ff0fb0",
+   "family": "binary",
+   "field": "GF(2^61)",
+   "coefficients": "a = 0x1, b = 0x9c60f836d06fc8",
+   "order_bits": 62,
+   "standard": [],
+   "ec1": [
+    "EC1N61Crbh854aa3d90d2d"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "isogeny-class-trio B-61"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-f2m113-tm122610772499221213-5de3030f",
    "family": "binary",
    "field": "GF(2^113)",
@@ -15350,6 +15386,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp36-t276049-fe2b595b",
+   "family": "prime",
+   "field": "GF(p), p = 39615550291",
+   "coefficients": "a = 0, b = 22620405809",
+   "order_bits": 36,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp36-tm47184-1daf0972",
    "family": "prime",
    "field": "GF(p), p = 68190058247",
@@ -15415,6 +15465,20 @@
    "field": "GF(p), p = 81640512137",
    "coefficients": "a = 6206588639, b = 31351229805",
    "order_bits": 37,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp40-tm506303-75549727",
+   "family": "prime",
+   "field": "GF(p), p = 649522587953",
+   "coefficients": "a = 552810359288, b = 555863716954",
+   "order_bits": 40,
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
@@ -15731,6 +15795,132 @@
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
    "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp47-tm8785349-43e36ce5",
+   "family": "prime",
+   "field": "GF(p), p = 140737488355213",
+   "coefficients": "a = 140737488355210, b = 15017979474618",
+   "order_bits": 48,
+   "standard": [],
+   "ec1": [
+    "EC1P47Cfph7e9290c297bc"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "isogeny-class-trio P-47"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp61-t727-ddf032b6",
+   "family": "prime",
+   "field": "GF(p), p = 2305842677174433443",
+   "coefficients": "a = 2305842677174433440, b = 1126842748974135980",
+   "order_bits": 61,
+   "standard": [],
+   "ec1": [
+    "EC1P61Cfph4b4d3888d752"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "isogeny-class-trio gap d-43"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp61-t95-4d1bb712",
+   "family": "prime",
+   "field": "GF(p), p = 2305842838172865227",
+   "coefficients": "a = 2305842838172865224, b = 1873033291747189733",
+   "order_bits": 61,
+   "standard": [],
+   "ec1": [
+    "EC1P61Cfph4ec3c36833c2"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "isogeny-class-trio gap d-163"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp61-t205-983ecb51",
+   "family": "prime",
+   "field": "GF(p), p = 2305842958741183033",
+   "coefficients": "a = 0, b = 5",
+   "order_bits": 61,
+   "standard": [],
+   "ec1": [
+    "EC1P61Cfph54bb8886c801"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "isogeny-class-trio gap d-3"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp61-t7175-7e38f752",
+   "family": "prime",
+   "field": "GF(p), p = 2305842959800795691",
+   "coefficients": "a = 2305842959800795688, b = 1507406867695792627",
+   "order_bits": 61,
+   "standard": [],
+   "ec1": [
+    "EC1P61Cfphde4753195a5f"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "isogeny-class-trio gap d-19"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp61-t2279-df6b5e41",
+   "family": "prime",
+   "field": "GF(p), p = 2305842976999134887",
+   "coefficients": "a = 2305842976999134884, b = 399914583043124681",
+   "order_bits": 61,
+   "standard": [],
+   "ec1": [
+    "EC1P61Cfph1646189acdfe"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "isogeny-class-trio gap d-67"
+   ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp61-tm813574577-a3b71255",
+   "family": "prime",
+   "field": "GF(p), p = 2305843009213693951",
+   "coefficients": "a = 2305843009213693948, b = 381300098124707820",
+   "order_bits": 62,
+   "standard": [],
+   "ec1": [
+    "EC1P61Cfph303b4b060ff9"
+   ],
+   "ec1_unresolved": null,
+   "legacy": [
+    "isogeny-class-trio P-61"
+   ],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"

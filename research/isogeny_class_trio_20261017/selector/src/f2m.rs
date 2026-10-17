@@ -363,7 +363,7 @@ mod tests {
 
     #[test]
     fn standard_moduli_match_tables() {
-        // SEC 2 sect113 and the k0n7 registry modulus 0x83; Seroussi's table for 47 and 53.
+        // SEC 2 sect113 and the icv1-f2m7-t13-616700dd modulus 0x83; Seroussi's table for 47 and 53.
         assert_eq!(standard_modulus(113), vec![113, 9, 0]);
         assert_eq!(standard_modulus(7), vec![7, 1, 0]);
         assert_eq!(standard_modulus(47), vec![47, 5, 0]);
