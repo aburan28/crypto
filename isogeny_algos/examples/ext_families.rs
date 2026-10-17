@@ -78,7 +78,7 @@ fn case(bits: usize, ell: u64, n: u32) -> Case {
         type Out = (Int, Int);
         fn run<F: PrimeFieldInt>(self, f: &F) -> (Int, Int) {
             let e = Curve::new(f.one(), f.zero());
-            let cof = (&(self.0 + &Int::one())).div_floor(self.1);
+            let cof = (self.0 + &Int::one()).div_floor(self.1);
             let mut x0 = 2u64;
             loop {
                 let x = f.from_u64(x0);
