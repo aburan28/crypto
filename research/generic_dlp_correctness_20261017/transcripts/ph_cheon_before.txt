@@ -1,0 +1,138 @@
+pinned-j0-smooth47 d=0 bound=200: None [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 0), (130321, 0), (151, 0), (181, 0)] 7
+pinned-j0-smooth47 d=0 bound=16384: Some(0) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 0), (130321, 0), (151, 0), (181, 0), (13171, 0)] 8
+pinned-j0-smooth47 d=0 bound=131072: Some(0) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 0), (130321, 0), (151, 0), (181, 0), (13171, 0)] 8
+  wrong-order: Some(0) [(2, 0), (3, 0), (130321, 0), (151, 0), (181, 0), (13171, 0)] 9
+pinned-j0-smooth47 d=1 bound=200: None [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 1), (130321, 1), (151, 1), (181, 1)] 11
+pinned-j0-smooth47 d=1 bound=16384: Some(1) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 1), (130321, 1), (151, 1), (181, 1), (13171, 1)] 13
+pinned-j0-smooth47 d=1 bound=131072: Some(1) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 1), (130321, 1), (151, 1), (181, 1), (13171, 1)] 13
+  wrong-order: Some(140737531856764) [(2, 0), (3, 1), (130321, 1), (151, 1), (181, 1), (13171, 1)] 14
+pinned-j0-smooth47 d=2 bound=200: None [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 2), (130321, 2), (151, 2), (181, 2)] 15
+pinned-j0-smooth47 d=2 bound=16384: Some(2) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 2), (130321, 2), (151, 2), (181, 2), (13171, 2)] 18
+pinned-j0-smooth47 d=2 bound=131072: Some(2) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 2), (130321, 2), (151, 2), (181, 2), (13171, 2)] 18
+  wrong-order: Some(2) [(2, 0), (3, 2), (130321, 2), (151, 2), (181, 2), (13171, 2)] 19
+pinned-j0-smooth47 d=12345 bound=200: None [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 0), (130321, 12345), (151, 114), (181, 37)] 191
+pinned-j0-smooth47 d=12345 bound=16384: Some(12345) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 0), (130321, 12345), (151, 114), (181, 37), (13171, 12345)] 12537
+pinned-j0-smooth47 d=12345 bound=131072: Some(12345) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 0), (130321, 12345), (151, 114), (181, 37), (13171, 12345)] 12537
+  wrong-order: Some(140737531869108) [(2, 0), (3, 0), (130321, 12345), (151, 114), (181, 37), (13171, 12345)] 12538
+pinned-j0-smooth47 d=99991 bound=200: None [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 1), (130321, 99991), (151, 29), (181, 79)] 171
+pinned-j0-smooth47 d=99991 bound=16384: Some(99991) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 1), (130321, 99991), (151, 29), (181, 79), (13171, 7794)] 7966
+pinned-j0-smooth47 d=99991 bound=131072: Some(99991) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 1), (130321, 99991), (151, 29), (181, 79), (13171, 7794)] 7966
+  wrong-order: Some(140737531956754) [(2, 0), (3, 1), (130321, 99991), (151, 29), (181, 79), (13171, 7794)] 7967
+pinned-j0-smooth47 d=140737531856000 bound=200: None [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 2), (130321, 129558), (151, 143), (181, 142)] 360
+pinned-j0-smooth47 d=140737531856000 bound=16384: Some(140737531856000) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 2), (130321, 129558), (151, 143), (181, 142), (13171, 12408)] 12769
+pinned-j0-smooth47 d=140737531856000 bound=131072: Some(140737531856000) [(3, 1), (19, 4), (151, 1), (181, 1), (13171, 1)] [(3, 2), (130321, 129558), (151, 143), (181, 142), (13171, 12408)] 12769
+  wrong-order: Some(140737531856000) [(2, 0), (3, 2), (130321, 129558), (151, 143), (181, 142), (13171, 12408)] 12770
+demo-10007 d=0 bound=200: None [(10039, 1)] [] 0
+demo-10007 d=0 bound=16384: Some(0) [(10039, 1)] [(10039, 0)] 1
+demo-10007 d=0 bound=131072: Some(0) [(10039, 1)] [(10039, 0)] 1
+  wrong-order: Some(0) [(2, 0), (10039, 0)] 2
+demo-10007 d=1 bound=200: None [(10039, 1)] [] 0
+demo-10007 d=1 bound=16384: Some(1) [(10039, 1)] [(10039, 1)] 2
+demo-10007 d=1 bound=131072: Some(1) [(10039, 1)] [(10039, 1)] 2
+  wrong-order: Some(10040) [(2, 0), (10039, 1)] 3
+demo-10007 d=2 bound=200: None [(10039, 1)] [] 0
+demo-10007 d=2 bound=16384: Some(2) [(10039, 1)] [(10039, 2)] 3
+demo-10007 d=2 bound=131072: Some(2) [(10039, 1)] [(10039, 2)] 3
+  wrong-order: Some(2) [(2, 0), (10039, 2)] 4
+demo-10007 d=2306 bound=200: None [(10039, 1)] [] 0
+demo-10007 d=2306 bound=16384: Some(2306) [(10039, 1)] [(10039, 2306)] 2307
+demo-10007 d=2306 bound=131072: Some(2306) [(10039, 1)] [(10039, 2306)] 2307
+  wrong-order: Some(2306) [(2, 0), (10039, 2306)] 2308
+demo-10007 d=9640 bound=200: None [(10039, 1)] [] 0
+demo-10007 d=9640 bound=16384: Some(9640) [(10039, 1)] [(10039, 9640)] 9641
+demo-10007 d=9640 bound=131072: Some(9640) [(10039, 1)] [(10039, 9640)] 9641
+  wrong-order: Some(9640) [(2, 0), (10039, 9640)] 9642
+demo-10007 d=3658 bound=200: None [(10039, 1)] [] 0
+demo-10007 d=3658 bound=16384: Some(3658) [(10039, 1)] [(10039, 3658)] 3659
+demo-10007 d=3658 bound=131072: Some(3658) [(10039, 1)] [(10039, 3658)] 3659
+  wrong-order: Some(3658) [(2, 0), (10039, 3658)] 3660
+demo-99013 d=0 bound=200: None [(98893, 1)] [] 0
+demo-99013 d=0 bound=16384: None [(98893, 1)] [] 0
+demo-99013 d=0 bound=131072: Some(0) [(98893, 1)] [(98893, 0)] 1
+  wrong-order: None [(2, 0)] 1
+demo-99013 d=1 bound=200: None [(98893, 1)] [] 0
+demo-99013 d=1 bound=16384: None [(98893, 1)] [] 0
+demo-99013 d=1 bound=131072: Some(1) [(98893, 1)] [(98893, 1)] 2
+  wrong-order: None [(2, 0)] 1
+demo-99013 d=2 bound=200: None [(98893, 1)] [] 0
+demo-99013 d=2 bound=16384: None [(98893, 1)] [] 0
+demo-99013 d=2 bound=131072: Some(2) [(98893, 1)] [(98893, 2)] 3
+  wrong-order: None [(2, 0)] 1
+demo-99013 d=12345 bound=200: None [(98893, 1)] [] 0
+demo-99013 d=12345 bound=16384: None [(98893, 1)] [] 0
+demo-99013 d=12345 bound=131072: Some(12345) [(98893, 1)] [(98893, 12345)] 12346
+  wrong-order: None [(2, 0)] 1
+demo-99013 d=1098 bound=200: None [(98893, 1)] [] 0
+demo-99013 d=1098 bound=16384: None [(98893, 1)] [] 0
+demo-99013 d=1098 bound=131072: Some(1098) [(98893, 1)] [(98893, 1098)] 1099
+  wrong-order: None [(2, 0)] 1
+demo-99013 d=57520 bound=200: None [(98893, 1)] [] 0
+demo-99013 d=57520 bound=16384: None [(98893, 1)] [] 0
+demo-99013 d=57520 bound=131072: Some(57520) [(98893, 1)] [(98893, 57520)] 57521
+  wrong-order: None [(2, 0)] 1
+cheon d=1 alpha=2: Some(2) 23 5 None
+cheon d=1 alpha=5: Some(5) 25 5 None
+cheon d=1 alpha=73: Some(73) 26 5 None
+cheon d=1 alpha=100: Some(100) 22 5 None
+cheon d=1 alpha=197: Some(197) 16 5 None
+cheon d=2 alpha=2: Some(2) 11 5 None
+cheon d=2 alpha=5: Some(5) 14 5 None
+cheon d=2 alpha=73: Some(73) 16 5 None
+cheon d=2 alpha=100: Some(100) 20 5 None
+cheon d=2 alpha=197: Some(197) 11 5 None
+cheon d=3 alpha=2: Some(2) 14 5 None
+cheon d=3 alpha=5: Some(5) 10 6 None
+cheon d=3 alpha=73: Some(73) 12 6 None
+cheon d=3 alpha=100: Some(100) 12 5 None
+cheon d=3 alpha=197: Some(197) 10 5 None
+cheon d=6 alpha=2: Some(2) 8 7 None
+cheon d=6 alpha=5: Some(5) 8 7 None
+cheon d=6 alpha=73: Some(73) 10 7 None
+cheon d=6 alpha=100: Some(100) 11 6 None
+cheon d=6 alpha=197: Some(197) 8 6 None
+cheon d=9 alpha=2: Some(2) 9 8 None
+cheon d=9 alpha=5: Some(5) 7 8 None
+cheon d=9 alpha=73: Some(73) 9 8 None
+cheon d=9 alpha=100: Some(100) 6 8 None
+cheon d=9 alpha=197: Some(197) 7 7 None
+cheon d=11 alpha=2: Some(2) 9 8 None
+cheon d=11 alpha=5: Some(5) 8 8 None
+cheon d=11 alpha=73: Some(73) 7 9 None
+cheon d=11 alpha=100: Some(100) 6 8 None
+cheon d=11 alpha=197: Some(197) 7 7 None
+cheon d=18 alpha=2: Some(2) 6 9 None
+cheon d=18 alpha=5: Some(5) 6 10 None
+cheon d=18 alpha=73: Some(73) 7 10 None
+cheon d=18 alpha=100: Some(100) 6 9 None
+cheon d=18 alpha=197: Some(197) 6 8 None
+cheon d=22 alpha=2: Some(2) 6 10 None
+cheon d=22 alpha=5: Some(5) 5 11 None
+cheon d=22 alpha=73: Some(73) 6 11 None
+cheon d=22 alpha=100: Some(100) 5 10 None
+cheon d=22 alpha=197: Some(197) 6 8 None
+cheon d=33 alpha=2: Some(2) 5 11 None
+cheon d=33 alpha=5: Some(5) 4 12 None
+cheon d=33 alpha=73: Some(73) 4 13 None
+cheon d=33 alpha=100: Some(100) 4 11 None
+cheon d=33 alpha=197: Some(197) 4 9 None
+cheon d=66 alpha=2: Some(2) 3 15 None
+cheon d=66 alpha=5: Some(5) 3 17 None
+cheon d=66 alpha=73: Some(73) 3 17 None
+cheon d=66 alpha=100: Some(100) 4 15 None
+cheon d=66 alpha=197: Some(197) 3 12 None
+cheon d=99 alpha=2: Some(2) 3 18 None
+cheon d=99 alpha=5: Some(5) 3 19 None
+cheon d=99 alpha=73: Some(73) 3 20 None
+cheon d=99 alpha=100: Some(100) 3 17 None
+cheon d=99 alpha=197: Some(197) 3 13 None
+cheon d=198 alpha=2: Some(2) 3 25 None
+cheon d=198 alpha=5: Some(5) 3 27 None
+cheon d=198 alpha=73: Some(73) 3 28 None
+cheon d=198 alpha=100: Some(100) 3 24 None
+cheon d=198 alpha=197: Some(197) 3 18 None
+cheon d=7 alpha=2: None 0 0 Some("d = 7 does not divide n − 1 = 198")
+cheon d=7 alpha=5: None 0 0 Some("d = 7 does not divide n − 1 = 198")
+cheon d=7 alpha=73: None 0 0 Some("d = 7 does not divide n − 1 = 198")
+cheon d=7 alpha=100: None 0 0 Some("d = 7 does not divide n − 1 = 198")
+cheon d=7 alpha=197: None 0 0 Some("d = 7 does not divide n − 1 = 198")
+

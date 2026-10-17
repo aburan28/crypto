@@ -1,0 +1,162 @@
+{
+  "schema": "ecdlp.fixed-f8-genus3-order-certificate/v1",
+  "certificate_uid": "urn:ecdlp-order-certificate:1:sha256:44b0072f58f744d173b1c92bda05c81a757e2f770ed8831dbc5ae10faf1bfc36",
+  "record": {
+    "claim": {
+      "statement": "For the stated smooth genus-3 curve H over GF(8), #Jac(H)(GF(8)) = 486.",
+      "status": "supported",
+      "scope": "exact fixed polynomial-basis GF(8) source curve only",
+      "evidence_kind": "implementation-separated exhaustive extension point count and zeta reconstruction"
+    },
+    "fixture": {
+      "fixture_id": "binary-cover-fixed-f8-a1-b3-d7",
+      "base_field": {
+        "characteristic": 2,
+        "degree": 3,
+        "cardinality": 8,
+        "binary_modulus": "0xb",
+        "polynomial": "z^3 + z + 1",
+        "element_encoding": "polynomial-basis bits, least-significant bit is the constant coefficient"
+      },
+      "construction_parameters": {
+        "a": "0x1",
+        "b": "0x3",
+        "d": "0x7"
+      },
+      "source_curve": {
+        "model": "v^2 + h(u)*v = f(u)",
+        "equation": "v^2 + u^2*v = u^7 + u^4 + (z^2+z+1)*u",
+        "h_coefficients_ascending_hex": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "f_coefficients_ascending_hex": [
+          "0x0",
+          "0x7",
+          "0x0",
+          "0x0",
+          "0x1",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 3,
+        "infinity_configuration": "one rational point"
+      },
+      "cover_context": {
+        "target_equation": "y^2 + x*y = x^3 + x^2 + 3",
+        "map": "(u,v) -> (u^3,u*v+7)",
+        "degree": 3,
+        "certified_by_this_record": false
+      }
+    },
+    "geometric_preconditions": {
+      "smooth": true,
+      "genus": 3,
+      "rational_points_at_infinity": 1,
+      "checks": [
+        "d^2=b and d is nonzero in GF(8)",
+        "the affine v-derivative is u^2; at u=0 the u-derivative is d, so there is no affine singularity",
+        "in the infinity chart t=1/u and w=v/u^4, w^2+t^2*w=t+t^4+d*t^7 is smooth at t=w=0",
+        "s=v/u^2 gives s^2+s=u^3+1+d/u^3 with two order-3 poles; the Artin-Schreier genus formula gives genus 3"
+      ]
+    },
+    "method": {
+      "point_count": "For n=1,2,3, enumerate every (u,v) in GF(8^n)^2 satisfying the exact source equation and add its unique rational point at infinity.",
+      "extension_construction": "Use independently checked irreducible binary polynomials and an explicitly checked root of z^3+z+1 in each extension.",
+      "zeta_reconstruction": "Set S_n=8^n+1-N_n, apply Newton identities through n=3, then apply the genus-3 functional equation c[6-i]=8^(3-i)c[i].",
+      "jacobian_order": "For a smooth projective curve over GF(8), #Jac(H)(GF(8))=P(1), where P is the zeta numerator.",
+      "implementation_separation": {
+        "language": "Rust 1.90.0 native verifier",
+        "production_curve_arithmetic_imported": false,
+        "mumford_arithmetic_used": false,
+        "production_486_class_table_used": false,
+        "shared_input": "the public field and curve equations"
+      }
+    },
+    "results": {
+      "extension_point_counts": [
+        {
+          "extension_degree_over_f8": 1,
+          "binary_degree": 3,
+          "field_cardinality": 8,
+          "binary_modulus": "0xb",
+          "base_generator_embedding": "0x2",
+          "d_embedding": "0x7",
+          "points": 6
+        },
+        {
+          "extension_degree_over_f8": 2,
+          "binary_degree": 6,
+          "field_cardinality": 64,
+          "binary_modulus": "0x43",
+          "base_generator_embedding": "0xe",
+          "d_embedding": "0x18",
+          "points": 104
+        },
+        {
+          "extension_degree_over_f8": 3,
+          "binary_degree": 9,
+          "field_cardinality": 512,
+          "binary_modulus": "0x203",
+          "base_generator_embedding": "0xfc",
+          "d_embedding": "0x1d3",
+          "points": 558
+        }
+      ],
+      "frobenius_power_sums": [
+        3,
+        -39,
+        -45
+      ],
+      "zeta_numerator": {
+        "definition": "Z(H,T)=P(T)/((1-T)*(1-8*T))",
+        "variable": "T",
+        "coefficient_order": "ascending",
+        "coefficients": [
+          1,
+          -3,
+          24,
+          -48,
+          192,
+          -192,
+          512
+        ],
+        "polynomial": "1 - 3*T + 24*T^2 - 48*T^3 + 192*T^4 - 192*T^5 + 512*T^6",
+        "functional_equation": "c[6-i] = 8^(3-i) * c[i] for 0 <= i <= 3"
+      },
+      "jacobian_order_over_f8": {
+        "derivation": "P(1)",
+        "value": 486
+      },
+      "derived_extension_point_counts_n1_to_n6": [
+        6,
+        104,
+        558,
+        3920,
+        32646,
+        263192
+      ]
+    },
+    "provenance": {
+      "created_utc": "2026-10-14",
+      "repository": "aburan28/crypto",
+      "repository_base_commit": "1e447956d3616092a223264f1c6c31eff8ac9979",
+      "verifier": {
+        "path": "src/bin/ecdlp_audit/fixed_f8_order.rs",
+        "sha256": "f6051990491e8775676bbd842adb9b39bf95ee544974faeeb9c061c424729980",
+        "tested_with": "rustc 1.90.0",
+        "imports_production_arithmetic": false
+      },
+      "canonical_uid_rule": "SHA-256 of UTF-8 JSON(record) with recursively sorted keys, no insignificant whitespace, ensure_ascii=false"
+    },
+    "limitations": [
+      "This certifies only the cardinality 486 of the stated Jacobian over GF(8).",
+      "It does not certify the Jacobian group structure, the A/B presentation, divisor reduction, addition, scalar multiplication, or enumeration of reduced representatives.",
+      "It does not certify the cover map, arbitrary-class pushforward, norm homomorphism, pull-push composition, kernel fibers, or subgroup preservation.",
+      "It does not generalize to another field representation, source curve, cover, or catalog row.",
+      "The replay is a separate implementation but has not received an external CAS replay or independent reviewer signature."
+    ]
+  }
+}

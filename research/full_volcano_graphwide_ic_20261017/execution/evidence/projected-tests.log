@@ -1,0 +1,10 @@
+   Compiling crypto v0.1.0 (/workspace/repos/crypto)
+    Finished `test` profile [unoptimized] target(s) in 2m 45s
+     Running unittests src/lib.rs (/tmp/volcano-debug-target/debug/deps/crypto_lib-6a7c8446be3b44c2)
+
+running 2 tests
+test cryptanalysis::ic_framework::plugins::projected_prime_tests::projected_base_checks_membership_and_counts_projection ... ok
+test cryptanalysis::ic_framework::plugins::projected_prime_tests::projected_relations_recover_every_nonzero_control_log ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 4346 filtered out; finished in 0.01s
+

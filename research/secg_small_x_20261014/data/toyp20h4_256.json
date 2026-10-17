@@ -1,0 +1,75 @@
+{
+  "arguments": {
+    "controls": 32,
+    "curve": "toy:20,7,4",
+    "factor_base": "small_x",
+    "raw_samples": 0,
+    "seed": 7,
+    "size": 256,
+    "trials": 3000000
+  },
+  "elapsed_seconds": 1.8162700790000001,
+  "evidence_scope": "exact_pair_sum_yield_with_monte_carlo",
+  "limitations": [
+    "Two-point sums only: a relation is a signed sum of two base points of the small-x base.",
+    "The yield is exact for the base built. The Monte Carlo rate agrees with it only where the yield is large enough to produce hits; at P-192 it is a null result and bounds the rate from above.",
+    "The cost of each trial, deciding by a Semaev S₃ solve whether a target decomposes, is not part of this measurement, and neither is any linear algebra or descent: a relation yield is not a discrete logarithm.",
+    "The base is capped at 8192 abscissae, and lower where the pair-sum keys would not fit in memory (wide fields).",
+    "With a cofactor h > 1 (every SECG binary curve, secp112r2, secp128r2) each small-x point enters the base as [h]P and targets are [h] times a uniform point, so base and targets lie in the prime-order subgroup and the yield is over that subgroup. --raw-samples measures, by sampling, the share of raw small-x pair sums that lie in the subgroup."
+  ],
+  "operation": "prime",
+  "report": {
+    "base_abscissae": 256,
+    "base_points": 512,
+    "cofactor": 4,
+    "collisions": 13787,
+    "controls": 32,
+    "controls_detected": 32,
+    "controls_recovered": 32,
+    "covered_targets": "103498",
+    "curve": "toy y²=x³−3x+639317 over F_1048571 (20 bits), #E = 4·262321",
+    "distinct_sums": 51749,
+    "exact_yield": 0.3945486428789274,
+    "exact_yield_log2": -1.3417249175534067,
+    "expected_trials_log2": 1.3417249175534067,
+    "field_bits": 20,
+    "field_kind": "prime",
+    "largest_small_x": 492,
+    "mc_ci95": [
+      0.3940847136696677,
+      0.39519088949336767
+    ],
+    "mc_hits": 1183913,
+    "mc_hits_verified": 8,
+    "mc_over_exact": 1.0002256345050125,
+    "mc_rate": 0.39463766666666666,
+    "mc_trials": 3000000,
+    "model_yield": 0.49966453186947296,
+    "model_yield_log2": -1.0009682812804215,
+    "order": "262321",
+    "order_bits": 18.000973781022306,
+    "raw_base": null,
+    "rho_log2": 9.000486890511153,
+    "sums": 65536,
+    "threads": 4,
+    "timing_ms": {
+      "base": 0.40147099999999997,
+      "controls": 1.185241,
+      "monte_carlo": 1363.945831,
+      "pair_sums": 6.6741530000000004,
+      "us_per_trial_wall": 0.4546486103333333
+    },
+    "trials_for_full_system_log2": 9.347349466747286
+  },
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "e2b310b997963862fda778144df40e78648822a378557c5d73d0e4e929c2fd2b",
+    "git_commit": null,
+    "git_commit_source": null,
+    "git_dirty": null,
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete"
+}

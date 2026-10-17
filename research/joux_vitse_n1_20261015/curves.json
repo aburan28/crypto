@@ -1,0 +1,9 @@
+{
+  "note": "ICV1 identities of the curves of the complete DLPs, computed with scripts/curve_id.py extension (modulus t^5 - 2, i.e. c_0 = p - 2). Not registered: build_curve_registry.py harvests no extension-field JSON (problems/k5-joux-vitse-trial-cost-and-fpk-ecbench.md). Ladder curves have no counted order (p^5 up to 8e11) and so no identity; they are named by (p, seed) and their coefficients in data/ladder/.",
+  "curves": [
+    {"run": "data/dlp/p11_s1.jsonl", "p": 11, "modulus": [9,0,0,0,0], "a": [1,10,1,1,10], "b": [5,0,6,8,8], "order": 160637,
+     "icv1": "ICV1:fpk-11-5-4ca41dc3:415:160637:2,0,5,0,5:unk:unk:r:f2d50031beea", "slug": "icv1-fp4k5-t415-f2d50031"},
+    {"run": "data/dlp/p31_s1.jsonl", "p": 31, "modulus": [29,0,0,0,0], "a": [11,4,10,25,28], "b": [9,16,5,24,6], "order": 28622519,
+     "icv1": "ICV1:fpk-31-5-9dd8497d:6633:28622519:3,0,15,9,6:unk:unk:r:e84140db055b", "slug": "icv1-fp5k5-t6633-e84140db"}
+  ]
+}

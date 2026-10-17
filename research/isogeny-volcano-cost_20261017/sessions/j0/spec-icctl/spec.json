@@ -1,0 +1,113 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=33",
+          "oracle": "mitm:negation_folded=1"
+        }
+      },
+      "name": "ic-mitm-plus1",
+      "role": "control"
+    }
+  ],
+  "description": "volcano-rho --ecbench: every curve of an 2-isogeny volcano over F_13151689 (8 curves x 4 models), isogeny-transported generators, planted_shared targets; written by ./target/release/volcano-rho --bits 24 --depth 3 --max-cofactor 4096 --ell 2 --j0 --seed 11 --controls 0 --per-level 12 --ecbench research/isogeny-volcano-cost_20261017/classes/j0 --models 4 --targets 16 --out /tmp/claude-0/-home-user/bb846e50-c603-501b-84aa-3c771ffd768e/scratchpad/vr-j0",
+  "label": "isogeny volcano: planted IC control (factor base + 1)",
+  "measurement": {
+    "isolation_required": "L0",
+    "order": "shuffle",
+    "rounds": 1,
+    "seed": 11,
+    "timeout_seconds": 600,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "b": 9554511,
+        "group_order": 13155924,
+        "gx": 11359379,
+        "gy": 1041035,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 5485859,
+        "b": 12923907,
+        "group_order": 13155924,
+        "gx": 12622319,
+        "gy": 7938390,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 7151106,
+        "b": 1744066,
+        "group_order": 13155924,
+        "gx": 5067333,
+        "gy": 10753138,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 12684222,
+        "b": 3014690,
+        "group_order": 13155924,
+        "gx": 5004868,
+        "gy": 12723464,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 13123598,
+        "b": 5707221,
+        "group_order": 13155924,
+        "gx": 9549839,
+        "gy": 7334451,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 1519188,
+        "b": 5613982,
+        "group_order": 13155924,
+        "gx": 546482,
+        "gy": 1062678,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 492220,
+        "b": 11786344,
+        "group_order": 13155924,
+        "gx": 4579303,
+        "gy": 5747157,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      },
+      {
+        "a": 8533142,
+        "b": 4485909,
+        "group_order": 13155924,
+        "gx": 3282459,
+        "gy": 9085215,
+        "kind": "prime_explicit",
+        "p": 13151689,
+        "r": 1096327
+      }
+    ],
+    "target_kind": "planted_shared",
+    "target_seed": 11,
+    "targets_per_curve": 16
+  }
+}

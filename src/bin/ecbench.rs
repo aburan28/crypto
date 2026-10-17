@@ -10,6 +10,7 @@
 //! ecbench table  --dir D... [--reference ARM]   the one-unit table AGENTS.md §2 asks for
 //! ecbench resources --dir D [--out F]   cold native-work, memory and PMU vectors
 //! ecbench fb --curve C --factor-base F a factor base with its points
+//! ecbench fbm --curve C --factor-base F --oracle O [--solver S]  seal an FBM1 measurement id
 //! ecbench claim build --dir D --ic X --rho Y --workload W   a vs_rho claim, checked
 //! ecbench claim attach --base-report R --independent-receipt A   attach a later replay
 //! ecbench claim check --report R       the vs_rho checker
@@ -286,6 +287,29 @@ enum Cmd {
         /// A factor-base plug-in spec, e.g. 'koblitz-orbit:divisor=1'.
         #[arg(long)]
         factor_base: String,
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
+    /// Seal an FBM1 measurement identity (curve × FB1 × oracle × solver × instrument).
+    Fbm {
+        /// A curve spec, e.g. '{"kind":"koblitz","a":1,"n":17}'.
+        #[arg(long)]
+        curve: String,
+        /// A factor-base plug-in spec, e.g. 'binary-subspace:dimension=4'.
+        #[arg(long)]
+        factor_base: String,
+        /// Oracle plug-in string, e.g. 'mitm:m=2' or 'descent-algebraic:m=2'.
+        #[arg(long)]
+        oracle: String,
+        /// Solver plug-in string for algebraic oracles (default empty for table oracles).
+        #[arg(long, default_value = "")]
+        solver: String,
+        /// Linear algebra backend (default incremental-gauss).
+        #[arg(long, default_value = "incremental-gauss")]
+        linalg: String,
+        /// Instrument tag (default ecbench.ic_pipeline/v1).
+        #[arg(long, default_value = "ecbench.ic_pipeline/v1")]
+        instrument: String,
         #[arg(long)]
         out: Option<PathBuf>,
     },
@@ -974,6 +998,13 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 rep.replays.iter().filter(|r| r.reproduced).count(),
                 rep.problems.len()
             );
+            if rep.records_bound == Some(false) && rep.interruption.is_some() {
+                eprintln!(
+                    "warning: interruption {}: records_bound false (no records hash binds \
+                     records.jsonl); this session must not be cited as complete",
+                    rep.interruption.as_deref().unwrap_or("")
+                );
+            }
             if exit_code && !rep.ok {
                 return Ok(ExitCode::from(1));
             }
@@ -1155,6 +1186,47 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                         dump.curve.slug,
                         dump.factor_base.signed_points,
                         dump.factor_base.columns,
+                        p.display()
+                    );
+                }
+                None => print!("{text}"),
+            }
+        }
+        Cmd::Fbm {
+            curve,
+            factor_base,
+            oracle,
+            solver,
+            linalg,
+            instrument,
+            out,
+        } => {
+            let spec: workload::CurveSpec =
+                serde_json::from_str(&curve).map_err(|e| format!("--curve: {e}"))?;
+            let dump = methods::dump_factor_base(&spec, &factor_base)?;
+            let cfg = fbm::FactorBaseMeasurementConfig {
+                schema: fbm::FBM_SCHEMA.into(),
+                curve: dump.curve.slug.clone(),
+                fb_id: dump.factor_base.fb_id.clone(),
+                fb_sha256: dump.factor_base.fb_sha256.clone(),
+                family: dump.factor_base.family.clone(),
+                fb_params: dump.factor_base.params.clone(),
+                oracle,
+                solver,
+                linalg,
+                instrument,
+            };
+            let sealed = cfg.seal()?;
+            let text = serde_json::to_string_pretty(&sealed).map_err(|e| e.to_string())? + "\n";
+            match out {
+                Some(p) => {
+                    std::fs::write(&p, &text).map_err(|e| e.to_string())?;
+                    eprintln!(
+                        "{} = {} × {} × oracle={} -> {}",
+                        sealed.fbm_id,
+                        sealed.config.curve,
+                        sealed.config.fb_id,
+                        sealed.config.oracle,
                         p.display()
                     );
                 }

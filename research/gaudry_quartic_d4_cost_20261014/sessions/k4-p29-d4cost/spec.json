@@ -1,0 +1,65 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Gaudry k = 4 IC on E(F_29^4): the D4 oracle with weighted grading, chains, sparsest pivots and shape replay, paired against the committed D4 oracle and rho",
+  "description": "PROTOCOL.md (research/gaudry_quartic_d4_cost_20261014). Workload and target seed of SPEC-k4-p29-zero, two targets (the first is that session's target). Arms: rho with the negation map (reference); the committed oracle gaudry-d4:macaulay=14 with its unsolved systems charged; the new oracle gaudry-d4:macaulay=26,weighted=1,chains=1,sparsest=1,replay=1, unsolved systems charged; rho A/A. Both IC arms use fghr-y-line:zero=1.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "fp4_torsion",
+        "p": 29,
+        "seed": 1,
+        "max_cofactor": 16
+      }
+    ],
+    "targets_per_curve": 2,
+    "target_seed": 202610134029
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-d4-committed",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "fghr-y-line:zero=1",
+          "oracle": "gaudry-d4:macaulay=14,charge_unsolved=1",
+          "max_trials": "20000"
+        }
+      }
+    },
+    {
+      "name": "ic-d4-chains",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "fghr-y-line:zero=1",
+          "oracle": "gaudry-d4:macaulay=26,weighted=1,chains=1,sparsest=1,replay=1,charge_unsolved=1",
+          "max_trials": "20000"
+        }
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610134030,
+    "isolation_required": "L2",
+    "timeout_seconds": 86400
+  }
+}

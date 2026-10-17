@@ -1,0 +1,257 @@
+{
+  "$schema": "../cross-route-cost-receipt.schema.json",
+  "schema_version": "ecdlp-cross-route-cost-receipt/v0.1-draft",
+  "record_state": "mock_non_authoritative",
+  "receipt_uid": "urn:ecdlp-audit:cost-receipt:mock:protocol-misuse-001",
+  "created_at": "2026-10-13T20:10:00Z",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "claim_transition_allowed": false,
+  "route": {
+    "route_uid": "route.mock.protocol-transcript",
+    "route_revision": "draft-1",
+    "route_class": "protocol_misuse",
+    "family": "synthetic-transcript-invariant",
+    "description": "Synthetic accounting example for a protocol-misuse assessment.",
+    "adversary_model_uid": "adversary.mock.passive-auditor",
+    "prerequisites": ["invented public transcripts", "known-answer labels"],
+    "composed_route_uids": [],
+    "weakest_open_obligation": "No real protocol execution or independent replay exists for this invented fixture."
+  },
+  "route_registry_binding": {
+    "registry_path": "docs/ecdlp-audit/routes/route-registry.seed.json",
+    "registry_schema_version": "ecdlp-ws5-routes/v0-draft",
+    "registry_as_of": "2026-10-14",
+    "registry_revision_sha256": "sha256:b19664ca7557a3bd943ad472f8ea645b114a058f1a1557b8822c8177e0140b1b",
+    "route_family_join": {
+      "status": "unresolved",
+      "id": null,
+      "reason": "The local mock route has not been reviewed as an exact WS5 route-family member."
+    },
+    "evidence_profile_join": {
+      "status": "unresolved",
+      "id": null,
+      "reason": "No exact WS5 evidence-profile join has been established for this mock receipt."
+    }
+  },
+  "identities": {
+    "audit_unit_uid": "unit.mock.protocol.001",
+    "subject_uid": "subject.mock.protocol.001",
+    "target_set_uid": "targets.mock.protocol.001",
+    "workload_uid": "workload.mock.protocol.001",
+    "evidence_revision": "mock-evidence-1",
+    "curve": {"status": "not_applicable", "uid": null, "revision": null, "reason": "The abstract fixture is not bound to a curve."},
+    "field_or_platform": {"status": "applicable", "uid": "platform:mock-protocol", "revision": "mock-1"},
+    "representation": {"status": "applicable", "uid": "representation:mock-transcript-v1", "revision": "mock-1"},
+    "subgroup_or_secret_domain": {"status": "applicable", "uid": "secret-domain:mock-ephemeral", "revision": "mock-1"},
+    "protocol": {"status": "applicable", "uid": "protocol:mock-signature", "revision": "mock-1"},
+    "implementation": {"status": "applicable", "uid": "implementation:mock-protocol-harness", "revision": "0000000-mock"}
+  },
+  "authorization": {
+    "tier": "T1",
+    "status": "mock_only",
+    "authorization_ref": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json",
+    "scope": "Schema fixture using invented public synthetic values only.",
+    "valid_from": null,
+    "expires_at": null,
+    "fixture_classes": ["public_synthetic", "known_answer"],
+    "live_target_execution": false,
+    "secret_material": false,
+    "production_exploitation": false,
+    "transferable": false
+  },
+  "workload": {
+    "fixture_class": "known_answer",
+    "description": "One invented known-answer transcript bundle.",
+    "target_count": 1,
+    "target_manifest_ref": "mock://targets/protocol-001",
+    "target_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "reuse_group_uid": null,
+    "public_data_only": true,
+    "synthetic_or_known_answer": true,
+    "selection_rule": "The invented transcript identifier was fixed before this receipt was written.",
+    "selection_frozen_before_execution": true
+  },
+  "environment": {
+    "environment_uid": "environment.mock.cpu.002",
+    "host_class": "invented-single-cpu",
+    "cpu": "mock-cpu",
+    "gpu": null,
+    "memory_bytes": 1073741824,
+    "os": "mock-os",
+    "toolchain": "mock-toolchain",
+    "isolation": "unknown",
+    "resource_cap": "Invented one-core, one-GiB cap.",
+    "captured_at": "2026-10-13T20:10:00Z"
+  },
+  "execution": {
+    "mode": "mock_fixture",
+    "attempt_uid": "attempt.mock.protocol.001",
+    "started_at": null,
+    "ended_at": null,
+    "outcome": "complete",
+    "exit_code": 0,
+    "command_argv": ["mock-protocol-audit", "--fixture", "protocol-001"],
+    "seeds": [2],
+    "repetitions": 1,
+    "concurrency": 1,
+    "cold_cache": "unknown",
+    "notes": "No command was executed; all values are invented schema examples."
+  },
+  "phase_records": [
+    {
+      "phase_id": "collect-transcripts",
+      "category": "setup",
+      "accounting_class": "cold_only",
+      "description": "Invented transcript ingestion and normalization.",
+      "target_dependent": false,
+      "reused": false,
+      "attempts": 1,
+      "successes": 1,
+      "costs": [{"metric": "wall_time", "value": 3, "unit": "milliseconds", "status": "modeled", "source": "invented fixture", "sample_count": 1, "uncertainty": "No measurement."}],
+      "included_in_boundaries": ["cold_start"],
+      "artifact_refs": ["artifact.mock.protocol.raw"]
+    },
+    {
+      "phase_id": "check-protocol-invariant",
+      "category": "core",
+      "accounting_class": "online_target_dependent",
+      "description": "Invented target-specific protocol invariant check.",
+      "target_dependent": true,
+      "reused": false,
+      "attempts": 1,
+      "successes": 1,
+      "costs": [{"metric": "wall_time", "value": 5, "unit": "milliseconds", "status": "modeled", "source": "invented fixture", "sample_count": 1, "uncertainty": "No measurement."}],
+      "included_in_boundaries": ["cold_start", "online_single_target"],
+      "artifact_refs": ["artifact.mock.protocol.raw"]
+    },
+    {
+      "phase_id": "verify-protocol-finding",
+      "category": "verification",
+      "accounting_class": "verification",
+      "description": "Invented known-answer verification of the protocol classification.",
+      "target_dependent": true,
+      "reused": false,
+      "attempts": 1,
+      "successes": 1,
+      "costs": [{"metric": "wall_time", "value": 2, "unit": "milliseconds", "status": "modeled", "source": "invented fixture", "sample_count": 1, "uncertainty": "No measurement."}],
+      "included_in_boundaries": ["cold_start", "online_single_target"],
+      "artifact_refs": ["artifact.mock.protocol.raw"]
+    }
+  ],
+  "accounting_boundaries": {
+    "cold_start": {
+      "status": "modeled",
+      "denominator_targets": 1,
+      "included_phase_ids": ["collect-transcripts", "check-protocol-invariant", "verify-protocol-finding"],
+      "excluded_phase_ids": [],
+      "totals": [{"metric": "wall_time", "value": 10, "unit": "milliseconds", "status": "modeled", "source": "sum of invented phases", "sample_count": 1, "uncertainty": "No measurement."}],
+      "formula": "collect-transcripts + check-protocol-invariant + verify-protocol-finding",
+      "complete": true,
+      "exclusions": []
+    },
+    "online_single_target": {
+      "status": "modeled",
+      "denominator_targets": 1,
+      "included_phase_ids": ["check-protocol-invariant", "verify-protocol-finding"],
+      "excluded_phase_ids": ["collect-transcripts"],
+      "totals": [{"metric": "wall_time", "value": 7, "unit": "milliseconds", "status": "modeled", "source": "sum of invented target phases", "sample_count": 1, "uncertainty": "No measurement."}],
+      "formula": "check-protocol-invariant + verify-protocol-finding",
+      "complete": true,
+      "exclusions": ["Cold transcript ingestion is separately charged."]
+    },
+    "amortized": {
+      "enabled": false,
+      "target_count": null,
+      "reuse_group_uid": null,
+      "reusable_phase_ids": [],
+      "per_target_phase_ids": [],
+      "total_costs": [],
+      "per_target_costs": [],
+      "allocation_formula": "Amortization is disabled for the one-target mock receipt.",
+      "assumptions": [],
+      "secondary_only": true
+    }
+  },
+  "failure_accounting": {
+    "attempts_total": 3,
+    "successful_attempts": 3,
+    "unsuccessful_searches": 0,
+    "timeouts": 0,
+    "ooms": 0,
+    "errors": 0,
+    "invalid_results": 0,
+    "budget_exhaustions": 0,
+    "failed_costs_included_in": ["separate_reported_cost"],
+    "failure_artifact_refs": [],
+    "search_boundary": "One invented transcript bundle; no search or claim beyond this fixture.",
+    "universal_nonexistence_claim": false
+  },
+  "duplicate_accounting": {
+    "candidates_generated": 1,
+    "candidates_retained": 1,
+    "duplicates_detected": 0,
+    "invalid_candidates": 0,
+    "deduplication_key": "mock transcript digest",
+    "deduplication_stage": "before invented protocol check",
+    "duplicate_cost_charged": true,
+    "artifact_refs": ["artifact.mock.protocol.raw"]
+  },
+  "memory_accounting": {
+    "measurements": [{"metric": "peak_rss", "scope": "invented whole process", "status": "modeled", "value_bytes": 2048, "tool": "invented counter", "sample_count": 1, "unknown_reason": null}],
+    "aggregate_scope": "One invented process.",
+    "concurrent_processes": 1,
+    "resource_cap_enforced": false
+  },
+  "matched_control": {
+    "status": "unmatched",
+    "control_receipt_uid": null,
+    "same_subject": true,
+    "same_target_set": true,
+    "same_fixture_class": true,
+    "same_authorization_envelope": true,
+    "same_environment_class": true,
+    "same_resource_cap": true,
+    "same_operation_unit": false,
+    "separate_complete_runs": false,
+    "best_of_component_mixing": false,
+    "differences": ["No synthetic control receipt was created."],
+    "rationale": "The fixture demonstrates an explicitly unmatched comparison state."
+  },
+  "uncertainty": {
+    "method": "No statistical method; all quantities are invented.",
+    "sample_count": 1,
+    "statistic": "illustrative point value",
+    "interval": null,
+    "confidence_or_coverage": "not applicable to mock data",
+    "limitations": ["The receipt records no experiment and supports no comparison."]
+  },
+  "evidence": {
+    "source_revision": "mock-source-revision",
+    "build_identity": "mock-build-identity",
+    "configuration_identity": "mock-configuration-identity",
+    "dependency_identity": "mock-dependency-identity",
+    "raw_output_ref": "mock://raw/protocol-001",
+    "replay_receipt_ref": null,
+    "artifacts": [{"artifact_uid": "artifact.mock.protocol.raw", "path_or_uri": "mock://raw/protocol-001", "sha256": null, "role": "Invented placeholder, not raw evidence.", "immutable": false}],
+    "independent_replay": false
+  },
+  "result": {
+    "execution_outcome": "complete",
+    "requirement_status": "partial",
+    "correctness_verification": "not_run",
+    "outcome_class": "accounting_fixture_only",
+    "observed_result": "The synthetic object exercises protocol-route accounting fields.",
+    "claim_status": "unknown",
+    "evidence_maturity": "E0",
+    "interpretation_category": "descriptive_only",
+    "claim_boundary": "Schema fixture only; not a protocol finding or recovery result.",
+    "not_established": ["protocol weakness", "secret recovery", "performance", "real-world applicability"],
+    "universal_nonexistence_claim": false,
+    "full_solver_claim": false
+  },
+  "open_obligations": [
+    "Implement semantic reconciliation of phase totals and attempt counts.",
+    "Replace invented values only after authorization, immutable evidence, and independent review."
+  ]
+}

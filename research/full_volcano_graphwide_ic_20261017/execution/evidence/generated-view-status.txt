@@ -1,0 +1,21 @@
+The generated browser candidate was built into a scratch file, not over the
+canonical docs/browser/data.json, which is conflicted against current main.
+Candidate: 2126 registered models, 206 methods, 411 factor bases, 271 candidate
+identities, 30 rounds, 126 sessions, 13558 yield rows. All 16 new sessions are
+visible through the newly declared study glob. Unregistered references remain
+in raw/session/method rows and are not falsely labeled registered.
+
+Current merge diagnostic (HEAD vs fetched origin/main) identifies conflicts:
+.github/scripts/ci-scope.mjs
+docs/browser/data.json
+docs/ic-leaderboard.html
+docs/ic/LEADERBOARD.md
+
+AGENTS.md requires Copilot to resolve conflicts first. The existing request is
+https://github.com/aburan28/crypto/pull/2001#issuecomment-6227724266
+Those conflicted files were not edited by this execution work. The browser
+candidate is included in the Drive archive as staged-browser-data.json, pending
+canonical regeneration after conflict resolution. No best/frontier claim was
+promoted; the unchanged leaderboard source check passes locally. The new bounded
+diagnostic is quoted explicitly in the scoreboard panel and canonical timeline;
+both focused site tests and both workflow path-coverage checks pass.

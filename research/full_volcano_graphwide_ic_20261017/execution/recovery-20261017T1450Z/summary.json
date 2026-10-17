@@ -1,0 +1,28 @@
+{
+  "aggregation": "Each status separate. Means over present values only; n explicit. Conductor 0 denotes graph aggregate, not a stratum. Timeout counters are unknown, not zero. Duplicate workload/arm/round/seed and cross-binary pooling are refused.",
+  "binary_sha256": "35d89073f4d666b094c213a1d31b0c819b63600123e067c111af3c947d7609a9",
+  "call_observations": 29350,
+  "decomposition_calls": 71296000,
+  "measured_records": 46960,
+  "mitm_call_lookup_checks": 17610,
+  "outcome_totals": {
+    "exhausted": 14626,
+    "timeout": 2064,
+    "verified": 30270
+  },
+  "relation_observations": 29350,
+  "relation_trials": 74829850,
+  "relations_found": 1530557,
+  "schema": "volcano-ic-summary/v2",
+  "verified_records": 30270,
+  "wall_claim": "RAW_DESCRIPTIVE_ONLY; profile/isolation are in sealed records; no admitted runtime comparison",
+  "weighted_oracle_call_yield": 0.02146764194344704,
+  "weighted_relation_yield": 0.020453829588058775,
+  "yield_definitions": {
+    "decomposition_calls": "targets_tried - repeated_targets_skipped for these classic guarded walk arms; identity skips occur before trial increment",
+    "oracle_call_relation_yield": "relations_found / decomposition_calls; absent when calls are zero or unknown",
+    "relation_yield": "Legacy alias: relations per nonidentity source trial, including duplicate queries skipped before the oracle. Not relations per oracle call.",
+    "trial_relation_yield": "relations_found / targets_tried"
+  },
+  "groups_in_external_archive": "summary/summary.json"
+}

@@ -2,41 +2,83 @@ name: Curve cover certificates
 on:
   pull_request:
     paths:
+      - '.gitattributes'
       - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'src/lib.rs'
       - 'src/bin/curve_standards.rs'
       - 'src/bin/curve_standards/**'
       - 'src/bin/curve_cover_check.rs'
       - 'src/bin/curve_cover_check/**'
+      - 'src/bin/hyperelliptic_cover.rs'
+      - 'src/bin/ecdlp_audit.rs'
+      - 'src/bin/ecdlp_audit/**'
       - 'src/binary_ecc/**'
+      - 'src/prime_hyperelliptic/**'
       - 'src/cryptanalysis/ecc2k130_guard.rs'
+      - 'src/cryptanalysis/mod.rs'
+      - 'src/hash/mod.rs'
       - 'src/hash/sha256.rs'
       - 'src/utils/**'
       - 'docs/curves/**'
+      - 'docs/ecdlp-audit/**'
+      - 'docs/ECDLP_ATTACK_MATRIX.md'
+      - 'docs/ic/boundary_targets.json'
       - 'docs/browser/**'
       - 'scripts/build_lab_browser.py'
+      - 'scripts/test_build_lab_browser.py'
       - 'scripts/test_cover_catalog.py'
       - 'scripts/update_curve_standards.py'
       - 'scripts/build_curve_registry.py'
+      - 'scripts/build_cover_transfer_assessments.mjs'
+      - 'research/cover_transfer_assessment_20261013/**'
+      - 'research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md'
+      - 'research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.pdf'
+      - 'problems/catalog-cover-subgroup-certificates-incomplete.md'
+      - 'research/hyperelliptic_cover_infrastructure_20261006/evidence.json'
+      - 'research/hyperelliptic_cover_infrastructure_20261006/README.md'
       - '.github/workflows/curve-covers.yml'
+      - '.github/workflows/release.yml'
   push:
     branches: [main]
     paths:
+      - '.gitattributes'
       - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'src/lib.rs'
       - 'src/bin/curve_standards.rs'
       - 'src/bin/curve_standards/**'
       - 'src/bin/curve_cover_check.rs'
       - 'src/bin/curve_cover_check/**'
+      - 'src/bin/hyperelliptic_cover.rs'
+      - 'src/bin/ecdlp_audit.rs'
+      - 'src/bin/ecdlp_audit/**'
       - 'src/binary_ecc/**'
+      - 'src/prime_hyperelliptic/**'
       - 'src/cryptanalysis/ecc2k130_guard.rs'
+      - 'src/cryptanalysis/mod.rs'
+      - 'src/hash/mod.rs'
       - 'src/hash/sha256.rs'
       - 'src/utils/**'
       - 'docs/curves/**'
+      - 'docs/ecdlp-audit/**'
+      - 'docs/ECDLP_ATTACK_MATRIX.md'
+      - 'docs/ic/boundary_targets.json'
       - 'docs/browser/**'
       - 'scripts/build_lab_browser.py'
+      - 'scripts/test_build_lab_browser.py'
       - 'scripts/test_cover_catalog.py'
       - 'scripts/update_curve_standards.py'
       - 'scripts/build_curve_registry.py'
+      - 'scripts/build_cover_transfer_assessments.mjs'
+      - 'research/cover_transfer_assessment_20261013/**'
+      - 'research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md'
+      - 'research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.pdf'
+      - 'problems/catalog-cover-subgroup-certificates-incomplete.md'
+      - 'research/hyperelliptic_cover_infrastructure_20261006/evidence.json'
+      - 'research/hyperelliptic_cover_infrastructure_20261006/README.md'
       - '.github/workflows/curve-covers.yml'
+      - '.github/workflows/release.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -48,17 +90,86 @@ concurrency:
 
 jobs:
   certificates:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          # verify-plan replays three immutable historical Git blobs.
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --bin curve_cover_check --bin curve_standards
+      - name: Cover, Jacobian, transfer, and CLI controls
+        run: |
+          cargo test --lib hyperelliptic
+          cargo test --lib binary_ecc::cover_transfer::tests
+          cargo test --bin hyperelliptic-cover
+      - name: Replay the native audit plan and fixed-F8 order certificate
+        run: |
+          cargo test --bin ecdlp-audit
+          cargo run --bin ecdlp-audit -- verify-plan \
+            --input docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json \
+            --repo-root .
+          cargo run --bin ecdlp-audit -- verify-fixed-f8-order \
+            --input docs/curves/fixed-f8-genus3-order-certificate.json \
+            --repo-root .
       - run: cargo run --bin curve_standards -- --check
       - run: python3 scripts/update_curve_standards.py --check
       - run: cargo run --bin curve_cover_check -- --check
       - run: python3 scripts/test_cover_catalog.py
-      - run: python3 scripts/build_lab_browser.py --check
+      - name: Check sparse-safe lab-browser generation
+        run: |
+          python3 scripts/test_build_lab_browser.py
+          python3 scripts/build_lab_browser.py --check
+
+  transfer-assessment:
+    name: Cover transfer assessment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install the pinned Draft 2020-12 validator
+        run: python -m pip install jsonschema==4.23.0
+      - name: Check deterministic catalog-wide assessment generation
+        run: node scripts/build_cover_transfer_assessments.mjs --check
+      - name: Validate the assessment schema
+        run: python -m jsonschema -i docs/curves/cover-transfer-assessments.json docs/curves/cover-transfer-assessment.schema.json
+      - name: Verify typed map, subgroup, and evidence bindings
+        run: node research/cover_transfer_assessment_20261013/verify_assessment.mjs
+
+  transfer-lemma:
+    name: Cover transfer Lean lemma
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: research/cover_transfer_assessment_20261013/lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the conditional injectivity theorem and replay it in a fresh kernel
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/cover_transfer_assessment_20261013/lean
+          auto-config: false
+          use-mathlib-cache: true
+          build: true
+          build-args: 'CoverTransfer'
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose CoverTransfer'
+      - name: Audit transitive axioms
+        run: lake env lean AxiomAudit.lean

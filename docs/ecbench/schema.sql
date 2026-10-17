@@ -112,6 +112,22 @@ CREATE TABLE IF NOT EXISTS factor_base_points (
   PRIMARY KEY (fb_id, idx)
 );
 
+-- FBM1: measurement configuration identity (curve × FB1 × oracle × solver ×
+-- linalg × instrument). Results attach to cells; they are never part of the hash.
+CREATE TABLE IF NOT EXISTS factor_base_measurements (
+  fbm_id        TEXT PRIMARY KEY,                     -- FBM1h + 12 hex
+  fbm_sha256    TEXT NOT NULL UNIQUE,
+  curve_slug    TEXT NOT NULL REFERENCES curves(slug),
+  fb_id         TEXT NOT NULL REFERENCES factor_bases(fb_id),
+  fb_sha256     TEXT NOT NULL,
+  family        TEXT NOT NULL,
+  fb_params_json TEXT NOT NULL,
+  oracle        TEXT NOT NULL,
+  solver        TEXT NOT NULL,
+  linalg        TEXT NOT NULL,
+  instrument    TEXT NOT NULL                          -- e.g. ecbench.ic_pipeline/v1, sage.factor_base_dor/v1
+);
+
 -- ── Where and how ────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS hosts (
@@ -172,6 +188,7 @@ CREATE TABLE IF NOT EXISTS runs (
   method_id            TEXT NOT NULL REFERENCES algorithms(method_id),
   workload_id          TEXT NOT NULL REFERENCES workloads(workload_id),
   fb_id                TEXT REFERENCES factor_bases(fb_id),
+  fbm_id               TEXT REFERENCES factor_base_measurements(fbm_id),
   algorithm_seed       TEXT NOT NULL,
   status               TEXT NOT NULL CHECK (status IN ('verified', 'wrong_answer', 'exhausted', 'error', 'timeout', 'crashed')),
   recovered            TEXT,
@@ -250,6 +267,27 @@ CREATE TABLE IF NOT EXISTS isolation_blockers (
   ord       INTEGER NOT NULL,
   blocker   TEXT NOT NULL,                            -- "L2: 3 ticks of hypervisor steal ..."
   PRIMARY KEY (record_id, ord)
+);
+
+-- One measured cell under an FBM1 id (yield / DoR / cost). Source may be an
+-- ecbench record or a Sage DoR join stamped with the same FBM1.
+CREATE TABLE IF NOT EXISTS factor_base_measurement_cells (
+  cell_id              TEXT PRIMARY KEY,              -- optional stable id; else fbm_id||':'||record_id
+  fbm_id               TEXT NOT NULL REFERENCES factor_base_measurements(fbm_id),
+  record_id            TEXT REFERENCES runs(record_id),
+  session_id           TEXT,
+  s                    REAL,
+  total_gae            REAL,
+  trials               INTEGER,
+  relations            INTEGER,
+  yield_per_trial      REAL,
+  solving_degree_mean  REAL,
+  solving_degree_max   INTEGER,
+  semi_regular_degree  INTEGER,
+  macaulay_rows        INTEGER,
+  macaulay_columns     INTEGER,
+  status               TEXT,
+  extra_json           TEXT NOT NULL DEFAULT '{}'
 );
 
 CREATE TABLE IF NOT EXISTS comparisons (
@@ -389,7 +427,7 @@ WHERE r.fb_id IS NOT NULL;
 -- writes `hits`; the view reads either.
 CREATE VIEW IF NOT EXISTS ic_yield AS
 SELECT r.record_id, r.session_id, r.arm, r.round, r.status, r.run_id,
-       w.curve_slug, w.target_index, r.fb_id, f.family AS fb_family, f.columns AS fb_columns,
+       w.curve_slug, w.target_index, r.fb_id, r.fbm_id, f.family AS fb_family, f.columns AS fb_columns,
        f.signed_points AS fb_signed_points, a.method AS method,
        json_extract(a.params_json, '$.oracle') AS oracle,
        json_extract(a.params_json, '$.solver') AS solver_param,
@@ -415,4 +453,26 @@ LEFT JOIN phases l ON l.record_id = r.record_id AND l.phase = 'linear_algebra'
 LEFT JOIN run_solver s ON s.record_id = r.record_id
 WHERE a.family = 'ic' AND r.warmup = 0;
 
-INSERT OR REPLACE INTO schema_info (key, value) VALUES ('ecbench_schema_version', '2');
+-- The FBM1 ledger: every measurement cell with its identity and DoR/yield fields.
+-- Cite yield or DoR only with both fb_id and fbm_id present.
+CREATE VIEW IF NOT EXISTS fb_measurement_ledger AS
+SELECT m.fbm_id, m.fbm_sha256, m.curve_slug, m.fb_id, m.family AS fb_family,
+       m.oracle, m.solver, m.linalg, m.instrument,
+       c.cell_id, c.record_id, c.session_id, c.s, c.total_gae,
+       c.trials, c.relations, c.yield_per_trial,
+       c.solving_degree_mean, c.solving_degree_max, c.semi_regular_degree,
+       c.macaulay_rows, c.macaulay_columns, c.status, c.extra_json
+FROM factor_base_measurements m
+LEFT JOIN factor_base_measurement_cells c ON c.fbm_id = m.fbm_id;
+
+CREATE TRIGGER IF NOT EXISTS factor_base_measurements_identity
+BEFORE INSERT ON factor_base_measurements
+WHEN EXISTS (
+  SELECT 1 FROM factor_base_measurements
+  WHERE fbm_id = NEW.fbm_id AND fbm_sha256 <> NEW.fbm_sha256
+)
+BEGIN
+  SELECT RAISE(ABORT, 'fbm_id collision: same short id, different sha256');
+END;
+
+INSERT OR REPLACE INTO schema_info (key, value) VALUES ('ecbench_schema_version', '3');

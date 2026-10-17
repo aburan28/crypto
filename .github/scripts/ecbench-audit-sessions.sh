@@ -16,11 +16,20 @@ export ecbench failed
 # every failing session is reported.
 xargs -d '\n' -P "$(nproc)" -n 1 bash -c '
   out="$failed.$$"
-  if ! "$ecbench" verify --dir "$1" --replay 0 --allow-interrupted --exit-code > "$out.json" 2> "$out.err"; then
+  dir=$1
+  # A session committed with gzip-compressed records.jsonl.gz / plan.json.gz
+  # (too large to commit raw) is audited from a decompressed copy; every
+  # check then runs on exactly the committed bytes, decompressed.
+  if [ -f "$1/records.jsonl.gz" ] && [ ! -f "$1/records.jsonl" ]; then
+    dir="$out.session"
+    cp -r "$1" "$dir"
+    gunzip "$dir"/*.gz
+  fi
+  if ! "$ecbench" verify --dir "$dir" --replay 0 --allow-interrupted --exit-code > "$out.json" 2> "$out.err"; then
     msg=$(echo "$1"; { jq -r ".problems[]" "$out.json" 2> /dev/null || true; cat "$out.err"; } | sed "s/^/    /")
     printf "%s\n" "$msg" >> "$failed"
   fi
-  rm -f "$out.json" "$out.err"
+  rm -rf "$out.json" "$out.err" "$out.session"
 ' audit < "$list"
 total=$(grep -c . "$list")
 if [ -s "$failed" ]; then

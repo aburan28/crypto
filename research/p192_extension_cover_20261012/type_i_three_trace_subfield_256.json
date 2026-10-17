@@ -1,0 +1,37 @@
+{
+  "all_model_constants_fixed_by_frobenius_cube": {
+    "beta": true,
+    "c0": true,
+    "d0": true,
+    "inf": true,
+    "kappa": true,
+    "quartic_root_0": true,
+    "quartic_root_1": true,
+    "quartic_root_2": true,
+    "quartic_root_3": true,
+    "zeta": true
+  },
+  "alternating_unisolated_elapsed_ns": {
+    "inverse_ns": 1004607614,
+    "quotient_ns": 79695077,
+    "trace3_ns": 7603796797,
+    "trace6_ns": 11213179793
+  },
+  "anchor_fixed_by_frobenius_cube": true,
+  "boundary": "Exact equivalence on both residuals of 128 frozen cuts. The field closure and trace identity hold on the inverse open locus; trace timers exclude separately performed subfield-membership checks and are exploratory with concurrent producers.",
+  "column_digest_sha256": "77e2392efc5cc54e78cfea08c59144e2caf14af6ae2e1f8bbfb08823aa2249ae",
+  "input_sha256": {
+    "type_i_line_trace_residual_4096.json": "4fc96dd8d29c5c34f451a508da91dee5b17fa1bf5eeda81bae5c512c4d9382d1",
+    "type_i_quotient_base_probe.json": "f7de9791a007214b8506bf054ed24d55a803c4d1c8da50815aee04c5410339c7"
+  },
+  "inverse_source_sha256": "744fd6044d2229dfaab5380829cd9c6c7e07b4c5d44858fb7b7d91621991cbfb",
+  "projection_source_sha256": "feea03ed5666089e3734820e6aaa62fa9838c69b9c0eba28b09872d4aca350fb",
+  "rational_cuts": 128,
+  "residual_images": 256,
+  "runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "source_sha256": "d40ba6aefa0e133066edc06ce24d73fb6b9c6628ae636f024e3592c9b5ef6a55",
+  "status": "verified_p192_three_trace_subfield_256_columns",
+  "subfield_membership_checks_outside_trace_timers": true,
+  "three_trace_projection_matches_frozen_columns": true,
+  "trace6_equals_twice_trace3": true
+}

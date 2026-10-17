@@ -1,0 +1,13 @@
+Initial helper compilation, before setting the existing toolchain selectors:
+error: could not create home directory: '/home/agent/.rustup': Read-only file system (os error 30)
+Retried with CARGO_HOME=/workspace/pr1963-toolchain/cargo and RUSTUP_HOME=/workspace/pr1963-toolchain/rustup; native helper compilation and index round trip passed.
+
+Initial metadata assertion compared the entire aliases map for equality with main:
+AssertionError: main
+The map correctly has 96 additive historical aliases. Retried by checking every original alias/value individually; all entries preserved.
+
+Initial payload check tried to read sparse, unmaterialized research/factor_base_traces_20261016/build.sh:
+FileNotFoundError: [Errno 2] No such file or directory: 'research/factor_base_traces_20261016/build.sh'
+Compared all 24 non-store Git index blob hashes, then materialized the original payload through git sparse-checkout; all match.
+
+An unscoped whitespace check included inherited main research SVGs and raw logs and reported existing whitespace. It was stopped. The PR-scoped source check passes; original raw validation logs retain their recorded whitespace and final blank lines unchanged.

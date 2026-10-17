@@ -1,0 +1,86 @@
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-d2959353 | 20.33 | 32/32 | 1.177 | [0.940, 1.437] | 0.886 | 1.328 | 1.328 | 1.000 | yes | 9.952 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-6129a158 | 20.33 | 32/32 | 1.127 | [0.901, 1.387] | 0.886 | 1.272 | 1.272 | 1.000 | yes | 10.964 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-228f1f7f | 20.33 | 32/32 | 1.116 | [0.920, 1.322] | 0.886 | 1.259 | 1.259 | 1.000 | yes | 10.548 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-6069cf4d | 20.33 | 32/32 | 1.355 | [1.126, 1.596] | 0.886 | 1.529 | 1.529 | 1.000 | yes | 10.021 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-a417ed2b | 20.33 | 32/32 | 1.317 | [1.061, 1.629] | 0.886 | 1.486 | 1.486 | 1.000 | yes | 9.824 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-5d1f1d4c | 20.33 | 32/32 | 1.189 | [0.945, 1.474] | 0.886 | 1.341 | 1.341 | 1.000 | yes | 9.727 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-b27e01a8 | 20.33 | 32/32 | 1.250 | [0.981, 1.530] | 0.886 | 1.410 | 1.410 | 1.000 | yes | 9.000 | L1×4 L2×28 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-451622a2 | 20.33 | 32/32 | 1.291 | [1.101, 1.508] | 0.886 | 1.457 | 1.457 | 1.000 | yes | 9.961 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-d7f5075f | 20.33 | 32/32 | 1.092 | [0.873, 1.323] | 0.886 | 1.232 | 1.232 | 1.000 | yes | 9.050 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-ea3ad5fa | 20.33 | 32/32 | 1.299 | [1.079, 1.548] | 0.886 | 1.466 | 1.466 | 1.000 | yes | 9.782 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-1667eebf | 20.33 | 32/32 | 1.301 | [1.037, 1.603] | 0.886 | 1.468 | 1.468 | 1.000 | yes | 9.127 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-f584795c | 20.33 | 32/32 | 1.179 | [0.986, 1.401] | 0.886 | 1.330 | 1.330 | 1.000 | yes | 9.607 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-3b65bad7 | 20.33 | 32/32 | 1.175 | [0.910, 1.466] | 0.886 | 1.326 | 1.326 | 1.000 | yes | 10.686 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg | rho.negation | icv1-fp26-tm3572-a29ce9e1 | 20.33 | 32/32 | 1.278 | [1.012, 1.545] | 0.886 | 1.442 | 1.442 | 1.000 | yes | 10.704 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-d2959353 | 20.33 | 32/32 | 1.375 | [1.099, 1.680] | 1.253 | 1.097 | 1.551 | 1.168 | no | 10.417 | L1×4 L2×28 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-6129a158 | 20.33 | 32/32 | 1.817 | [1.552, 2.057] | 1.253 | 1.450 | 2.050 | 1.612 | no | 11.061 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-228f1f7f | 20.33 | 32/32 | 1.390 | [1.123, 1.692] | 1.253 | 1.109 | 1.569 | 1.246 | no | 10.482 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-6069cf4d | 20.33 | 32/32 | 1.485 | [1.096, 1.887] | 1.253 | 1.185 | 1.676 | 1.096 | no | 10.833 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-a417ed2b | 20.33 | 32/32 | 1.409 | [1.083, 1.751] | 1.253 | 1.124 | 1.590 | 1.070 | no | 9.990 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-5d1f1d4c | 20.33 | 32/32 | 1.652 | [1.313, 1.997] | 1.253 | 1.318 | 1.864 | 1.390 | no | 9.815 | L1×4 L2×28 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-b27e01a8 | 20.33 | 32/32 | 1.523 | [1.211, 1.880] | 1.253 | 1.215 | 1.718 | 1.218 | no | 9.885 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-451622a2 | 20.33 | 32/32 | 1.518 | [1.227, 1.794] | 1.253 | 1.212 | 1.713 | 1.176 | no | 9.750 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-d7f5075f | 20.33 | 32/32 | 1.323 | [1.010, 1.701] | 1.253 | 1.056 | 1.493 | 1.212 | no | 8.954 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-ea3ad5fa | 20.33 | 32/32 | 1.851 | [1.506, 2.230] | 1.253 | 1.477 | 2.089 | 1.425 | no | 9.370 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-1667eebf | 20.33 | 32/32 | 1.377 | [1.176, 1.574] | 1.253 | 1.099 | 1.554 | 1.059 | no | 9.366 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-f584795c | 20.33 | 32/32 | 1.569 | [1.341, 1.822] | 1.253 | 1.252 | 1.770 | 1.331 | no | 8.590 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-3b65bad7 | 20.33 | 32/32 | 1.500 | [1.274, 1.781] | 1.253 | 1.197 | 1.693 | 1.276 | no | 10.803 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-plain | rho.plain | icv1-fp26-tm3572-a29ce9e1 | 20.33 | 32/32 | 1.520 | [1.268, 1.770] | 1.253 | 1.213 | 1.715 | 1.189 | no | 10.259 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-d2959353 | 20.33 | 32/32 | 1.580 | [1.341, 1.800] | 1.500 | 1.053 | 1.783 | 1.342 | yes | 9.444 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-6129a158 | 20.33 | 32/32 | 1.580 | [1.345, 1.794] | 1.500 | 1.053 | 1.783 | 1.402 | yes | 9.840 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-228f1f7f | 20.33 | 32/32 | 1.580 | [1.347, 1.798] | 1.500 | 1.053 | 1.783 | 1.416 | yes | 9.812 | L2×32 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-6069cf4d | 20.33 | 32/32 | 1.580 | [1.341, 1.797] | 1.500 | 1.053 | 1.783 | 1.166 | yes | 10.231 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-a417ed2b | 20.33 | 32/32 | 1.580 | [1.338, 1.796] | 1.500 | 1.053 | 1.783 | 1.200 | yes | 9.155 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-5d1f1d4c | 20.33 | 32/32 | 1.580 | [1.345, 1.798] | 1.500 | 1.053 | 1.783 | 1.329 | yes | 8.703 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-b27e01a8 | 20.33 | 32/32 | 1.580 | [1.341, 1.798] | 1.500 | 1.053 | 1.783 | 1.264 | yes | 8.603 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-451622a2 | 20.33 | 32/32 | 1.580 | [1.339, 1.801] | 1.500 | 1.053 | 1.783 | 1.224 | yes | 8.726 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-d7f5075f | 20.33 | 32/32 | 1.580 | [1.341, 1.801] | 1.500 | 1.053 | 1.783 | 1.447 | yes | 9.402 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-ea3ad5fa | 20.33 | 32/32 | 1.580 | [1.338, 1.803] | 1.500 | 1.053 | 1.783 | 1.216 | yes | 9.215 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-1667eebf | 20.33 | 32/32 | 1.580 | [1.349, 1.797] | 1.500 | 1.053 | 1.783 | 1.215 | yes | 9.089 | L2×32 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-f584795c | 20.33 | 32/32 | 1.580 | [1.346, 1.806] | 1.500 | 1.053 | 1.783 | 1.340 | yes | 9.099 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-3b65bad7 | 20.33 | 32/32 | 1.580 | [1.341, 1.794] | 1.500 | 1.053 | 1.783 | 1.344 | yes | 9.336 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | bsgs | bsgs.textbook | icv1-fp26-tm3572-a29ce9e1 | 20.33 | 32/32 | 1.580 | [1.336, 1.801] | 1.500 | 1.053 | 1.783 | 1.236 | yes | 9.652 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-d2959353 | 20.33 | 32/32 | 1.081 | [0.843, 1.301] | 1.000 | 1.081 | 1.220 | 0.919 | yes | 9.679 | L2×32 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-6129a158 | 20.33 | 32/32 | 1.081 | [0.847, 1.296] | 1.000 | 1.081 | 1.220 | 0.959 | yes | 9.681 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-228f1f7f | 20.33 | 32/32 | 1.081 | [0.849, 1.299] | 1.000 | 1.081 | 1.220 | 0.969 | yes | 9.691 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-6069cf4d | 20.33 | 32/32 | 1.081 | [0.843, 1.299] | 1.000 | 1.081 | 1.220 | 0.798 | yes | 10.022 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-a417ed2b | 20.33 | 32/32 | 1.081 | [0.840, 1.297] | 1.000 | 1.081 | 1.220 | 0.821 | yes | 9.506 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-5d1f1d4c | 20.33 | 32/32 | 1.081 | [0.847, 1.299] | 1.000 | 1.081 | 1.220 | 0.910 | yes | 9.096 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-b27e01a8 | 20.33 | 32/32 | 1.081 | [0.843, 1.299] | 1.000 | 1.081 | 1.220 | 0.865 | yes | 9.602 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-451622a2 | 20.33 | 32/32 | 1.081 | [0.841, 1.302] | 1.000 | 1.081 | 1.220 | 0.838 | yes | 9.493 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-d7f5075f | 20.33 | 32/32 | 1.081 | [0.842, 1.302] | 1.000 | 1.081 | 1.220 | 0.991 | yes | 9.053 | L2×32 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-ea3ad5fa | 20.33 | 32/32 | 1.081 | [0.840, 1.304] | 1.000 | 1.081 | 1.220 | 0.832 | yes | 9.499 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-1667eebf | 20.33 | 32/32 | 1.081 | [0.851, 1.299] | 1.000 | 1.081 | 1.220 | 0.832 | yes | 9.811 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-f584795c | 20.33 | 32/32 | 1.081 | [0.848, 1.308] | 1.000 | 1.081 | 1.220 | 0.918 | yes | 8.432 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-3b65bad7 | 20.33 | 32/32 | 1.081 | [0.843, 1.295] | 1.000 | 1.081 | 1.220 | 0.920 | yes | 9.452 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | bsgs-neg | bsgs.negation | icv1-fp26-tm3572-a29ce9e1 | 20.33 | 32/32 | 1.081 | [0.838, 1.302] | 1.000 | 1.081 | 1.220 | 0.846 | yes | 9.515 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-d2959353 | 20.33 | 32/32 | 71.669 | [56.864, 87.122] | – | – | 80.869 | 60.894 | yes | 27.871 | L1×5 L2×27 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-6129a158 | 20.33 | 32/32 | 71.170 | [56.523, 89.718] | – | – | 80.307 | 63.139 | yes | 30.693 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-228f1f7f | 20.33 | 32/32 | 82.451 | [66.519, 99.382] | – | – | 93.036 | 73.893 | yes | 28.552 | L1×4 L2×28 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-6069cf4d | 20.33 | 32/32 | 79.041 | [66.914, 92.045] | – | – | 89.189 | 58.319 | yes | 34.254 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-a417ed2b | 20.33 | 32/32 | 78.021 | [66.312, 90.532] | – | – | 88.037 | 59.238 | yes | 30.023 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-5d1f1d4c | 20.33 | 32/32 | 68.660 | [58.777, 78.640] | – | – | 77.474 | 57.768 | yes | 25.373 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-b27e01a8 | 20.33 | 32/32 | 77.693 | [57.055, 98.148] | – | – | 87.668 | 62.157 | yes | 27.555 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-451622a2 | 20.33 | 32/32 | 70.896 | [54.503, 89.260] | – | – | 79.998 | 54.918 | yes | 25.493 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-d7f5075f | 20.33 | 32/32 | 97.806 | [78.967, 117.911] | – | – | 110.362 | 89.592 | yes | 40.846 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-ea3ad5fa | 20.33 | 32/32 | 87.653 | [72.139, 104.536] | – | – | 98.906 | 67.451 | yes | 33.456 | L1×4 L2×28 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-1667eebf | 20.33 | 32/32 | 87.667 | [72.495, 101.887] | – | – | 98.922 | 67.403 | yes | 32.969 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-f584795c | 20.33 | 32/32 | 82.567 | [68.603, 98.080] | – | – | 93.167 | 70.050 | yes | 33.031 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-3b65bad7 | 20.33 | 32/32 | 76.548 | [62.751, 89.674] | – | – | 86.375 | 65.119 | yes | 29.134 | L2×32 |
+| ECBS1h1f4a7a4faf5b | ic | ic.pipeline | icv1-fp26-tm3572-a29ce9e1 | 20.33 | 32/32 | 60.337 | [49.174, 72.012] | – | – | 68.083 | 47.204 | yes | 18.545 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-d2959353 | 20.33 | 32/32 | 1.177 | [0.940, 1.437] | 0.886 | 1.328 | 1.328 | 1.000 | yes | 10.757 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-6129a158 | 20.33 | 32/32 | 1.127 | [0.901, 1.387] | 0.886 | 1.272 | 1.272 | 1.000 | yes | 10.858 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-228f1f7f | 20.33 | 32/32 | 1.116 | [0.920, 1.322] | 0.886 | 1.259 | 1.259 | 1.000 | yes | 11.029 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-6069cf4d | 20.33 | 32/32 | 1.355 | [1.126, 1.596] | 0.886 | 1.529 | 1.529 | 1.000 | yes | 10.516 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-a417ed2b | 20.33 | 32/32 | 1.317 | [1.061, 1.629] | 0.886 | 1.486 | 1.486 | 1.000 | yes | 9.469 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-5d1f1d4c | 20.33 | 32/32 | 1.189 | [0.945, 1.474] | 0.886 | 1.341 | 1.341 | 1.000 | yes | 9.493 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-b27e01a8 | 20.33 | 32/32 | 1.250 | [0.981, 1.530] | 0.886 | 1.410 | 1.410 | 1.000 | yes | 9.112 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-451622a2 | 20.33 | 32/32 | 1.291 | [1.101, 1.508] | 0.886 | 1.457 | 1.457 | 1.000 | yes | 10.141 | L2×32 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-d7f5075f | 20.33 | 32/32 | 1.092 | [0.873, 1.323] | 0.886 | 1.232 | 1.232 | 1.000 | yes | 9.166 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-ea3ad5fa | 20.33 | 32/32 | 1.299 | [1.079, 1.548] | 0.886 | 1.466 | 1.466 | 1.000 | yes | 10.236 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-1667eebf | 20.33 | 32/32 | 1.301 | [1.037, 1.603] | 0.886 | 1.468 | 1.468 | 1.000 | yes | 10.247 | L1×1 L2×31 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-f584795c | 20.33 | 32/32 | 1.179 | [0.986, 1.401] | 0.886 | 1.330 | 1.330 | 1.000 | yes | 9.492 | L1×2 L2×30 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-3b65bad7 | 20.33 | 32/32 | 1.175 | [0.910, 1.466] | 0.886 | 1.326 | 1.326 | 1.000 | yes | 11.112 | L1×3 L2×29 |
+| ECBS1h1f4a7a4faf5b | rho-neg-aa | rho.negation | icv1-fp26-tm3572-a29ce9e1 | 20.33 | 32/32 | 1.278 | [1.012, 1.545] | 0.886 | 1.442 | 1.442 | 1.000 | yes | 10.418 | L2×32 |

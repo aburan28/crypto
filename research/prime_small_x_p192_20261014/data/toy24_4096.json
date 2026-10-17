@@ -1,0 +1,70 @@
+{
+  "arguments": {
+    "controls": 32,
+    "curve": "toy:24",
+    "factor_base": "small_x",
+    "seed": 7,
+    "size": 4096,
+    "trials": 3000000
+  },
+  "elapsed_seconds": 3.674628337,
+  "evidence_scope": "exact_pair_sum_yield_with_monte_carlo",
+  "limitations": [
+    "Two-point sums only: a relation is a signed sum of two base points of the small-x base.",
+    "The yield is exact for the base built. The Monte Carlo rate agrees with it only where the yield is large enough to produce hits; at P-192 it is a null result and bounds the rate from above.",
+    "The cost of each trial, deciding by a Semaev S₃ solve whether a target decomposes, is not part of this measurement, and neither is any linear algebra or descent: a relation yield is not a discrete logarithm.",
+    "The base is capped at 8192 abscissae by the memory of the pair-sum set."
+  ],
+  "operation": "prime",
+  "report": {
+    "base_abscissae": 4096,
+    "base_points": 8192,
+    "collisions": 9523333,
+    "controls": 32,
+    "controls_detected": 32,
+    "controls_recovered": 32,
+    "covered_targets": "14507766",
+    "curve": "toy y²=x³−3x+8775120 over F_16777199 (24 bits)",
+    "distinct_sums": 7253883,
+    "exact_yield": 0.8646951918166602,
+    "exact_yield_log2": -0.20973642774645995,
+    "expected_trials_log2": 0.20973642774645995,
+    "field_bits": 24,
+    "largest_small_x": 8181,
+    "mc_ci95": [
+      0.8644836873725125,
+      0.865257378204055
+    ],
+    "mc_hits": 2594613,
+    "mc_hits_verified": 8,
+    "mc_over_exact": 1.0002033180998386,
+    "mc_rate": 0.864871,
+    "mc_trials": 3000000,
+    "model_yield": 1.99991894096852,
+    "model_yield_log2": 0.9999415270836849,
+    "order": "16777897",
+    "order_bits": 24.00005855890415,
+    "rho_log2": 12.000029279452075,
+    "sums": 16777216,
+    "threads": 4,
+    "timing_ms": {
+      "base": 4.4921,
+      "controls": 17.526384999999998,
+      "monte_carlo": 1711.25353,
+      "pair_sums": 1310.0273929999998,
+      "us_per_trial_wall": 0.5704178433333333
+    },
+    "trials_for_full_system_log2": 12.21008860522676
+  },
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "13888159fdecded552b8b413bdf0bc1d8b08045b00f8f132d4bd8953803c994b",
+    "git_commit": null,
+    "git_commit_source": null,
+    "git_dirty": null,
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete"
+}

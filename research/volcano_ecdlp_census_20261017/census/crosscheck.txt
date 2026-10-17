@@ -1,0 +1,14 @@
+== V1 --curve 43047617,27409387,14835669 (crater root as given to ca)
+curve: p=43047617 a=27409387 b=14835669 #E=43037636 n=10759409 h=4 t=9982 D=-72550144 depth=4 crater: split (crater is a cycle; two horizontal edges per crater vertex) (0 curves tried, 0.0s)
+walk: 360 curves, 359 verified edges; per level (0 = crater): [21, 19, 34, 60, 104]
+ca: [400,[25,25,50,100,200]]
+== V2 --curve 42310123,38553991,25071365 (crater root as given to ca)
+curve: p=42310123 a=38553991 b=25071365 #E=42313696 n=1322303 h=32 t=-3572 D=-156481308 depth=3 crater: split (crater is a cycle; two horizontal edges per crater vertex) (0 curves tried, 0.0s)
+walk: 378 curves, 377 verified edges; per level (0 = crater): [14, 28, 78, 198]
+ca: [378,[14,28,84,252]]
+== V3 --curve 49922809,0,41533272 (crater root as given to ca)
+curve: p=49922809 a=0 b=41533272 #E=49929808 n=3120613 h=16 t=-6998 D=-150719232 depth=4 crater: inert (crater is one vertex; no horizontal edges) (0 curves tried, 0.0s)
+walk: 16 curves, 15 verified edges; per level (0 = crater): [1, 1, 2, 4, 8]
+ca: [16,[1,1,2,4,8]]
+ca V1 --radius 10 (volcano-rho's fixed 2*depth+2): [360,[21,19,34,60,104]]
+ca V2 --radius 8 (volcano-rho's fixed 2*depth+2): [378,[14,28,78,198]]

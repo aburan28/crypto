@@ -88,9 +88,11 @@ use crate::cryptanalysis::semaev_decomp::Gf2;
 
 // ── field helpers ───────────────────────────────────────────────────
 
-/// `v` as an element of `F_{2^n}` in the polynomial basis.
+/// `v` as an element of `F_{2^n}` in the polynomial basis.  For `n > 64`
+/// the bits of `v` above 63 are zero (a shift by 64 or more overflows: it
+/// panics in a debug build and wraps to bit `i mod 64` in a release build).
 pub fn elt(v: u64, n: u32) -> F2mElement {
-    let bits: Vec<u32> = (0..n).filter(|i| (v >> i) & 1 == 1).collect();
+    let bits: Vec<u32> = (0..n.min(64)).filter(|i| (v >> i) & 1 == 1).collect();
     F2mElement::from_bit_positions(&bits, n)
 }
 

@@ -1,0 +1,23 @@
+{
+  "schema": "volcano-graph-explorer-delivery/v1",
+  "date": "2026-10-17",
+  "name": "volcano_complete_graphs_explorer_20261017.html",
+  "id": "13AQHFuLnePIfbbS9XbaXNueJY-JMyKCE",
+  "url": "https://drive.google.com/file/d/13AQHFuLnePIfbbS9XbaXNueJY-JMyKCE/view?usp=drivesdk",
+  "bytes": 5314681,
+  "local_sha256": "3678eb5c27be6bdba2bcbf33d7297d761679f440b2a28f9a213408e00f1f321d",
+  "parent": "109DpcQpX7ATz6GeI8iSWAExGMWBoR-H_",
+  "remote_name_size_parent_readback": "PASS",
+  "remote_whole_file_hash": "NOT_CHECKED",
+  "vertices": 24823,
+  "strata": 51,
+  "directed_kernel_maps": 69300,
+  "node_columns": ["id", "a", "b", "j", "conductor"],
+  "edge_columns": ["source", "ell", "target", "u", "kernel_json"],
+  "large_field_values": "EXACT_DECIMAL_STRINGS",
+  "view": "SELF_CONTAINED_HTML; DOWNLOAD_TO_RUN; OVERVIEW_MARKS_MAY_OVERLAP",
+  "checks": "Native population/export checks, exact graph hashes, all 51 UI filters, exact string checks, root/floor inspectors, complete outgoing map lists, bounds and checkpoint labels pass. Actual Chromium desktop/floor/mobile interaction and capture pass with no page errors.",
+  "screenshots_visually_inspected": ["evidence/mixed.png", "evidence/floor.png", "evidence/mobile.png"],
+  "scope": "Three additional complete selected-degree graphs only, not original A--E completion or infinitely many isogeny compositions. The dev measurement overlay covers 99 vertices, not 24823 measurements. Recorded certificates are not a new or independent replay.",
+  "existing_archives": "UNCHANGED; THIS_IS_A_SUPPLEMENT"
+}

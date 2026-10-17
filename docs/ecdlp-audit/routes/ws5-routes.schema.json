@@ -1,0 +1,687 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aburan28:crypto:ecdlp-audit:ws5-routes:v0-draft",
+  "title": "Draft WS5 route registry and bounded coverage-matrix contract",
+  "description": "Strict, non-authoritative schema for the WS5 taxonomy seed. It does not define a universal route denominator or promote a scientific claim.",
+  "oneOf": [
+    {"$ref": "#/$defs/routeRegistry"},
+    {"$ref": "#/$defs/coverageMatrix"}
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/nonEmptyString"}
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/nonEmptyString"}
+    },
+    "commonDraftFlags": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "record_state",
+        "authoritative",
+        "promotion_allowed",
+        "historical_completeness_claim"
+      ],
+      "properties": {
+        "schema_version": {"const": "ecdlp-ws5-routes/v0-draft"},
+        "record_state": {"const": "draft_non_authoritative"},
+        "authoritative": {"const": false},
+        "promotion_allowed": {"const": false},
+        "historical_completeness_claim": {"const": false}
+      }
+    },
+    "vocabularyMappings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authorization_scope", "cost_state"],
+      "properties": {
+        "authorization_scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "local_value",
+            "plan_reference",
+            "shared_vocabulary",
+            "passive_public_plan_tier",
+            "public_fixture_semantics",
+            "executable_fixture_rule"
+          ],
+          "properties": {
+            "local_value": {"const": "public_synthetic_only"},
+            "plan_reference": {"const": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json#/vocabularies/authorization_tiers"},
+            "shared_vocabulary": {"const": false},
+            "passive_public_plan_tier": {"const": "T0"},
+            "public_fixture_semantics": {"const": "public_or_locally_generated_synthetic_known_answer_only"},
+            "executable_fixture_rule": {"const": "explicit_T1_receipt_required_for_local_executable_fixture"}
+          }
+        },
+        "cost_state": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "local_value",
+            "plan_reference",
+            "shared_vocabulary",
+            "plan_projection",
+            "lifecycle_state",
+            "numeric_fields"
+          ],
+          "properties": {
+            "local_value": {"const": "unmeasured"},
+            "plan_reference": {"const": "docs/ecdlp-audit/ECDLP_AUDIT_PLAN.mock.json#/vocabularies/cost_status"},
+            "shared_vocabulary": {"const": false},
+            "plan_projection": {"const": "unknown"},
+            "lifecycle_state": {"const": "pre_measurement"},
+            "numeric_fields": {"const": "all_null"}
+          }
+        }
+      }
+    },
+    "populationDigestContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hash",
+        "serialization",
+        "object_key_order",
+        "string_encoding",
+        "ascii_escape",
+        "trailing_lf"
+      ],
+      "properties": {
+        "hash": {"const": "SHA-256"},
+        "serialization": {"const": "compact_json"},
+        "object_key_order": {"const": "lexicographic"},
+        "string_encoding": {"const": "raw_UTF-8"},
+        "ascii_escape": {"const": false},
+        "trailing_lf": {"const": false}
+      }
+    },
+    "profileId": {
+      "enum": [
+        "profile.A.native_dlp",
+        "profile.B.mathematical_transfer",
+        "profile.C.parameter_provenance",
+        "profile.D.protocol_implementation_bypass",
+        "profile.E.evidence_supply_chain"
+      ]
+    },
+    "profileLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "lane", "registry_path", "registry_schema_version"],
+      "properties": {
+        "id": {"$ref": "#/$defs/profileId"},
+        "lane": {"enum": ["A", "B", "C", "D", "E"]},
+        "registry_path": {
+          "const": "docs/ecdlp-audit/evidence/evidence-profile-registry.draft.json"
+        },
+        "registry_schema_version": {"const": "ecdlp-ws4-evidence/v0-draft"}
+      },
+      "allOf": [
+        {
+          "if": {"type": "object", "properties": {"lane": {"const": "A"}}},
+          "then": {"type": "object", "properties": {"id": {"const": "profile.A.native_dlp"}}}
+        },
+        {
+          "if": {"type": "object", "properties": {"lane": {"const": "B"}}},
+          "then": {"type": "object", "properties": {"id": {"const": "profile.B.mathematical_transfer"}}}
+        },
+        {
+          "if": {"type": "object", "properties": {"lane": {"const": "C"}}},
+          "then": {"type": "object", "properties": {"id": {"const": "profile.C.parameter_provenance"}}}
+        },
+        {
+          "if": {"type": "object", "properties": {"lane": {"const": "D"}}},
+          "then": {"type": "object", "properties": {"id": {"const": "profile.D.protocol_implementation_bypass"}}}
+        },
+        {
+          "if": {"type": "object", "properties": {"lane": {"const": "E"}}},
+          "then": {"type": "object", "properties": {"id": {"const": "profile.E.evidence_supply_chain"}}}
+        }
+      ]
+    },
+    "routeFamilyBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "lane",
+        "title",
+        "scope",
+        "ecdlp_relation",
+        "evidence_profile_id",
+        "registry_status",
+        "claim_status",
+        "authorization_tier",
+        "evidence_refs",
+        "open_obligations"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^route\\.[a-e]\\.[a-z0-9][a-z0-9._-]*$"
+        },
+        "lane": {"enum": ["A", "B", "C", "D", "E"]},
+        "title": {"$ref": "#/$defs/nonEmptyString"},
+        "scope": {"$ref": "#/$defs/nonEmptyString"},
+        "ecdlp_relation": {
+          "enum": [
+            "solves_source_dlp",
+            "transports_and_recovers",
+            "property_only",
+            "bypasses_source_dlp",
+            "evidence_integrity"
+          ]
+        },
+        "evidence_profile_id": {"$ref": "#/$defs/profileId"},
+        "registry_status": {"const": "seed_candidate"},
+        "claim_status": {"const": "unknown"},
+        "authorization_tier": {"const": "public_synthetic_only"},
+        "evidence_refs": {"$ref": "#/$defs/evidenceRefs"},
+        "open_obligations": {"$ref": "#/$defs/nonEmptyStringArray"}
+      }
+    },
+    "routeFamily": {
+      "oneOf": [
+        {
+          "allOf": [
+            {"$ref": "#/$defs/routeFamilyBase"},
+            {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "pattern": "^route\\.a\\."},
+                "lane": {"const": "A"},
+                "ecdlp_relation": {"const": "solves_source_dlp"},
+                "evidence_profile_id": {"const": "profile.A.native_dlp"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/routeFamilyBase"},
+            {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "pattern": "^route\\.b\\."},
+                "lane": {"const": "B"},
+                "ecdlp_relation": {"const": "transports_and_recovers"},
+                "evidence_profile_id": {"const": "profile.B.mathematical_transfer"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/routeFamilyBase"},
+            {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "pattern": "^route\\.c\\."},
+                "lane": {"const": "C"},
+                "ecdlp_relation": {"const": "property_only"},
+                "evidence_profile_id": {"const": "profile.C.parameter_provenance"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/routeFamilyBase"},
+            {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "pattern": "^route\\.d\\."},
+                "lane": {"const": "D"},
+                "ecdlp_relation": {"const": "bypasses_source_dlp"},
+                "evidence_profile_id": {"const": "profile.D.protocol_implementation_bypass"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/routeFamilyBase"},
+            {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "pattern": "^route\\.e\\."},
+                "lane": {"const": "E"},
+                "ecdlp_relation": {"const": "evidence_integrity"},
+                "evidence_profile_id": {"const": "profile.E.evidence_supply_chain"}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "decision_rule",
+        "evidence_profile",
+        "route_families"
+      ],
+      "properties": {
+        "id": {"enum": ["A", "B", "C", "D", "E"]},
+        "title": {"$ref": "#/$defs/nonEmptyString"},
+        "decision_rule": {"$ref": "#/$defs/nonEmptyString"},
+        "evidence_profile": {"$ref": "#/$defs/profileLink"},
+        "route_families": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/routeFamily"}
+        }
+      }
+    },
+    "hybridEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "from_route_id",
+        "to_route_id",
+        "edge_type",
+        "component_role",
+        "required",
+        "claim_status",
+        "evidence_refs",
+        "anti_double_counting",
+        "open_obligation"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^edge\\.hybrid\\.[a-z0-9][a-z0-9._-]*$"
+        },
+        "from_route_id": {
+          "type": "string",
+          "pattern": "^route\\.[a-e]\\.[a-z0-9][a-z0-9._-]*$"
+        },
+        "to_route_id": {
+          "type": "string",
+          "pattern": "^route\\.[a-e]\\.[a-z0-9][a-z0-9._-]*$"
+        },
+        "edge_type": {"enum": ["requires", "enables", "conditions", "verifies", "supplies"]},
+        "component_role": {"enum": ["prerequisite", "mechanism", "control", "evidence", "recovery"]},
+        "required": {"type": "boolean"},
+        "claim_status": {"const": "unknown"},
+        "evidence_refs": {"$ref": "#/$defs/evidenceRefs"},
+        "anti_double_counting": {"const": "count_once_as_composed_route"},
+        "open_obligation": {"$ref": "#/$defs/nonEmptyString"}
+      }
+    },
+    "countingPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lane_assignment",
+        "property_mechanism_split",
+        "bypass_dlp_split",
+        "composed_route_unit",
+        "weakest_link_rule"
+      ],
+      "properties": {
+        "lane_assignment": {"const": "first_matching_rule_A_through_E"},
+        "property_mechanism_split": {"const": "lane_C_property_links_to_separate_lane_A_or_B_mechanism"},
+        "bypass_dlp_split": {"const": "lane_D_key_recovery_does_not_count_as_source_ECDLP_solution"},
+        "composed_route_unit": {"const": "one_composed_route_not_each_component"},
+        "weakest_link_rule": {"const": "inherit_weakest_required_component"}
+      }
+    },
+    "routeRegistry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$schema",
+        "schema_version",
+        "document_type",
+        "record_state",
+        "authoritative",
+        "promotion_allowed",
+        "historical_completeness_claim",
+        "title",
+        "as_of",
+        "scope",
+        "vocabulary_mappings",
+        "counting_policy",
+        "lanes",
+        "hybrid_edges",
+        "open_obligations",
+        "non_claims"
+      ],
+      "properties": {
+        "$schema": {"const": "./ws5-routes.schema.json"},
+        "schema_version": {"const": "ecdlp-ws5-routes/v0-draft"},
+        "document_type": {"const": "route_registry"},
+        "record_state": {"const": "draft_non_authoritative"},
+        "authoritative": {"const": false},
+        "promotion_allowed": {"const": false},
+        "historical_completeness_claim": {"const": false},
+        "title": {"$ref": "#/$defs/nonEmptyString"},
+        "as_of": {"type": "string", "format": "date"},
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fixture_class", "production_targets", "purpose", "boundary"],
+          "properties": {
+            "fixture_class": {"const": "public_synthetic_and_schema_only"},
+            "production_targets": {"const": false},
+            "purpose": {"$ref": "#/$defs/nonEmptyString"},
+            "boundary": {"$ref": "#/$defs/nonEmptyString"}
+          }
+        },
+        "vocabulary_mappings": {"$ref": "#/$defs/vocabularyMappings"},
+        "counting_policy": {"$ref": "#/$defs/countingPolicy"},
+        "lanes": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "allOf": [
+                {"$ref": "#/$defs/lane"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {"const": "A"},
+                    "evidence_profile": {"type": "object", "properties": {"lane": {"const": "A"}}},
+                    "route_families": {"type": "array", "items": {"type": "object", "properties": {"lane": {"const": "A"}}}}
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "#/$defs/lane"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {"const": "B"},
+                    "evidence_profile": {"type": "object", "properties": {"lane": {"const": "B"}}},
+                    "route_families": {"type": "array", "items": {"type": "object", "properties": {"lane": {"const": "B"}}}}
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "#/$defs/lane"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {"const": "C"},
+                    "evidence_profile": {"type": "object", "properties": {"lane": {"const": "C"}}},
+                    "route_families": {"type": "array", "items": {"type": "object", "properties": {"lane": {"const": "C"}}}}
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "#/$defs/lane"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {"const": "D"},
+                    "evidence_profile": {"type": "object", "properties": {"lane": {"const": "D"}}},
+                    "route_families": {"type": "array", "items": {"type": "object", "properties": {"lane": {"const": "D"}}}}
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "#/$defs/lane"},
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {"const": "E"},
+                    "evidence_profile": {"type": "object", "properties": {"lane": {"const": "E"}}},
+                    "route_families": {"type": "array", "items": {"type": "object", "properties": {"lane": {"const": "E"}}}}
+                  }
+                }
+              ]
+            }
+          ],
+          "items": false
+        },
+        "hybrid_edges": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/hybridEdge"}
+        },
+        "open_obligations": {"$ref": "#/$defs/nonEmptyStringArray"},
+        "non_claims": {"$ref": "#/$defs/nonEmptyStringArray"}
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "asset_kind", "canonical_identity", "fixture_class", "scope"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^asset\\.mock\\.[a-z0-9][a-z0-9._-]*$"},
+        "asset_kind": {"enum": ["synthetic_algebraic_instance", "synthetic_signing_stack"]},
+        "canonical_identity": {"type": "string", "pattern": "^urn:ecdlp-audit:mock:asset:[a-z0-9-]+$"},
+        "fixture_class": {"const": "schema_only_public_synthetic"},
+        "scope": {"$ref": "#/$defs/nonEmptyString"}
+      }
+    },
+    "threatModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor", "capabilities", "access", "success_condition"],
+      "properties": {
+        "actor": {"$ref": "#/$defs/nonEmptyString"},
+        "capabilities": {"$ref": "#/$defs/nonEmptyStringArray"},
+        "access": {"$ref": "#/$defs/nonEmptyStringArray"},
+        "success_condition": {"$ref": "#/$defs/nonEmptyString"}
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixture_class", "allowed_operations", "production_targets"],
+      "properties": {
+        "fixture_class": {"const": "public_synthetic"},
+        "allowed_operations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["schema_validation", "bounded_non_key_recovery_replay"]}
+        },
+        "production_targets": {"const": false}
+      }
+    },
+    "costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "accounting_receipt_ref",
+        "cold_cost",
+        "online_cost",
+        "amortized_cost",
+        "memory_peak"
+      ],
+      "properties": {
+        "status": {"const": "unmeasured"},
+        "accounting_receipt_ref": {"type": "null"},
+        "cold_cost": {"type": "null"},
+        "online_cost": {"type": "null"},
+        "amortized_cost": {"type": "null"},
+        "memory_peak": {"type": "null"}
+      }
+    },
+    "coverageCell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cell_id",
+        "route_id",
+        "asset_id",
+        "prerequisites",
+        "threat_model",
+        "authorization",
+        "applicability_status",
+        "claim_status",
+        "status_reason",
+        "evidence_refs",
+        "controls",
+        "costs",
+        "open_obligations"
+      ],
+      "properties": {
+        "cell_id": {"type": "string", "pattern": "^cell\\.mock\\.[a-z0-9][a-z0-9._-]*$"},
+        "route_id": {"type": "string", "pattern": "^route\\.[a-e]\\.[a-z0-9][a-z0-9._-]*$"},
+        "asset_id": {"type": "string", "pattern": "^asset\\.mock\\.[a-z0-9][a-z0-9._-]*$"},
+        "prerequisites": {"$ref": "#/$defs/nonEmptyStringArray"},
+        "threat_model": {"$ref": "#/$defs/threatModel"},
+        "authorization": {"$ref": "#/$defs/authorization"},
+        "applicability_status": {"enum": ["unknown", "applicable", "not_applicable"]},
+        "claim_status": {"enum": ["unknown", "supported", "refuted", "not_applicable"]},
+        "status_reason": {"$ref": "#/$defs/nonEmptyString"},
+        "evidence_refs": {"$ref": "#/$defs/evidenceRefs"},
+        "controls": {"$ref": "#/$defs/nonEmptyStringArray"},
+        "costs": {"$ref": "#/$defs/costs"},
+        "open_obligations": {"$ref": "#/$defs/nonEmptyStringArray"}
+      },
+      "allOf": [
+        {
+          "if": {"type": "object", "properties": {"claim_status": {"enum": ["supported", "refuted"]}}},
+          "then": {"type": "object", "properties": {"evidence_refs": {"type": "array", "minItems": 1}}}
+        },
+        {
+          "if": {"type": "object", "properties": {"claim_status": {"const": "not_applicable"}}},
+          "then": {"type": "object", "properties": {"applicability_status": {"const": "not_applicable"}}}
+        }
+      ]
+    },
+    "populationPreimage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["route_registry_schema_version", "route_ids", "asset_ids"],
+      "properties": {
+        "route_registry_schema_version": {"const": "ecdlp-ws5-routes/v0-draft"},
+        "route_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^route\\.[a-e]\\.[a-z0-9][a-z0-9._-]*$"}
+        },
+        "asset_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^asset\\.mock\\.[a-z0-9][a-z0-9._-]*$"}
+        }
+      }
+    },
+    "coverageMatrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$schema",
+        "schema_version",
+        "document_type",
+        "record_state",
+        "authoritative",
+        "promotion_allowed",
+        "historical_completeness_claim",
+        "title",
+        "as_of",
+        "vocabulary_mappings",
+        "population",
+        "assets",
+        "cells",
+        "coverage",
+        "non_claims"
+      ],
+      "properties": {
+        "$schema": {"const": "../../ws5-routes.schema.json"},
+        "schema_version": {"const": "ecdlp-ws5-routes/v0-draft"},
+        "document_type": {"const": "coverage_matrix"},
+        "record_state": {"const": "draft_non_authoritative"},
+        "authoritative": {"const": false},
+        "promotion_allowed": {"const": false},
+        "historical_completeness_claim": {"const": false},
+        "title": {"$ref": "#/$defs/nonEmptyString"},
+        "as_of": {"type": "string", "format": "date"},
+        "vocabulary_mappings": {"$ref": "#/$defs/vocabularyMappings"},
+        "population": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "population_id",
+            "frozen_for",
+            "universal_denominator",
+            "route_registry_path",
+            "population_digest_contract",
+            "population_preimage",
+            "population_digest_sha256"
+          ],
+          "properties": {
+            "population_id": {"const": "population.mock.ws5-seed-v0"},
+            "frozen_for": {"const": "schema_and_semantic_fixture_only"},
+            "universal_denominator": {"const": false},
+            "route_registry_path": {"const": "docs/ecdlp-audit/routes/route-registry.seed.json"},
+            "population_digest_contract": {"$ref": "#/$defs/populationDigestContract"},
+            "population_preimage": {"$ref": "#/$defs/populationPreimage"},
+            "population_digest_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        "assets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/asset"}
+        },
+        "cells": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/coverageCell"}
+        },
+        "coverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "expected_cells",
+            "actual_cells",
+            "blank_cells",
+            "zero_blank_cells_recorded",
+            "scope_note"
+          ],
+          "properties": {
+            "expected_cells": {"type": "integer", "minimum": 1},
+            "actual_cells": {"type": "integer", "minimum": 1},
+            "blank_cells": {"const": 0},
+            "zero_blank_cells_recorded": {"const": true},
+            "scope_note": {"$ref": "#/$defs/nonEmptyString"}
+          }
+        },
+        "non_claims": {"$ref": "#/$defs/nonEmptyStringArray"}
+      }
+    }
+  }
+}
