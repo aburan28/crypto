@@ -1,0 +1,382 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Authenticated, quarantined ingress for the ECC2K-130 DP campaign
+
+Parameters:
+  CanonicalBucketName:
+    Type: String
+  IngressBucketName:
+    Type: String
+  CodeBucketName:
+    Type: String
+  CodeKey:
+    Type: String
+
+Resources:
+  WorkerTokens:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ecc2k130-worker-tokens
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: tokenHash
+          AttributeType: S
+      KeySchema:
+        - AttributeName: tokenHash
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  UploadTickets:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ecc2k130-upload-tickets
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: finalKey
+          AttributeType: S
+      KeySchema:
+        - AttributeName: finalKey
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
+      SSESpecification:
+        SSEEnabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  UploadStreams:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ecc2k130-upload-streams
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: slotStream
+          AttributeType: S
+      KeySchema:
+        - AttributeName: slotStream
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  ValidatorDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ecc2k130-upload-validator-dlq
+      MessageRetentionPeriod: 1209600
+      SqsManagedSseEnabled: true
+
+  ValidatorQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ecc2k130-upload-validator
+      VisibilityTimeout: 960
+      MessageRetentionPeriod: 345600
+      SqsManagedSseEnabled: true
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt ValidatorDeadLetterQueue.Arn
+        maxReceiveCount: 5
+
+  ValidatorQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues: [!Ref ValidatorQueue]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: IngressBucketNotifications
+            Effect: Allow
+            Principal: {Service: s3.amazonaws.com}
+            Action: sqs:SendMessage
+            Resource: !GetAtt ValidatorQueue.Arn
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+              ArnEquals:
+                aws:SourceArn: !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}
+
+  IngressBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: ValidatorQueuePolicy
+    Properties:
+      BucketName: !Ref IngressBucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      OwnershipControls:
+        Rules: [{ObjectOwnership: BucketOwnerEnforced}]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireQuarantine
+            Status: Enabled
+            ExpirationInDays: 2
+            AbortIncompleteMultipartUpload: {DaysAfterInitiation: 1}
+      NotificationConfiguration:
+        QueueConfigurations:
+          - Event: s3:ObjectCreated:*
+            Queue: !GetAtt ValidatorQueue.Arn
+            Filter:
+              S3Key:
+                Rules: [{Name: prefix, Value: incoming/}]
+
+  IngressBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref IngressBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}
+              - !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}/*
+            Condition: {Bool: {aws:SecureTransport: 'false'}}
+
+  BrokerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ecc2k130-upload-broker
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: broker
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents]
+                Resource: '*'
+              - Effect: Allow
+                Action: [dynamodb:GetItem]
+                Resource: !GetAtt WorkerTokens.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem]
+                Resource: !GetAtt UploadTickets.Arn
+              - Effect: Allow
+                Action: sqs:SendMessage
+                Resource: !GetAtt ValidatorQueue.Arn
+              - Effect: Allow
+                Action: [s3:GetObject, s3:GetObjectAttributes]
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/campaign.json
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/bin/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/aws/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/ckpt/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/slots/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/seed-registry/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/dp/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/solution.json
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/solution/*
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}
+                Condition:
+                  StringLike: {s3:prefix: ['slots/*', 'ckpt/*', 'dp/*', 'solution.json']}
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/slots/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/seed-registry/*
+                  - !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}/incoming/*
+              - Effect: Allow
+                Action: [s3:GetObject, s3:GetObjectAttributes]
+                Resource: !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}/incoming/*
+
+  ValidatorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ecc2k130-upload-validator
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: validator
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents]
+                Resource: '*'
+              - Effect: Allow
+                Action: [sqs:ReceiveMessage, sqs:DeleteMessage, sqs:GetQueueAttributes]
+                Resource: !GetAtt ValidatorQueue.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:UpdateItem]
+                Resource: [!GetAtt UploadTickets.Arn, !GetAtt UploadStreams.Arn]
+              - Effect: Allow
+                Action: [s3:GetObject, s3:DeleteObject]
+                Resource: !Sub arn:${AWS::Partition}:s3:::${IngressBucketName}/incoming/*
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/campaign.json
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/slots/*
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource:
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/dp/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/ckpt/*
+                  - !Sub arn:${AWS::Partition}:s3:::${CanonicalBucketName}/solution/*
+
+  BrokerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ecc2k130-upload-broker
+      Runtime: python3.12
+      Architectures: [arm64]
+      Handler: upload_gateway.broker.lambdaHandler
+      Role: !GetAtt BrokerRole.Arn
+      Code: {S3Bucket: !Ref CodeBucketName, S3Key: !Ref CodeKey}
+      MemorySize: 512
+      Timeout: 30
+      Environment:
+        Variables:
+          CANONICAL_BUCKET: !Ref CanonicalBucketName
+          INGRESS_BUCKET: !Ref IngressBucketName
+          AUTH_TABLE: !Ref WorkerTokens
+          TICKET_TABLE: !Ref UploadTickets
+          VALIDATOR_QUEUE_URL: !Ref ValidatorQueue
+          TICKET_SECONDS: '600'
+
+  ValidatorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ecc2k130-upload-validator
+      Runtime: python3.12
+      Architectures: [arm64]
+      Handler: upload_gateway.validator.lambdaHandler
+      Role: !GetAtt ValidatorRole.Arn
+      Code: {S3Bucket: !Ref CodeBucketName, S3Key: !Ref CodeKey}
+      MemorySize: 2048
+      Timeout: 900
+      EphemeralStorage: {Size: 1024}
+      Environment:
+        Variables:
+          CANONICAL_BUCKET: !Ref CanonicalBucketName
+          INGRESS_BUCKET: !Ref IngressBucketName
+          TICKET_TABLE: !Ref UploadTickets
+          STREAM_TABLE: !Ref UploadStreams
+
+  ValidatorEventSource:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt ValidatorQueue.Arn
+      FunctionName: !Ref ValidatorFunction
+      BatchSize: 1
+      Enabled: true
+
+  UploadApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: ecc2k130-upload
+      ProtocolType: HTTP
+
+  UploadApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref UploadApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt BrokerFunction.Arn
+      PayloadFormatVersion: '2.0'
+      TimeoutInMillis: 30000
+
+  UploadApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref UploadApi
+      RouteKey: $default
+      Target: !Sub integrations/${UploadApiIntegration}
+
+  UploadApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref UploadApi
+      StageName: $default
+      AutoDeploy: true
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 40
+        ThrottlingRateLimit: 20
+
+  UploadApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref BrokerFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${UploadApi}/*
+
+  ValidatorDlqAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ecc2k130-upload-validator-dlq
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions: [{Name: QueueName, Value: !GetAtt ValidatorDeadLetterQueue.QueueName}]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  BrokerErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ecc2k130-upload-broker-errors
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{Name: FunctionName, Value: !Ref BrokerFunction}]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  ValidatorErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ecc2k130-upload-validator-errors
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{Name: FunctionName, Value: !Ref ValidatorFunction}]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+Outputs:
+  ApiUrl:
+    Value: !GetAtt UploadApi.ApiEndpoint
+  IngressBucket:
+    Value: !Ref IngressBucket
+  WorkerTokensTable:
+    Value: !Ref WorkerTokens
+  UploadTicketsTable:
+    Value: !Ref UploadTickets
+  UploadStreamsTable:
+    Value: !Ref UploadStreams

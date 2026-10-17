@@ -1,0 +1,59 @@
+=== Thread 12: CM-73 Extended Sweep p<=5000 ===
+
+--- Part A+B: Sweep results (CM73=CM-73 hit, NF=norm-form hit) ---
+NF  p=19  k=1  a2-2p=-73
+CM73  p=19  4p-73=3  kron(-219,p)=1
+NF  p=37  k=5  a2-2p=-73
+CM73  p=37  4p-73=75  kron(-219,p)=1
+NF  p=79  k=9  a2-2p=-73
+CM73  p=79  4p-73=243  kron(-219,p)=1
+NF  p=109  k=11  a2-2p=-73
+CM73  p=109  4p-73=363  kron(-219,p)=1
+NF  p=349  k=21  a2-2p=-313
+NF  p=487  k=25  a2-2p=-1273
+NF  p=739  k=31  a2-2p=-2881
+NF  p=937  k=35  a2-2p=-1873
+NF  p=1279  k=41  a2-2p=-4873
+NF  p=2287  k=55  a2-2p=-5473
+NF  p=3187  k=65  a2-2p=-10873
+
+  CM-73 primes found: 4
+  Norm-form (4p=73+3k^2) primes found: 11
+
+--- Part C: Class groups ---
+  Q(sqrt(-219)): h=4  clgp=[4, [4], [[5, 0; 0, 1]]]
+  Q(sqrt(-73)):  h=4  clgp=[4, [4], [[7, 5; 0, 1]]]
+  Q(sqrt(-3)):   h=1  clgp=[1, [], []]
+
+--- Part D: Splitting analysis for CM-73 primes {19,37,79,109} ---
+  p=19:  kron(-219,19)=1  kron(-73,19)=-1  kron(-3,19)=1
+  p=37:  kron(-219,37)=1  kron(-73,37)=1  kron(-3,37)=1
+  p=79:  kron(-219,79)=1  kron(-73,79)=-1  kron(-3,79)=1
+  p=109: kron(-219,109)=1  kron(-73,109)=1  kron(-3,109)=1
+  -- Some norm-form primes (not CM-73) for comparison:
+  p=349: kron(-219,349)=1  kron(-73,349)=1
+  p=601: kron(-219,601)=-1  kron(-73,601)=-1
+  p=907: kron(-219,907)=-1  kron(-73,907)=1
+
+--- Part E: Galois groups for CM-73 Weil polys T^4+(2p-73)T^2+p^2 ---
+  p=19:  Gal=[4, 1, 1, "E(4) = 2[x]2"]
+  p=37:  Gal=[4, 1, 1, "E(4) = 2[x]2"]
+  p=79:  Gal=[4, 1, 1, "E(4) = 2[x]2"]
+  p=109: Gal=[4, 1, 1, "E(4) = 2[x]2"]
+
+--- Part F: Factoring Weil polys over Q(sqrt(-219)) ---
+  p=19:  T^4-35T^2+361  factors=[x^2 + Mod(-1/2*y - 35/2, y^2 + 219), 1; x^2 + Mod(1/2*y - 35/2, y^2 + 219), 1]
+  p=37:  T^4+T^2+1369   factors=[x^2 + Mod(-5/2*y + 1/2, y^2 + 219), 1; x^2 + Mod(5/2*y + 1/2, y^2 + 219), 1]
+  p=79:  T^4+85T^2+6241 factors=[x^2 + Mod(-9/2*y + 85/2, y^2 + 219), 1; x^2 + Mod(9/2*y + 85/2, y^2 + 219), 1]
+  p=109: T^4+145T^2+11881 factors=[x^2 + Mod(-11/2*y + 145/2, y^2 + 219), 1; x^2 + Mod(11/2*y + 145/2, y^2 + 219), 1]
+
+--- Part G: Subfield structure verification ---
+  (beta + p/beta)^2 for p=19,k=1: alpha=(35+sqrt(-219))/2
+  = alpha + 2p + p^2/alpha = alpha + 2p + alpha_bar = 2*Re(alpha) + 2p
+  = 2*(35/2) + 2*19 = 35 + 38 = 73. So F2 = Q(sqrt(73)). Check.
+  (beta - p/beta)^2 = alpha - 2p + alpha_bar = (alpha+alpha_bar) - 2p = 35 - 38 = -3.
+  So F3 = Q(sqrt(-3)). Check.
+  Compositum F1 = F2*F3 = Q(sqrt(73), sqrt(-3)) has product sqrt(-219). Check.
+
+=== Thread 12 complete ===
+exit=0

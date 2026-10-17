@@ -4,6 +4,14 @@ name: Tree-split structured-V Lean checks
 # Verdict.lean must close by kernel `decide`, and Replay.lean's independent
 # recomputation must match the records. See
 # research/ic_tree_split_structured_v_20261011/PREREGISTRATION.md §7.
+#
+# Axiom audit (sheriff case SHF-20261016-3caa6f, finding L3): no sorry,
+# admit or custom axiom anywhere, `native_decide` in Replay.lean's
+# `replay_ok` only, and lean/AxiomAudit.lean checks every theorem's axioms:
+# the kernel-checked ones (Verdict, targets_count, Leak) may use propext,
+# Classical.choice and Quot.sound only; `replay_ok` may add its own
+# compiler-trust axioms (native_decide) and nothing else. The audit log is
+# kept as an artifact, and leanchecker re-checks the environment.
 on:
   pull_request:
     paths:
@@ -86,6 +94,38 @@ jobs:
       - name: Rule hash is the registered one
         run: |
           echo "714601c110d88e23202206b741c92f9d198554410b1b087841f3b2e36cd0760d  lean/TreeSplit/Rule.lean" | sha256sum -c -
-      - name: lake build (Rule, Verdict by decide, Replay by native_decide)
+      - name: No sorry, admit or custom axioms; native_decide only in replay_ok
+        working-directory: research/ic_tree_split_structured_v_20261011/lean
+        run: |
+          if grep -rnE '\bsorry\b|\badmit\b|^\s*axiom\s' TreeSplit AxiomAudit.lean; then
+            echo "forbidden construct found"; exit 1; fi
+          # A tactic use is `native_decide` outside backquotes (prose quotes it).
+          uses=$(grep -rnE '(^|[^`])\bnative_decide\b' TreeSplit AxiomAudit.lean || true)
+          echo "$uses"
+          test "$(printf '%s\n' "$uses" | grep -c .)" -eq 1
+          printf '%s\n' "$uses" | grep -qE '^TreeSplit/Replay\.lean:[0-9]+:theorem replay_ok :'
+      - name: lake build (Rule, Verdict and Leak by kernel decide, Replay by native_decide)
         working-directory: research/ic_tree_split_structured_v_20261011/lean
         run: lake build
+      - name: Axiom audit (standard axioms only; replay_ok's own native_decide axioms)
+        working-directory: research/ic_tree_split_structured_v_20261011/lean
+        run: |
+          set -o pipefail
+          lake env lean AxiomAudit.lean | tee "$RUNNER_TEMP/axioms.txt"
+          test "$(grep -c 'AXIOM_AUDIT|kernel|' "$RUNNER_TEMP/axioms.txt")" -eq 5
+          test "$(grep -c 'AXIOM_AUDIT|compiler|TreeSplit.Replay.replay_ok|' "$RUNNER_TEMP/axioms.txt")" -eq 1
+          std='(propext|Classical\.choice|Quot\.sound)'
+          if grep 'AXIOM_AUDIT|kernel|' "$RUNNER_TEMP/axioms.txt" | grep -vE "AXIOM_AUDIT\|kernel\|[^|]+\|($std(, $std)*)?\$"; then
+            echo "unexpected axiom in a kernel-checked theorem"; exit 1; fi
+      - name: Keep the audit log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tree-split-axiom-audit
+          path: ${{ runner.temp }}/axioms.txt
+          if-no-files-found: ignore
+      - name: leanchecker --fresh
+        working-directory: research/ic_tree_split_structured_v_20261011/lean
+        run: |
+          lake env leanchecker --fresh TreeSplit.Verdict
+          lake env leanchecker --fresh TreeSplit.Leak

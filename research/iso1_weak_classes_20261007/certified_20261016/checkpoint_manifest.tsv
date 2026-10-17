@@ -1,0 +1,8 @@
+# Artifacts kept outside the repository (too large to commit; sizes grow with p).
+# Each is recoverable: ckpt.gz by rerunning queue.sh from scratch (ISO1_CHECKPOINT), L*.csv by
+# ISO1_P=p ISO1_TRACES=<positive traces> gp -q -f residual_model_20261016/class_levels.gp.
+# sha256	bytes	file
+a1ec1748cb219c567fa26651bcfd4c05f62bf8f55993df1cbf02402366e2fbe8	29971952	p101_cert.ckpt.gz
+92b76e51371168869956269824f246b214d43054f46c578e5dd9538affca0aec	32451059	p103_cert.ckpt.gz
+2543f20b510f654fdd553a6d9ff66b77441a7a9cd57d29f0cd2d528ff7647fce	37184902	L101.csv
+6abab933ce695dac7baf28115c67e10ed989dfbbbf7ba8cb60c53526b8b14598	39549821	L103.csv
