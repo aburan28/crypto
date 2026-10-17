@@ -221,6 +221,17 @@
           "class": "accounting",
           "anchor": "#n41-n53-base-size-cold-20261004",
           "source": "https://github.com/aburan28/crypto/blob/main/experiments/koblitz-base-size-cold-panel-20261004/RESULT.md"
+        },
+        {
+          "date": "2026-10-12",
+          "value": 52.58560062120812,
+          "reference": "matched",
+          "unit": "unisolated in-process cold wall diagnostic",
+          "label": "n53 K220 fixed-base S3 root batch, nine single-target pairs",
+          "detail": "Nine verified same-Q/rank-seed control/batch pairs and nine strong-rho cells; batch/rho cold median 52.586 [33.179–64.668], was control/rho 78.146 on these Q. Batch/control complete-cold median 0.738 [0.714–0.750]. All 27 cells completed and 18 IC replays verified; shared Apple M4 Pro L0 only, common-operation S unset.",
+          "class": "engineering",
+          "anchor": "#n53-s3-root-batch-20261012",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n53_s3_root_batch_20261012/RESULT.md"
         }
       ]
     },
@@ -662,6 +673,17 @@
           "class": "accounting",
           "anchor": "#ic-tool-programme-20261001",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
+        },
+        {
+          "date": "2026-10-12",
+          "value": 0.37777093852601323,
+          "reference": "matched",
+          "unit": "unisolated online wall diagnostic",
+          "label": "n53 K220 fixed-base S3 root batch, target phase, nine single-target pairs",
+          "detail": "Nine verified same-Q/rank-seed pairs; batch/rho target-online median 0.378 [0.103–0.442], was control/rho 0.490 on these Q. Batch/control online median 0.612 [0.569–0.903]. Reusable K220 setup excluded here but charged in the cold-series point; shared Apple M4 Pro L0 diagnostic.",
+          "class": "engineering",
+          "anchor": "#n53-s3-root-batch-20261012",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n53_s3_root_batch_20261012/RESULT.md"
         }
       ]
     },

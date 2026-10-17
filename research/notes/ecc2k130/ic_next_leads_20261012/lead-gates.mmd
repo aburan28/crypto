@@ -1,0 +1,14 @@
+flowchart LR
+    Q[Public Q] --> B[Factor base and index]
+    B --> R[Verified relations]
+    R --> L[Useful rank and factor logs]
+    L --> T[Target PDP and scalar check]
+    T --> C[Cold single-target S]
+    H1[Affine slot bases: proposed] --> B
+    H2[Joint N41 family elimination: proposed] --> R
+    H3[Large-prime graph cycles: proposed] --> L
+    H4[N53 Bloom after root batching: unmeasured] --> B
+    H5[Prime-field reusable template: proposed] --> R
+    P[Same-point strong rho] --> C
+    classDef proposal fill:#fff6df,stroke:#a36a12,color:#263746
+    class H1,H2,H3,H4,H5 proposal

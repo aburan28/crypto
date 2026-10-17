@@ -1,0 +1,29 @@
+{
+  "arm": "rho",
+  "binary_sha256": "9bf3b9fdf11c06f8c19c5445c27078930a1dcc66a693498a43ac6b86c2349bc7",
+  "command": {
+    "args": [
+      "53",
+      "0",
+      "signed_frobenius",
+      "1",
+      "531203"
+    ],
+    "binary": "target/release/examples/koblitz_rho_batch_ks_strong_online"
+  },
+  "environment": {
+    "KIC_RHO_DP_BITS": "4",
+    "KIC_RHO_LANES": "32",
+    "KIC_RHO_RUNG": "3",
+    "KIC_RHO_TARGET_POINT": "5374341705021308,8724529577095303"
+  },
+  "frozen_sha256": "359594b741a6ea263e6ed8a4d93994922a6a2b629038b8f0f1365fa4fc07fe7c",
+  "point_sha256": "78ca4bba452069c88ed8f21a128529957aad613c399494efea7a64f692774f7c",
+  "rank_seed": 532103,
+  "rho_seed": 531203,
+  "rss_cap_bytes": 17179869184,
+  "schema": "n53-s3-root-batch-intent-v1",
+  "seed_index": 2,
+  "target_index": 1,
+  "wall_cap_seconds": 90
+}
