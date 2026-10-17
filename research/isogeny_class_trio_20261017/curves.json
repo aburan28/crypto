@@ -1,0 +1,86 @@
+{
+ "schema": "isogeny-class-trio/curves/v1",
+ "what": "Curve records of the isogeny-class trio picks (copied from data/pick-*.json, produced by selector/). Harvested by scripts/build_curve_registry.py.",
+ "curves": [
+  {
+   "name": "isogeny-class-trio B-47",
+   "role": "primary",
+   "slug": "icv1-f2m47-t4276051-826c5755",
+   "field": {
+    "kind": "binary",
+    "degree": 47,
+    "polynomial_low_terms": [
+     5,
+     0
+    ]
+   },
+   "a": 1,
+   "b": "0x52e3db551eb3",
+   "order": "140737484079278",
+   "subgroup_order": "70368742039639",
+   "cofactor": 2,
+   "generator": [
+    "0xd6dc0d063d1",
+    "0x23397c1623ca"
+   ],
+   "seed": "isogeny-class-trio/2026-10-17/B-47/b/28948"
+  },
+  {
+   "name": "isogeny-class-trio B-61",
+   "role": "alternate",
+   "slug": "icv1-f2m61-tm2657393969-b9ff0fb0",
+   "field": {
+    "kind": "binary",
+    "degree": 61,
+    "polynomial_low_terms": [
+     5,
+     2,
+     1,
+     0
+    ]
+   },
+   "a": 1,
+   "b": "0x9c60f836d06fc8",
+   "order": "2305843011871087922",
+   "subgroup_order": "1152921505935543961",
+   "cofactor": 2,
+   "generator": [
+    "0xc17a1d9ae3996ee",
+    "0x9bcf1bc6ebcb05"
+   ],
+   "seed": "isogeny-class-trio/2026-10-17/B-61/b/12079"
+  },
+  {
+   "name": "isogeny-class-trio P-47",
+   "role": "primary",
+   "slug": "icv1-fp47-tm8785349-43e36ce5",
+   "p": "140737488355213",
+   "a": "-3",
+   "b": "0xda8a554f2ba",
+   "order": "140737497140563",
+   "subgroup_order": "140737497140563",
+   "cofactor": 1,
+   "generator": [
+    "0x4548698c68b3",
+    "0x2b74b4fbfbc3"
+   ],
+   "seed": "isogeny-class-trio/2026-10-17/P-47/b/117828"
+  },
+  {
+   "name": "isogeny-class-trio P-61",
+   "role": "alternate",
+   "slug": "icv1-fp61-tm813574577-a3b71255",
+   "p": "2305843009213693951",
+   "a": "-3",
+   "b": "0x54aa66b458b77ec",
+   "order": "2305843010027268529",
+   "subgroup_order": "2305843010027268529",
+   "cofactor": 1,
+   "generator": [
+    "0x112c917afe3d4fd3",
+    "0xef721929b08bfaa"
+   ],
+   "seed": "isogeny-class-trio/2026-10-17/P-61/b/11526"
+  }
+ ]
+}
