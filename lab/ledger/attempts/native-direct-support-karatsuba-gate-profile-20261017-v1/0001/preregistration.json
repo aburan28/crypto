@@ -1,0 +1,119 @@
+{
+  "effective_timeout_seconds": 90,
+  "experiment_id": "native-direct-support-karatsuba-gate-profile-20261017-v1",
+  "fingerprint": "d5807e6df94e8751e5cfca594aa15fb9095a08e792acf2e8af3fb5db308e3b0b",
+  "identity": {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-m",
+      "research.direct_support_karatsuba_20261017_v1.launch",
+      "native-direct-support-karatsuba-gate-profile-20261017-v1"
+    ],
+    "cpu": 0,
+    "files_sha256": {
+      "lab/runner.py": "f385c82a7064c7645a41299dfcb6a1fba9dd4fc7d491eb7a29865bbc87d8cf18",
+      "performance/GATE.md": "fa62d4f19d5b222b534ac1cfa7c4dde265492ac60553d67eea9f0baab7e427fc",
+      "performance_gate.py": "a01ed8a4b996d0ff769a12968888e7353b867ffb2fcc4a93a2d5f2796b9fcafb",
+      "research/crt_support_circuit_20261017_v1/PROOF.md": "b0f2837796e8bfe36c09cf6cb0e70d57cbc59ae6d2560bb719bedd3e91501ea3",
+      "research/direct_support_karatsuba_20261017_v1/BUILD.log": "0496a9494b7ce10e137a8cd78d7edbe6ee483919193eea742a3aba94a550302a",
+      "research/direct_support_karatsuba_20261017_v1/CONTROLS.json": "9d3d027b52b8c721db73c5542a6e03d51fb5b5efd1814b497ce51cb6488c91b1",
+      "research/direct_support_karatsuba_20261017_v1/CONTROLS.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "research/direct_support_karatsuba_20261017_v1/Cargo.lock": "0f87c27162e041f6ac1f6ecce10f34de829a308c8dc2b9a3439ffbe1364f274f",
+      "research/direct_support_karatsuba_20261017_v1/Cargo.toml": "897ac435ae313ec64f96a0de5374c49d19d49a7600f923ec0f01f8784b7b49c7",
+      "research/direct_support_karatsuba_20261017_v1/INPUTS.json": "c427f7089af6399cb8234cd7f6101a9958578e208a7acf4739607621f9480ac5",
+      "research/direct_support_karatsuba_20261017_v1/NATIVE_TESTS.log": "992eda14f0fdd444815c46640a36e103b7e45fa79c4215dfb48c90ffd6460225",
+      "research/direct_support_karatsuba_20261017_v1/PROOF.md": "afd8e4264c4ed7f65d07a1468edc449a31a9f875dda6a0ed4d0dd11f499b44fc",
+      "research/direct_support_karatsuba_20261017_v1/SOURCE_MANIFEST.json": "328b5abc37a22e40ba4576d995401582b47e441b336d25df0a01eba74c58d679",
+      "research/direct_support_karatsuba_20261017_v1/direct-support-karatsuba": "4fc3c56ebb8ac162678bb1633659c2f4e4b6f9f013c99a0ba82091d3405d72ae",
+      "research/direct_support_karatsuba_20261017_v1/launch.py": "52b4d124f6910fbc113b2e8f283143329235f64df1c6eb48eac393bac08727b2",
+      "research/direct_support_karatsuba_20261017_v1/src/main.rs": "b6fb422c2cbfdf351f2d99035a04a307560e3f9e9dfccc1d8a5f321daaed3f5d",
+      "research/direct_support_karatsuba_20261017_v1/tests/native_cli.rs": "a64f8863817fe9084628d8434f8425ea020b458ec3dbb9005688901c54e23de9"
+    },
+    "hypothesis": "A fixed preregistered recursive-multiplication cutoff cuts AND gates>=25percent across six direct support widths with <=1.10 standard-clause ratio on every panel; no solver speed claim.",
+    "input_paths": [
+      "research/direct_support_karatsuba_20261017_v1/INPUTS.json"
+    ],
+    "memory_limit_mb": 4096,
+    "process_runner_sha256": "a01ed8a4b996d0ff769a12968888e7353b867ffb2fcc4a93a2d5f2796b9fcafb",
+    "runner_sha256": "f385c82a7064c7645a41299dfcb6a1fba9dd4fc7d491eb7a29865bbc87d8cf18",
+    "source_paths": [
+      "research/direct_support_karatsuba_20261017_v1/PROOF.md",
+      "research/direct_support_karatsuba_20261017_v1/NATIVE_TESTS.log",
+      "research/direct_support_karatsuba_20261017_v1/CONTROLS.json",
+      "research/direct_support_karatsuba_20261017_v1/INPUTS.json",
+      "research/direct_support_karatsuba_20261017_v1/launch.py",
+      "research/direct_support_karatsuba_20261017_v1/direct-support-karatsuba",
+      "research/direct_support_karatsuba_20261017_v1/Cargo.lock",
+      "research/direct_support_karatsuba_20261017_v1/Cargo.toml",
+      "research/direct_support_karatsuba_20261017_v1/CONTROLS.stderr",
+      "research/direct_support_karatsuba_20261017_v1/BUILD.log",
+      "research/direct_support_karatsuba_20261017_v1/tests/native_cli.rs",
+      "research/direct_support_karatsuba_20261017_v1/src/main.rs",
+      "research/crt_support_circuit_20261017_v1/PROOF.md",
+      "lab/runner.py",
+      "performance/GATE.md",
+      "performance_gate.py",
+      "research/direct_support_karatsuba_20261017_v1/SOURCE_MANIFEST.json"
+    ],
+    "timeout_seconds": 90
+  },
+  "measurement_scope": "development diagnostic; external isolation and release gate required",
+  "schema": "experiment_preregistration_v1",
+  "spec": {
+    "artifact_paths": [],
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-m",
+      "research.direct_support_karatsuba_20261017_v1.launch",
+      "native-direct-support-karatsuba-gate-profile-20261017-v1"
+    ],
+    "cpu": 0,
+    "depends_on": [],
+    "expected_sha256": {
+      "lab/runner.py": "f385c82a7064c7645a41299dfcb6a1fba9dd4fc7d491eb7a29865bbc87d8cf18",
+      "performance/GATE.md": "fa62d4f19d5b222b534ac1cfa7c4dde265492ac60553d67eea9f0baab7e427fc",
+      "performance_gate.py": "a01ed8a4b996d0ff769a12968888e7353b867ffb2fcc4a93a2d5f2796b9fcafb",
+      "research/crt_support_circuit_20261017_v1/PROOF.md": "b0f2837796e8bfe36c09cf6cb0e70d57cbc59ae6d2560bb719bedd3e91501ea3",
+      "research/direct_support_karatsuba_20261017_v1/BUILD.log": "0496a9494b7ce10e137a8cd78d7edbe6ee483919193eea742a3aba94a550302a",
+      "research/direct_support_karatsuba_20261017_v1/CONTROLS.json": "9d3d027b52b8c721db73c5542a6e03d51fb5b5efd1814b497ce51cb6488c91b1",
+      "research/direct_support_karatsuba_20261017_v1/CONTROLS.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "research/direct_support_karatsuba_20261017_v1/Cargo.lock": "0f87c27162e041f6ac1f6ecce10f34de829a308c8dc2b9a3439ffbe1364f274f",
+      "research/direct_support_karatsuba_20261017_v1/Cargo.toml": "897ac435ae313ec64f96a0de5374c49d19d49a7600f923ec0f01f8784b7b49c7",
+      "research/direct_support_karatsuba_20261017_v1/INPUTS.json": "c427f7089af6399cb8234cd7f6101a9958578e208a7acf4739607621f9480ac5",
+      "research/direct_support_karatsuba_20261017_v1/NATIVE_TESTS.log": "992eda14f0fdd444815c46640a36e103b7e45fa79c4215dfb48c90ffd6460225",
+      "research/direct_support_karatsuba_20261017_v1/PROOF.md": "afd8e4264c4ed7f65d07a1468edc449a31a9f875dda6a0ed4d0dd11f499b44fc",
+      "research/direct_support_karatsuba_20261017_v1/SOURCE_MANIFEST.json": "328b5abc37a22e40ba4576d995401582b47e441b336d25df0a01eba74c58d679",
+      "research/direct_support_karatsuba_20261017_v1/direct-support-karatsuba": "4fc3c56ebb8ac162678bb1633659c2f4e4b6f9f013c99a0ba82091d3405d72ae",
+      "research/direct_support_karatsuba_20261017_v1/launch.py": "52b4d124f6910fbc113b2e8f283143329235f64df1c6eb48eac393bac08727b2",
+      "research/direct_support_karatsuba_20261017_v1/src/main.rs": "b6fb422c2cbfdf351f2d99035a04a307560e3f9e9dfccc1d8a5f321daaed3f5d",
+      "research/direct_support_karatsuba_20261017_v1/tests/native_cli.rs": "a64f8863817fe9084628d8434f8425ea020b458ec3dbb9005688901c54e23de9"
+    },
+    "hypothesis": "A fixed preregistered recursive-multiplication cutoff cuts AND gates>=25percent across six direct support widths with <=1.10 standard-clause ratio on every panel; no solver speed claim.",
+    "id": "native-direct-support-karatsuba-gate-profile-20261017-v1",
+    "input_paths": [
+      "research/direct_support_karatsuba_20261017_v1/INPUTS.json"
+    ],
+    "memory_limit_mb": 4096,
+    "source_paths": [
+      "research/direct_support_karatsuba_20261017_v1/PROOF.md",
+      "research/direct_support_karatsuba_20261017_v1/NATIVE_TESTS.log",
+      "research/direct_support_karatsuba_20261017_v1/CONTROLS.json",
+      "research/direct_support_karatsuba_20261017_v1/INPUTS.json",
+      "research/direct_support_karatsuba_20261017_v1/launch.py",
+      "research/direct_support_karatsuba_20261017_v1/direct-support-karatsuba",
+      "research/direct_support_karatsuba_20261017_v1/Cargo.lock",
+      "research/direct_support_karatsuba_20261017_v1/Cargo.toml",
+      "research/direct_support_karatsuba_20261017_v1/CONTROLS.stderr",
+      "research/direct_support_karatsuba_20261017_v1/BUILD.log",
+      "research/direct_support_karatsuba_20261017_v1/tests/native_cli.rs",
+      "research/direct_support_karatsuba_20261017_v1/src/main.rs",
+      "research/crt_support_circuit_20261017_v1/PROOF.md",
+      "lab/runner.py",
+      "performance/GATE.md",
+      "performance_gate.py",
+      "research/direct_support_karatsuba_20261017_v1/SOURCE_MANIFEST.json"
+    ],
+    "timeout_seconds": 90
+  },
+  "time": "2026-10-17T03:27:40.609349+00:00"
+}

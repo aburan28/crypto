@@ -1,0 +1,6 @@
+"""User-required legacy scheduler adapter; all research/timing lives in Rust."""
+import os
+import sys
+from pathlib import Path
+binary = str(Path(__file__).with_name('quintic-resultant'))
+os.execv(binary, [binary, *sys.argv[1:]])

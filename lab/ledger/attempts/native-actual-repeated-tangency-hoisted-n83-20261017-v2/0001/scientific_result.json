@@ -1,0 +1,66 @@
+{
+  "evidence": {
+    "curve_points_visited": 261446,
+    "inversion_count_scope": "nontrivial x and tangency denominator inversions in the search only; parsing/field validation and certificate checks excluded from this count, but included in cold wall time",
+    "original_root_count_exact": null,
+    "release_gate_claim": false,
+    "rows": [
+      {
+        "h": "4208336d0d441df79c400",
+        "k": "0",
+        "relaxed_candidates": 0,
+        "source_domain_size": 262144,
+        "source_elements_visited": 262144,
+        "support_candidate_count_exact": 0,
+        "support_candidates": [],
+        "tangency_branch_complete": true,
+        "tangent_parameters_tested": 261446
+      },
+      {
+        "h": "4208336d0d441df79c400",
+        "k": "1",
+        "relaxed_candidates": 0,
+        "source_domain_size": 262144,
+        "source_elements_visited": 262144,
+        "support_candidate_count_exact": 0,
+        "support_candidates": [],
+        "tangency_branch_complete": true,
+        "tangent_parameters_tested": 261446
+      },
+      {
+        "h": "4208336d0d441df79c401",
+        "k": "0",
+        "relaxed_candidates": 0,
+        "source_domain_size": 262144,
+        "source_elements_visited": 262144,
+        "support_candidate_count_exact": 0,
+        "support_candidates": [],
+        "tangency_branch_complete": true,
+        "tangent_parameters_tested": 261446
+      },
+      {
+        "h": "4208336d0d441df79c401",
+        "k": "1",
+        "relaxed_candidates": 0,
+        "source_domain_size": 262144,
+        "source_elements_visited": 262144,
+        "support_candidate_count_exact": 0,
+        "support_candidates": [],
+        "tangency_branch_complete": true,
+        "tangent_parameters_tested": 261446
+      }
+    ],
+    "scope": "nonzero source x, Q(x)!=0, x!=z repeated tangency branch of four fixed norm families; no original tuple or squarefree coverage",
+    "search_denominator_inversions": 392866,
+    "v1_formula_inversions_for_same_visited_prefix": 1307927
+  },
+  "experiment_id": "native-actual-repeated-tangency-hoisted-n83-20261017-v2",
+  "next_actions": [
+    "If bounded scan is incomplete, profile charged field inversions and reuse the x-dependent denominator across all h,k/y arms in a new frozen variant.",
+    "Combine with repeated Q-root closure and preserve every squarefree/outer/pole branch.",
+    "Do not infer all-root Groebner speed or novelty from a completed repeated-root component."
+  ],
+  "schema": "scientific_result_v1",
+  "status": "passed",
+  "summary": "Fixed-h,k repeated tangency branch scanned through exact curve fibers and closed r,s formulas within its budget."
+}

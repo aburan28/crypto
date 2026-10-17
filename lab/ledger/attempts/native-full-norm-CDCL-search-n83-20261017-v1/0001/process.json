@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-m",
+    "research.full_binary_norm_sat_20261017_v1.launch",
+    "native-full-norm-CDCL-search-n83-20261017-v1",
+    "research/advance/instances/n83-d18-m5-T001-offset0.json",
+    "research/cms_primary_cdcl_fork_v2/native.so"
+  ],
+  "effective_timeout_seconds": 90,
+  "ended_unix": 1792209916.529243,
+  "exit_code": 0,
+  "measurement_scope": "development diagnostic; isolation must be established separately",
+  "memory_limit_scope": "per-process address space inherited by descendants",
+  "peak_process_rss_kib": 250196,
+  "pid": 4709,
+  "process_group": 4709,
+  "started_unix": 1792209855.0143263,
+  "status": "ok",
+  "stderr": "",
+  "stdout": "{\"evidence\":{\"backend\":\"modified CryptoMiniSat functional-primary Gaussian fork v2, source/hash pinned; not F4/F5/F6\",\"circuit_counts\":{\"constructed_nodes\":58308,\"inputs\":174,\"reachable_and\":13247,\"reachable_nodes\":58307,\"reachable_xor\":44885,\"standard_clauses\":219448,\"zero_constraints\":167},\"native_stats\":[7317,12208,38556495,12208,0,2124192,0,58308,58308,58308,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,16384,32768,3,2,1,500000,2,2,0,7597726,9837458,24763076,5510,7753,20159,0,0,0,0,2,2,2,0,1707372,5120,0,0,0,8389],\"norm_primary_count_exact\":null,\"norm_primary_search_complete\":false,\"original_auxiliary_fibers_reconstructed\":false,\"original_root_count_exact\":null,\"release_gate_claim\":false,\"scope\":\"norm predicate primary roots only; no global original field/ANF equivalence or original tuple count\",\"verified_norm_models\":[],\"verified_norm_primary_lower_bound\":0},\"experiment_id\":\"native-full-norm-CDCL-search-n83-20261017-v1\",\"next_actions\":[\"Use native matrix/decision statistics to diagnose unresolved search; do not repeat identical failed execution.\",\"Reconstruct every original ordered S3 auxiliary fiber and pay ghost/exception closure before original all-root claims.\",\"Keep genuine matching F4/F5/F6 and qualified8x gate separate.\"],\"schema\":\"scientific_result_v1\",\"status\":\"inconclusive\",\"summary\":\"Native primary-only CDCL searched the exact full norm predicate with literal model replay; original S3 completeness remains unclaimed.\"}\n",
+  "stdout_sha256": "b7a79349a222b7b38344e9adbac77ae7c6f6f461b3e25511ce050d42f92b5511",
+  "system_seconds": 0.12242399999999999,
+  "user_seconds": 61.381391,
+  "wall_seconds": 61.51491356100087
+}

@@ -1,0 +1,65 @@
+{
+  "change": "journal memory retention only",
+  "journal_bytes": 6353828209,
+  "journal_records": 538,
+  "journal_sha256": "ffd985b93ba07bf64bded54f10a079509a5677c8ac4239f471695118fba4f5be",
+  "last_record_sha256": "c8bf5f049f447558a97f76a60154b950b57159ecc720b9b012e665ca0e86f02b",
+  "original_runner_sha256": "f385c82a7064c7645a41299dfcb6a1fba9dd4fc7d491eb7a29865bbc87d8cf18",
+  "original_runner_unmodified": true,
+  "schema": "rootfinding-streaming-driver/v1",
+  "scientific_identity": {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-m",
+      "research.crt_support_circuit_20261017_v1.launch",
+      "native-exact-CRT-support-gate-profile-20261017-v1"
+    ],
+    "cpu": 0,
+    "files_sha256": {
+      "lab/runner.py": "f385c82a7064c7645a41299dfcb6a1fba9dd4fc7d491eb7a29865bbc87d8cf18",
+      "performance/GATE.md": "fa62d4f19d5b222b534ac1cfa7c4dde265492ac60553d67eea9f0baab7e427fc",
+      "performance_gate.py": "a01ed8a4b996d0ff769a12968888e7353b867ffb2fcc4a93a2d5f2796b9fcafb",
+      "research/crt_support_circuit_20261017_v1/BUILD.log": "5a8060330e3285a87bb576fd7c72b88ce0cb97340d58daf01134a32a008e2e7e",
+      "research/crt_support_circuit_20261017_v1/CONTROLS.json": "034a08f37e5e6140959a290c1f3242234a3ab58a512d00fff2c462bb0da14fda",
+      "research/crt_support_circuit_20261017_v1/CONTROLS.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "research/crt_support_circuit_20261017_v1/Cargo.lock": "7b63861b2bf60868ff36ed680c7ddc2c8d40f82c13c11d3a358c0c330035704d",
+      "research/crt_support_circuit_20261017_v1/Cargo.toml": "f97301efbb677ab63f9d19492de0d0e7cc7e812107816fde78495006342fe494",
+      "research/crt_support_circuit_20261017_v1/INPUTS.json": "334eeb57161b8820bc891f95504f2445cf6b8b92e295d4ab7057b102bc1cbaa3",
+      "research/crt_support_circuit_20261017_v1/NATIVE_TESTS.log": "8162bf226f7c669b5dc07bf8a3e2a9573827eee2766a44cb41c541f5af520fde",
+      "research/crt_support_circuit_20261017_v1/PROOF.md": "b0f2837796e8bfe36c09cf6cb0e70d57cbc59ae6d2560bb719bedd3e91501ea3",
+      "research/crt_support_circuit_20261017_v1/SOURCE_MANIFEST.json": "70074f61051d559c42a4835a63ba8cb356900d1b44fb2053fea61db9dc4abcbe",
+      "research/crt_support_circuit_20261017_v1/crt-support-circuit": "61be7d86c09a5249eeaad4135001d8e5fc1cd75b287669653fbb47d7d45841ee",
+      "research/crt_support_circuit_20261017_v1/launch.py": "9ff1d8d4b8c726fd5f20ddb488062985af8631919887fc66d72d100c3ebe2074",
+      "research/crt_support_circuit_20261017_v1/src/main.rs": "5c0300cb6f5abb962ef5820d5255b8dc837a22d17ff74591cbbe8f725f4f8f6c",
+      "research/crt_support_circuit_20261017_v1/tests/native_cli.rs": "392dfab181f191573e3c339c98c4e4c38bca50b82f4bf00ca77c6d3f50cf5db7"
+    },
+    "hypothesis": "Exact sufficiently high-degree CRT product equality cuts standard Boolean clauses at least25percent versus a strong direct low-degree reference across six binary panels; reject blanket replacement on any loss. No full solver claim.",
+    "input_paths": [
+      "research/crt_support_circuit_20261017_v1/INPUTS.json"
+    ],
+    "memory_limit_mb": 4096,
+    "process_runner_sha256": "a01ed8a4b996d0ff769a12968888e7353b867ffb2fcc4a93a2d5f2796b9fcafb",
+    "runner_sha256": "f385c82a7064c7645a41299dfcb6a1fba9dd4fc7d491eb7a29865bbc87d8cf18",
+    "source_paths": [
+      "research/crt_support_circuit_20261017_v1/crt-support-circuit",
+      "research/crt_support_circuit_20261017_v1/PROOF.md",
+      "research/crt_support_circuit_20261017_v1/NATIVE_TESTS.log",
+      "research/crt_support_circuit_20261017_v1/CONTROLS.json",
+      "research/crt_support_circuit_20261017_v1/INPUTS.json",
+      "research/crt_support_circuit_20261017_v1/launch.py",
+      "research/crt_support_circuit_20261017_v1/Cargo.lock",
+      "research/crt_support_circuit_20261017_v1/Cargo.toml",
+      "research/crt_support_circuit_20261017_v1/CONTROLS.stderr",
+      "research/crt_support_circuit_20261017_v1/BUILD.log",
+      "research/crt_support_circuit_20261017_v1/tests/native_cli.rs",
+      "research/crt_support_circuit_20261017_v1/src/main.rs",
+      "lab/runner.py",
+      "performance/GATE.md",
+      "performance_gate.py",
+      "research/crt_support_circuit_20261017_v1/SOURCE_MANIFEST.json"
+    ],
+    "timeout_seconds": 90
+  },
+  "streaming_driver_sha256": "440f59ee94ec09b56115f1e6bb34881369bd600cbec91cc2ea4ead6c3768cb1d",
+  "worker_supervision": "unchanged original run_cold_process"
+}

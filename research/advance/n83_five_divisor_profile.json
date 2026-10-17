@@ -1,0 +1,68 @@
+{
+  "schema": "five-source-divisor-support-profiler-v1",
+  "instance_id": "s3-chain-k0-n83-d18-m5-target0",
+  "field_degree": 83,
+  "field_modulus_hex": "0x800000000200000000007",
+  "source_dimension": 18,
+  "target": [
+    "0x622425e96ba633969263b",
+    "0x3258275069b18d0854564"
+  ],
+  "negative_target": [
+    "0x622425e96ba633969263b",
+    "0x507c02b90217be9ec635f"
+  ],
+  "support_dimensions": [
+    18,
+    35,
+    52,
+    69,
+    83
+  ],
+  "outer_rank": 65,
+  "outer_nullity": 18,
+  "outer_cardinality_exact": 262144,
+  "conditional_variable_bits": 166,
+  "conditional_constraint_rank_ceiling": 93,
+  "conditional_nullity_floor": 73,
+  "nonlinear_products_at_fixed_d1": [
+    "d0*c2",
+    "d0*c1"
+  ],
+  "profiles": [
+    {
+      "d1_hex": "0x4208336d0d441df79c400",
+      "d0_hex": "0x0",
+      "consistent": true,
+      "rank": 93,
+      "nullity": 73,
+      "relaxed_cardinality_exact": 9444732965739290427392
+    },
+    {
+      "d1_hex": "0x4208336d0d441df79c400",
+      "d0_hex": "0x1",
+      "consistent": true,
+      "rank": 93,
+      "nullity": 73,
+      "relaxed_cardinality_exact": 9444732965739290427392
+    },
+    {
+      "d1_hex": "0x4208336d0d441df79c401",
+      "d0_hex": "0x0",
+      "consistent": true,
+      "rank": 93,
+      "nullity": 73,
+      "relaxed_cardinality_exact": 9444732965739290427392
+    },
+    {
+      "d1_hex": "0x4208336d0d441df79c401",
+      "d0_hex": "0x1",
+      "consistent": true,
+      "rank": 93,
+      "nullity": 73,
+      "relaxed_cardinality_exact": 9444732965739290427392
+    }
+  ],
+  "solver_complete": false,
+  "claim_scope": "Exact necessary-condition ranks only; no root solving, timing, speed or novelty claim."
+}

@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-m",
+    "research.actual_norm_repeated_pair_20261017_v1.launch",
+    "native-actual-repeated-Q-root-n83-20261017-v1",
+    "research/advance/instances/n83-d18-m5-T001-offset0.json",
+    "research/advance/n83_five_divisor_profile.json"
+  ],
+  "effective_timeout_seconds": 90,
+  "ended_unix": 1792205685.0141459,
+  "exit_code": 0,
+  "measurement_scope": "development diagnostic; isolation must be established separately",
+  "memory_limit_scope": "per-process address space inherited by descendants",
+  "peak_process_rss_kib": 249864,
+  "pid": 2869,
+  "process_group": 2869,
+  "started_unix": 1792205684.7491837,
+  "status": "ok",
+  "stderr": "",
+  "stdout": "{\"evidence\":{\"original_root_count_exact\":null,\"release_gate_claim\":false,\"rows\":[{\"added_pair_constraint_rank\":69,\"h\":\"4208336d0d441df79c400\",\"k\":\"0\",\"original_relaxed_dimension\":73,\"pair_branch_complete\":true,\"pair_consistent\":true,\"pair_family_dimension\":4,\"repeated_x\":\"0\",\"support_candidate_count_exact\":0,\"support_candidates\":[],\"tested_parameters\":16},{\"branch_empty\":\"Q root outside source domain\",\"h\":\"4208336d0d441df79c400\",\"k\":\"1\",\"pair_branch_complete\":true,\"support_candidate_count_exact\":0},{\"added_pair_constraint_rank\":69,\"h\":\"4208336d0d441df79c401\",\"k\":\"0\",\"original_relaxed_dimension\":73,\"pair_branch_complete\":true,\"pair_consistent\":true,\"pair_family_dimension\":4,\"repeated_x\":\"0\",\"support_candidate_count_exact\":0,\"support_candidates\":[],\"tested_parameters\":16},{\"branch_empty\":\"Q root outside source domain\",\"h\":\"4208336d0d441df79c401\",\"k\":\"1\",\"pair_branch_complete\":true,\"support_candidate_count_exact\":0}],\"scope\":\"four fixed-h,k norm families, Q(x)=P(x)=0 repeated-pair branch only; no original multivariate tuple completion\",\"source_tuple_reconstruction_complete\":false},\"experiment_id\":\"native-actual-repeated-Q-root-n83-20261017-v1\",\"next_actions\":[\"Retain all complementary repeated tangency, squarefree and exceptional pole branches; this is not a full family solve.\",\"Use the reduced cubic branch with exact source permutations and original Semaev auxiliary-fiber reconstruction before all-roots claims.\",\"Generalize the repeated-root reduction to a bounded native tangency branch and compare complete matching baselines only after full coverage.\"],\"schema\":\"scientific_result_v1\",\"status\":\"passed\",\"summary\":\"Repeated Q-root branch intersected with actual relaxed families and all admitted support candidates checked.\"}\n",
+  "stdout_sha256": "33afdedf00b489a83f6778d8372ad23b4e9ad1c9aee9c1041af5ab773afc4fc5",
+  "system_seconds": 0.056263,
+  "user_seconds": 0.203231,
+  "wall_seconds": 0.2649601570001323
+}

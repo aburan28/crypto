@@ -1,0 +1,3 @@
+Native build and exhaustive CLI controls passed; source/binary/input hashes frozen before both native workers. Two workers passed under declared90sec/4GiB/oneCPU. No new library implementation or examples changed; root-wide library suite not rerun for this isolated component. Prior broad validation is in PR1993; CI on this PR remains separate. Both PDFs/2pages visually inspected; graph copies generated from the same recorded data. Conductor unavailable (receipt retained). No Lean/external independent review or qualified all-roots performance claim.
+
+Canonical IC/rho timeline, best-of leaderboard, boundary exponents and costs left unchanged: the results add no admissible whole-pipeline or rho measurement. Only a diagnostic panel and its generated index are added.

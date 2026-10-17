@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-m",
+    "research.full_binary_norm_circuit_20261017_v1.launch",
+    "native-full-binary-norm-circuit-n83-20261017-v1",
+    "research/advance/instances/n83-d18-m5-T001-offset0.json"
+  ],
+  "effective_timeout_seconds": 90,
+  "ended_unix": 1792208740.3281314,
+  "exit_code": 0,
+  "measurement_scope": "development diagnostic; isolation must be established separately",
+  "memory_limit_scope": "per-process address space inherited by descendants",
+  "peak_process_rss_kib": 246892,
+  "pid": 4410,
+  "process_group": 4410,
+  "started_unix": 1792208739.8691406,
+  "status": "ok",
+  "stderr": "",
+  "stdout": "{\"evidence\":{\"novelty_claim\":false,\"original_root_count_exact\":null,\"release_gate_claim\":false,\"rows\":[{\"compile_seconds_diagnostic\":0.011706501,\"counts\":{\"constructed_nodes\":90294,\"inputs\":174,\"reachable_and\":33524,\"reachable_nodes\":90293,\"reachable_xor\":56594,\"standard_clauses\":327115,\"zero_constraints\":167},\"cutoff\":0,\"profile_complete\":true},{\"compile_seconds_diagnostic\":0.008143464,\"counts\":{\"constructed_nodes\":58308,\"inputs\":174,\"reachable_and\":13247,\"reachable_nodes\":58307,\"reachable_xor\":44885,\"standard_clauses\":219448,\"zero_constraints\":167},\"cutoff\":8,\"profile_complete\":true}],\"scope\":\"full norm coefficient predicate,174 primary bits, not all-original-root equivalence or a SAT solve\"},\"experiment_id\":\"native-full-binary-norm-circuit-n83-20261017-v1\",\"next_actions\":[\"Freeze a native SAT or XOR-solver interface, replay every model against literal norms, and preserve null counts until complete exhaustion.\",\"Recover all ordered original S3 auxiliary fibers and pay ghost/exception coverage before original all-root claims.\",\"Keep genuine F4/F5/F6 full matching and8x gate requirements.\"],\"schema\":\"scientific_result_v1\",\"status\":\"passed\",\"summary\":\"Complete eliminated binary norm circuit compiled for the actual GF83 fixture with schoolbook and recursive arithmetic.\"}\n",
+  "stdout_sha256": "7417788fd321ac55bbb2e34b43d405ec87ede02a1f2bcfa894d6bfb35deba8f4",
+  "system_seconds": 0.071349,
+  "user_seconds": 0.22985699999999998,
+  "wall_seconds": 0.458989159000339
+}

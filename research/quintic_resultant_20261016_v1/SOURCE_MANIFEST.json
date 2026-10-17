@@ -1,0 +1,30 @@
+{
+  "source_and_input_sha256": {
+    "research/quintic_resultant_20261016_v1/PROOF.md": "fad7bac6a8a084333a0b96ff7290ee473ab9c040b7db56e08946a6b3a5617439",
+    "research/quintic_resultant_20261016_v1/CONTROLS.json": "0c8b8ac50601fd6d090f501724c5953889722601af48c2a9c06d6cd3813e77e7",
+    "research/quintic_resultant_20261016_v1/INPUTS.json": "19b4938359559dac372af08e60de1b608a32a00113ffd327a1a1b8be41356732",
+    "research/quintic_resultant_20261016_v1/quintic-resultant": "005d6d67c709441b5ca1c5e3dbd06b57f781a92fe58b6da865470f41f68f17b6",
+    "research/quintic_resultant_20261016_v1/launch.py": "ce3645137d612222ff6a8f51fa2323786f20d94fc4e958baa8fa36853a65c32e",
+    "research/quintic_resultant_20261016_v1/PREPARATION_OLD_BINARY_CONTROLS.json": "0c8b8ac50601fd6d090f501724c5953889722601af48c2a9c06d6cd3813e77e7",
+    "research/quintic_resultant_20261016_v1/PREPARATION_OLD_BINARY_CONTROLS.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "research/quintic_resultant_20261016_v1/Cargo.lock": "4137d6180630dc60648385938f20c16916e02c10b86fcdc336b8c93e16f7e852",
+    "research/quintic_resultant_20261016_v1/Cargo.toml": "8cbf9b084d57c071c58843f8c3ce81b6d6d5f4be658781479b0d258c700c7cfa",
+    "research/quintic_resultant_20261016_v1/CONTROLS.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "research/quintic_resultant_20261016_v1/BUILD_VERIFIED.log": "d05597ff889c2f26b3ea639dc5e8dcc85cdd26efc6b5c4d640800c6368b398ea",
+    "research/quintic_resultant_20261016_v1/BUILD.log": "df9d181de4f04bfbe6e769cb33872b116f6d5c63f1b2b655d8f1d76fe2488edf",
+    "research/quintic_resultant_20261016_v1/BUILD_FINAL.log": "235b38834ff4d793fcd08ff9f73d423b66c29363ad453da4e53234240703f62a",
+    "research/quintic_resultant_20261016_v1/src/main.rs": "5fd25076bda633616f5ce25b63babbdf3452217f645a5c96afc8fff11b0d981b",
+    "lab/runner.py": "f385c82a7064c7645a41299dfcb6a1fba9dd4fc7d491eb7a29865bbc87d8cf18",
+    "performance_gate.py": "a01ed8a4b996d0ff769a12968888e7353b867ffb2fcc4a93a2d5f2796b9fcafb",
+    "performance/GATE.md": "fa62d4f19d5b222b534ac1cfa7c4dde265492ac60553d67eea9f0baab7e427fc",
+    "lab/research/nist_presets.json": "a614dac35438fce60fb05d822d0e90f0149bdfde616986f32255f10722ea2a7c"
+  },
+  "budget": {
+    "seconds": 90,
+    "memory_mib": 4096,
+    "cpu": 0
+  },
+  "requested_gain": 8,
+  "goal_complete": false,
+  "legacy_adapter": "os.execv only, retained because user explicitly requires existing Python-only lab.runner interface; algorithm and harness timings Rust"
+}

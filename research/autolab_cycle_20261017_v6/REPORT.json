@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-17T03:52:31.358396+00:00",
+  "experiment_id": "native-full-binary-norm-circuit-n83-20261017-v1",
+  "status": "passed",
+  "evidence": {
+    "novelty_claim": false,
+    "original_root_count_exact": null,
+    "release_gate_claim": false,
+    "rows": [
+      {
+        "compile_seconds_diagnostic": 0.011706501,
+        "counts": {
+          "constructed_nodes": 90294,
+          "inputs": 174,
+          "reachable_and": 33524,
+          "reachable_nodes": 90293,
+          "reachable_xor": 56594,
+          "standard_clauses": 327115,
+          "zero_constraints": 167
+        },
+        "cutoff": 0,
+        "profile_complete": true
+      },
+      {
+        "compile_seconds_diagnostic": 0.008143464,
+        "counts": {
+          "constructed_nodes": 58308,
+          "inputs": 174,
+          "reachable_and": 13247,
+          "reachable_nodes": 58307,
+          "reachable_xor": 44885,
+          "standard_clauses": 219448,
+          "zero_constraints": 167
+        },
+        "cutoff": 8,
+        "profile_complete": true
+      }
+    ],
+    "scope": "full norm coefficient predicate,174 primary bits, not all-original-root equivalence or a SAT solve"
+  },
+  "and_ratio": 0.39514974346736664,
+  "clause_ratio": 0.6708588722620485,
+  "prediction_supported": true,
+  "prepared_native_controls": {
+    "native_complete": true,
+    "native_tiny_primary_models": 28,
+    "scope": "actual modified native CDCL adapter versus exhaustive tiny predicate",
+    "status": "passed"
+  },
+  "next_queue": [
+    {
+      "id": "native-full-norm-CDCL-search-n83-v1",
+      "seconds": 90,
+      "memory_mib": 4096,
+      "cores": 1,
+      "mechanism": "Freeze prepared Rust FFI bridge, modified native library/source/build-receipt hashes and fixture. Run60second norm-primary search, replay all models, retain UNKNOWN/caps. Original all-root counts stay null; ghost/auxiliary-fiber closure remains required."
+    },
+    {
+      "id": "norm-XOR-component-admission-v1",
+      "seconds": 90,
+      "memory_mib": 4096,
+      "cores": 1,
+      "mechanism": "Inspect actual XOR connected-component sizes/native Gaussian counters before changing the current per-matrix row/column caps. Total rows alone do not prove a per-component refusal. Any new backend/circuit requires new source identity and tiny complete-set controls."
+    }
+  ],
+  "source_pr": "https://github.com/aburan28/crypto/pull/2049",
+  "goal_complete": false,
+  "original_system_complete": false,
+  "qualified_gain": null,
+  "novelty_established": false,
+  "publication": "Local reports/evidence pending explicit authorization; source-only PR updated."
+}

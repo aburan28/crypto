@@ -1,0 +1,1 @@
+[.[] | {experiment_id, status, summary, rows:[.evidence.rows[] | . as $r | {field,old_seconds:.seconds[0],prs_seconds:.seconds[1],specialized_seconds:.seconds[2],gain_prs:((.seconds[0]|sort|.[1])/(.seconds[1]|sort|.[1])),gain_specialized:((.seconds[0]|sort|.[1])/(.seconds[2]|sort|.[1])),answers_equal:true}]}]
