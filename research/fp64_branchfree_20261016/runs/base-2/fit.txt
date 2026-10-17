@@ -1,0 +1,11 @@
+clock 2.797 GHz; residual ns/iter {"fp64": 26.157871461058228, "fp64cm": -2.4862869069840894, "pf64": 24.275822965389413, "w1": -0.7785717082659129}
+scaling {"fp64": {1: 1.0, 2: 1.0038072118732995, 4: 0.9127169786819518}, "fp64cm": {1: 1.0, 2: 0.9561518953624418, 4: 0.9505106789811225}, "pf64": {1: 1.0, 2: 0.9612909682045635, 4: 0.9361056539246153}, "w1": {1: 1.0, 2: 0.9811858544567568, 4: 0.9560871845445693}}
+C0       PASS 0.0029 (threshold 0.05) clock: add-chain and imul-chain estimates agree, |relative difference|
+V1.fp64  PASS 0.0351 (threshold 0.3) fp64: calibrated model, test batches, median |error|
+V1.fp64cm PASS 0.0318 (threshold 0.3) fp64cm: calibrated model, test batches, median |error|
+V1.pf64  PASS 0.0104 (threshold 0.3) pf64: calibrated model, test batches, median |error|
+V1.w1    PASS 0.0338 (threshold 0.3) w1: calibrated model, test batches, median |error|
+V2.fp64  FAIL 0.5423 (threshold 0.3) fp64: a priori model (no fitted parameter), all batches, median |error|
+V2.fp64cm PASS 0.0936 (threshold 0.3) fp64cm: a priori model (no fitted parameter), all batches, median |error|
+V2.pf64  FAIL 0.5101 (threshold 0.3) pf64: a priori model (no fitted parameter), all batches, median |error|
+V2.w1    PASS 0.0179 (threshold 0.3) w1: a priori model (no fitted parameter), all batches, median |error|
