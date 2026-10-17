@@ -50,6 +50,7 @@ name = "complete-volcano-fixtures"
 version = "0.1.0"
 dependencies = [
  "isogeny_algos",
+ "rusqlite",
  "serde_json",
  "volcano-cli",
 ]

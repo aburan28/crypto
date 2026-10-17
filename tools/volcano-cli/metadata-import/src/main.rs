@@ -94,7 +94,11 @@ fn rank(v: &Value) -> (u8, u64, String, u64, String) {
 }
 fn main() {
     let repo = PathBuf::from(std::env::args().nth(1).expect("repository root"));
-    let study = repo.join("research/full_volcano_classes_20261016");
+    let study = repo.join(
+        std::env::args()
+            .nth(2)
+            .unwrap_or_else(|| "research/full_volcano_classes_20261016".into()),
+    );
     let registry_path = repo.join("docs/curves/registry.json");
     let mut registry: Value = serde_json::from_slice(&fs::read(&registry_path).unwrap()).unwrap();
     let mut files = vec![];
