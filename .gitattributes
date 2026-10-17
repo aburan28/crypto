@@ -1,4 +1,7 @@
 # Preserve solver output byte-for-byte; upstream tools intentionally pad fields.
+research/weak_curve_leaderboard_20261012/validation/ghs128_*.log -whitespace
+research/weak_curve_leaderboard_20261012/reports/run-*/*.svg -whitespace
+research/weak_curve_leaderboard_20261012/reports/run-*/*.log -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**/*.stdout -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**/*.stderr -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-wdsat-correction-20260909/**/*.stdout -whitespace

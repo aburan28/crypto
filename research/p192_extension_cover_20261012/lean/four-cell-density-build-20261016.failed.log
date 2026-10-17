@@ -1,0 +1,9 @@
+✖ [2/181] Running Mathlib.Tactic.Omega
+error: no such file or directory (error code: 2)
+  file: /private/tmp/p192-nonspecial-packages/mathlib/Mathlib/Tactic/Omega.lean
+✖ [806/807] Running FourCellDensity
+error: FourCellDensity.lean: bad import 'Mathlib.Tactic.Omega'
+Some required targets logged failures:
+- Mathlib.Tactic.Omega
+- FourCellDensity
+error: build failed

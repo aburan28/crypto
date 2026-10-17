@@ -1,0 +1,304 @@
+{
+  "actual_factor_base_size": 32,
+  "affine_points_nonzero_projection": 112,
+  "cover": "v^2=u^6+u^2+46",
+  "cover_genus": 2,
+  "cover_map": "(u,v)->(u^2,v)",
+  "curve": "y^2=x^3+x+46",
+  "curve_order": 109,
+  "distinct_projected_classes": 56,
+  "factor_base_law": "uniformly shuffled affine rational H points, one representative per distinct 107-projected class, first 32",
+  "factor_base_sha256": "af2b2254cea1684b80bb5562e16e9ffef40f3b509ec33ba8097fb6417750df7b",
+  "field": "F_101",
+  "final_rank": 32,
+  "independent_rows": 32,
+  "jacobian_order": 11663,
+  "jacobian_prime_subgroup_cofactor": 107,
+  "ordinary_attempts": 165,
+  "ordinary_query_law": "MT19937 uniform a in [1,108], T=aD; search verified three-summand H-point decompositions",
+  "pair_index_entries": 528,
+  "relation_witnesses": [
+    {
+      "a": 5,
+      "indices": [
+        8,
+        19,
+        18
+      ]
+    },
+    {
+      "a": 15,
+      "indices": [
+        8,
+        20,
+        2
+      ]
+    },
+    {
+      "a": 86,
+      "indices": [
+        1,
+        19,
+        10
+      ]
+    },
+    {
+      "a": 82,
+      "indices": [
+        10,
+        25,
+        14
+      ]
+    },
+    {
+      "a": 13,
+      "indices": [
+        18,
+        29,
+        31
+      ]
+    },
+    {
+      "a": 57,
+      "indices": [
+        9,
+        15,
+        31
+      ]
+    },
+    {
+      "a": 6,
+      "indices": [
+        17,
+        21,
+        17
+      ]
+    },
+    {
+      "a": 36,
+      "indices": [
+        19,
+        20,
+        6
+      ]
+    },
+    {
+      "a": 8,
+      "indices": [
+        3,
+        20,
+        13
+      ]
+    },
+    {
+      "a": 24,
+      "indices": [
+        7,
+        11,
+        19
+      ]
+    },
+    {
+      "a": 89,
+      "indices": [
+        14,
+        28,
+        13
+      ]
+    },
+    {
+      "a": 80,
+      "indices": [
+        16,
+        23,
+        23
+      ]
+    },
+    {
+      "a": 83,
+      "indices": [
+        1,
+        14,
+        21
+      ]
+    },
+    {
+      "a": 68,
+      "indices": [
+        12,
+        20,
+        30
+      ]
+    },
+    {
+      "a": 40,
+      "indices": [
+        25,
+        30,
+        15
+      ]
+    },
+    {
+      "a": 95,
+      "indices": [
+        0,
+        20,
+        18
+      ]
+    },
+    {
+      "a": 89,
+      "indices": [
+        10,
+        18,
+        23
+      ]
+    },
+    {
+      "a": 69,
+      "indices": [
+        12,
+        13,
+        19
+      ]
+    },
+    {
+      "a": 11,
+      "indices": [
+        16,
+        16,
+        15
+      ]
+    },
+    {
+      "a": 64,
+      "indices": [
+        17,
+        31,
+        3
+      ]
+    },
+    {
+      "a": 34,
+      "indices": [
+        4,
+        28,
+        25
+      ]
+    },
+    {
+      "a": 3,
+      "indices": [
+        0,
+        10,
+        11
+      ]
+    },
+    {
+      "a": 33,
+      "indices": [
+        26,
+        27,
+        2
+      ]
+    },
+    {
+      "a": 104,
+      "indices": [
+        3,
+        10,
+        3
+      ]
+    },
+    {
+      "a": 80,
+      "indices": [
+        9,
+        19,
+        29
+      ]
+    },
+    {
+      "a": 40,
+      "indices": [
+        2,
+        4,
+        26
+      ]
+    },
+    {
+      "a": 93,
+      "indices": [
+        5,
+        14,
+        10
+      ]
+    },
+    {
+      "a": 103,
+      "indices": [
+        1,
+        23,
+        1
+      ]
+    },
+    {
+      "a": 25,
+      "indices": [
+        12,
+        20,
+        24
+      ]
+    },
+    {
+      "a": 94,
+      "indices": [
+        14,
+        15,
+        3
+      ]
+    },
+    {
+      "a": 77,
+      "indices": [
+        14,
+        29,
+        22
+      ]
+    },
+    {
+      "a": 56,
+      "indices": [
+        7,
+        8,
+        3
+      ]
+    }
+  ],
+  "rho_same_point_scalar_recovered": 18,
+  "rho_steps": 10,
+  "scalar_replay": true,
+  "seed": 1727116218388,
+  "source_sha256": "86c20e59eb92b9f9ca7da38b42a3febcd6466a6a3cc52055f630fcee2717f915",
+  "status": "verified_same_field_genus2_jacobian_pipeline_control",
+  "target_decomposition_indices": [
+    7,
+    11,
+    19
+  ],
+  "target_input_law": "one fresh MT19937 scalar after precomputation; fixture scalar excluded from online algorithm",
+  "target_offset_queries": 7,
+  "target_point_sha256": "692cd053b57764b7ec238f9b717db81da71e575a9fa9ce3985e7ffc9759404ac",
+  "target_scalar_recovered": 18,
+  "timing_status": "shared-host diagnostic, no isolated CPU speedup claim",
+  "timings": {
+    "factor_base_ns": 1557846792,
+    "final_linear_algebra_and_base_replay_ns": 853290292,
+    "geometry_and_subgroup_ns": 810394875,
+    "ordinary_relations_and_rank_ns": 5703543208,
+    "pair_index_ns": 658043459,
+    "rho_online_ns": 391167,
+    "target_online_ns": 837159375
+  },
+  "verified_relations": 63
+}

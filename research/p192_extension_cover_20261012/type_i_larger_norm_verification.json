@@ -1,0 +1,21 @@
+{
+  "producer_receipt_sha256": "10371fd15a7d13c63eceef02ec24eca0658ee39d3177de58248a44f4e398d4b4",
+  "results": [
+    {
+      "all_nine_quotient_components_replayed": true,
+      "curve": "P-224",
+      "first_split_policy_replayed": true,
+      "norm_diagonal_nonzero_exact_order_r": true,
+      "selected_m": 1
+    },
+    {
+      "all_nine_quotient_components_replayed": true,
+      "curve": "P-256",
+      "first_split_policy_replayed": true,
+      "norm_diagonal_nonzero_exact_order_r": true,
+      "selected_m": 17
+    }
+  ],
+  "source_sha256": "592feda9069cc7413d1f904398a359d9269e28e1b563f755124d3fa2b4e4e3f7",
+  "status": "independent_larger_type_i_norm_replay_passed"
+}

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/small_field_pipeline.py", line 159, in <module>
+    recovered, target_offset, target_indices = timed('target_online', target_online)
+                                               ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/small_field_pipeline.py", line 24, in timed
+    result = fn()
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/small_field_pipeline.py", line 154, in target_online
+    assert result*D == target
+           ^^^^^^^^^^^^^^^^^^
+AssertionError

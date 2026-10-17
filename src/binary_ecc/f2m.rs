@@ -8,9 +8,10 @@
 //!
 //! - **Addition** = XOR (since `1 + 1 = 0` in `F_2`).
 //! - **Multiplication** = polynomial multiplication then reduction
-//!   mod `m(z)`.  We use the **improved Karatsuba** scheme from
-//!   Putranto et al. §3.1: divide-and-conquer with three half-size
-//!   multiplications, then combine via two MODSHIFT operations.
+//!   mod `m(z)`. Hardware carryless multiplication uses three products
+//!   for two-word operands and six for three-word operands; the general
+//!   path uses word-level schoolbook. An independent improved-Karatsuba
+//!   reference is retained for cross-checking.
 //! - **Squaring** = bit-spread (each bit `b_i` of input goes to
 //!   bit `2i` of output, others = 0) followed by reduction.  Much
 //!   cheaper than general multiplication for binary fields.
@@ -968,9 +969,9 @@ fn has_hw_clmul() -> bool {
     }
 }
 
-/// `out ^= a · b` over `F_2[z]`, word-level schoolbook with one
-/// carry-less multiply per pair of limbs.  `out` must hold at least
-/// `a.len() + b.len()` words.
+/// `out ^= a · b` over `F_2[z]`. Hardware two- and three-word products
+/// use Karatsuba cross terms; other widths use one carry-less multiply
+/// per limb pair. `out` must hold at least `a.len() + b.len()` words.
 fn mul_words_into(a: &[u64], b: &[u64], out: &mut [u64]) {
     debug_assert!(out.len() >= a.len() + b.len());
     #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
@@ -991,28 +992,60 @@ fn mul_words_into(a: &[u64], b: &[u64], out: &mut [u64]) {
     }
 }
 
+macro_rules! mul_words_hw_body {
+    ($a:ident, $b:ident, $out:ident) => {{
+        let a = $a;
+        let b = $b;
+        let out = $out;
+        if a.len() == 2 && b.len() == 2 {
+            let p0 = clmul64_hw(a[0], b[0]);
+            let p2 = clmul64_hw(a[1], b[1]);
+            let cross = clmul64_hw(a[0] ^ a[1], b[0] ^ b[1]);
+            let p1 = (cross.0 ^ p0.0 ^ p2.0, cross.1 ^ p0.1 ^ p2.1);
+            out[0] ^= p0.0;
+            out[1] ^= p0.1 ^ p1.0;
+            out[2] ^= p1.1 ^ p2.0;
+            out[3] ^= p2.1;
+            return;
+        }
+        if a.len() == 3 && b.len() == 3 {
+            let p0 = clmul64_hw(a[0], b[0]);
+            let p2 = clmul64_hw(a[1], b[1]);
+            let p4 = clmul64_hw(a[2], b[2]);
+            let q01 = clmul64_hw(a[0] ^ a[1], b[0] ^ b[1]);
+            let q12 = clmul64_hw(a[1] ^ a[2], b[1] ^ b[2]);
+            let q02 = clmul64_hw(a[0] ^ a[2], b[0] ^ b[2]);
+            let p1 = (q01.0 ^ p0.0 ^ p2.0, q01.1 ^ p0.1 ^ p2.1);
+            let p3 = (q12.0 ^ p2.0 ^ p4.0, q12.1 ^ p2.1 ^ p4.1);
+            let p2_total = (q02.0 ^ p0.0 ^ p4.0 ^ p2.0, q02.1 ^ p0.1 ^ p4.1 ^ p2.1);
+            out[0] ^= p0.0;
+            out[1] ^= p0.1 ^ p1.0;
+            out[2] ^= p1.1 ^ p2_total.0;
+            out[3] ^= p2_total.1 ^ p3.0;
+            out[4] ^= p3.1 ^ p4.0;
+            out[5] ^= p4.1;
+            return;
+        }
+        for (i, &ai) in a.iter().enumerate() {
+            for (j, &bj) in b.iter().enumerate() {
+                let (lo, hi) = clmul64_hw(ai, bj);
+                out[i + j] ^= lo;
+                out[i + j + 1] ^= hi;
+            }
+        }
+    }};
+}
+
 #[cfg(target_arch = "x86_64")]
 #[target_feature(enable = "pclmulqdq")]
 unsafe fn mul_words_hw(a: &[u64], b: &[u64], out: &mut [u64]) {
-    for (i, &ai) in a.iter().enumerate() {
-        for (j, &bj) in b.iter().enumerate() {
-            let (lo, hi) = clmul64_hw(ai, bj);
-            out[i + j] ^= lo;
-            out[i + j + 1] ^= hi;
-        }
-    }
+    mul_words_hw_body!(a, b, out)
 }
 
 #[cfg(target_arch = "aarch64")]
 #[target_feature(enable = "aes")]
 unsafe fn mul_words_hw(a: &[u64], b: &[u64], out: &mut [u64]) {
-    for (i, &ai) in a.iter().enumerate() {
-        for (j, &bj) in b.iter().enumerate() {
-            let (lo, hi) = clmul64_hw(ai, bj);
-            out[i + j] ^= lo;
-            out[i + j + 1] ^= hi;
-        }
-    }
+    mul_words_hw_body!(a, b, out)
 }
 
 /// Reduce `value` modulo `m(z)` in place, a whole word at a time.
@@ -1582,9 +1615,10 @@ mod tests {
     /// folded down to degree < m.
     #[test]
     fn reduction_works_at_boundary() {
-        let irr = IrreduciblePoly::deg_8(); // x⁸ + x⁴ + x³ + x + 1
-                                            // a = z⁵, b = z⁵.  a·b = z¹⁰ = z² · z⁸ = z² · (z⁴ + z³ + z + 1)
-                                            //                       = z⁶ + z⁵ + z³ + z².
+        // x⁸ + x⁴ + x³ + x + 1
+        let irr = IrreduciblePoly::deg_8();
+        // a = z⁵, b = z⁵.  a·b = z¹⁰ = z² · z⁸ = z² · (z⁴ + z³ + z + 1)
+        //                       = z⁶ + z⁵ + z³ + z².
         let a = F2mElement::from_bit_positions(&[5], 8);
         let b = a.clone();
         let p = a.schoolbook_mul(&b, &irr);

@@ -1,0 +1,29 @@
+{
+  "status": "verified_local_exact_support_census",
+  "base_git_head_at_run": "e70925777137472748477b5aec39864df42c0b23",
+  "source_was_uncommitted_at_run": true,
+  "host": "Darwin 25.6.0 arm64",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "gp": "PARI/GP 2.17.3 arm64",
+  "native_binary_sha256": "42d96892405fa58947da579091d3dbfb2e3482812a7ff26a053d6eee674f549e",
+  "gp_binary_sha256": "1b3464452036a97072a2514f5094bb49188e2ee3089a61514443494f4875ceb5",
+  "native_command": "CARGO_TARGET_DIR=/private/tmp/p192-signed-cargo cargo run --release --offline --manifest-path research/p192_extension_cover_20261012/native_support/Cargo.toml --bin signed_base -- research/p192_extension_cover_20261012/type_i_base_points_legacy_fixture.json research/p192_extension_cover_20261012/type_i_character_density.json research/p192_extension_cover_20261012/type_i_geom_character_collector.json research/p192_extension_cover_20261012/type_i_signed_base_support.json",
+  "native_exit_status": 0,
+  "gp_command": "gp -q research/p192_extension_cover_20261012/type_i_signed_base_independent.gp",
+  "gp_exit_status": 0,
+  "gp_output_checked_for_errors": true,
+  "gp_input_sha256": "0c98ed2c7959cae4ddd34f6147ffc00a24062375a99f82249b34b0bf6b83d89f",
+  "gp_source_sha256": "1df3a50758c9a68afd13857ea24a05ff6f875cc4712ed870a6a771ca39ba403d",
+  "input_sha256_in_native_receipt_order": [
+    "3984b55b793305b30beaf18918209282bce80d444c96217cd6143c7d9470d409",
+    "fd0a47cf4aecf736b1852d133fd384e30d9584114761bac6495f803d4210ca29",
+    "961a9995114189ed1ee86febde46979900317417a2744f34274833390fb5ff49"
+  ],
+  "query_attempts": 259,
+  "accepted_queries": 64,
+  "known_scalar_equation": "q=a(-2G)",
+  "native_result_sha256": "02958444321f5ca47c2f176cf2921b6602602f21818496dff819cd5533220c29",
+  "native_log_sha256": "eb17e5c747ad2af912f8827b58900330824bb0b48a5725adc916ab8627e5ea3e",
+  "independent_log_sha256": "feab97ff1fbc1387f72d3e243457e2473da171c73ba320b49b015556477d2e5d",
+  "timing_boundary": "No wall-time or CPU-isolated performance comparison was measured; arithmetic and test logs are correctness evidence only."
+}
