@@ -1,0 +1,158 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1ha54c56a3618f",
+  "label": "isogeny volcano: independent A/A rho",
+  "spec_id": "ECS1h6594d0e3a3fd",
+  "spec_sha256": "6594d0e3a3fd10433699dc2c9932c38aae2db58bdae8bc9e1636f9e8b6cbcb2a",
+  "env_class_id": "ECBENV2hc56f90fc1aa2",
+  "host_sha256": "36283117b247f6200b852d6dac2467ff18bee11ccb83699b142fb89ca1068084",
+  "plan_sha256": "bc90275e7edf42dab486580e78f7ee0c7b43d97298bce2a1c5c9dda89ddb5de8",
+  "binary_sha256": "7da27ec3f0dadbae565181b0faa74582eb94a8f36cf6fe806eecc7b4b1fa7a9f",
+  "git_commit": "445abd489c34e8de8b2c212523571ffff1a44487",
+  "git_dirty": false,
+  "options": {
+    "cpus": "inherit",
+    "lock_path": "/tmp/crypto-bench.lock",
+    "wait_for_lock": true,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/proc/self/exe"
+  },
+  "cpu_plan": {
+    "run_cpu": 3,
+    "reserved": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "node": 0,
+    "request": "inherit",
+    "unreserved_siblings": [],
+    "observed": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "preflight": {
+    "quiet": false,
+    "reasons": [
+      "CPU 0 was busy 1.980s of the 2.0s settle",
+      "CPU 1 was busy 1.990s of the 2.0s settle"
+    ],
+    "settle_seconds": 2.0,
+    "reserved_busy_seconds": {
+      "0": 1.98,
+      "1": 1.99,
+      "2": 0.06,
+      "3": 0.03
+    },
+    "before": {
+      "unix_ms": 1792215060696,
+      "loadavg": [
+        1.478515625,
+        1.11376953125,
+        0.947265625
+      ],
+      "psi_cpu_some_avg10": 0.05,
+      "psi_cpu_some_total_us": 13711735,
+      "psi_memory_some_avg10": 0.0,
+      "psi_memory_some_total_us": 0,
+      "reserved_ticks": {
+        "0": {
+          "busy": 34543,
+          "idle": 189998,
+          "steal": 596
+        },
+        "1": {
+          "busy": 41446,
+          "idle": 182267,
+          "steal": 629
+        },
+        "2": {
+          "busy": 43692,
+          "idle": 179536,
+          "steal": 653
+        },
+        "3": {
+          "busy": 100144,
+          "idle": 122354,
+          "steal": 1276
+        }
+      }
+    },
+    "after": {
+      "unix_ms": 1792215062696,
+      "loadavg": [
+        1.478515625,
+        1.11376953125,
+        0.947265625
+      ],
+      "psi_cpu_some_avg10": 0.04,
+      "psi_cpu_some_total_us": 13711820,
+      "psi_memory_some_avg10": 0.0,
+      "psi_memory_some_total_us": 0,
+      "reserved_ticks": {
+        "0": {
+          "busy": 34741,
+          "idle": 189998,
+          "steal": 597
+        },
+        "1": {
+          "busy": 41645,
+          "idle": 182267,
+          "steal": 631
+        },
+        "2": {
+          "busy": 43698,
+          "idle": 179735,
+          "steal": 653
+        },
+        "3": {
+          "busy": 100147,
+          "idle": 122552,
+          "steal": 1276
+        }
+      }
+    }
+  },
+  "eviction": {
+    "moved_count": 0,
+    "failed_user_threads": 42,
+    "failed_kernel_threads": 69
+  },
+  "runner_on_run_cpu": false,
+  "runner_cpus": [
+    0,
+    1,
+    2
+  ],
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "db1325aca1b2e904875cd5890b474cc8090bafbf32b676ceb75a94f11fadbc5d",
+  "child_env": {
+    "HOME": "/root",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/nix/var/nix/profiles/default/bin:/root/.local/bin:/root/.cargo/bin:/usr/local/go/bin:/opt/node22/bin:/opt/maven/bin:/opt/gradle/bin:/opt/rbenv/bin:/root/.bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1792215062707,
+  "finished_unix_ms": 1792215120771,
+  "status": "complete",
+  "executions_planned": 1024,
+  "records_written": 1024,
+  "records_sha256": "79f4c487d6c3f5a4a0fdd0265c5e980f362e52eaaf2d00588e9bab7c60d00e50",
+  "status_counts": {
+    "verified": 1024
+  }
+}

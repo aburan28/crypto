@@ -187,9 +187,17 @@ fn a_session_runs_verifies_compares_and_loads() {
     let (ok, sql, err) = ecbench(&["db", "sql", out.to_str().unwrap()]);
     assert!(ok, "{err}");
     assert!(sql.starts_with("-- ecbench database schema"));
-    assert!(sql.contains("INSERT INTO runs VALUES"));
+    assert!(sql.contains(
+        "INSERT INTO runs (record_id, session_id, run_id, seq, round, warmup, arm, method_id, workload_id, fb_id, fbm_id,"
+    ));
     assert!(sql.contains("ON CONFLICT (record_id) DO NOTHING"));
-    assert_eq!(sql.matches("INSERT INTO runs VALUES").count(), 48);
+    assert_eq!(
+        sql.matches(
+            "INSERT INTO runs (record_id, session_id, run_id, seq, round, warmup, arm, method_id, workload_id, fb_id, fbm_id,"
+        )
+        .count(),
+        48
+    );
     let _ = std::fs::remove_dir_all(&dir);
 }
 

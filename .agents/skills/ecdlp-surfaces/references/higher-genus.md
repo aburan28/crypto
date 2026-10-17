@@ -11,7 +11,7 @@ constructor to `tools/ecdlp-surfaces`.
 | Case | Existing entry point | Boundary |
 | --- | --- | --- |
 | Genus-2 cover of `y^2=x^3+a*x+b`, characteristic greater than three | `crypto`: `hyperelliptic-cover construct` / `verify` | The fixed degree-two cover is a smooth sextic with two rational infinity points. Its construction is checked; pullback, norm, and its two-infinity Jacobian arithmetic are not implemented. |
-| Genus-3 cover of an ordinary binary elliptic curve | Same CLI, plus `OrdinaryBinaryCover` in both native libraries | One-infinity Mumford arithmetic, rational elliptic point-class pullbacks, rational source-point pushforward, and typed pull/push witnesses are supported. Arbitrary Jacobian-class pushforward is unsupported. |
+| Genus-3 cover of an ordinary binary elliptic curve | Same CLI, plus `OrdinaryBinaryCover` in the native libraries | Both repositories support one-infinity Mumford arithmetic, rational elliptic point-class pullbacks, rational source-point pushforward, and typed pull/push witnesses. Current `crypto` source alone supports arbitrary Jacobian-class pushforward for the exact polynomial-basis GF(8) fixture `a=1`, `b=3`, `d=7`; every other crypto field/model is structured unsupported, and the retained `cryptanalysis` source remains pre-norm pending a current mirror/integration receipt. |
 | Arithmetic on a supplied odd-prime genus-g hyperelliptic curve | `crypto`: `hyperelliptic-cover arithmetic` with `odd_curve` | Monic squarefree `f` of degree `2g+1`, one rational infinity point, positive genus, and deterministically checked odd prime of at most 64 bits. This alone supplies no elliptic transfer. |
 | Other checked binary hyperelliptic models | `HyperellipticCurve::try_new`, `MumfordDivisor` in both libraries | Use the checked odd-degree, one-infinity API; binary field degree is bounded by 4096. The cover CLI's binary `model` selector reconstructs only its fixed genus-3 family. |
 | CM polarization on `E^2` | `crypto`: `jacobian-certificate` | Bounded exact Hermitian-lattice calculation; geometric existence is conditional. It emits no curve equation or subgroup map. |
@@ -152,6 +152,12 @@ The CLI has no pullback or transfer subcommand. In native Rust, import
 `OrdinaryBinaryCover` and the field/point types from `crypto_lib::binary_ecc`
 or `cryptanalysis_suite::binary_ecc`, then use these checked entry points:
 
+For the exact fixed-F8 fixture, the standalone construction receipt's
+`implemented_in_library_only_for_exact_fixed_f8_fixture` value declares the
+capability compiled into the library. The construction command itself only
+replays geometry; it does not run the 486-class norm and is not a transfer
+proof receipt.
+
 1. `OrdinaryBinaryCover::new(m, irreducible, a, b)` and `verify_certificate()`.
 2. `pullback_point_class(&P)` and `pullback_point_class(&Q)` to obtain divisor
    classes; `pull_push_composition_certificate(&P)` for the typed degree-three
@@ -165,10 +171,19 @@ or `cryptanalysis_suite::binary_ecc`, then use these checked entry points:
    separately, including the ramified two-torsion and infinity cases.
 
 `pushforward_rational_point_divisor` handles rational source-point classes.
-`pushforward_arbitrary_jacobian_class` returns an explicit unsupported result.
-Do not use the typed pullback witness as a norm for arbitrary classes produced
-by a relation collector. An end-to-end solver requiring that norm needs its
-own verified implementation.
+In current `crypto`, `pushforward_arbitrary_jacobian_class` handles every valid
+reduced class only for the exact polynomial-basis GF(8) model with modulus `z^3+z+1` (`0xb`),
+`a=1`, `b=3`, and `d=7`; its exhaustive native fixture covers 486 classes and
+236,196 ordered additivity pairs. The target has order 6 with six norm fibers
+of size 81, so `gcd(3,6)=3`; treat this as norm mechanics, not an injective
+full-target-group ECDLP transfer. This remains same-implementation evidence:
+the separate point-count certificate checks the ambient order 486 but not the
+divisor presentation, group law, or norm. Every other model returns an explicit
+unsupported result. Do not use the typed pullback witness as a general norm for
+classes produced by a relation collector. A catalog-general or end-to-end
+solver path still needs its own independently verified implementation. The
+retained `cryptanalysis` parity receipt binds a pre-norm source digest, so do
+not claim this exception there until a current mirror/integration replay passes.
 
 For separate genus-2 odd-prime arithmetic, this complete request validates the
 branch-point divisor on `v^2=u^5+u` over F5. It is a demonstration, not an n=83

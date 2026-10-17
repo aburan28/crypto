@@ -1,0 +1,14 @@
+    Finished `release` profile [optimized] target(s) in 0.08s
+     Running unittests src/lib.rs (/workspace/scratch/volcano-release-target/release/deps/crypto_lib-565bcb20cb4d5bb4)
+
+running 1 test
+test cryptanalysis::jv_cover::tests::nagao_finds_planted_six_sums_and_agrees_with_the_oracle ... trial 0: NagaoCost { weil_muls: 2730, f4_muls: 715704, lin_muls: 712369, post_muls: 5000, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 6.083844, lin_ms: 3.342669, total_ms: 10.162894, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 3, split: 1, decompositions: 1 }
+trial 1: NagaoCost { weil_muls: 2730, f4_muls: 720404, lin_muls: 966189, post_muls: 6292, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 3.903809, lin_ms: 3.4419139999999997, total_ms: 7.608858, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 5, split: 1, decompositions: 1 }
+trial 2: NagaoCost { weil_muls: 2730, f4_muls: 725077, lin_muls: 575066, post_muls: 3288, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 3.715534, lin_ms: 2.507656, total_ms: 6.431149, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 2, split: 1, decompositions: 1 }
+trial 3: NagaoCost { weil_muls: 2730, f4_muls: 722863, lin_muls: 455261, post_muls: 2471, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 4.09701, lin_ms: 2.062209, total_ms: 6.3620980000000005, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 1, split: 1, decompositions: 1 }
+trial 4: NagaoCost { weil_muls: 2730, f4_muls: 719441, lin_muls: 581070, post_muls: 3676, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 3.75417, lin_ms: 2.940505, total_ms: 7.020378, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 2, split: 1, decompositions: 1 }
+trial 5: NagaoCost { weil_muls: 2730, f4_muls: 723486, lin_muls: 581359, post_muls: 3659, delta: 64, degree_reached: 8, max_rows: 231, max_cols: 255, f4_ms: 3.323426, lin_ms: 4.276961999999999, total_ms: 7.923958999999999, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 2, split: 1, decompositions: 1 }
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4351 filtered out; finished in 2.55s
+

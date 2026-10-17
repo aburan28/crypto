@@ -167,6 +167,124 @@ pub fn f4_root_elimination_thread() -> u64 {
     ROOT_ELIMINATION.with(|c| c.get())
 }
 
+// ── Root shape replay (`KIC_F4_ROOT_REPLAY=1`, off by default) ─────────
+//
+// F4Remake's idea applied to the roots: the rows of a root that are
+// dependent on earlier rows (in build order) are recorded on the first
+// root of a given shape (column layout, row count, degree, multiplier
+// policy) and dropped from later roots of the same shape before the
+// elimination.  On another target the dropped rows may be independent, so
+// a replayed root spans a *subspace* of the from-scratch row space: every
+// row it yields is still in the ideal, so every refutation and forced
+// variable it reads is sound, and the splitting tree still decides every
+// target exactly (as with `support_local`).  It may read a weaker tail and
+// split more; that cost, and the recording's (an incremental basis in
+// build order, charged in the stage unit), is in the counts.
+
+fn root_replay() -> bool {
+    static ROOT_REPLAY: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ROOT_REPLAY.get_or_init(|| std::env::var("KIC_F4_ROOT_REPLAY").as_deref() == Ok("1"))
+}
+
+thread_local! {
+    /// Recorded dependent rows by root shape.
+    static ROOT_SHAPES: std::cell::RefCell<std::collections::HashMap<u64, std::rc::Rc<Vec<u32>>>> =
+        std::cell::RefCell::new(std::collections::HashMap::new());
+}
+
+/// Roots recorded, roots replayed and rows dropped by root shape replay,
+/// over all threads (a diagnostic; all zero unless `KIC_F4_ROOT_REPLAY=1`).
+static ROOT_REPLAY_COUNTS: [std::sync::atomic::AtomicU64; 3] = [
+    std::sync::atomic::AtomicU64::new(0),
+    std::sync::atomic::AtomicU64::new(0),
+    std::sync::atomic::AtomicU64::new(0),
+];
+
+/// `(roots recorded, roots replayed, rows dropped)` since the start.
+pub fn root_replay_counts() -> (u64, u64, u64) {
+    use std::sync::atomic::Ordering::Relaxed;
+    (
+        ROOT_REPLAY_COUNTS[0].load(Relaxed),
+        ROOT_REPLAY_COUNTS[1].load(Relaxed),
+        ROOT_REPLAY_COUNTS[2].load(Relaxed),
+    )
+}
+
+fn root_shape_key(columns: &[u64], rows: usize, degree: u32, support_local: bool) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    columns.hash(&mut h);
+    rows.hash(&mut h);
+    degree.hash(&mut h);
+    support_local.hash(&mut h);
+    h.finish()
+}
+
+/// The rows dependent on earlier rows, in build order, by an incremental
+/// basis keyed by leading bit; one word operation per word XORed.
+fn dependent_rows(matrix: &[Vec<u64>], word_ops: &mut u64) -> Vec<u32> {
+    let mut basis: std::collections::HashMap<usize, Vec<u64>> = std::collections::HashMap::new();
+    let mut dependent = Vec::new();
+    for (i, row) in matrix.iter().enumerate() {
+        let mut v = row.clone();
+        loop {
+            let Some(w) = v.iter().position(|&x| x != 0) else {
+                dependent.push(i as u32);
+                break;
+            };
+            let lead = w * 64 + v[w].trailing_zeros() as usize;
+            match basis.get(&lead) {
+                Some(b) => {
+                    for k in w..v.len() {
+                        v[k] ^= b[k];
+                    }
+                    *word_ops += (v.len() - w) as u64;
+                }
+                None => {
+                    basis.insert(lead, v);
+                    break;
+                }
+            }
+        }
+    }
+    dependent
+}
+
+/// Apply root shape replay to a freshly built root: record its dependent
+/// rows, or drop the recorded ones.
+fn replay_root(
+    columns: &[u64],
+    matrix: &mut Vec<Vec<u64>>,
+    degree: u32,
+    support_local: bool,
+    word_ops: &mut u64,
+) {
+    let key = root_shape_key(columns, matrix.len(), degree, support_local);
+    let known = ROOT_SHAPES.with(|m| m.borrow().get(&key).cloned());
+    match known {
+        Some(drop) => {
+            let mut keep = vec![true; matrix.len()];
+            for &i in drop.iter() {
+                keep[i as usize] = false;
+            }
+            let mut i = 0;
+            matrix.retain(|_| {
+                let k = keep[i];
+                i += 1;
+                k
+            });
+            ROOT_REPLAY_COUNTS[1].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            ROOT_REPLAY_COUNTS[2]
+                .fetch_add(drop.len() as u64, std::sync::atomic::Ordering::Relaxed);
+        }
+        None => {
+            let dep = dependent_rows(matrix, word_ops);
+            ROOT_SHAPES.with(|m| m.borrow_mut().insert(key, std::rc::Rc::new(dep)));
+            ROOT_REPLAY_COUNTS[0].fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        }
+    }
+}
+
 /// Whether a root is reduced fully (`KIC_F4_INHERIT_ROOT=rref`) rather
 /// than to echelon form; read once.
 fn root_rref() -> bool {
@@ -614,11 +732,14 @@ impl RewritePlan {
 /// One layout step's rewrite plan, built whole as flat arrays: under eager
 /// specialisation every kept row of a node goes through it, so nothing is
 /// gained by building it a word at a time.
-#[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
 struct StepPlan {
     /// Source word `w`'s segments are `segments[first[w]..first[w + 1]]`.
     first: Vec<u32>,
     segments: Vec<Segment>,
+    /// Segment `k`'s shift runs are `runs[run_first[k]..run_first[k + 1]]`
+    /// (built only for [`EagerMode::Runs`]).
+    run_first: Vec<u32>,
+    runs: Vec<ShiftRun>,
     /// `low[w]`: the smallest destination word of any column in source
     /// words `w ..` (`u32::MAX` if every one is deleted).  A row read from
     /// its word `lead` writes nothing before `low[lead]`.
@@ -626,7 +747,7 @@ struct StepPlan {
 }
 
 impl StepPlan {
-    fn new(map: &[u32]) -> Self {
+    fn new(map: &[u32], with_runs: bool) -> Self {
         let n = map.len().div_ceil(64);
         let mut first = Vec::with_capacity(n + 1);
         let mut segments = Vec::new();
@@ -644,11 +765,112 @@ impl StepPlan {
                 .unwrap_or(u32::MAX);
             low[w] = here.min(low[w + 1]);
         }
+        let mut run_first = Vec::new();
+        let mut runs = Vec::new();
+        if with_runs {
+            run_first.reserve(segments.len() + 1);
+            for seg in &segments {
+                run_first.push(runs.len() as u32);
+                ShiftRun::split_into(seg, &mut runs);
+            }
+            run_first.push(runs.len() as u32);
+        }
         Self {
             first,
             segments,
+            run_first,
+            runs,
             low,
         }
+    }
+}
+
+/// A maximal set of a segment's source bits that its map moves by one
+/// common distance: `dst |= shift(src & mask)`.  A segment's map is
+/// increasing, and a layout step deletes or folds whole blocks of columns,
+/// so a segment is a few such runs; together they do what `pdep ∘ pext`
+/// does, with shifts and masks only, on any CPU.
+#[derive(Clone, Copy, Debug)]
+struct ShiftRun {
+    mask: u64,
+    /// Destination bit minus source bit.
+    shift: i8,
+}
+
+impl ShiftRun {
+    /// The runs of `seg`, appended to `runs`: the `k`-th source bit maps to
+    /// the `k`-th destination bit, as under `pdep(pext(x, src), dst)`.
+    fn split_into(seg: &Segment, runs: &mut Vec<ShiftRun>) {
+        let (mut src, mut dst) = (seg.src_mask, seg.dst_mask);
+        let mut current: Option<ShiftRun> = None;
+        while src != 0 {
+            let (sb, db) = (src.trailing_zeros() as i8, dst.trailing_zeros() as i8);
+            src &= src - 1;
+            dst &= dst - 1;
+            let shift = db - sb;
+            match &mut current {
+                Some(run) if run.shift == shift => run.mask |= 1u64 << sb,
+                _ => {
+                    if let Some(run) = current.take() {
+                        runs.push(run);
+                    }
+                    current = Some(ShiftRun {
+                        mask: 1u64 << sb,
+                        shift,
+                    });
+                }
+            }
+        }
+        if let Some(run) = current {
+            runs.push(run);
+        }
+    }
+
+    #[inline(always)]
+    fn apply(self, x: u64) -> u64 {
+        let v = x & self.mask;
+        if self.shift >= 0 {
+            v << self.shift
+        } else {
+            v >> -self.shift
+        }
+    }
+}
+
+/// [`apply_step_bmi2`] with each segment applied through its shift runs:
+/// the same image, on CPUs without `pext`/`pdep`.
+fn apply_step_runs(plan: &StepPlan, live: &[u64], lead: usize, out: &mut [u64], lo: usize) {
+    for (i, &word) in live.iter().enumerate() {
+        if word == 0 {
+            continue;
+        }
+        let w = lead + i;
+        for k in plan.first[w] as usize..plan.first[w + 1] as usize {
+            let runs = &plan.runs[plan.run_first[k] as usize..plan.run_first[k + 1] as usize];
+            let mut image = 0u64;
+            for run in runs {
+                image |= run.apply(word);
+            }
+            out[plan.segments[k].dst_word as usize - lo] ^= image;
+        }
+    }
+}
+
+/// [`apply_step_bmi2`] or [`apply_step_runs`], as `mode` says.
+#[inline]
+fn apply_step(
+    mode: EagerMode,
+    plan: &StepPlan,
+    live: &[u64],
+    lead: usize,
+    out: &mut [u64],
+    lo: usize,
+) {
+    match mode {
+        #[cfg(target_arch = "x86_64")]
+        // SAFETY: `eager_mode` returns `Bmi2` only after checking BMI2.
+        EagerMode::Bmi2 => unsafe { apply_step_bmi2(plan, live, lead, out, lo) },
+        _ => apply_step_runs(plan, live, lead, out, lo),
     }
 }
 
@@ -675,19 +897,44 @@ unsafe fn apply_step_bmi2(plan: &StepPlan, live: &[u64], lead: usize, out: &mut 
     }
 }
 
+/// How a specialisation rewrites its kept rows; see [`eager_mode`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum EagerMode {
+    /// Lazily, each row from wherever it was last current when first read.
+    Off,
+    /// Eagerly through the step plan, segment by segment with `pext`/`pdep`.
+    #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
+    Bmi2,
+    /// Eagerly through the step plan, segment by segment with shift runs.
+    Runs,
+}
+
 /// Whether a specialisation rewrites every kept row into the child's
 /// layout at once, through the step's own plan, instead of leaving each
 /// to be rewritten from wherever it was last current when something first
 /// reads it.  At every node most rows are read (on `K₀/2²³` dim 8, 70 %
 /// of them were rewritten lazily anyway), and the lazy rewrite paid for a
-/// composed map and a plan per pair of layouts.  Needs BMI2, as the
-/// word-wise rewrite does; `KIC_F4_EAGER=0` keeps the lazy rows as a
-/// same-binary control.  The row space, and so every verdict, is the
-/// same; the specialisation word count charges every kept row's rewrite.
-fn eager_rewrite() -> bool {
-    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    *ENABLED
-        .get_or_init(|| std::env::var("KIC_F4_EAGER").as_deref() != Ok("0") && wordwise_rewrite())
+/// composed map and a plan per pair of layouts.  With BMI2 a segment is one
+/// `pdep ∘ pext`; without it (every aarch64 host) the same image is built
+/// from its shift runs.  `KIC_F4_EAGER=0` keeps the lazy rows and
+/// `KIC_F4_EAGER=runs` forces the shift runs on a BMI2 host, both as
+/// same-binary controls; `KIC_F4_REWRITE=scatter` turns the eager rewrite
+/// off with the word-wise one.  The row space, and so every verdict, is
+/// the same in every mode; the specialisation word count charges every
+/// kept row's rewrite, identically in both eager modes.
+fn eager_mode() -> EagerMode {
+    static MODE: std::sync::OnceLock<EagerMode> = std::sync::OnceLock::new();
+    *MODE.get_or_init(|| {
+        let var = std::env::var("KIC_F4_EAGER");
+        if var.as_deref() == Ok("0") || std::env::var("KIC_F4_REWRITE").as_deref() == Ok("scatter")
+        {
+            EagerMode::Off
+        } else if var.as_deref() == Ok("runs") || !wordwise_rewrite() {
+            EagerMode::Runs
+        } else {
+            EagerMode::Bmi2
+        }
+    })
 }
 
 /// Whether the word-wise rewrite is used: `pext`/`pdep` need BMI2, and
@@ -1399,6 +1646,15 @@ impl ReducedBasis {
         // `D`, was tried and costs what it saves.
         // `KIC_F4_INHERIT_ROOT=rref` restores the fully reduced root as a
         // control.
+        if root_replay() {
+            replay_root(
+                &columns,
+                &mut matrix,
+                degree,
+                support_local,
+                &mut cost.reduce_word_ops,
+            );
+        }
         let rank = if root_rref() {
             rref_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops)
         } else {
@@ -1978,8 +2234,7 @@ impl ReducedBasis {
     /// layout (none, unless a lazy ancestor left one) is materialised as
     /// before.  Charged as [`ReducedBasis::rewrite`] charges: the words
     /// read, and the words from the image's first nonzero one to the end.
-    #[cfg(target_arch = "x86_64")]
-    fn rewrite_kept(&mut self, plan: &StepPlan, cost: &mut InheritCost) {
+    fn rewrite_kept(&mut self, mode: EagerMode, plan: &StepPlan, cost: &mut InheritCost) {
         let to = self.epoch();
         let words = self.words;
         let mut spans: Vec<(usize, usize)> = Vec::with_capacity(self.rows.len());
@@ -2002,8 +2257,7 @@ impl ReducedBasis {
                     let live = row.live();
                     cost.specialise_word_ops += live.len() as u64;
                     let out = &mut data[off..off + words - lo];
-                    // SAFETY: `eager_rewrite` checked BMI2 for this process.
-                    unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
+                    apply_step(mode, plan, live, row.lead as usize, out, lo);
                 }
             }
         }
@@ -2031,16 +2285,11 @@ impl ReducedBasis {
         }
     }
 
-    #[cfg(not(target_arch = "x86_64"))]
-    fn rewrite_kept(&mut self, _plan: &StepPlan, _cost: &mut InheritCost) {
-        unreachable!("eager rewrite needs BMI2")
-    }
-
     /// [`ReducedBasis::rewrite`] of a row current in the parent's layout,
     /// through the step's plan.
-    #[cfg(target_arch = "x86_64")]
     fn rewrite_step(
         &self,
+        mode: EagerMode,
         plan: &StepPlan,
         row: &LazyRow,
         cost: &mut InheritCost,
@@ -2055,21 +2304,10 @@ impl ReducedBasis {
         }
         let mut data = zeroed_words(words - lo);
         let out = Rc::get_mut(&mut data).expect("just allocated");
-        // SAFETY: `eager_rewrite` checked BMI2 for this process.
-        unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
+        apply_step(mode, plan, live, row.lead as usize, out, lo);
         let first = out.iter().position(|&w| w != 0)?;
         cost.specialise_word_ops += (words - lo - first) as u64;
         Some(Draft { start: lo, data })
-    }
-
-    #[cfg(not(target_arch = "x86_64"))]
-    fn rewrite_step(
-        &self,
-        _plan: &StepPlan,
-        _row: &LazyRow,
-        _cost: &mut InheritCost,
-    ) -> Option<Draft> {
-        unreachable!("eager rewrite needs BMI2")
     }
 
     /// Bring row `r` into the current layout if it is not there yet.  A
@@ -2389,10 +2627,11 @@ impl ReducedBasis {
                 displaced.push((pc, row.clone()));
             }
         }
-        let step = eager_rewrite().then(|| StepPlan::new(&map));
+        let mode = eager_mode();
+        let step = (mode != EagerMode::Off).then(|| StepPlan::new(&map, mode == EagerMode::Runs));
         out.adopt_layout(new_columns, map);
         if let Some(step) = &step {
-            out.rewrite_kept(step, &mut cost);
+            out.rewrite_kept(mode, step, &mut cost);
         }
         cost.displaced_rows = displaced.len() as u64;
         // Lowest pivot first.  The order changes neither the child's row
@@ -2405,7 +2644,7 @@ impl ReducedBasis {
         for (_, row) in displaced {
             let image = match &step {
                 Some(step) if row.version + 1 == out.epoch() => {
-                    out.rewrite_step(step, &row, &mut cost)
+                    out.rewrite_step(mode, step, &row, &mut cost)
                 }
                 _ => out.rewrite(&row, &mut cost),
             };
@@ -2848,6 +3087,7 @@ mod tests {
             let src_words = n_old.div_ceil(64);
             let dst_words = layout.len().div_ceil(64).max(1);
             let plan = RewritePlan::new(Rc::new(composed.clone()));
+            let step = StepPlan::new(&composed, true);
             for _ in 0..8 {
                 let lead = (next() % src_words as u64) as usize;
                 let live: Vec<u64> = (lead..src_words)
@@ -2883,6 +3123,17 @@ mod tests {
                     let lo = unsafe { apply_plan_bmi2(&plan, &live, lead, &mut got) };
                     assert_eq!(got, expected, "trial {trial} (bmi2)");
                     assert_eq!(lo, expected_lo, "trial {trial} (bmi2)");
+                }
+                // the eager step plan: shift runs on every CPU, and pdep/pext
+                // where present, give the same image
+                let mut got = vec![0u64; dst_words];
+                apply_step_runs(&step, &live, lead, &mut got, 0);
+                assert_eq!(got, expected, "trial {trial} (step runs)");
+                #[cfg(target_arch = "x86_64")]
+                if std::arch::is_x86_feature_detected!("bmi2") {
+                    let mut got = vec![0u64; dst_words];
+                    unsafe { apply_step_bmi2(&step, &live, lead, &mut got, 0) };
+                    assert_eq!(got, expected, "trial {trial} (step bmi2)");
                 }
             }
         }

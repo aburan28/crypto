@@ -1,0 +1,43 @@
+error[E0433]: cannot find module or crate `libc` in this scope
+   --> src/bin/backlog/cairn.rs:359:24
+    |
+359 |     let ptr = unsafe { libc::mkdtemp(bytes.as_mut_ptr() as *mut libc::c_char) };
+    |                        ^^^^ use of unresolved module or unlinked crate `libc`
+    |
+    = help: you might be missing a crate named `libc`
+
+error[E0433]: cannot find module or crate `hex` in this scope
+   --> src/bin/backlog/card.rs:312:5
+    |
+312 |     hex::encode(crypto_lib::hash::sha1::sha1(&buf))
+    |     ^^^ use of unresolved module or unlinked crate `hex`
+    |
+    = help: you might be missing a crate named `hex`
+
+error[E0433]: cannot find module or crate `hex` in this scope
+   --> src/bin/backlog.rs:558:40
+    |
+558 |                     "artifact_sha256": hex::encode(crypto_lib::hash::sha256::sha256(&bytes)),
+    |                                        ^^^ use of unresolved module or unlinked crate `hex`
+    |
+    = help: you might be missing a crate named `hex`
+
+error[E0433]: cannot find module or crate `hex` in this scope
+   --> src/bin/backlog.rs:563:39
+    |
+563 |                     "checker_sha256": hex::encode(crypto_lib::hash::sha256::sha256(&bin_bytes)),
+    |                                       ^^^ use of unresolved module or unlinked crate `hex`
+    |
+    = help: you might be missing a crate named `hex`
+
+error[E0433]: cannot find module or crate `libc` in this scope
+   --> src/bin/backlog/cairn.rs:359:65
+    |
+359 |     let ptr = unsafe { libc::mkdtemp(bytes.as_mut_ptr() as *mut libc::c_char) };
+    |                                                                 ^^^^ use of unresolved module or unlinked crate `libc`
+    |
+    = help: you might be missing a crate named `libc`
+
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0433`.

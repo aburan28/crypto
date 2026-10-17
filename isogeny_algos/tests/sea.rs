@@ -6,6 +6,40 @@ use isogeny_algos::fpm::FpM;
 use std::collections::HashMap;
 
 #[test]
+fn recombination_without_elkies_primes_matches_exhaustive_point_counts() {
+    for p in [101, 1009, next_prime(1 << 20)] {
+        let f = Zp::new(p);
+        // Independent reference: count all y for each right-hand side.
+        let mut squares = vec![0u64; p as usize];
+        for y in 0..p {
+            squares[((y as u128 * y as u128) % p as u128) as usize] += 1;
+        }
+        for (a, b) in [(2, 3), (3, 4), (4, 5)] {
+            let e = Curve::new(a, b);
+            if !is_smooth(&f, &e) || jinv(&f, &e) == 1728 {
+                continue;
+            }
+            let expected = 1
+                + (0..p)
+                    .map(|x| squares[rhs(&f, &e, x) as usize])
+                    .sum::<u64>();
+            for seed in 1..=4 {
+                let (actual, st) = sea(&f, &e, 2, &mut HashMap::new(), &mut Rng::new(seed))
+                    .expect("recombination using trace parity only");
+                assert_eq!(
+                    actual,
+                    Big::from_u64(expected),
+                    "p={p}, a={a}, b={b}, seed={seed}, stats={st:?}"
+                );
+                if p > 1 << 20 {
+                    assert!(st.candidates > SEA_WALK_MAX);
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn atkin_candidate_sets_partition() {
     // every t mod l with a non-zero ratio falls in exactly one order class
     for l in [3u64, 5, 7, 11, 13] {

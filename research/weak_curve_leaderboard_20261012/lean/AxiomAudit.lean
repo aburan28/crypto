@@ -1,0 +1,30 @@
+import PrimeExamples
+import OakleyOrders
+import MinimalPairingField
+import RelationSupport
+
+#print axioms WeakCurveLeaderboard.anomalous_F101_affine
+#print axioms WeakCurveLeaderboard.smooth_F101_affine
+#print axioms WeakCurveLeaderboard.pairing_F103_affine
+#print axioms WeakCurveLeaderboard.anomalous_trace_identity
+#print axioms WeakCurveLeaderboard.pairing_embedding_degree_two
+#print axioms WeakCurveLeaderboard.anomalous_nonsingular
+#print axioms WeakCurveLeaderboard.smooth_nonsingular
+#print axioms WeakCurveLeaderboard.pairing_nonsingular
+#print axioms WeakCurveLeaderboard.anomalous_point_on_curve
+#print axioms WeakCurveLeaderboard.smooth_point_on_curve
+#print axioms WeakCurveLeaderboard.pairing_point_on_curve
+#print axioms WeakCurveLeaderboard.pairing_selected_order_divides_group_order
+#print axioms WeakCurveLeaderboard.oakley3_full_order_factor
+#print axioms WeakCurveLeaderboard.oakley4_full_order_factor
+#print axioms WeakCurveLeaderboard.oakley3_extension_factor
+#print axioms WeakCurveLeaderboard.oakley4_extension_factor
+#print axioms WeakCurveLeaderboard.oakley_type_ii_genus_formula
+#print axioms WeakCurveLeaderboard.selected_order_of_generator
+#print axioms WeakCurveLeaderboard.oakley3_selected_order
+#print axioms WeakCurveLeaderboard.oakley4_selected_order
+#print axioms WeakCurveLeaderboard.embedding_degree_formula
+#print axioms WeakCurveLeaderboard.minimal_degree_divides_pairing_extension
+#print axioms WeakCurveLeaderboard.minimal_degree_is_minimal
+#print axioms WeakCurveLeaderboard.unordered_relation_support_bound
+#print axioms WeakCurveLeaderboard.conditioned_relation_support_bound

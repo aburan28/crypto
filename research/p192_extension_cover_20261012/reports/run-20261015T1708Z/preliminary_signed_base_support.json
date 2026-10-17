@@ -1,0 +1,33 @@
+{
+  "accepted_keys_sha256": "acd5127e6516c66da8ea397725770893773ddd7a572b8d2387b6c292969b1bfb",
+  "accepted_nonzero_scalar_lower_bound": "1569275433846670190958947353987675545133315652035359680560",
+  "accepted_support_targets": 1344,
+  "cancellation_triples": 512,
+  "conditional_hit_probability_upper_bound": "1344/1569275433846670190958947353987675545133315652035359680560",
+  "counts_by_character_pair": {
+    "++": 1344,
+    "+-": 1416,
+    "-+": 1392,
+    "--": 1352
+  },
+  "distinct_three_sum_targets": 5504,
+  "ec_source_sha256": "776d74d3f5ef53f8427d29e519237a692136322259c23b8ba90b078df93fa382",
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "frozen_known_scalar_queries": 64,
+  "frozen_query_hits": [],
+  "geometry_status": "The 16 negative quotient classes are exact subgroup points; fixed-origin genus-three divisor representatives are a separate construction obligation.",
+  "input_sha256": [
+    "3984b55b793305b30beaf18918209282bce80d444c96217cd6143c7d9470d409",
+    "fd0a47cf4aecf736b1852d133fd384e30d9584114761bac6495f803d4210ca29",
+    "961a9995114189ed1ee86febde46979900317417a2744f34274833390fb5ff49"
+  ],
+  "logarithm_columns_before_orbit_folding": 16,
+  "query_equation": "q=a(-2G), with signed base entries ±B_i and coefficient columns B_i",
+  "signed_base_classes": 32,
+  "source_sha256": "274df3edc0df7ebd555d31f9fdc2596a69f6f75889e4f05c5f7aca2e43ffa425",
+  "status": "exact_signed_type_i_fixed_base_support_census",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081",
+  "target_keys_sha256": "7cc91f317e15ae63b757cab2668d47dc5c5f20c15df330eb41d82eab132c446a",
+  "unordered_signed_triples": 5984,
+  "unsigned_base_classes": 16
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "../ws4-evidence.schema.json",
+  "schema_version": "ecdlp-ws4-evidence/v0-draft",
+  "record_kind": "evidence_transition_fixture",
+  "record_state": "draft_non_authoritative",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "registry_ref": "../evidence-profile-registry.draft.json",
+  "fixture_id": "fixture.correction.additive_supersession_accepted",
+  "title": "Additive correction preserves and supersedes the prior assessment",
+  "scenario_kind": "correction",
+  "profile_id": "profile.E.evidence_supply_chain",
+  "claim_kind": "history_integrity",
+  "purpose": "Golden positive case for correcting descriptive metadata by appending a replacement assessment with an explicit supersedes link.",
+  "before": {
+    "assessment_id": "assessment.evidence.006.r1",
+    "revision": 1,
+    "supersedes": null,
+    "claim_status": "unknown",
+    "derived_maturity": "E3",
+    "evaluated_at": "2026-10-14T09:00:00Z",
+    "history_count": 1,
+    "identity_binding": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "blocking_gates": [],
+    "component_maturities": [
+      {"component_id": "artifact_manifest", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "content_digests", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "producer_revisions", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "replay_receipts", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "correction_history", "required": true, "maturity": "E3", "status": "present"}
+    ],
+    "evidence_revision_refs": ["fixture-evidence:supply-006:r1"]
+  },
+  "event": {
+    "event_id": "event.correction.evidence.006.r2",
+    "event_type": "correction_request",
+    "occurred_at": "2026-10-14T10:25:00Z",
+    "requested_maturity": null,
+    "gate_changes": [],
+    "component_maturities_after": [
+      {"component_id": "artifact_manifest", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "content_digests", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "producer_revisions", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "replay_receipts", "required": true, "maturity": "E3", "status": "present"},
+      {"component_id": "correction_history", "required": true, "maturity": "E3", "status": "present"}
+    ],
+    "correction": {
+      "mode": "additive_supersession",
+      "prior_assessment_id": "assessment.evidence.006.r1",
+      "replacement_assessment_id": "assessment.evidence.006.r2",
+      "preserves_prior": true,
+      "reason": "Correct the recorded producer revision while retaining the original record and unchanged E3 maturity.",
+      "evidence_refs": ["fixture-correction:supply-006:producer-revision"]
+    },
+    "reviewer_decision": "approved",
+    "reviewer_role": "evidence_replay",
+    "review_receipt_refs": ["fixture-review:supply-006:r2"]
+  },
+  "expected": {
+    "decision": "accept",
+    "resulting_maturity": "E3",
+    "reason_codes": ["additive_correction_accepted"],
+    "weakest_component_ids": [],
+    "history_count_after": 2,
+    "new_assessment_id": "assessment.evidence.006.r2",
+    "prior_assessment_preserved": true,
+    "claim_status_derived_from_maturity": false,
+    "required_actions": ["Link the replacement assessment to assessment.evidence.006.r1 through supersedes."]
+  },
+  "notes": [
+    "This correction changes metadata, not the scientific claim status or derived maturity.",
+    "The future ledger must make the prior assessment addressable after accepting the correction."
+  ]
+}

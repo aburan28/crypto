@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "72843c83a (main, carries #1999)",
+  "final": "this PR head (changes 1-6)",
+  "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cores": 4,
+  "os": "Linux 6.18.44-fc-v139 x86_64",
+  "event_sources": [
+    "breakpoint",
+    "msr",
+    "power",
+    "software",
+    "tracepoint",
+    "uprobe"
+  ],
+  "hardware_counters": "none (perf_ipc.sh: unsupported, runs/perf/)",
+  "binaries_sha256": {
+    "koblitz_rho_fixture-baseline": "3a229c2ebb10f7e2b1919e7d3ca3b9647b4d5e0fbed396df5ab59c7bb959b462",
+    "koblitz_rho_fixture-changes1-4": "82b1c822eaab2e2bce3e0741d7b8d470e97ef424f136e8c78b525cb6de7ba82c",
+    "koblitz_rho_fixture-changes1-5": "1b1137532757ebf4f14460d2a1a3d955c88ddfc1c7b583143e972cc1bd8f3e80",
+    "koblitz_rho_fixture-final": "031ccccf838605c4fa34fbbc5c6e1c6e07d6dbc0b1ba73445f9c7de97c819730",
+    "isolated_bench": "e2c77079ab686c2a9c4512d42723b7fb1d68f13ebe85b0d7998ef4fd7205d07a"
+  },
+  "pinning": "isolated_bench run --cpus 3 --max-other-cpu 0.3, RAYON_NUM_THREADS=1"
+}

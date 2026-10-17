@@ -1,0 +1,85 @@
+{
+  "artifact_sha256": {
+    ".github/workflows/weak-curve-database.yml": "c525b1e44f1864ff4de80382882a9ea730c60a95df6777bccee1567acb309f51",
+    "research/p192_extension_cover_20261012/REPORT.md": "a939839108c59d984b22fc128e7841c3d23f6ad16b2aedd3941045e490609bec",
+    "research/p192_extension_cover_20261012/lean/ShortSums.lean": "06253156fb399d79a173c90a35a65660f07bff7a5ea6cbdfd1e2db3119f0eec3",
+    "research/p192_extension_cover_20261012/lean/short-signed-axioms-20261015.log": "21aba307ab4fd1c4bde6bdea5c08941ece4da942b0711a7ff39ef772a6e58d3b",
+    "research/p192_extension_cover_20261012/lean/short-signed-build-20261015.log": "676a51b6d24406af92fc5a49f9cc06f355b940ba71d70a0c31ae89721db97270",
+    "research/p192_extension_cover_20261012/lean/short-signed-fresh-20261015.log": "3eb83905b2716a13b8c66f9ef0474d86341b87983d24c92aed0abfdcb587a81a",
+    "research/p192_extension_cover_20261012/line_signed_short_relation_screen.py": "81f9ed8b3d21999a7ba48a3b4db7c123def5f43cbce67c8c1743eb72a2e08bad",
+    "research/p192_extension_cover_20261012/reports/run-20261015T2316Z/REPORT.md": "eba34645ad6f5026ce09e20edc96bb6a8bb8a2692ea260c5ae9ad493cacdeace",
+    "research/p192_extension_cover_20261012/type_i_line_guided_collector.json": "1650a868094bbcaa7885acc0aa59aa63b71c10398f5e0b3dc0e3f1656161690f",
+    "research/p192_extension_cover_20261012/type_i_line_signed_sage_runtime_info.json": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+    "research/p192_extension_cover_20261012/type_i_line_signed_short_receipt_verification.log": "9a26f3c728008d539e1186e6bea1e63286cc1ebf0589616c58fe8ef189c3191d",
+    "research/p192_extension_cover_20261012/type_i_line_signed_short_relation_screen.json": "63eedc1c4b5a1d1ad6cd1557717f9ca3af1fdbda5f9fdffcfcec7f78b49dbc57",
+    "research/p192_extension_cover_20261012/type_i_line_signed_short_relation_screen.log": "30d3b612c92b44825a9118b666854c7c726c8e09fc5c9a01ec5c11ec25c4cfbb",
+    "research/p192_extension_cover_20261012/type_i_line_signed_short_sage_verification.json": "55a6dd2e786e40e501729c4191d11fad730b6dc31cf91ada6b007b14838c7087",
+    "research/p192_extension_cover_20261012/type_i_line_signed_short_sage_verification.log": "9ae25ad972c8e8c0e18180e972608f0c0660da4b0fba5f6c621bf3c7363010f7",
+    "research/p192_extension_cover_20261012/type_i_line_signed_short_sage_verification.stale-producer.log": "9eb833b846f1ebc9d912893417ef87874eee048123460f0f83e915cea543fad6",
+    "research/p192_extension_cover_20261012/type_i_line_three_sum_coverage.json": "5ccebe2d9bda3bb5310bdae53778fc096d59786d7d94c8a8d74cad72130cca5b",
+    "research/p192_extension_cover_20261012/verify_line_signed_short_receipt.py": "9e84ce78a6d4226fa95c46ba4bb817006ba9c79e20e1bf19be540e0f3ad5b873",
+    "research/p192_extension_cover_20261012/verify_line_signed_short_sage.py": "ae681009a6cd819296584a0eee8b8fefac78699cab091c04776caea02c6848b3",
+    "research/weak_curve_leaderboard_20261012/criteria.json": "450a1e4419c6143262fa272fe7544177818d3d9267f47721612b86f63f082a90",
+    "website/weakcurves/dist/criteria.json": "450a1e4419c6143262fa272fe7544177818d3d9267f47721612b86f63f082a90"
+  },
+  "candidate_id": null,
+  "checks": {
+    "integer_group_law_enumeration_exit": 0,
+    "lean_axiom_audit_exit": 0,
+    "lean_build_exit": 0,
+    "lean_fresh_exit": 0,
+    "python_receipt_custody_exit": 0,
+    "sage_independent_group_law_replay_exit": 0
+  },
+  "counts": {
+    "base_classes": 141,
+    "identity_and_support_intersection_cells": 12,
+    "max_terms_per_side": 3,
+    "overlap_counts": {
+      "1_term_zero": 0,
+      "1_vs_1_opposite_sign": 0,
+      "1_vs_2_opposite_sign": 0,
+      "1_vs_2_same_sign": 0,
+      "1_vs_3_opposite_sign": 0,
+      "1_vs_3_same_sign": 0,
+      "2_term_zero": 0,
+      "2_vs_2_opposite_sign": 0,
+      "2_vs_3_opposite_sign": 0,
+      "2_vs_3_same_sign": 0,
+      "3_term_zero": 0,
+      "3_vs_3_opposite_sign": 0
+    },
+    "signed_relation_rank": 0,
+    "support_sizes": {
+      "1": 141,
+      "2": 10011,
+      "3": 477191
+    }
+  },
+  "failed_attempts": [
+    {
+      "log": "research/p192_extension_cover_20261012/type_i_line_signed_short_sage_verification.stale-producer.log",
+      "stage": "sage_independent_replay_initial_receipt_read",
+      "status": "stale_producer_receipt_missing_digest"
+    }
+  ],
+  "field_prime": "6277101735386680763835789423207666416083908700390324961279",
+  "formalization": {
+    "axioms": [
+      "propext"
+    ],
+    "declarations": [
+      "P192ExtensionCover.same_sign_lists_relation",
+      "P192ExtensionCover.opposite_sign_lists_relation"
+    ],
+    "lean_version": "v4.34.1",
+    "mathlib_revision": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+    "module": "ShortSums",
+    "open_bridge": "concrete P-192 support nonintersection is exhaustively replayed but the 141 elliptic points are not Lean objects"
+  },
+  "parent_commit": "1a81f653ebe2db66964425353ff83eab54f0e51d",
+  "scope": "NIST P-192 Type I 141 frozen r-torsion quotient classes; signed supports of length 1, 2, 3",
+  "status": "verified_p192_type_i_141_base_signed_short_support_zero_overlap_screen",
+  "subgroup_order": "6277101735386680763835789423176059013767194773182842284081",
+  "support_sha256_sorted_xy_be24": "95a111382b5b3088a11f438e564864a462e46fb83619ed9b170afda03e067fb0"
+}

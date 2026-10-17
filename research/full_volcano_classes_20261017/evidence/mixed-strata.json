@@ -1,0 +1,226 @@
+[
+  {
+    "conductor": 1,
+    "level2": 0,
+    "level3": 0,
+    "representative": "mixed/stratum-1-representative.json",
+    "representative_vertex": 0,
+    "vertices": 1
+  },
+  {
+    "conductor": 2,
+    "level2": 1,
+    "level3": 0,
+    "representative": "mixed/stratum-2-representative.json",
+    "representative_vertex": 1,
+    "vertices": 3
+  },
+  {
+    "conductor": 3,
+    "level2": 0,
+    "level3": 1,
+    "representative": "mixed/stratum-3-representative.json",
+    "representative_vertex": 4,
+    "vertices": 4
+  },
+  {
+    "conductor": 4,
+    "level2": 2,
+    "level3": 0,
+    "representative": "mixed/stratum-4-representative.json",
+    "representative_vertex": 8,
+    "vertices": 6
+  },
+  {
+    "conductor": 6,
+    "level2": 1,
+    "level3": 1,
+    "representative": "mixed/stratum-6-representative.json",
+    "representative_vertex": 10,
+    "vertices": 12
+  },
+  {
+    "conductor": 8,
+    "level2": 3,
+    "level3": 0,
+    "representative": "mixed/stratum-8-representative.json",
+    "representative_vertex": 38,
+    "vertices": 12
+  },
+  {
+    "conductor": 9,
+    "level2": 0,
+    "level3": 2,
+    "representative": "mixed/stratum-9-representative.json",
+    "representative_vertex": 26,
+    "vertices": 12
+  },
+  {
+    "conductor": 12,
+    "level2": 2,
+    "level3": 1,
+    "representative": "mixed/stratum-12-representative.json",
+    "representative_vertex": 40,
+    "vertices": 24
+  },
+  {
+    "conductor": 16,
+    "level2": 4,
+    "level3": 0,
+    "representative": "mixed/stratum-16-representative.json",
+    "representative_vertex": 146,
+    "vertices": 24
+  },
+  {
+    "conductor": 18,
+    "level2": 1,
+    "level3": 2,
+    "representative": "mixed/stratum-18-representative.json",
+    "representative_vertex": 50,
+    "vertices": 36
+  },
+  {
+    "conductor": 24,
+    "level2": 3,
+    "level3": 1,
+    "representative": "mixed/stratum-24-representative.json",
+    "representative_vertex": 148,
+    "vertices": 48
+  },
+  {
+    "conductor": 27,
+    "level2": 0,
+    "level3": 3,
+    "representative": "mixed/stratum-27-representative.json",
+    "representative_vertex": 110,
+    "vertices": 36
+  },
+  {
+    "conductor": 32,
+    "level2": 5,
+    "level3": 0,
+    "representative": "mixed/stratum-32-representative.json",
+    "representative_vertex": 398,
+    "vertices": 48
+  },
+  {
+    "conductor": 36,
+    "level2": 2,
+    "level3": 2,
+    "representative": "mixed/stratum-36-representative.json",
+    "representative_vertex": 158,
+    "vertices": 72
+  },
+  {
+    "conductor": 48,
+    "level2": 4,
+    "level3": 1,
+    "representative": "mixed/stratum-48-representative.json",
+    "representative_vertex": 400,
+    "vertices": 96
+  },
+  {
+    "conductor": 54,
+    "level2": 1,
+    "level3": 3,
+    "representative": "mixed/stratum-54-representative.json",
+    "representative_vertex": 194,
+    "vertices": 108
+  },
+  {
+    "conductor": 64,
+    "level2": 6,
+    "level3": 0,
+    "representative": "mixed/stratum-64-representative.json",
+    "representative_vertex": 902,
+    "vertices": 96
+  },
+  {
+    "conductor": 72,
+    "level2": 3,
+    "level3": 2,
+    "representative": "mixed/stratum-72-representative.json",
+    "representative_vertex": 410,
+    "vertices": 144
+  },
+  {
+    "conductor": 96,
+    "level2": 5,
+    "level3": 1,
+    "representative": "mixed/stratum-96-representative.json",
+    "representative_vertex": 904,
+    "vertices": 192
+  },
+  {
+    "conductor": 108,
+    "level2": 2,
+    "level3": 3,
+    "representative": "mixed/stratum-108-representative.json",
+    "representative_vertex": 446,
+    "vertices": 216
+  },
+  {
+    "conductor": 144,
+    "level2": 4,
+    "level3": 2,
+    "representative": "mixed/stratum-144-representative.json",
+    "representative_vertex": 914,
+    "vertices": 288
+  },
+  {
+    "conductor": 192,
+    "level2": 6,
+    "level3": 1,
+    "representative": "mixed/stratum-192-representative.json",
+    "representative_vertex": 1910,
+    "vertices": 384
+  },
+  {
+    "conductor": 216,
+    "level2": 3,
+    "level3": 3,
+    "representative": "mixed/stratum-216-representative.json",
+    "representative_vertex": 950,
+    "vertices": 432
+  },
+  {
+    "conductor": 288,
+    "level2": 5,
+    "level3": 2,
+    "representative": "mixed/stratum-288-representative.json",
+    "representative_vertex": 1918,
+    "vertices": 576
+  },
+  {
+    "conductor": 432,
+    "level2": 4,
+    "level3": 3,
+    "representative": "mixed/stratum-432-representative.json",
+    "representative_vertex": 1950,
+    "vertices": 864
+  },
+  {
+    "conductor": 576,
+    "level2": 6,
+    "level3": 2,
+    "representative": "mixed/stratum-576-representative.json",
+    "representative_vertex": 3734,
+    "vertices": 1152
+  },
+  {
+    "conductor": 864,
+    "level2": 5,
+    "level3": 3,
+    "representative": "mixed/stratum-864-representative.json",
+    "representative_vertex": 3758,
+    "vertices": 1728
+  },
+  {
+    "conductor": 1728,
+    "level2": 6,
+    "level3": 3,
+    "representative": "mixed/stratum-1728-representative.json",
+    "representative_vertex": 6614,
+    "vertices": 3456
+  }
+]

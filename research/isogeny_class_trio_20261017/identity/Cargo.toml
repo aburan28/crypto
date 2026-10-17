@@ -1,0 +1,10 @@
+[package]
+name = "isogeny-class-trio-identity"
+version = "0.1.0"
+edition = "2021"
+description = "ICV1 identities of the isogeny-class trio picks, from the native crypto_lib::cryptanalysis::curve_id producer"
+publish = false
+
+[dependencies]
+crypto = { path = "../../.." }
+num-bigint = "0.4"

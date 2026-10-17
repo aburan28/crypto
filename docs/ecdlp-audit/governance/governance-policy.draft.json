@@ -1,0 +1,209 @@
+{
+  "schema_version": "ecdlp-audit.governance/v1-draft",
+  "record_kind": "policy",
+  "record_id": "gov.policy.ws8.v1-draft",
+  "status": "draft",
+  "authoritative": false,
+  "promotion_allowed": false,
+  "self_promotion_allowed": false,
+  "synthetic_only": true,
+  "created_at": "2026-10-14T00:00:00Z",
+  "source_plan": "research/notes/ecdlp-general/RESEARCH_COMPREHENSIVE_ECDLP_AUDIT_PLAN.md#workstream-8--add-independent-governance",
+  "draft_notice": "This policy is a non-authoritative design record. It cannot promote, demote, correct, release, or otherwise change a scientific assessment.",
+  "policy": {
+    "policy_version": "ws8-policy/v1-draft",
+    "purpose": "Separate claim authorship, domain review, replay, authorization review, and release approval while preserving immutable evidence and decisions.",
+    "dependencies": ["WS3", "WS4", "WS7"],
+    "roles": [
+      {
+        "role": "author",
+        "purpose": "Prepare a revision-bound request, disclose conflicts, and respond to review without approving the request.",
+        "required_independence": "originator",
+        "may_request": true,
+        "may_review": false,
+        "may_finalize": false,
+        "veto_scope": [],
+        "must_record": ["identity", "relationship_to_author", "conflicts", "reviewed_revisions", "decision", "rationale", "evidence_receipts"]
+      },
+      {
+        "role": "mathematical_reviewer",
+        "purpose": "Check hypotheses, identities, proofs, exceptional cases, transfer obligations, and the exact scope of negative language.",
+        "required_independence": "distinct_person",
+        "may_request": false,
+        "may_review": true,
+        "may_finalize": false,
+        "veto_scope": ["promotion", "demotion", "additive_correction", "staleness_recheck"],
+        "must_record": ["identity", "relationship_to_author", "conflicts", "reviewed_revisions", "decision", "rationale", "evidence_receipts"]
+      },
+      {
+        "role": "implementation_reviewer",
+        "purpose": "Check executable behavior, tests, artifact identity, malformed-input handling, and implementation-to-claim correspondence.",
+        "required_independence": "distinct_person",
+        "may_request": false,
+        "may_review": true,
+        "may_finalize": false,
+        "veto_scope": ["promotion", "demotion", "additive_correction", "staleness_recheck"],
+        "must_record": ["identity", "relationship_to_author", "conflicts", "reviewed_revisions", "decision", "rationale", "evidence_receipts"]
+      },
+      {
+        "role": "evidence_replay_reviewer",
+        "purpose": "Reproduce receipts from frozen inputs and exact revisions, check provenance and accounting, and retain failures.",
+        "required_independence": "distinct_person_and_fresh_replay",
+        "may_request": false,
+        "may_review": true,
+        "may_finalize": false,
+        "veto_scope": ["promotion", "demotion", "additive_correction", "staleness_recheck", "external_replication_registration"],
+        "must_record": ["identity", "relationship_to_author", "conflicts", "reviewed_revisions", "decision", "rationale", "evidence_receipts"]
+      },
+      {
+        "role": "authorization_privacy_reviewer",
+        "purpose": "Check execution authorization, handling of sensitive material, disclosure limits, and publication eligibility when applicable.",
+        "required_independence": "distinct_person",
+        "may_request": false,
+        "may_review": true,
+        "may_finalize": false,
+        "veto_scope": ["promotion", "demotion", "additive_correction", "staleness_recheck", "external_replication_registration"],
+        "must_record": ["identity", "relationship_to_author", "conflicts", "reviewed_revisions", "decision", "rationale", "evidence_receipts"]
+      },
+      {
+        "role": "release_approver",
+        "purpose": "Confirm all required machine and human gates are complete and append a final decision without overriding a veto.",
+        "required_independence": "distinct_person",
+        "may_request": false,
+        "may_review": true,
+        "may_finalize": true,
+        "veto_scope": ["promotion", "demotion", "additive_correction", "staleness_recheck", "external_replication_registration"],
+        "must_record": ["identity", "relationship_to_author", "conflicts", "reviewed_revisions", "decision", "rationale", "evidence_receipts"]
+      }
+    ],
+    "independence": {
+      "author_may_approve_own_work": false,
+      "reviewer_may_hold_multiple_required_or_invoked_roles": false,
+      "release_approver_may_override_veto": false,
+      "external_replication_auto_promotes": false,
+      "conflicts_require_recusal": true,
+      "semantic_identity_check_required": true
+    },
+    "transition_rules": [
+      {
+        "transition_kind": "promotion",
+        "required_inputs": ["source assessment", "proposed assessment", "exact revision bindings", "profile-required evidence", "accounting receipt when applicable", "authorization record when applicable"],
+        "required_roles": ["mathematical_reviewer", "implementation_reviewer", "evidence_replay_reviewer", "release_approver"],
+        "conditional_roles": ["authorization_privacy_reviewer"],
+        "machine_gates": ["schema", "identity", "revision_binding", "evidence_profile", "accounting", "authorization", "staleness", "conflicts", "history", "required_roles"],
+        "veto_is_blocking": true,
+        "history_mode": "append_assessment",
+        "draft_state_effect": "none"
+      },
+      {
+        "transition_kind": "demotion",
+        "required_inputs": ["trigger receipt", "affected assessment", "recomputed contiguous maturity", "proposed superseding assessment"],
+        "required_roles": ["mathematical_reviewer", "evidence_replay_reviewer", "release_approver"],
+        "conditional_roles": ["implementation_reviewer", "authorization_privacy_reviewer"],
+        "machine_gates": ["schema", "identity", "revision_binding", "evidence_profile", "staleness", "conflicts", "history", "required_roles"],
+        "veto_is_blocking": true,
+        "history_mode": "append_assessment",
+        "draft_state_effect": "none"
+      },
+      {
+        "transition_kind": "additive_correction",
+        "required_inputs": ["correction reason", "prior record digest", "replacement record digest", "supersedes link", "impact analysis"],
+        "required_roles": ["mathematical_reviewer", "implementation_reviewer", "evidence_replay_reviewer", "release_approver"],
+        "conditional_roles": ["authorization_privacy_reviewer"],
+        "machine_gates": ["schema", "identity", "revision_binding", "evidence_profile", "accounting", "authorization", "conflicts", "history", "required_roles"],
+        "veto_is_blocking": true,
+        "history_mode": "append_supersession",
+        "draft_state_effect": "none"
+      },
+      {
+        "transition_kind": "staleness_recheck",
+        "required_inputs": ["staleness class", "trigger", "last check", "recheck deadline", "affected gates", "recomputed contiguous maturity"],
+        "required_roles": ["evidence_replay_reviewer", "release_approver"],
+        "conditional_roles": ["mathematical_reviewer", "implementation_reviewer", "authorization_privacy_reviewer"],
+        "machine_gates": ["schema", "identity", "revision_binding", "evidence_profile", "staleness", "conflicts", "history", "required_roles"],
+        "veto_is_blocking": true,
+        "history_mode": "append_assessment",
+        "draft_state_effect": "none"
+      },
+      {
+        "transition_kind": "external_replication_registration",
+        "required_inputs": ["replicator identity", "independence attestation", "scope", "artifact digest", "result", "failed-attempt record", "authorization record when applicable"],
+        "required_roles": ["evidence_replay_reviewer", "release_approver"],
+        "conditional_roles": ["authorization_privacy_reviewer"],
+        "machine_gates": ["schema", "identity", "revision_binding", "authorization", "conflicts", "history", "required_roles"],
+        "veto_is_blocking": true,
+        "history_mode": "append_replication_entry",
+        "draft_state_effect": "none"
+      }
+    ],
+    "staleness_classes": [
+      {
+        "class": "immutable_content",
+        "description": "Content-addressed evidence remains the same object, but a hash mismatch or retraction invalidates reliance on it.",
+        "invalidators": ["digest mismatch", "source retraction", "custody failure"],
+        "maximum_age_days": null,
+        "recheck_action": "verify_digest"
+      },
+      {
+        "class": "revision_bound",
+        "description": "A decision applies only to the exact implementation, source, schema, and dependency revisions reviewed.",
+        "invalidators": ["source revision changes", "dependency lock changes", "schema revision changes", "artifact identity changes"],
+        "maximum_age_days": null,
+        "recheck_action": "replay_on_revision_change"
+      },
+      {
+        "class": "time_bound",
+        "description": "Evidence whose relevance depends on a stated review horizon must be replayed by its profile-specific deadline.",
+        "invalidators": ["profile-specific deadline reached"],
+        "maximum_age_days": 365,
+        "recheck_action": "replay_at_deadline"
+      },
+      {
+        "class": "event_bound",
+        "description": "New errata, counterexamples, incidents, toolchain defects, or authorization changes trigger re-evaluation.",
+        "invalidators": ["erratum", "counterexample", "toolchain defect", "incident correction", "authorization change"],
+        "maximum_age_days": null,
+        "recheck_action": "replay_on_event"
+      }
+    ],
+    "decision_log": {
+      "append_only": true,
+      "exact_revision_binding": true,
+      "prior_decisions_preserved": true,
+      "decision_fields": ["actor", "role", "relationship", "conflicts", "review_binding", "decision", "rationale", "evidence_receipts", "timestamp"]
+    },
+    "release_checklist": [
+      "The request and every referenced record validate against their pinned schemas.",
+      "Canonical subject, assessment, evidence, implementation, and correction identities resolve without aliases or collisions.",
+      "Every decision binds the request's exact proposed aggregate, governance schema, and dependency-lock revisions.",
+      "Every profile-required evidence gate is present, fresh, and contiguous; composed routes use the weakest required component.",
+      "Measured, modeled, and extrapolated costs remain separate and the applicable accounting receipt passes.",
+      "Execution authorization, privacy, and publication constraints pass when the conditional role is invoked, or machine preflight records that no adopted trigger applies.",
+      "Required and invoked conditional roles are held by distinct eligible people, conflicts are disclosed, and no such reviewer authored the reviewed revision.",
+      "No required reviewer rejected or remained blocked; the release approver cannot override a veto.",
+      "Failures, negative results, timeouts, duplicates, and superseded evidence remain visible.",
+      "The final action appends a revision-bound decision and never rewrites frozen evidence or prior assessments."
+    ],
+    "external_replication": {
+      "registry_is_append_only": true,
+      "replicator_cannot_finalize": true,
+      "receipt_and_scope_required": true,
+      "negative_and_failed_results_retained": true,
+      "full_recheck_after_entry": true
+    },
+    "adoption_prerequisites": [
+      "WS3 supplies reviewed canonical identities, immutable history, and an authoritative ledger.",
+      "WS4 supplies a native semantic transition validator and governed evidence profiles.",
+      "WS7 supplies a native cross-route accounting and claim checker.",
+      "Repository ownership, protected approvals, and release controls enforce the adopted role matrix.",
+      "Positive and negative workflow fixtures pass under independent review at an exact revision.",
+      "An authorized governance decision adopts a version that no longer carries draft fail-closed markers."
+    ],
+    "non_claims": [
+      "This draft does not adopt a governance policy or satisfy WS8-G1.",
+      "Schema validity, CI success, or a merged pull request is not scientific promotion.",
+      "An external replication entry is evidence, not an automatic status or maturity transition.",
+      "These synthetic drills establish no ECDLP, cover, transfer, solver, performance, security, or historical claim."
+    ]
+  }
+}

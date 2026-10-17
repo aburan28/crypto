@@ -20,6 +20,7 @@ name = "fixed-modulus-bench"
 path = "src/bin/fixed_modulus_bench.rs"
 
 [dependencies]
+volcano-cli = { path = "../volcano-cli" }
 isogeny_algos = { path = "../../isogeny_algos" }
 num-bigint = { version = "0.4", features = ["rand"] }
 num-traits = "0.2"

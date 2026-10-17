@@ -1,0 +1,70 @@
+{
+  "arguments": {
+    "controls": 32,
+    "curve": "secp192r1",
+    "factor_base": "small_x",
+    "seed": 7,
+    "size": 1024,
+    "trials": 2000000
+  },
+  "elapsed_seconds": 18.680712088,
+  "evidence_scope": "exact_pair_sum_yield_with_monte_carlo",
+  "limitations": [
+    "Two-point sums only: a relation is a signed sum of two base points of the small-x base.",
+    "The yield is exact for the base built. The Monte Carlo rate agrees with it only where the yield is large enough to produce hits; at P-192 it is a null result and bounds the rate from above.",
+    "The cost of each trial, deciding by a Semaev S₃ solve whether a target decomposes, is not part of this measurement, and neither is any linear algebra or descent: a relation yield is not a discrete logarithm.",
+    "The base is capped at 8192 abscissae by the memory of the pair-sum set."
+  ],
+  "operation": "prime",
+  "report": {
+    "base_abscissae": 1024,
+    "base_points": 2048,
+    "collisions": 0,
+    "controls": 32,
+    "controls_detected": 32,
+    "controls_recovered": 32,
+    "covered_targets": "2097152",
+    "curve": "secp192r1 (NIST P-192)",
+    "distinct_sums": 1048576,
+    "exact_yield": 3.3409558876152446e-52,
+    "exact_yield_log2": -171.0,
+    "expected_trials_log2": 171.0,
+    "field_bits": 192,
+    "largest_small_x": 2075,
+    "mc_ci95": [
+      0.0,
+      1.8444380260884685e-6
+    ],
+    "mc_hits": 0,
+    "mc_hits_verified": 0,
+    "mc_over_exact": null,
+    "mc_rate": 0.0,
+    "mc_trials": 2000000,
+    "model_yield": 3.3409558876152446e-52,
+    "model_yield_log2": -171.0,
+    "order": "6277101735386680763835789423176059013767194773182842284081",
+    "order_bits": 192.0,
+    "rho_log2": 96.0,
+    "sums": 1048576,
+    "threads": 4,
+    "timing_ms": {
+      "base": 34.294239999999995,
+      "controls": 214.448706,
+      "monte_carlo": 18332.172678,
+      "pair_sums": 97.2172,
+      "us_per_trial_wall": 9.166086339
+    },
+    "trials_for_full_system_log2": 181.0014081943928
+  },
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "13888159fdecded552b8b413bdf0bc1d8b08045b00f8f132d4bd8953803c994b",
+    "git_commit": null,
+    "git_commit_source": null,
+    "git_dirty": null,
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete"
+}

@@ -1,0 +1,6 @@
+DivisorSupport.lean:23:4: warning: Try `simp at heval` instead of `simpa using heval`
+
+Note: This linter can be disabled with `set_option linter.unnecessarySimpa false`
+'P192ExtensionCover.no_common_x_of_bezout' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.affine_support_disjoint_of_bezout' depends on axioms: [propext, Classical.choice, Quot.sound]
+'P192ExtensionCover.p192_split_support_hit_bound_certificate' depends on axioms: [propext, Classical.choice, Quot.sound]

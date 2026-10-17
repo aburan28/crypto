@@ -1,0 +1,262 @@
+   Compiling autocfg v1.5.1
+   Compiling num-traits v0.2.19
+    Checking num-integer v0.1.47
+    Checking num-bigint v0.4.8
+    Checking ecc-arithmetic-panel v0.1.0 (/Volumes/SSD990-2/crypto/wt/codex-ecc-arithmetic-20261013/research/ecc_arithmetic_20261013)
+warning[E0133]: call to unsafe function `baseline::clmul64_hw` is unsafe and requires unsafe block
+   --> src/bin/../../baseline_src/f2m.rs:999:28
+    |
+999 |             let (lo, hi) = clmul64_hw(ai, bj);
+    |                            ^^^^^^^^^^^^^^^^^^ call to unsafe function
+    |
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+note: an unsafe function restricts its caller, but its body is safe by default
+   --> src/bin/../../baseline_src/f2m.rs:996:1
+    |
+996 | unsafe fn mul_words_hw(a: &[u64], b: &[u64], out: &mut [u64]) {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: `#[warn(unsafe_op_in_unsafe_fn)]` (part of `#[warn(rust_2024_compatibility)]`) on by default
+
+warning[E0133]: call to unsafe function `baseline::fold_words_clmul_hw::place` is unsafe and requires unsafe block
+    --> src/bin/../../baseline_src/f2m.rs:1122:17
+     |
+1122 |                 place(value, 64 * i - m, w, r);
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1138 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+note: an unsafe function restricts its caller, but its body is safe by default
+    --> src/bin/../../baseline_src/f2m.rs:1137:1
+     |
+1137 | unsafe fn fold_words_clmul_hw(value: &mut [u64], m: usize, r: u64) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `fold_words_clmul_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `baseline::fold_words_clmul_hw::place` is unsafe and requires unsafe block
+    --> src/bin/../../baseline_src/f2m.rs:1129:17
+     |
+1129 |                 place(value, 0, w, r);
+     |                 ^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1138 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `fold_words_clmul_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `baseline::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../baseline_src/f2m.rs:1101:28
+     |
+1101 |             let (lo, hi) = clmul64_hw(w, r);
+     |                            ^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1138 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+note: an unsafe function restricts its caller, but its body is safe by default
+    --> src/bin/../../baseline_src/f2m.rs:1100:9
+     |
+1100 |         unsafe fn place(v: &mut [u64], pos: usize, w: u64, r: u64) {
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+1138 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `fold_words_clmul_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1001:22
+     |
+1001 |             let p0 = clmul64_hw(a[0], b[0]);
+     |                      ^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+note: an unsafe function restricts its caller, but its body is safe by default
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1041:1
+     |
+1041 | unsafe fn mul_words_hw(a: &[u64], b: &[u64], out: &mut [u64]) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1002:22
+     |
+1002 |             let p2 = clmul64_hw(a[1], b[1]);
+     |                      ^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1003:25
+     |
+1003 |             let cross = clmul64_hw(a[0] ^ a[1], b[0] ^ b[1]);
+     |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1012:22
+     |
+1012 |             let p0 = clmul64_hw(a[0], b[0]);
+     |                      ^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1013:22
+     |
+1013 |             let p2 = clmul64_hw(a[1], b[1]);
+     |                      ^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1014:22
+     |
+1014 |             let p4 = clmul64_hw(a[2], b[2]);
+     |                      ^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1015:23
+     |
+1015 |             let q01 = clmul64_hw(a[0] ^ a[1], b[0] ^ b[1]);
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1016:23
+     |
+1016 |             let q12 = clmul64_hw(a[1] ^ a[2], b[1] ^ b[2]);
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1017:23
+     |
+1017 |             let q02 = clmul64_hw(a[0] ^ a[2], b[0] ^ b[2]);
+     |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1031:32
+     |
+1031 |                 let (lo, hi) = clmul64_hw(ai, bj);
+     |                                ^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1042 |     mul_words_hw_body!(a, b, out)
+     |     ----------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `mul_words_hw_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::fold_words_clmul_hw::place` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1155:17
+     |
+1155 |                 place(value, 64 * i - m, w, r);
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1171 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+note: an unsafe function restricts its caller, but its body is safe by default
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1170:1
+     |
+1170 | unsafe fn fold_words_clmul_hw(value: &mut [u64], m: usize, r: u64) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `fold_words_clmul_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::fold_words_clmul_hw::place` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1162:17
+     |
+1162 |                 place(value, 0, w, r);
+     |                 ^^^^^^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1171 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `fold_words_clmul_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning[E0133]: call to unsafe function `candidate::clmul64_hw` is unsafe and requires unsafe block
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1134:28
+     |
+1134 |             let (lo, hi) = clmul64_hw(w, r);
+     |                            ^^^^^^^^^^^^^^^^ call to unsafe function
+...
+1171 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     |
+     = note: consult the function's documentation for information on how to avoid undefined behavior
+note: an unsafe function restricts its caller, but its body is safe by default
+    --> src/bin/../../../../src/binary_ecc/f2m.rs:1133:9
+     |
+1133 |         unsafe fn place(v: &mut [u64], pos: usize, w: u64, r: u64) {
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+1171 |     fold_words_clmul_body!(value, m, r)
+     |     ----------------------------------- in this macro invocation
+     = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+     = note: this warning originates in the macro `fold_words_clmul_body` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0133`.
+warning: `ecc-arithmetic-panel` (bin "compare") generated 17 warnings (run `cargo fix --bin "compare" -p ecc-arithmetic-panel` to apply 6 suggestions)
+    Finished `release` profile [optimized] target(s) in 54.13s

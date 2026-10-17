@@ -1,0 +1,42 @@
+{
+  "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.36",
+  "cpu_model": "unknown",
+  "cpu_flags_relevant": [
+    "pclmulqdq",
+    "avx2",
+    "bmi2",
+    "avx512f",
+    "adx",
+    "vpclmulqdq"
+  ],
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "cargo_version": "cargo 1.93.1 (083ac5135 2025-12-15)",
+  "rustc_version": "rustc 1.93.1 (01f6ddf75 2026-02-11)",
+  "baseline_sha256": "2bc2a1f55887ef7db1fdb1ce5a6cd05c86b7c75e9eb8ade36497ff5686b37fd3",
+  "candidate_sha256": "8b32c5467ee8c87752b9cb86594fb742aa9053fd5918172686c4270c9e936364",
+  "test_exit": 101,
+  "test_stdout": "",
+  "test_stderr": "    Updating crates.io index\n Downloading crates ...\n  Downloaded autocfg v1.5.1\n  Downloaded num-traits v0.2.19\n  Downloaded num-integer v0.1.47\n  Downloaded num-bigint v0.4.8\n   Compiling autocfg v1.5.1\n   Compiling num-traits v0.2.19\n   Compiling num-integer v0.1.47\n   Compiling num-bigint v0.4.8\n   Compiling ecc-arithmetic-panel v0.1.0 (/work/study)\nerror: couldn't read `src/bin/../../../../src/binary_ecc/f2m.rs`: No such file or directory (os error 2)\n --> src/bin/compare.rs:8:1\n  |\n8 | mod candidate;\n  | ^^^^^^^^^^^^^^\n\nerror: could not compile `ecc-arithmetic-panel` (bin \"compare\" test) due to 1 previous error\n",
+  "bench_exit": null,
+  "bench_stdout": null,
+  "bench_stderr": null
+}

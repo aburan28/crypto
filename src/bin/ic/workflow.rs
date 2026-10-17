@@ -49,7 +49,7 @@ use super::experiment::{
 use clap::{Args, ValueEnum};
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
-    search, Candidate, FactorBaseSpec, Family, SearchOptions,
+    freeze_spec, search, Candidate, FactorBaseSpec, Family, SearchOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, CollectedRelation,
@@ -902,6 +902,7 @@ fn search_options(src: &FactorBaseSource, p: &WorkflowParams) -> Result<SearchOp
         "factor" => vec![Family::Factor],
         "divisor" => vec![Family::Divisor],
         "union" => vec![Family::Union],
+        "greedy" => vec![Family::Greedy],
         "all" => vec![Family::Factor, Family::Divisor, Family::Union],
         other => return Err(format!("unknown factor-base family {other:?}")),
     };
@@ -1075,11 +1076,15 @@ pub(crate) fn build_pair_table(
     fb: &FrobeniusFactorBase,
     p: &WorkflowParams,
 ) -> Option<PairSumTable> {
+    super::progress::line(format_args!(
+        "pair table: building for {} factor-base points",
+        fb.points.len()
+    ));
     let budget = p
         .pair_table_bytes
         .map(u128::from)
         .unwrap_or(PairSumTable::DEFAULT_BYTE_BUDGET);
-    match p.pair_table_tier.unwrap_or(PairTableTier::Auto) {
+    let table = match p.pair_table_tier.unwrap_or(PairTableTier::Auto) {
         PairTableTier::Auto => {
             PairSumTable::build_within_for(c, fb, budget, probe_budget(c, fb, p))
         }
@@ -1089,7 +1094,16 @@ pub(crate) fn build_pair_table(
             PairSumTable::build_witnessed_compact_within(c, fb, budget)
         }
         PairTableTier::Folded => PairSumTable::build_folded_within(c, fb, budget),
-    }
+    };
+    super::progress::line(format_args!(
+        "pair table: {}",
+        if table.is_some() {
+            "ready"
+        } else {
+            "unavailable within the requested budget"
+        }
+    ));
+    table
 }
 
 /// Which representation of the pair table a run should build.
@@ -1155,8 +1169,12 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let resumed = state.runs > 1;
     let say = |msg: &str| {
         if !quiet {
-            println!("{msg}");
-            let _ = std::io::stdout().flush();
+            if super::progress::enabled() {
+                super::progress::line(format_args!("{msg}"));
+            } else {
+                println!("{msg}");
+                let _ = std::io::stdout().flush();
+            }
         }
     };
     say(&format!(
@@ -1222,8 +1240,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     .take(5)
                     .map(candidate_json)
                     .collect();
+                // A greedy selection is saved by the orbits it chose, so
+                // every later stage and worker rebuilds it without the scan.
                 (
-                    best.spec.clone(),
+                    freeze_spec(&c, &best.spec).unwrap_or_else(|_| best.spec.clone()),
                     Some(json!({"candidates_scored":report.candidates.len(),
                         "targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
                         "elapsed_ms":report.elapsed_ms,"top":top})),
@@ -1990,7 +2010,21 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 // Timed like the ρ baseline: the descent on the public point
                 // only, not the construction of the target.
                 let t = Instant::now();
-                let outcome = solver.as_ref().and_then(|s| s.solve(&q));
+                super::progress::line(format_args!("[4/4] target {i}: descent started"));
+                let outcome = solver.as_ref().and_then(|s| {
+                    if super::progress::enabled() {
+                        let report = s.solve_report_with_progress(&q, &mut |trial, outcome| {
+                            super::progress::line(format_args!(
+                                "[4/4] target {i}, trial {trial}/{}: {}",
+                                ic.max_trials,
+                                super::progress::outcome(outcome)
+                            ));
+                        });
+                        report.log.clone().map(|d| (d, report))
+                    } else {
+                        s.solve(&q)
+                    }
+                });
                 let elapsed = t.elapsed().as_secs_f64();
                 let (recovered, trials) = match outcome {
                     Some((d, r)) => (Some(d), r.trials),
@@ -2287,7 +2321,22 @@ fn collect_unit(
             .ok_or("work unit range overflows")?,
         count: p.collection.unit_trials,
     };
-    let (relations, report) = collector.collect_aimed(work, aim);
+    let (relations, report) = if super::progress::enabled() {
+        super::progress::line(format_args!(
+            "[2/4] unit {unit:05}: starting {} probes",
+            work.count
+        ));
+        collector.collect_aimed_with_progress(work, aim, &|trial, outcome| {
+            super::progress::line(format_args!(
+                "[2/4] unit {unit:05}, trial {}/{} (probe {trial}): {}",
+                trial - work.start + 1,
+                work.count,
+                super::progress::outcome(outcome)
+            ));
+        })
+    } else {
+        collector.collect_aimed(work, aim)
+    };
     let doc = RelationUnitDocument {
         schema_version: 1,
         params_digest: digest.to_string(),

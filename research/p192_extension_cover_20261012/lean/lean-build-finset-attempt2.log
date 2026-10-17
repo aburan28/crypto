@@ -1,0 +1,35 @@
+✖ [816/817] Building CrossRatio (68s)
+trace: .> LEAN_PATH=/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Cli/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/batteries/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Qq/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/aesop/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/proofwidgets/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/importGraph/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/plausible/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/mathlib/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/lean/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/lean/CrossRatio.lean -o /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/lean/.lake/build/lib/lean/CrossRatio.olean -i /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/lean/.lake/build/lib/lean/CrossRatio.ilean -c /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/lean/.lake/build/ir/CrossRatio.c --setup /Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/lean/.lake/build/ir/CrossRatio.setup.json --json
+error: CrossRatio.lean:168:4: failed to synthesize instance of type class
+  Fintype (Fin 16)
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+error: CrossRatio.lean:174:2: Tactic `decide` failed for proposition
+  canonicalTriples16.card = 816
+because its `Decidable` instance
+  instDecidableEqNat canonicalTriples16.card 816
+did not reduce to `isTrue` or `isFalse`.
+
+After unfolding the instances `instDecidableEqNat` and `Nat.decEq`, reduction got stuck at the `Decidable` instance
+  match h : canonicalTriples16.card.beq 816 with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+info: CrossRatio.lean:189:0: 'P192ExtensionCover.cyclic_cross_ratio_product' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:190:0: 'P192ExtensionCover.cyclic_cross_ratio_not_norm_one' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:191:0: 'P192ExtensionCover.pullback_injective_of_push_pull_two' does not depend on any axioms
+info: CrossRatio.lean:192:0: 'P192ExtensionCover.legendre_j_difference_factor' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:193:0: 'P192ExtensionCover.scholten_palindromic_identity' depends on axioms: [propext]
+info: CrossRatio.lean:194:0: 'P192ExtensionCover.scholten_reciprocal_identity' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:195:0: 'P192ExtensionCover.quartic_projection_identity' depends on axioms: [propext]
+info: CrossRatio.lean:196:0: 'P192ExtensionCover.projected_three_point_relation' depends on axioms: [propext]
+info: CrossRatio.lean:197:0: 'P192ExtensionCover.projected_target_scalar' depends on axioms: [propext, Classical.choice, Quot.sound]
+info: CrossRatio.lean:198:0: 'P192ExtensionCover.odd_power_pair_square' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:199:0: 'P192ExtensionCover.type_i_subfield_rhs_square' depends on axioms: [propext, Quot.sound]
+info: CrossRatio.lean:200:0: 'P192ExtensionCover.involution_norm_fixed' does not depend on any axioms
+info: CrossRatio.lean:201:0: 'P192ExtensionCover.involution_norm_torsion' depends on axioms: [propext]
+info: CrossRatio.lean:202:0: 'P192ExtensionCover.conorm_preserves_torsion' depends on axioms: [propext]
+info: CrossRatio.lean:203:0: 'P192ExtensionCover.canonicalTriples16_card' depends on axioms: [propext, sorryAx, Quot.sound]
+info: CrossRatio.lean:204:0: 'P192ExtensionCover.three_sum_support_bound' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]
+Some required targets logged failures:
+- CrossRatio
+error: build failed

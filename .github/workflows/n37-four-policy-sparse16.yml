@@ -34,6 +34,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             src
             examples/n37_four_policy_sparse16_prepare.rs
             examples/n37_four_policy_sparse16_inputs_replay.rs
@@ -41,6 +43,7 @@ jobs:
             examples/n37_four_policy_sparse16_pdp_replay.rs
             examples/support/n37_policy_common.rs
             docs/curves/registry.json
+            docs/curves/standards/parameters.json
             docs/ecbench/schema.sql
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
