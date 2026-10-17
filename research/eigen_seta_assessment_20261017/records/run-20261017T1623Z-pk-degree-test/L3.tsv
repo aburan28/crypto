@@ -1,0 +1,42 @@
+keygen	L3	E=1594	f_bits=410	seconds=75.71
+true	flip=false	e=832	u=39	e_floor=823	accept=true	panic=false	seconds=2.830
+true	flip=true	e=832	u=39	e_floor=823	accept=true	panic=false	seconds=3.169
+time	rep=0	pk_test_e=832	pk_test_s=2.6423	pk_test_codomain_is_EA=true	decaps_E=1594	decaps_s=5.4937	decaps_correct=true
+time	rep=1	pk_test_e=832	pk_test_s=2.7194	pk_test_codomain_is_EA=true	decaps_E=1594	decaps_s=5.5369	decaps_correct=true
+time	rep=2	pk_test_e=832	pk_test_s=2.7808	pk_test_codomain_is_EA=true	decaps_E=1594	decaps_s=5.7549	decaps_correct=true
+wrong	uniform	e=831	u=29	accept=false	panic=false	seconds=2.931
+wrong	uniform	e=835	u=13	accept=false	panic=false	seconds=2.977
+wrong	uniform	e=838	u=3	accept=false	panic=false	seconds=2.914
+wrong	uniform	e=827	u=9	accept=false	panic=false	seconds=2.930
+wrong	uniform	e=832	u=27	accept=false	panic=false	seconds=2.771
+wrong	uniform	e=833	u=1	accept=false	panic=false	seconds=2.993
+wrong	uniform	e=833	u=31	accept=false	panic=false	seconds=3.281
+wrong	uniform	e=827	u=7	accept=false	panic=false	seconds=3.200
+wrong	uniform	e=841	u=27	accept=false	panic=false	seconds=3.170
+wrong	uniform	e=834	u=3	accept=false	panic=false	seconds=3.036
+wrong	uniform	e=828	u=1	accept=false	panic=false	seconds=3.070
+wrong	uniform	e=831	u=23	accept=false	panic=false	seconds=2.917
+wrong	uniform	e=833	u=25	accept=false	panic=false	seconds=2.764
+wrong	uniform	e=829	u=5	accept=false	panic=false	seconds=2.976
+wrong	uniform	e=826	u=3	accept=false	panic=false	seconds=3.093
+wrong	uniform	e=835	u=55	accept=false	panic=false	seconds=2.819
+wrong	uniform	e=838	u=21	accept=false	panic=false	seconds=2.916
+wrong	uniform	e=832	u=37	accept=false	panic=false	seconds=2.834
+wrong	uniform	e=831	u=47	accept=false	panic=false	seconds=2.755
+wrong	uniform	e=835	u=5	accept=false	panic=false	seconds=2.900
+wrong	uniform	e=841	u=63	accept=false	panic=false	seconds=3.049
+wrong	uniform	e=842	u=9	accept=false	panic=false	seconds=3.338
+wrong	uniform	e=831	u=35	accept=false	panic=false	seconds=3.051
+wrong	uniform	e=847	u=31	accept=false	panic=false	seconds=3.205
+wrong	uniform	e=835	u=5	accept=false	panic=false	seconds=3.039
+wrong	uniform	e=837	u=33	accept=false	panic=false	seconds=3.181
+wrong	uniform	e=853	u=25	accept=false	panic=false	seconds=3.100
+wrong	uniform	e=833	u=5	accept=false	panic=false	seconds=3.237
+wrong	uniform	e=833	u=21	accept=false	panic=false	seconds=2.964
+wrong	uniform	e=838	u=21	accept=false	panic=false	seconds=3.162
+wrong	agree16	e=852	u=49	accept=false	panic=false	seconds=3.056
+wrong	agree16	e=826	u=3	accept=false	panic=false	seconds=3.145
+wrong	agree64	e=868	u=57	accept=false	panic=false	seconds=2.854
+wrong	agree64	e=853	u=39	accept=false	panic=false	seconds=2.885
+wrong	agree205	e=843	u=41	accept=false	panic=false	seconds=2.889
+summary	L3	true_e=832	E=1594	wrong_tested=35	wrong_accepted=0	mean_e_above_floor=14.66	max_e_above_floor=45
