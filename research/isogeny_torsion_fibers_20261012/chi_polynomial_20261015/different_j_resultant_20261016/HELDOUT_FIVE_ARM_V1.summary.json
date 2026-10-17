@@ -1,0 +1,68 @@
+{
+  "schema": "different_j_chi_heldout_summary/v1",
+  "rows": 60,
+  "all_verified": true,
+  "arms": [
+    {
+      "arm": "chi-resultant",
+      "n": 12,
+      "total_cpu_ns": 79103335,
+      "mean_cpu_ns": 6591944.583333333,
+      "mean_group_ops": 2128.75,
+      "mean_fp_muls": 980317.6666666666,
+      "mean_fp_invs": 40897.5,
+      "mean_trials": 33.583333333333336,
+      "mean_relations": 13.833333333333334,
+      "mean_rank": 9
+    },
+    {
+      "arm": "direct-pair",
+      "n": 12,
+      "total_cpu_ns": 5464208,
+      "mean_cpu_ns": 455350.6666666667,
+      "mean_group_ops": 1345.4166666666667,
+      "mean_fp_muls": 36772,
+      "mean_fp_invs": 1343.25,
+      "mean_trials": 33.583333333333336,
+      "mean_relations": 13.833333333333334,
+      "mean_rank": 9
+    },
+    {
+      "arm": "rho-negation",
+      "n": 12,
+      "total_cpu_ns": 2161378,
+      "mean_cpu_ns": 180114.83333333334,
+      "mean_group_ops": 320.75,
+      "mean_fp_muls": 9706.5,
+      "mean_fp_invs": 326.6666666666667,
+      "mean_trials": 0,
+      "mean_relations": 0,
+      "mean_rank": 0
+    },
+    {
+      "arm": "rho-negation-aa",
+      "n": 12,
+      "total_cpu_ns": 3121794,
+      "mean_cpu_ns": 260149.5,
+      "mean_group_ops": 320.75,
+      "mean_fp_muls": 9706.5,
+      "mean_fp_invs": 326.6666666666667,
+      "mean_trials": 0,
+      "mean_relations": 0,
+      "mean_rank": 0
+    },
+    {
+      "arm": "source-bsgs",
+      "n": 12,
+      "total_cpu_ns": 1642416,
+      "mean_cpu_ns": 136868,
+      "mean_group_ops": 266,
+      "mean_fp_muls": 8292.5,
+      "mean_fp_invs": 271,
+      "mean_trials": 5.5,
+      "mean_relations": 0,
+      "mean_rank": 0
+    }
+  ],
+  "relation_pair_match": true
+}

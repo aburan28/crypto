@@ -170,7 +170,12 @@ impl RhoClasses<PrimeCurve> for SixClasses {
         6
     }
 
-    fn canon(&self, curve: &PrimeCurve, point: PrimePoint) -> (PrimePoint, u64) {
+    fn canon(
+        &self,
+        curve: &PrimeCurve,
+        _ops: &mut GroupOps,
+        point: PrimePoint,
+    ) -> (PrimePoint, u64) {
         if point.infinity {
             return (point, 1);
         }

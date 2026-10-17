@@ -1,0 +1,15 @@
+{
+  "schema": "different_j_chi_s3_exhaustive_spec/v2",
+  "predecessor": "S3_EXHAUSTIVE_SPEC_V1.json",
+  "purpose": "emit every returned pair set for independent Rust replay rather than summary-only internal enumeration",
+  "solver_source_sha256": "c3cb3b06fd5d90708334d6b88ad878a780ddbd34979e8da88dfc363e41a74319",
+  "solver_binary_sha256": "4469bd1c155fe132da30f82b390c420bfca3c85713a8d5379220359ef998b5d9",
+  "checker_source_sha256": "f51c26bf522180c9426f254982240b7cad2fdc1ce37c950ac783e2bdc5531887",
+  "checker_binary_sha256": "9f29295470d9a985b1a888dacb209f2e81d07ba076fd98664060a4e1aa4f5630",
+  "public_sha256": "e1969305462131722556dead399593b77a919a8017f0e035e3019986b645958e",
+  "p": 211,
+  "r": 229,
+  "source_and_quotient_cases_each": 229,
+  "acceptance": "each source and quotient S3 pair set equals separate direct enumeration, including zero-pair and exceptional cases; all 229 case rows and summary independently replayed",
+  "stop_condition": "stop the seven-arm panel on any mismatched case or checker failure"
+}

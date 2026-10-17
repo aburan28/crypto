@@ -1,0 +1,20 @@
+{
+  "schema": "different_j_price_sensitivity_five_run_spec/v1",
+  "status": "frozen_before_derivation",
+  "trend_sha256": "611ac86929a2bc0364ca854949be05f1c7833f9722fce4571472af9d9661aadf",
+  "source_sha256": "74182e99cc9a79006ca105207be1a13a4d70184f3116026f4b455cf17c9bb449",
+  "binary_sha256": "0c0b14aac3931e5863bc40f0ff370d4f1113f883cd59fbeb76bf19c8b3852f2a",
+  "cells": [
+    {"p": 211, "r": 229, "run_sha256": "d0e4616236aeb8978f5ac1549dde373be294bdf52503c954a6f964904f68faf8"},
+    {"p": 457, "r": 421, "run_sha256": "b1054cd665cae39d07a4f64adbb1132f4d5756b59e8b3e44e1b46ce4e32009fb"},
+    {"p": 409, "r": 433, "run_sha256": "b167728e7c0809803f387c6db8ddad4520a5fce603774a74c7d981947f1d4632"},
+    {"p": 421, "r": 457, "run_sha256": "d75247c817c17c0bb0966f06792fb4d58f74d24434d0e83dcba45396ec98caa0"},
+    {"p": 1237, "r": 1201, "run_sha256": "d314764e87988b2dc12675d199612f50abc538d1782761c562c2c74be5e34d89"}
+  ],
+  "expected_children": 420,
+  "expected_scalar_outputs": 8925,
+  "expected_matched_rows": 60,
+  "unit": "group-addition equivalents of extra omitted rho work per observed rho step",
+  "output_json": "SENSITIVITY_FIVE_V1.json",
+  "output_svg": "SENSITIVITY_FIVE_V1.svg"
+}

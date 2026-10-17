@@ -125,7 +125,7 @@ impl Field {
             count <= 10_000_000,
             "extension multiplication cap exhausted"
         );
-        if count % 2048 == 0 {
+        if count.is_multiple_of(2048) {
             assert!(
                 thread_cpu_ns() - self.budget_cpu_start_ns <= 900_000_000_000,
                 "15-minute current-thread CPU cap exhausted"

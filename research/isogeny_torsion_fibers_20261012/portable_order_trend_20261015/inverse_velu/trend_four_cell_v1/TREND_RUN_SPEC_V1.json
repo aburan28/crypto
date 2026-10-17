@@ -1,0 +1,27 @@
+{
+  "schema": "different_j_inverse_trend_run_spec/v1",
+  "protocol": "../FOUR_GATE_PROTOCOL_V1.md",
+  "solver_source_sha256": "e0256820c1e1412e1b91d3fcad04bfc7d4afe5155581bc3c48c97379dbf8484a",
+  "solver_binary_sha256": "7e3998f2b4b496556f87a79979b2c173ce7ae5c9e99aa73ddfd6fe6050ef2f3f",
+  "meter_source_sha256": "be2539c5dde00df38def5a19866615dce3508eb38ac4150995f724e12d0711c2",
+  "meter_binary_sha256": "798bd10f25edd2832b09de4f6a4551e46e58894966dae867dc6cfe6e24b1c42a",
+  "darwin_orchestration_sha256": "c008ba0171cac6346ad4209b5c670954ea9daafb67bdc28a37d6ea5509664074",
+  "public_sha256_by_p": {
+    "2473": "5009b0a804b7f91cb36eea8123c9d39b28bf6bb09891eb7b44d5d516c7327623",
+    "5521": "2e62d06d2598806cdd7d1ab3345a6e255c014c45a324b05879ff06697a7186eb",
+    "9619": "975cedb3586660d6abaa82c917b03371a43a8584661613730cefd430297cf987",
+    "19213": "fa0e0838b2b0320366e2035c6b727d7a455fd6370d946e99d74ae7bffb3431f3"
+  },
+  "arms": ["inverse-velu", "full-image", "source-bsgs", "rho-negation", "rho-negation-aa"],
+  "rounds": 3,
+  "prefixes": [1, 64],
+  "relation_trials_per_target": "8r",
+  "rho_restarts": 32,
+  "rho_steps_per_restart": "20r",
+  "child_wall_seconds": 300,
+  "child_rss_bytes": 536870912,
+  "darwin_memory_enforcement": "observed peak only; full-image arms with unbounded square maps routed to Linux hard-cap worker",
+  "darwin_executable_arms": ["inverse-velu", "source-bsgs", "rho-negation", "rho-negation-aa"],
+  "linux_censored_full_image_status": "pending",
+  "independent_replay_required": true
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "different_j_trend_batch_source_freeze/v1",
+  "status": "source_binary_and_fiber_inputs_frozen_before_target_generation",
+  "parent_commit": "e5d05f0e3",
+  "protocol": "PANEL_PROTOCOL_V2.md",
+  "host": "Darwin arm64",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "build_command": "CARGO_TARGET_DIR=target/order-batch-check cargo build --release --example different_j_trend_batch --example different_j_trend_batch_check",
+  "runner_source_sha256": "b851819e76f638e1514a0e1702159e99fc7ec671e886f3ffed3b08852cb46df2",
+  "runner_binary_sha256": "74290fc586084f6afdaaef00c5850a4f8e4a0eb7bead6831d0faaa3eb3fa59f7",
+  "checker_source_sha256": "4845a2ca0126312ed048648ee606fec96d47299e92cc1e99aa339d417b794660",
+  "checker_binary_sha256": "238eaff955f73fdd7c1a65ce01f19662296670a8394d9d3d4c9757013ffd1498",
+  "meter_binary_sha256": "798bd10f25edd2832b09de4f6a4551e46e58894966dae867dc6cfe6e24b1c42a",
+  "fiber_input_sha256": {
+    "409_433": "538f939b431f1a314f45736ba37a6c9749a2f83ba91abb8c269c7139936f1733",
+    "421_457": "281ecdbd77790b481994a91302b6184070821bb0d60ad415813248baffa3868d",
+    "457_421": "2098992e0a687befd4e8c6a3a8d63a53e4c450b1e2fcc8e9902e083ca21bccff"
+  },
+  "target_count_per_cell": 64,
+  "target_order_domain": "different-j-prime-to-char-target-v2:13",
+  "arms": ["source", "isogeny-image", "destination-direct", "full-image", "source-bsgs", "rho-negation", "rho-negation-aa"],
+  "rounds": 3,
+  "prefixes": [1, 4, 16, 64],
+  "relation_trials_per_target": "8*r",
+  "rho_restarts_max": 32,
+  "rho_steps_per_restart": "20*r",
+  "bsgs_baby_size": "ceil(sqrt(r))",
+  "per_child_wall_ceiling_seconds": 300,
+  "per_child_rss_ceiling_bytes": 536870912
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "different_j_inverse_trend_screen_freeze/v2",
+  "status": "frozen_before_extension",
+  "protocol": "SCREEN_RANGE_EXTENSION_V2.md",
+  "protocol_commit": "229272c3b9",
+  "v1_raw_sha256": "ef232a54b22938239819fd6b14182d1e49de5778e9c00542ce257c54097608a5",
+  "source": "examples/different_j_inverse_trend_screen.rs",
+  "source_sha256": "d2779e868cd075aca56b4b710ef5b3c5a70719e8c9a82b2201f04cb7214ac0e0",
+  "binary_sha256_darwin": "eabc4477199ac2daa92ab1cebbbf30811595cb066e5b3f77497a808f1431a6c2",
+  "checker": "examples/different_j_inverse_trend_check.rs",
+  "checker_source_sha256": "bf4a25705fe31e324c5b111bad2c398f626798c9e1853900af469983a1ea3854",
+  "checker_binary_sha256_darwin": "b6afdeeb681a287a7298739e2442f24b10542d868114517195f1604805cbff7e",
+  "command": "target/release/examples/different_j_inverse_trend_screen screen-inverse-trend-extension",
+  "checker_command": "target/release/examples/different_j_inverse_trend_check SCREEN_V2.jsonl check-extension",
+  "range": {"min_p": 10009, "max_p": 30011, "p_mod_3": 1},
+  "selected_bin": [19200, 38400],
+  "screen_wall_ceiling_seconds": 3600,
+  "screen_rss_ceiling_bytes": 536870912,
+  "map_samples_per_accepted_row": 64,
+  "output": "SCREEN_V2.jsonl"
+}
