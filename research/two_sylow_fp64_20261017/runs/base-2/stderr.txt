@@ -1,0 +1,64 @@
+fp64 (Fp64, 2^63-25): batched walk == unbatched reference, on curve; timed arithmetic == field
+w1 (FpWide<1>, 2^64-59): batched walk == unbatched reference, on curve; timed arithmetic == field
+clock
+  rep 1/7 of 2 arms
+  rep 2/7 of 2 arms
+  rep 3/7 of 2 arms
+  rep 4/7 of 2 arms
+  rep 5/7 of 2 arms
+  rep 6/7 of 2 arms
+  rep 7/7 of 2 arms
+field operations
+  rep 1/7 of 16 arms
+  rep 2/7 of 16 arms
+  rep 3/7 of 16 arms
+  rep 4/7 of 16 arms
+  rep 5/7 of 16 arms
+  rep 6/7 of 16 arms
+  rep 7/7 of 16 arms
+memory read bandwidth, 1 thread(s)
+  rep 1/7 of 10 arms
+  rep 2/7 of 10 arms
+  rep 3/7 of 10 arms
+  rep 4/7 of 10 arms
+  rep 5/7 of 10 arms
+  rep 6/7 of 10 arms
+  rep 7/7 of 10 arms
+memory read bandwidth, 4 thread(s)
+  rep 1/7 of 10 arms
+  rep 2/7 of 10 arms
+  rep 3/7 of 10 arms
+  rep 4/7 of 10 arms
+  rep 5/7 of 10 arms
+  rep 6/7 of 10 arms
+  rep 7/7 of 10 arms
+rho kernel
+  fp64: 10 batch sizes set up
+  w1: 10 batch sizes set up
+  rep 1/7 of 20 arms
+  rep 2/7 of 20 arms
+  rep 3/7 of 20 arms
+  rep 4/7 of 20 arms
+  rep 5/7 of 20 arms
+  rep 6/7 of 20 arms
+  rep 7/7 of 20 arms
+thread scaling
+  rep 1/7 of 6 arms
+  rep 2/7 of 6 arms
+  rep 3/7 of 6 arms
+  rep 4/7 of 6 arms
+  rep 5/7 of 6 arms
+  rep 6/7 of 6 arms
+  rep 7/7 of 6 arms
+two_sylow z2xz2 p=9223372036854775783: 2000 draws, three arms agree on every depth; depth sum 4922, points (depth >= 6) 85, x xor per arm baseline 0x4e343ade76751fd0, fast-chi 0x5fb70c5dbe2d5f61, fast 0x363b8fb6939ce2cb
+two_sylow z2xz8 p=9223372036854775783: 2000 draws, three arms agree on every depth; depth sum 7939, points (depth >= 6) 236, x xor per arm baseline 0x27cf114294b01830, fast-chi 0x56b86e862fb28989, fast 0x49903f974568e2dc
+two_sylow_search halving draws on fp_backend::Fp64, p = 9223372036854775783
+  rep 1/7 of 6 arms
+  rep 2/7 of 6 arms
+  rep 3/7 of 6 arms
+  rep 4/7 of 6 arms
+  rep 5/7 of 6 arms
+  rep 6/7 of 6 arms
+  rep 7/7 of 6 arms
+wrote research/two_sylow_fp64_20261017/runs/base-2
+exit 0

@@ -1,0 +1,24 @@
+# Axiom audit of papers/rootfinding-decomposition/lean (S3Roots), copied from a green CI run.
+# Source: workflow "Root-finding S3Roots Lean proof" (.github/workflows/rootfinding-s3roots-lean.yml), job `lean-proof`
+#   run  https://github.com/aburan28/crypto/actions/runs/38984047507
+#   job  https://github.com/aburan28/crypto/actions/runs/38984047507/job/117251255336 (conclusion: success)
+#   PR   https://github.com/aburan28/crypto/pull/2026, head e5a8842272b3efbfdd53bc1b8f65bf4c644e3948
+#        (actions/checkout default ref, i.e. the PR merge ref; the lean/ sources are identical at e5a884227 and main)
+#   date 2026-10-17T01:06:17Z (audit step), Lean toolchain per lean-toolchain, Mathlib per lake-manifest.json
+#   artifact rootfinding-s3roots-axiom-audit, id 12083579716, zip sha256 0c2f7a7319df8fd74d067f3762a5decb7c5a775fd418fc66fe55a0f4d1d63160
+# Committed for finding L-N7 of sheriff case SHF-20261017-e4d7f6.
+# Commands (from the job log): grep for sorry/admit/native_decide/axiom (none found);
+#   lean-action build S3Roots; leanchecker --fresh --verbose S3Roots (success);
+#   set -o pipefail; lake env lean AxiomAudit.lean | tee /tmp/axioms.txt (exactly 3 lines, allow-list).
+# Lines below are the job's stdout, timestamps stripped.
+✔ [3092/3093] Built S3Roots (2.6s)
+Build completed successfully (3093 jobs).
+Checking environment with leanchecker
+Using bundled leanchecker from the active Lean toolchain
+replaying S3Roots with --fresh
+AXIOM_AUDIT|SemaevS3.d2_mul_addX|[propext, Classical.choice, Quot.sound]
+AXIOM_AUDIT|SemaevS3.S3_factor|[propext, Classical.choice, Quot.sound]
+AXIOM_AUDIT|SemaevS3.S3_root_iff|[propext, Classical.choice, Quot.sound]
+'SemaevS3.d2_mul_addX' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SemaevS3.S3_factor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SemaevS3.S3_root_iff' depends on axioms: [propext, Classical.choice, Quot.sound]
