@@ -52,7 +52,9 @@ fn die(msg: &str) -> ! {
 }
 
 fn ratio(rs: &[&Run]) -> f64 {
-    let (n, d) = rs.iter().fold((0.0, 0.0), |(n, d), r| (n + r.num, d + r.den));
+    let (n, d) = rs
+        .iter()
+        .fold((0.0, 0.0), |(n, d), r| (n + r.num, d + r.den));
     n / d
 }
 
@@ -78,7 +80,10 @@ fn normalise(runs: &[Run]) -> Vec<Run> {
     }
     let mean: HashMap<u64, f64> = by.iter().map(|(c, rs)| (*c, ratio(rs))).collect();
     runs.iter()
-        .map(|r| Run { num: r.num / mean[&r.class], ..r.clone() })
+        .map(|r| Run {
+            num: r.num / mean[&r.class],
+            ..r.clone()
+        })
         .collect()
 }
 
@@ -105,7 +110,11 @@ fn vertical(runs: &[Run], floor: &HashMap<u64, u64>) -> Option<f64> {
         let (mut acc, mut k) = (0.0, 0usize);
         for (c, rs) in group(runs, |r| r.class) {
             let crater: Vec<&Run> = rs.iter().copied().filter(|r| r.level == 0).collect();
-            let bottom: Vec<&Run> = rs.iter().copied().filter(|r| r.level == floor[&c] && r.level > 0).collect();
+            let bottom: Vec<&Run> = rs
+                .iter()
+                .copied()
+                .filter(|r| r.level == floor[&c] && r.level > 0)
+                .collect();
             if !crater.is_empty() && !bottom.is_empty() {
                 acc += (ratio(&bottom) / ratio(&crater)).ln();
                 k += 1;
@@ -114,14 +123,21 @@ fn vertical(runs: &[Run], floor: &HashMap<u64, u64>) -> Option<f64> {
         return (k > 0).then(|| (acc / k as f64).exp());
     }
     let crater: Vec<&Run> = runs.iter().filter(|r| r.level == 0).collect();
-    let bottom: Vec<&Run> = runs.iter().filter(|r| r.level == floor[&r.class] && r.level > 0).collect();
+    let bottom: Vec<&Run> = runs
+        .iter()
+        .filter(|r| r.level == floor[&r.class] && r.level > 0)
+        .collect();
     (!crater.is_empty() && !bottom.is_empty()).then(|| ratio(&bottom) / ratio(&crater))
 }
 
 /// Cochran Q of cell means around their stratum means, the DL spread τ, and
 /// the largest standardised deviation of one cell (the test for a single
 /// deviant curve, which the omnibus Q dilutes over its degrees of freedom).
-fn cochran(runs: &[Run], stratum: impl Fn(&Run) -> (u64, u64, u64), cell: impl Fn(&Run) -> (u64, u64, u64, u64)) -> (f64, f64, usize, f64) {
+fn cochran(
+    runs: &[Run],
+    stratum: impl Fn(&Run) -> (u64, u64, u64),
+    cell: impl Fn(&Run) -> (u64, u64, u64, u64),
+) -> (f64, f64, usize, f64) {
     let mut q = 0.0;
     let mut maxz = 0f64;
     let (mut sw, mut sw2, mut df) = (0.0, 0.0, 0usize);
@@ -131,12 +147,24 @@ fn cochran(runs: &[Run], stratum: impl Fn(&Run) -> (u64, u64, u64), cell: impl F
         if cells.len() < 2 {
             continue;
         }
-        let stats: Vec<(f64, f64)> = cells.values().map(|c| ratio_se2(c)).filter(|s| s.1 > 0.0).collect();
+        let stats: Vec<(f64, f64)> = cells
+            .values()
+            .map(|c| ratio_se2(c))
+            .filter(|s| s.1 > 0.0)
+            .collect();
         let w: Vec<f64> = stats.iter().map(|s| 1.0 / s.1).collect();
         let tw: f64 = w.iter().sum();
         let mbar = stats.iter().zip(&w).map(|(s, w)| s.0 * w).sum::<f64>() / tw;
-        q += stats.iter().zip(&w).map(|(s, w)| w * (s.0 - mbar).powi(2)).sum::<f64>();
-        maxz = stats.iter().zip(&w).map(|(s, w)| (s.0 - mbar).abs() * w.sqrt()).fold(maxz, f64::max);
+        q += stats
+            .iter()
+            .zip(&w)
+            .map(|(s, w)| w * (s.0 - mbar).powi(2))
+            .sum::<f64>();
+        maxz = stats
+            .iter()
+            .zip(&w)
+            .map(|(s, w)| (s.0 - mbar).abs() * w.sqrt())
+            .fold(maxz, f64::max);
         sw += tw;
         sw2 += w.iter().map(|w| w * w).sum::<f64>();
         df += stats.len() - 1;
@@ -163,7 +191,11 @@ fn cochran_null(
             let mut vals: Vec<(f64, f64)> = rs.iter().map(|r| (r.num, r.den)).collect();
             vals.shuffle(rng);
             for (r, (n, d)) in rs.iter().zip(vals) {
-                shuffled.push(Run { num: n, den: d, ..(*r).clone() });
+                shuffled.push(Run {
+                    num: n,
+                    den: d,
+                    ..(*r).clone()
+                });
             }
         }
         let (q, t, _, z) = cochran(&shuffled, stratum, cell);
@@ -218,7 +250,12 @@ fn analyse(
         for _ in 0..boot {
             let draw: HashMap<u64, Vec<u64>> = targets
                 .iter()
-                .map(|(c, t)| (*c, (0..t.len()).map(|_| t[rng.gen_range(0..t.len())]).collect()))
+                .map(|(c, t)| {
+                    (
+                        *c,
+                        (0..t.len()).map(|_| t[rng.gen_range(0..t.len())]).collect(),
+                    )
+                })
                 .collect();
             let mut sample = Vec::new();
             for ((class, _), curves) in &by_stratum {
@@ -244,12 +281,19 @@ fn analyse(
             let mut shuffled = Vec::with_capacity(runs.len());
             for rs in by_class.values() {
                 let owned: Vec<Run> = rs.iter().map(|r| (*r).clone()).collect();
-                let curves: Vec<(u64, u64)> = group(&owned, |r| (r.vertex, r.level)).keys().copied().collect();
+                let curves: Vec<(u64, u64)> = group(&owned, |r| (r.vertex, r.level))
+                    .keys()
+                    .copied()
+                    .collect();
                 let mut labels: Vec<u64> = curves.iter().map(|c| c.1).collect();
                 labels.shuffle(rng);
-                let relabel: HashMap<u64, u64> = curves.iter().zip(labels).map(|(c, l)| (c.0, l)).collect();
+                let relabel: HashMap<u64, u64> =
+                    curves.iter().zip(labels).map(|(c, l)| (c.0, l)).collect();
                 for r in rs {
-                    shuffled.push(Run { level: relabel[&r.vertex], ..(*r).clone() });
+                    shuffled.push(Run {
+                        level: relabel[&r.vertex],
+                        ..(*r).clone()
+                    });
                 }
             }
             if let Some(p) = vertical(&shuffled, floor) {
@@ -258,8 +302,14 @@ fn analyse(
                 }
             }
         }
-        let (lo90, hi90) = (quantile(&mut bs.clone(), 0.05), quantile(&mut bs.clone(), 0.95));
-        let (lo95, hi95) = (quantile(&mut bs.clone(), 0.025), quantile(&mut bs.clone(), 0.975));
+        let (lo90, hi90) = (
+            quantile(&mut bs.clone(), 0.05),
+            quantile(&mut bs.clone(), 0.95),
+        );
+        let (lo95, hi95) = (
+            quantile(&mut bs.clone(), 0.025),
+            quantile(&mut bs.clone(), 0.975),
+        );
         vert = json!({
             "floor_over_crater": v, "ci90": [lo90, hi90], "ci95": [lo95, hi95],
             "perm_p": (ge + 1) as f64 / (perms + 1) as f64, "perms": perms, "boot": bs.len(),
@@ -276,7 +326,9 @@ fn analyse(
     let mc = |r: &Run| (r.class, r.vertex, r.model, 0u64);
     let (qm, taum, dfm, zm) = cochran(&runs, ms, mc);
     let (mut qmn, mut taumn, zmn) = cochran_null(&runs, ms, mc, perms.min(2000), rng);
-    let pval = |obs: f64, null: &[f64]| (null.iter().filter(|&&q| q >= obs - 1e-12).count() + 1) as f64 / (null.len() + 1) as f64;
+    let pval = |obs: f64, null: &[f64]| {
+        (null.iter().filter(|&&q| q >= obs - 1e-12).count() + 1) as f64 / (null.len() + 1) as f64
+    };
     let horizontal = json!({
         "q": qh, "df": dfh, "perm_p": pval(qh, &qhn), "tau_rel": tauh,
         "max_abs_z": zh, "max_z_perm_p": pval(zh, &zhn),
@@ -292,7 +344,10 @@ fn analyse(
 
     // Adjacent same-level pairs (direct horizontal ℓ-edges), descriptive.
     let curve_cells = group(&runs, |r| (r.class, r.vertex));
-    let curve_means: HashMap<(u64, u64), (f64, f64)> = curve_cells.iter().map(|(k, rs)| (*k, ratio_se2(rs))).collect();
+    let curve_means: HashMap<(u64, u64), (f64, f64)> = curve_cells
+        .iter()
+        .map(|(k, rs)| (*k, ratio_se2(rs)))
+        .collect();
     let curves: Vec<Value> = curve_cells
         .iter()
         .map(|((c, v), rs)| {
@@ -309,7 +364,12 @@ fn analyse(
 
 fn main() {
     let argv: Vec<String> = std::env::args().skip(1).collect();
-    let get = |k: &str| argv.iter().position(|a| a == k).and_then(|i| argv.get(i + 1)).cloned();
+    let get = |k: &str| {
+        argv.iter()
+            .position(|a| a == k)
+            .and_then(|i| argv.get(i + 1))
+            .cloned()
+    };
     if argv.iter().any(|a| a == "-h" || a == "--help") || get("--records").is_none() {
         println!("usage: volcano-stats --records R1.jsonl[,R2...] --curves C1.jsonl[,C2...] [--margin 0.05] [--boot 2000] [--perm 10000] [--pair A:B]... [--out analysis.json]");
         return;
@@ -327,7 +387,9 @@ fn main() {
     }
     let plant = |k: &str| {
         get(k).map(|v| {
-            let (a, b) = v.split_once(':').unwrap_or_else(|| die(&format!("{k} takes INDEX:FACTOR")));
+            let (a, b) = v
+                .split_once(':')
+                .unwrap_or_else(|| die(&format!("{k} takes INDEX:FACTOR")));
             (a.parse::<u64>().unwrap(), b.parse::<f64>().unwrap())
         })
     };
@@ -338,13 +400,24 @@ fn main() {
     let mut side: HashMap<(u64, u64, u64, u64, u64), (u64, u64, u64, u64)> = HashMap::new();
     let mut floor: HashMap<u64, u64> = HashMap::new();
     let mut class_names = Vec::new();
-    for (ci, path) in get("--curves").unwrap_or_default().split(',').filter(|s| !s.is_empty()).enumerate() {
+    for (ci, path) in get("--curves")
+        .unwrap_or_default()
+        .split(',')
+        .filter(|s| !s.is_empty())
+        .enumerate()
+    {
         let ci = ci as u64;
         class_names.push(json!({"class": ci, "curves": path}));
-        for line in fs::read_to_string(path).unwrap_or_else(|e| die(&format!("{path}: {e}"))).lines() {
+        for line in fs::read_to_string(path)
+            .unwrap_or_else(|e| die(&format!("{path}: {e}")))
+            .lines()
+        {
             let c: Value = serde_json::from_str(line).unwrap();
             let u = |k: &str| c[k].as_u64().unwrap();
-            side.insert((u("p"), u("a"), u("b"), u("gx"), u("gy")), (ci, u("vertex"), u("model"), u("level")));
+            side.insert(
+                (u("p"), u("a"), u("b"), u("gx"), u("gy")),
+                (ci, u("vertex"), u("model"), u("level")),
+            );
             let f = floor.entry(ci).or_insert(0);
             *f = (*f).max(u("level"));
         }
@@ -355,7 +428,10 @@ fn main() {
     let mut bsgs: BTreeMap<String, BTreeMap<(u64, u64), Vec<f64>>> = BTreeMap::new();
     let (mut skipped, mut unverified) = (0usize, 0usize);
     for path in get("--records").unwrap().split(',') {
-        for line in fs::read_to_string(path).unwrap_or_else(|e| die(&format!("{path}: {e}"))).lines() {
+        for line in fs::read_to_string(path)
+            .unwrap_or_else(|e| die(&format!("{path}: {e}")))
+            .lines()
+        {
             let r: Value = serde_json::from_str(line).unwrap();
             if r["warmup"].as_bool() == Some(true) {
                 continue;
@@ -366,14 +442,24 @@ fn main() {
             }
             let cs = &r["workload"]["curve_spec"];
             let key = |k: &str| cs[k].as_u64().unwrap_or(u64::MAX);
-            let Some(&(class, vertex, model, level)) = side.get(&(key("p"), key("a"), key("b"), key("gx"), key("gy"))) else {
+            let Some(&(class, vertex, model, level)) =
+                side.get(&(key("p"), key("a"), key("b"), key("gx"), key("gy")))
+            else {
                 skipped += 1;
                 continue;
             };
             let arm = r["arm"].as_str().unwrap().to_string();
             let target = r["workload"]["target_index"].as_u64().unwrap();
             let s = r["cost"]["s"].as_f64().unwrap();
-            let mut base = Run { class, vertex, model, level, target, num: s, den: 1.0 };
+            let mut base = Run {
+                class,
+                vertex,
+                model,
+                level,
+                target,
+                num: s,
+                den: 1.0,
+            };
             // Planted effects (--plant-level L:x, --plant-curve V:x): the
             // analysis's own positive control, applied to S and to yield.
             if plant_level.is_some_and(|(l, _)| l == level) {
@@ -383,12 +469,23 @@ fn main() {
                 base.num *= plant_curve.unwrap().1;
             }
             if r["method"]["family"] == "bsgs" {
-                bsgs.entry(arm.clone()).or_default().entry((base.class, target)).or_default().push(s);
+                bsgs.entry(arm.clone())
+                    .or_default()
+                    .entry((base.class, target))
+                    .or_default()
+                    .push(s);
             }
-            if let (Some(rel), Some(tr)) = (r["counters"]["relations_found"].as_f64(), r["counters"]["targets_tried"].as_f64()) {
+            if let (Some(rel), Some(tr)) = (
+                r["counters"]["relations_found"].as_f64(),
+                r["counters"]["targets_tried"].as_f64(),
+            ) {
                 // A planted yield effect scales relations per trial.
                 let k = base.num / s;
-                ic_yield.entry(arm.clone()).or_default().push(Run { num: rel * k, den: tr, ..base.clone() });
+                ic_yield.entry(arm.clone()).or_default().push(Run {
+                    num: rel * k,
+                    den: tr,
+                    ..base.clone()
+                });
             }
             by_arm.entry(arm).or_default().push(base);
         }
@@ -426,15 +523,30 @@ fn main() {
 
     // Planted / named arm pairs: ratio of pooled class-normalised yield (or S), bootstrap over runs.
     let mut pairs = Vec::new();
-    for spec in argv.windows(2).filter(|w| w[0] == "--pair").map(|w| w[1].clone()) {
+    for spec in argv
+        .windows(2)
+        .filter(|w| w[0] == "--pair")
+        .map(|w| w[1].clone())
+    {
         // Matched by workload (class, curve, model, target), so classes with
         // different group orders never mix in the ratio.
-        let (a, b) = spec.split_once(':').unwrap_or_else(|| die("--pair takes ARM_A:ARM_B"));
-        let src = if ic_yield.contains_key(a) { &ic_yield } else { &by_arm };
-        let (Some(ra), Some(rb)) = (src.get(a), src.get(b)) else { die(&format!("--pair {spec}: unknown arm")) };
+        let (a, b) = spec
+            .split_once(':')
+            .unwrap_or_else(|| die("--pair takes ARM_A:ARM_B"));
+        let src = if ic_yield.contains_key(a) {
+            &ic_yield
+        } else {
+            &by_arm
+        };
+        let (Some(ra), Some(rb)) = (src.get(a), src.get(b)) else {
+            die(&format!("--pair {spec}: unknown arm"))
+        };
         let key = |r: &Run| (r.class, r.vertex, r.model, r.target);
         let bmap: HashMap<_, &Run> = rb.iter().map(|r| (key(r), r)).collect();
-        let matched: Vec<(&Run, &Run)> = ra.iter().filter_map(|r| bmap.get(&key(r)).map(|o| (r, *o))).collect();
+        let matched: Vec<(&Run, &Run)> = ra
+            .iter()
+            .filter_map(|r| bmap.get(&key(r)).map(|o| (r, *o)))
+            .collect();
         if matched.is_empty() {
             die(&format!("--pair {spec}: no matched workloads"));
         }
@@ -459,7 +571,9 @@ fn main() {
         let obs = stat(&matched);
         let mut bs: Vec<f64> = (0..boot)
             .map(|_| {
-                let s: Vec<(&Run, &Run)> = (0..matched.len()).map(|_| matched[rng.gen_range(0..matched.len())]).collect();
+                let s: Vec<(&Run, &Run)> = (0..matched.len())
+                    .map(|_| matched[rng.gen_range(0..matched.len())])
+                    .collect();
                 stat(&s)
             })
             .collect();

@@ -681,7 +681,12 @@ fn write_ecbench(
         let (n1, n2) = group_structure(f, &e, order, rng);
         *structures.entry(format!("{n1}x{n2}")).or_insert(0usize) += 1;
         let lv = levels[v].expect("walked curves have a level");
-        let horizontal: Vec<usize> = vs[v].nbrs.iter().copied().filter(|&w| levels[w] == Some(lv)).collect();
+        let horizontal: Vec<usize> = vs[v]
+            .nbrs
+            .iter()
+            .copied()
+            .filter(|&w| levels[w] == Some(lv))
+            .collect();
         for m in 0..args.models.max(1) {
             // Model 0 is the walked model; others are (u⁴a, u⁶b) with the generator mapped.
             let u = if m == 0 { 1 } else { rng.gen_range(2..f.p) };
@@ -707,22 +712,26 @@ fn write_ecbench(
             side.push('\n');
         }
     }
-    let ic = |size: u32| json!({"id": "ic.pipeline", "params": {
-        "factor_base": format!("prime-abscissa:size={size}"), "oracle": "mitm:negation_folded=1"}});
-    let spec = |label: &str, arms: serde_json::Value, seed: u64| json!({
-        "schema": "ecbench.spec/v1",
-        "label": label,
-        "description": format!(
-            "volcano-rho --ecbench: every curve of an {}-isogeny volcano over F_{} ({} curves x {} models), \
-             isogeny-transported generators, planted_shared targets; written by {}",
-            args.ell, f.p, walked.len(), args.models.max(1),
-            std::env::args().collect::<Vec<_>>().join(" ")),
-        "workloads": {"curves": curves, "targets_per_curve": args.targets,
-                      "target_seed": args.seed, "target_kind": "planted_shared"},
-        "arms": arms,
-        "measurement": {"rounds": 1, "warmup": 1, "order": "shuffle", "seed": seed,
-                        "isolation_required": "L0", "timeout_seconds": 600},
-    });
+    let ic = |size: u32| {
+        json!({"id": "ic.pipeline", "params": {
+        "factor_base": format!("prime-abscissa:size={size}"), "oracle": "mitm:negation_folded=1"}})
+    };
+    let spec = |label: &str, arms: serde_json::Value, seed: u64| {
+        json!({
+            "schema": "ecbench.spec/v1",
+            "label": label,
+            "description": format!(
+                "volcano-rho --ecbench: every curve of an {}-isogeny volcano over F_{} ({} curves x {} models), \
+                 isogeny-transported generators, planted_shared targets; written by {}",
+                args.ell, f.p, walked.len(), args.models.max(1),
+                std::env::args().collect::<Vec<_>>().join(" ")),
+            "workloads": {"curves": curves, "targets_per_curve": args.targets,
+                          "target_seed": args.seed, "target_kind": "planted_shared"},
+            "arms": arms,
+            "measurement": {"rounds": 1, "warmup": 1, "order": "shuffle", "seed": seed,
+                            "isolation_required": "L0", "timeout_seconds": 600},
+        })
+    };
     let models = args.models.max(1);
     let main = spec(
         "isogeny volcano: rho and IC on every curve",
@@ -746,7 +755,8 @@ fn write_ecbench(
         json!([{"name": "ic-mitm-plus1", "role": "control", "method": ic(args.ic_size + 1)}]),
         args.seed,
     );
-    icctl["workloads"]["curves"] = json!(curves.iter().step_by(models).cloned().collect::<Vec<_>>());
+    icctl["workloads"]["curves"] =
+        json!(curves.iter().step_by(models).cloned().collect::<Vec<_>>());
     let aa = spec(
         "isogeny volcano: independent A/A rho",
         json!([{"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}]),
@@ -754,7 +764,10 @@ fn write_ecbench(
     );
     // Positive control on a j = 0 / j = 1728 crater: the automorphism-folded
     // walk (which refuses every other curve) beside rho.negation, crater only.
-    let crater_j = walked.iter().find(|&&v| levels[v] == Some(0)).map(|&v| vs[v].j);
+    let crater_j = walked
+        .iter()
+        .find(|&&v| levels[v] == Some(0))
+        .map(|&v| vs[v].j);
     let aut = match crater_j.unwrap_or(u64::MAX) {
         0 if f.p % 3 == 1 && (n - 1) % 3 == 0 => Some(("rho-cubic", "rho.cubic")),
         1728 if f.p % 4 == 1 && (n - 1) % 4 == 0 => Some(("rho-quartic", "rho.quartic")),
@@ -778,12 +791,32 @@ fn write_ecbench(
             .map(|(_, c)| c.clone())
             .collect();
         crater["workloads"]["curves"] = json!(crater_curves);
-        fs::write(dir.join("spec-crater-aut.json"), serde_json::to_string_pretty(&crater).unwrap()).unwrap();
+        fs::write(
+            dir.join("spec-crater-aut.json"),
+            serde_json::to_string_pretty(&crater).unwrap(),
+        )
+        .unwrap();
     }
-    fs::write(dir.join("spec.json"), serde_json::to_string_pretty(&main).unwrap()).unwrap();
-    fs::write(dir.join("spec-aa.json"), serde_json::to_string_pretty(&aa).unwrap()).unwrap();
-    fs::write(dir.join("spec-bsgs.json"), serde_json::to_string_pretty(&bsgs).unwrap()).unwrap();
-    fs::write(dir.join("spec-icctl.json"), serde_json::to_string_pretty(&icctl).unwrap()).unwrap();
+    fs::write(
+        dir.join("spec.json"),
+        serde_json::to_string_pretty(&main).unwrap(),
+    )
+    .unwrap();
+    fs::write(
+        dir.join("spec-aa.json"),
+        serde_json::to_string_pretty(&aa).unwrap(),
+    )
+    .unwrap();
+    fs::write(
+        dir.join("spec-bsgs.json"),
+        serde_json::to_string_pretty(&bsgs).unwrap(),
+    )
+    .unwrap();
+    fs::write(
+        dir.join("spec-icctl.json"),
+        serde_json::to_string_pretty(&icctl).unwrap(),
+    )
+    .unwrap();
     fs::write(dir.join("curves.jsonl"), side).unwrap();
     (walked.len() * args.models.max(1), structures)
 }
@@ -1040,9 +1073,21 @@ fn parse_args() -> Args {
                 continue;
             }
             "--ecbench" => a.ecbench = Some(PathBuf::from(val)),
-            "--models" => a.models = val.parse().unwrap_or_else(|_| die("--models takes an integer")),
-            "--targets" => a.targets = val.parse().unwrap_or_else(|_| die("--targets takes an integer")),
-            "--ic-size" => a.ic_size = val.parse().unwrap_or_else(|_| die("--ic-size takes an integer")),
+            "--models" => {
+                a.models = val
+                    .parse()
+                    .unwrap_or_else(|_| die("--models takes an integer"))
+            }
+            "--targets" => {
+                a.targets = val
+                    .parse()
+                    .unwrap_or_else(|_| die("--targets takes an integer"))
+            }
+            "--ic-size" => {
+                a.ic_size = val
+                    .parse()
+                    .unwrap_or_else(|_| die("--ic-size takes an integer"))
+            }
             "--instance-study" => {
                 a.instance_study = true;
                 i += 1; // a flag: no value
@@ -1674,7 +1719,17 @@ fn main() {
                 keep
             })
             .collect();
-        let (curves, n1n2) = write_ecbench(&args, dir, &f, &vs, &levels, &walked, found.order, n, &mut rng);
+        let (curves, n1n2) = write_ecbench(
+            &args,
+            dir,
+            &f,
+            &vs,
+            &levels,
+            &walked,
+            found.order,
+            n,
+            &mut rng,
+        );
         eprintln!(
             "ecbench: {} curves x {} models = {} workload curves, {} targets each; group structures {:?} -> {}",
             walked.len(),
