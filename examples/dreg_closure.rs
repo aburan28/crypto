@@ -24,7 +24,9 @@
 //! refuting a system with a solution is an instrument failure.
 
 use crypto_lib::binary_ecc::F2mElement;
-use crypto_lib::cryptanalysis::koblitz_bench::{closure_refutation_scan, ClosureDegree};
+use crypto_lib::cryptanalysis::koblitz_bench::{
+    closure_refutation_scan, sparse_closure_refutes, ClosureDegree,
+};
 use crypto_lib::cryptanalysis::koblitz_groebner::{build_decomposition_system, FieldStructure};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
 use num_bigint::BigUint;
@@ -74,7 +76,14 @@ fn main() {
     // `--draw K`: only the draw numbered K, so each draw can run in its own
     // process under its own memory and time limits.
     let only_draw: Option<u64> = flag("--draw").map(|v| v.parse().expect("--draw K"));
-    let valued = ["--max-cols", "--to", "--draw"];
+    // `--sparse D`: the closure at degree D alone on the sparse engine
+    // ([`sparse_closure_refutes`]), capped at `--max-entries` stored
+    // nonzeros.  No XL basis is built and no column cap applies; a capped
+    // run prints `"capped":true` and is unmeasured.
+    let sparse: Option<u32> = flag("--sparse").map(|v| v.parse().expect("--sparse D"));
+    let max_entries: usize =
+        flag("--max-entries").map_or(1_500_000_000, |v| v.parse().expect("--max-entries"));
+    let valued = ["--max-cols", "--to", "--draw", "--sparse", "--max-entries"];
     let files: Vec<&String> = args
         .iter()
         .enumerate()
@@ -116,6 +125,30 @@ fn main() {
                 v["n_vars"].as_u64().unwrap(),
                 "{file}: rebuilt shape"
             );
+            if let Some(d) = sparse {
+                let started = std::time::Instant::now();
+                let got = sparse_closure_refutes(&sys.equations, sys.n_vars, d, max_entries);
+                let secs = started.elapsed().as_secs_f64();
+                let body = match &got {
+                    Some(c) => format!(
+                        r#""capped":false,"closure_refuted":{},"saturated":{},"rank":{},"falls":{},"products":{},"max_weight":{}"#,
+                        c.refuted, c.saturated, c.rank, c.falls, c.products, c.max_weight
+                    ),
+                    None => r#""capped":true"#.to_string(),
+                };
+                println!(
+                    r#"{{"source":"{file}","cell":"{}","m":{m},"n":{n},"ell":{ell},"draw":{},"n_vars":{},"committed_outcome":{},"engine":"sparse","degree":{d},"max_entries":{max_entries},{body},"secs":{secs:.3}}}"#,
+                    v["cell"].as_str().unwrap_or(""),
+                    v["draw"],
+                    sys.n_vars,
+                    v["outcome"],
+                );
+                eprintln!(
+                    "m={m} ({n},{ell}) draw {} degree {d}: {body} ({secs:.1}s)",
+                    v["draw"]
+                );
+                continue;
+            }
             if satisfiable {
                 let mut scan = Vec::new();
                 for d in (3..=to.unwrap_or(5))

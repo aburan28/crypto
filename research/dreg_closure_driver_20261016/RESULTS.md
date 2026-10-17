@@ -76,3 +76,46 @@ saturated.
 - **For the cost rows,** the open question is now degree 5: does it hold
   past ℓ = 7? That also needs a sparse closure (degree 5 at N = 40 is
   760k columns).
+
+## Instrument cross-check and the degree-5 engine (added 2026-10-17)
+
+These were added after the registered study and are not part of its
+verdicts.
+
+### An independent closure implementation
+
+`sparse_closure_refutes` (`src/cryptanalysis/koblitz_bench.rs`) computes
+the same MutantXL closure on a sparse echelon basis.
+
+- **How it works.** Rows are monomial masks, reduced by leading term. A
+  stored row whose leading monomial has degree below `D` is a fall, and
+  each fall is multiplied out by every monomial `t` with
+  `1 ≤ deg t ≤ D − deg f` until no fall is left.
+- **Why it is independent.** It shares no code with the dense
+  `ReducedBasis::from_system_closed_full` beyond the Macaulay row builder.
+- **The test.** `sparse_closure_matches_the_dense_closure` holds the two
+  to the same refutation outcome:
+  - on the constructed control at degrees 3 and 4;
+  - on 18 chained draws (m = 3 and 4, n ≤ 7, satisfiable and not) at
+    degrees 3 and 4, which is 36 comparisons with both outcomes present.
+- **What that buys.** It is a second-implementation check on the dense
+  closure behind this study, the scale study and the 2026-10-16 closure
+  study.
+
+### Why degree 5 past ℓ = 7 is not measured here
+
+- **The sparse engine.** As written it is too slow for these cells. On
+  the m = 3 (16, 6) draw 0 at degree 4, where the dense closure took
+  37 s, it ran more than 30 minutes without finishing. The session's
+  background-job limit stopped it.
+  - That run is a practicality note, not a measurement. No output was
+    recorded.
+- **A batched, F4-style variant would not fit either.** After reduction,
+  the falls are dense across the roughly 10⁵ degree-≤4 columns at N = 40.
+  Multiplying about 10⁵ such falls by about 40 monomials needs tens of GB
+  of rows, against 16 GB here.
+- **The dense engine at degree 5, N = 40** needs 760k columns, about
+  70 GB.
+- **So the successor needs a larger host.** The two questions are:
+  - m = 4, ℓ = 6, which separates "ℓ = 7" from "m·ℓ ≥ 21";
+  - degree 5 past ℓ = 7, which settles the degree-5 cost rows.
