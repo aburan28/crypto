@@ -4,7 +4,7 @@
 Note on LLL Degeneracy of the Boneh–Venkatesan Lattice for secp256k1" (PDF of
 2026-10-11).
 
-**Status**: corrected 2026-10-16. Research note, not peer-reviewed, not
+**Status**: corrected 2026-10-16; second correction 2026-10-17. Research note, not peer-reviewed, not
 submitted, not posted. Anonymized; restore the authors with `make deanonymize`
 after creating an `AUTHORS` file (see `../AUTHORS.example`).
 
@@ -21,26 +21,40 @@ diagnosed and fixed in May 2026:
 
 - the squared norms overflow (`n⁴ > f64::MAX`) for secp256k1 and for every
   384-bit curve;
-- P-521 additionally suffers catastrophic cancellation.
+- P-521 still fails on the scaled `f64` path, for a reason not yet isolated,
+  and recovers with 2048-bit fixed-point Gram–Schmidt.
 
 A sheriff audit found the stale claim: crypto-autoresearcher
 `research/sheriff/SHF-20261016-3caa6f`, blocker P1. The curve-specificity
 claim and everything built on it are withdrawn. The pre-fix tables are kept,
 labelled as superseded.
 
+**Correction (2026-10-17).** A re-audit (crypto-autoresearcher
+`research/sheriff/SHF-20261017-e4d7f6`, findings P-N1 and P-N2) found that
+the 2026-10-16 version asserted an unsupported mechanism for the P-521
+failure ("catastrophic cancellation"; with the scaling, P-521's diagonal is
+exactly `2^500` in `f64`, so the described subtraction is exact) and counted
+probe runs of deterministic, overlapping tests as instances. The mechanism
+sentence is withdrawn; the measured result stands. The re-run table now gives
+distinct seed pairs and the actual `k_bits` (P-521 ran at 384, not
+⌊3·521/4⌋ = 390).
+
 ## What it says
 
 - The two failure modes and their numerical causes.
 - A 2026-10-16 re-run of the committed probes on the fixed code
-  (`research/lll_degeneracy_rerun_20261016/`). Every probe at 256 and 384 bits
-  recovers the key, secp256k1 included (6/6). P-521 recovers 3/3 with 2048-bit
-  fixed-point Gram–Schmidt.
+  (`research/lll_degeneracy_rerun_20261016/`). Every distinct seed pair at 256
+  and 384 bits recovers the key, secp256k1 included (3 of 3 distinct seed
+  pairs, 6 probe runs). P-521, at `k_bits = 384`, recovers 0 of 3 on scaled
+  `f64` and 3 of 3 with 2048-bit fixed-point Gram–Schmidt.
 
 ## What it does not say
 
 - No security claim about any curve.
 - No LLL cost comparison between curves.
-- No statement beyond `m = 8`, `k_bits = 3/4 · n_bits`.
+- No statement beyond `m = 8`, `k_bits = 3/4 · n_bits` (384 at P-521), one to
+  three distinct seed pairs per curve.
+- No mechanism for the P-521 scaled-`f64` failure.
 
 ## Building
 

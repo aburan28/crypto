@@ -1,0 +1,187 @@
+{
+ "slopes": {
+  "A1_pkm_mult_chain": {
+   "slope_all": 2.022148738919469,
+   "ci": [
+    2.0022754225462918,
+    2.0432210038395167
+   ],
+   "slope_last3": 1.9721331044302295,
+   "levels": [
+    2,
+    3,
+    4,
+    5
+   ],
+   "ic_exponent": 2.522148738919469
+  },
+  "A2_subgroup_flat": {
+   "slope_all": 1.2927682876892177,
+   "ci": [
+    1.281978618042142,
+    1.3050052871815032
+   ],
+   "slope_last3": 1.424660957167282,
+   "levels": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "ic_exponent": 1.7927682876892177
+  },
+  "A3_pkm_isogeny_chain": {
+   "slope_all": 1.9117986492212742,
+   "ci": [
+    1.878307807212885,
+    1.9458722917428821
+   ],
+   "slope_last3": 1.9154988088445488,
+   "levels": [
+    2,
+    3,
+    4,
+    5
+   ],
+   "ic_exponent": 2.411798649221274
+  },
+  "A4_dickson_chain": {
+   "slope_all": 2.1077116731477967,
+   "ci": [
+    2.082286540909074,
+    2.1338270117380205
+   ],
+   "slope_last3": 2.010628725865293,
+   "levels": [
+    2,
+    3,
+    4,
+    5
+   ],
+   "ic_exponent": 2.6077116731477967
+  },
+  "A5_dickson_flat": {
+   "slope_all": 1.3043313589234267,
+   "ci": [
+    1.293657880204189,
+    1.3165510644254443
+   ],
+   "slope_last3": 1.4016019695210247,
+   "levels": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "ic_exponent": 1.8043313589234267
+  },
+  "A6_small_x": {
+   "slope_all": 1.3074785775810096,
+   "ci": [
+    1.2990440237648098,
+    1.3152368616321617
+   ],
+   "slope_last3": 1.3937712509239881,
+   "levels": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "ic_exponent": 1.8074785775810096
+  },
+  "A7_random_x": {
+   "slope_all": 1.2796862655439487,
+   "ci": [
+    1.2619168916423753,
+    1.2974032244099605
+   ],
+   "slope_last3": 1.4172493934678003,
+   "levels": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "ic_exponent": 1.7796862655439487
+  }
+ },
+ "pkm_published_slopes": {
+  "table4_n1_7_11": 1.5099470615867372,
+  "table5_last3": 1.383180330947393
+ },
+ "rho_ops_slope": 0.5184640303018339,
+ "positive_control_degree": [
+  {
+   "n1": 2,
+   "pkm_table4": 4.0,
+   "D_corr_sugar": 8.083333333333334,
+   "Dl_corr_lcm": 4.0
+  },
+  {
+   "n1": 3,
+   "pkm_table4": 4.0,
+   "D_corr_sugar": 9.0,
+   "Dl_corr_lcm": 4.0
+  },
+  {
+   "n1": 4,
+   "pkm_table4": 4.0,
+   "D_corr_sugar": 10.0,
+   "Dl_corr_lcm": 4.0
+  },
+  {
+   "n1": 5,
+   "pkm_table4": 4.0,
+   "D_corr_sugar": 12.0,
+   "Dl_corr_lcm": 5.0
+  }
+ ],
+ "positive_control_planted": [
+  {
+   "n1": 2,
+   "ratio": 1.0390625
+  },
+  {
+   "n1": 3,
+   "ratio": 2.28125
+  },
+  {
+   "n1": 4,
+   "ratio": 4.36669921875
+  },
+  {
+   "n1": 5,
+   "ratio": 8.498738606770834
+  },
+  {
+   "n1": 6,
+   "ratio": 13.293904622395832
+  },
+  {
+   "n1": 7,
+   "ratio": 39.401893615722656
+  }
+ ],
+ "stopped": {
+  "A1_pkm_mult_chain": 5,
+  "A3_pkm_isogeny_chain": 5,
+  "A4_dickson_chain": 5
+ },
+ "cut": [
+  "A1_pkm_mult_chain n1=6 (stopped or cap)",
+  "A3_pkm_isogeny_chain n1=6 (stopped or cap)",
+  "A4_dickson_chain n1=6 (stopped or cap)",
+  "A1_pkm_mult_chain n1=7 (stopped or cap)",
+  "A3_pkm_isogeny_chain n1=7 (stopped or cap)",
+  "A4_dickson_chain n1=7 (stopped or cap)"
+ ]
+}
