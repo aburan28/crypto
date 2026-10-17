@@ -1,0 +1,17 @@
+region = "us-east-1"
+
+# Who may run `ephemeral run`: existing IAM roles and users.
+# launcher_role_names = ["InstanceRole"]
+# launcher_user_names = ["adam"]
+
+# Network: empty uses the default VPC's default subnets.
+# subnet_ids = ["subnet-0123456789abcdef0", "subnet-0fedcba9876543210"]
+
+# SSH is closed unless you list CIDRs. Session Manager works either way.
+# ssh_cidrs = ["203.0.113.4/32"]
+# key_name  = "meow34"
+
+# default_ttl         = "4h"
+# max_ttl_hours       = 48
+# results_expire_days = 0
+# cache_expire_days   = 30

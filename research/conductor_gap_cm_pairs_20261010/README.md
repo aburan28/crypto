@@ -78,11 +78,23 @@ in every file.
 
 Provable now, with Mathlib and no curve-specific library:
 
-- **Generic invariance.** A generic-group algorithm's cost and output
-  distribution is identical on isomorphic groups. The crater and floor
-  curves are both cyclic of order `N`, so rho, BSGS and the kangaroo
-  cannot see the conductor. This is the null hypothesis of
-  `PROTOCOL.md`, as a theorem rather than a guess.
+- **Generic invariance**, in `lean/GenericInvariance.lean` (no Mathlib).
+  An algorithm whose control flow depends only on group-operation outcomes
+  (equality answers) and its random tape has the same cost and output
+  distribution on isomorphic groups. That covers BSGS-type algorithms. The
+  crater and floor curves are both cyclic of order `N`, so BSGS cannot see
+  the conductor. **It does not cover the rho and kangaroo that ecbench
+  runs.** They choose each step by hashing the point's representation
+  (`mix(g.key(&pos))` in the kangaroo, `src/cryptanalysis/ecbench/generic.rs:275`;
+  `mix(self.g.key(x))` in the rho walk, `TunedWalker::index` in
+  `src/cryptanalysis/ic_boundary.rs`). That is outside the theorem's model.
+  Sheriff case SHF-20261016-3caa6f (finding L5) gives a toy demonstration,
+  not run on ecbench: on `Z_1019` and its isomorphic image in `F_2039^*`, a
+  representation-hashing r-adding walk had a different cost on 197 of 200
+  transported instances, while BSGS had a different transcript on 0 of 200.
+  For rho and kangaroo, `S = 1` is the expected null, not a theorem.
+  (Corrected 2026-10-16. Earlier text said the theorem covers rho and the
+  kangaroo.)
 - **The transfer bound** (the formal shape of Jao–Miller–Venkatesan), in
   `lean/TransferBound.lean`: any solver on one curve in the isogeny class,
   generic or not, solves the ECDLP on any other at two evaluations of the
@@ -92,9 +104,10 @@ Provable now, with Mathlib and no curve-specific library:
 
 Not formalizable today: anything that mentions endomorphism rings,
 conductors, or volcanoes. Mathlib has no isogenies and no `End(E)`. So
-Lean proves the generic methods are blind, and the experiment asks whether
-the implemented non-generic ones (`ic.pipeline` and any structural
-candidate) are too.
+Lean proves that BSGS-type methods are blind. The experiment asks whether
+the implemented methods outside the theorem are blind too: the
+representation-hashing rho and kangaroo, `ic.pipeline`, and any structural
+candidate.
 
 ## 5. ecbench: the measurement (2026-10-10)
 
@@ -114,10 +127,20 @@ bootstrap over workloads; `results/crater_vs_floor.md` has every row.
 
 Reading, by the decision rule of `PROTOCOL.md`:
 
-- The two intervals that excluded 1 in the first three sessions (ic at
-  ℓ = 263, rho at ℓ = 8209) each rested on four crater workloads and had
-  opposite signs across ℓ. Rho is a generic method, so its deviation is
-  noise by theorem (§4); the ic lead was the one worth chasing.
+- Two intervals excluded 1 in the first three sessions: ic at ℓ = 263
+  and rho at ℓ = 8209, which was 1.22 [1.005, 1.46]. Each rested on four
+  crater workloads, and they had opposite signs across ℓ. **The rho
+  interval is unexplained.** Correction (2026-10-16, SHF-20261016-3caa6f
+  L5): this bullet used to call it "noise by theorem". It is not. The
+  generic-invariance theorem does not cover ecbench's rho, which hashes the
+  point representation (§4). The `ell8209_q29_ic16` session put rho at
+  1.04 [0.91, 1.19], with a fresh target seed (20261011) and 16 targets
+  per curve, so the deviation did not reproduce there. All five sessions,
+  though, used the same walk seed (`measurement.seed = 1`). Still open: a
+  rho-only re-test at ℓ = 8209 under a fresh measurement seed. The A/A
+  arm `rho-neg-aa` matches `rho-neg` row for row in
+  `results/crater_vs_floor.md`, so it does not act as an independent
+  control for this question. The ic lead was followed up first.
 - The follow-up with 16 targets per curve and a fresh target seed puts
   `ic.pipeline` at 0.998 [0.970, 1.026] at ℓ = 263 and 0.96 [0.87, 1.07] at
   ℓ = 8209, with the control arm at 1 in both. **No implemented method sees
@@ -153,14 +176,20 @@ method in ecbench, so there is no folding to lose. Every method then
 measures as level-blind. Together the two say the same thing from both
 characteristics: in the implemented methods, the conductor matters only
 through an endomorphism the method actually exploits, never through the
-ring's index as such. That is the Lean pair of §4 in practice: generic
-methods are blind by theorem, and a structural method is no better than the
+ring's index as such. That is the Lean pair of §4 in practice. Methods
+whose control flow depends only on group-operation outcomes (BSGS-type) are
+blind by theorem. The measured rho and kangaroo hash the representation, so
+for them blindness is measured, not proved (the ℓ = 8209 rho interval in §5
+is still unexplained). A structural method is no better than the
 endomorphisms it uses.
 
 ## 6. Falsifiers
 
-- A generic arm with `log₂ S` excluding 0: harness fault (check the
-  control arm first).
+- A BSGS-type arm with `log₂ S` excluding 0: harness fault (check the
+  control arm first). A rho or kangaroo arm with `log₂ S` excluding 0:
+  unexplained until re-tested under a fresh measurement seed. These
+  methods hash the representation, so generic invariance does not rule out
+  a real effect (§4, correction of 2026-10-16).
 - `ic.pipeline` with `log₂ S` excluding 0 at both ℓ = 263 and ℓ = 8209
   with the same sign: the first implemented method that sees the
   conductor. Build a third pair at a new ℓ before claiming anything.
