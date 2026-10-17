@@ -1,0 +1,31 @@
+error[E0061]: this method takes 1 argument but 2 arguments were supplied
+   --> research/full_volcano_graphwide_ic_20261017/execution/full_point_order/diagnostic.rs:532:26
+    |
+532 |             let jump = c.neg(&mut t.w("digit_setup").ec, jump_pos);
+    |                          ^^^ -------------------------- unexpected argument #1 of type `&mut crypto_lib::cryptanalysis::ic_boundary::GroupOps`
+    |
+note: method defined here
+   --> src/cryptanalysis/ic_boundary.rs:988:7
+help: remove the extra argument
+    |
+532 -             let jump = c.neg(&mut t.w("digit_setup").ec, jump_pos);
+532 +             let jump = c.neg(jump_pos);
+    |
+
+error[E0061]: this method takes 1 argument but 2 arguments were supplied
+   --> research/full_volcano_graphwide_ic_20261017/execution/full_point_order/diagnostic.rs:541:29
+    |
+541 |                 let neg = c.neg(&mut t.w("digit_update").ec, correction);
+    |                             ^^^ --------------------------- unexpected argument #1 of type `&mut crypto_lib::cryptanalysis::ic_boundary::GroupOps`
+    |
+note: method defined here
+   --> src/cryptanalysis/ic_boundary.rs:988:7
+help: remove the extra argument
+    |
+541 -                 let neg = c.neg(&mut t.w("digit_update").ec, correction);
+541 +                 let neg = c.neg(correction);
+    |
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0061`.
