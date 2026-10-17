@@ -130,7 +130,7 @@ through an isolated Linux userspace hub/worker network; explicitly removing a
 gateway peer then made it unreachable. The first forwarding attempt exposed ICMP
 redirect packet loss, so the deployment instructions include redirect controls.
 See Conductor's
-[routing validation and preserved evidence](https://github.com/aburan28/conductor/blob/feat/private-network-discovery/docs/WIREGUARD_VALIDATION.md).
+[routing validation and preserved evidence](https://github.com/aburan28/conductor/blob/5c4f63cc08570ecb5c1a8dcb428ee8caf30f64de/docs/WIREGUARD_VALIDATION.md).
 These checks do not establish kernel WireGuard compatibility, customer firewall
 isolation, automatic revocation propagation, or production availability.
 
