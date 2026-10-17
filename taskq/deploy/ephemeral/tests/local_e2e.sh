@@ -173,6 +173,27 @@ check "--no-cache neither restores nor saves" log_lacks 'cache:'
 check "toolchain none job succeeds" bash -c "'$CLI' run --toolchain none --ttl 30m --no-source --name e2e-stock -- true >/dev/null 2>&1"
 check "toolchain none keeps the stock image" last_launch_has 'resolve:ssm:/cpu'
 
+echo "== git object cache: whole-repository fetch, miss then hit"
+git_key=$FAKE_AWS/s3/test-runs/cache/git/github.com-aburan28-crypto.tar
+full_run() { # name -> the job's exit status
+    "$CLI" run --toolchain none --ttl 30m --name "$1" -- \
+        'echo "missing=$(git ls-files -d | wc -l)"; test -f Cargo.toml && test -f taskq/pyproject.toml && echo full-tree' >/dev/null 2>&1
+}
+check "first whole-repo job succeeds" full_run e2e-git-miss
+id=$(last)
+check "first fetch finds no base" log_has 'git cache: no base (cache/git/github.com-aburan28-crypto.tar)'
+check "the whole tree was checked out" bash -c "grep -qx full-tree '$XDG_CACHE_HOME/ephemeral/runs/$id/job.log' && grep -qx missing=0 '$XDG_CACHE_HOME/ephemeral/runs/$id/job.log'"
+wait_state "$id" terminated 300 || true
+check "the base was saved before termination" test -s "$git_key"
+check "the saved base has no index" bash -c "! tar -tf '$git_key' | grep -qx '.git/index'"
+check "second whole-repo job succeeds" full_run e2e-git-hit
+id=$(last)
+check "second fetch restores the base" log_has 'git cache: restored base'
+check "second fetch downloads nothing new" log_has 'git: fetched 0 MiB from origin on top of base'
+check "the restored checkout is complete" bash -c "grep -qx full-tree '$XDG_CACHE_HOME/ephemeral/runs/$id/job.log' && grep -qx missing=0 '$XDG_CACHE_HOME/ephemeral/runs/$id/job.log'"
+wait_state "$id" terminated 300 || true
+check "an unchanged base is not saved again" bash -c "grep -q terminating '$(job_dir "$id")/job.log' && ! grep -q 'git cache: saved' '$(job_dir "$id")/job.log'"
+
 echo "== detach, then kill"
 id=$("$CLI" run --toolchain none --ttl 30m --no-source --detach --name e2e-kill -- sleep 600)
 check "--detach printed the job id" test -n "$id"

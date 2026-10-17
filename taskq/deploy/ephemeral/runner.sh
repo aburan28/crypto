@@ -7,11 +7,13 @@
 #
 #   1. fetch job.json from s3://$EPHEMERAL_BUCKET/jobs/$EPHEMERAL_JOB/
 #   2. install the toolchain preset (skipped when the image has it baked in)
-#   3. shallow-fetch the pinned commit, apply the local patch if any
+#   3. restore the git object cache (whole-repo jobs), shallow-fetch the
+#      pinned commit on top of it, apply the local patch if any
 #   4. restore the cargo cache (rust preset), run the setup command
 #   5. run the command under `timeout`, stopping 10 minutes before the deadline
 #   6. upload job.log, status.json, host.txt, rusage.txt and $EPHEMERAL_OUT
-#   7. save the cargo cache if the build changed it
+#   7. save the cargo cache if the build changed it, and the git object cache
+#      if it was missing or far behind
 #   8. shutdown -h now, unless the job asked to --keep the box
 #
 # The log is copied to S3 every 15 seconds while the job runs, so
@@ -213,6 +215,102 @@ cache_save() {
     fi
 }
 
+# ---- git object cache ------------------------------------------------------
+#
+#   s3://<bucket>/cache/git/<host>-<owner>-<repo>.tar
+#
+# A whole-repository fetch (no --paths) is almost all download: the pinned
+# commit's tree is a 2.4 GB pack, which GitHub sends at about 45 MB/s. The
+# entry is the .git of an earlier depth-1 checkout, without its index, with
+# refs/ephemeral/base naming that checkout's commit. Restored from S3 (about
+# 8 s), it makes the fetch offer the base commit as a "have", so GitHub sends
+# only the objects the pinned commit does not share with it, and checkout
+# writes the rest from the local packs.
+#
+# The entry is rewritten when there was none, or when the fetch brought more
+# than GIT_REFRESH_MIB and the pinned commit is newer than the base. A rewrite
+# repacks to the new commit's objects only, so the entry does not grow. The
+# copy that is saved is a hard-link snapshot taken right after checkout, so
+# nothing the patch or the job does to .git can reach the cache. A restored
+# entry that fails to fetch or check out is dropped for a fresh fetch.
+GIT_REFRESH_MIB=64
+GIT_KEY=''
+GIT_BASE=''
+GIT_SAVE=''
+
+git_kib() { git count-objects -v | awk '$1 == "size:" || $1 == "size-pack:" { s += $2 } END { print s + 0 }'; }
+
+# Leaves $SRC a repository with remote origin, restored from the cache if it can.
+git_cache_restore() {
+    local t0
+    t0=$(date +%s)
+    GIT_KEY=cache/git/$(sed -E 's|^[a-z+]+://||; s|^[^@/]*@||; s|\.git/*$||' <<<"$REPO" |
+        tr -cs 'A-Za-z0-9._' '-' | sed 's/^-*//; s/-*$//').tar
+    mkdir -p "$SRC"
+    if aws s3 cp --only-show-errors "s3://$EPHEMERAL_BUCKET/$GIT_KEY" - 2>/dev/null | tar -C "$SRC" -xf - 2>/dev/null &&
+        GIT_BASE=$(git -C "$SRC" rev-parse -q --verify 'refs/ephemeral/base^{commit}'); then
+        git -C "$SRC" remote set-url origin "$REPO" 2>/dev/null || git -C "$SRC" remote add origin "$REPO"
+        say "git cache: restored base ${GIT_BASE:0:12} ($(du -sm "$SRC/.git" | cut -f1) MiB, $(($(date +%s) - t0)) s)"
+    else
+        say "git cache: no base ($GIT_KEY)"
+        GIT_BASE=''
+        rm -rf "$SRC"
+        git init -q "$SRC"
+        git -C "$SRC" remote add origin "$REPO"
+    fi
+}
+
+# In $SRC after checkout: decide whether to rewrite the entry, and snapshot .git.
+git_cache_mark() { # KiB fetched
+    local why=''
+    if [ -z "$GIT_BASE" ]; then
+        why=new
+    elif [ "$1" -gt $((GIT_REFRESH_MIB * 1024)) ] &&
+        [ "$(git log -1 --format=%ct FETCH_HEAD)" -gt "$(git log -1 --format=%ct "$GIT_BASE")" ]; then
+        why=refresh
+    fi
+    [ -n "$why" ] || return 0
+    rm -rf "$W/git-base"
+    if cp -al "$SRC/.git" "$W/git-base"; then
+        GIT_SAVE=$why
+    else
+        say "git cache: snapshot failed; not saved"
+    fi
+}
+
+git_cache_save() {
+    local t0 g=$W/git-base
+    t0=$(date +%s)
+    if [ $((EPHEMERAL_DEADLINE - t0)) -lt 300 ]; then
+        say "git cache: not saved, too close to the deadline"
+        return
+    fi
+    rm -f "$g/index" "$g/FETCH_HEAD" "$g/ORIG_HEAD"
+    # Git replaces files by rename, so these writes leave the job's .git alone.
+    git --git-dir="$g" update-ref --no-deref HEAD "$COMMIT" &&
+        git --git-dir="$g" update-ref refs/ephemeral/base "$COMMIT" || {
+        say "git cache: cannot record the base; not saved"
+        return
+    }
+    # A reflog would keep the old base reachable, and once it is no longer a
+    # shallow root, repack would walk into its missing parents.
+    rm -rf "$g/logs"
+    if [ "$GIT_SAVE" = refresh ]; then
+        # Drop the old base's objects: the new commit is the only shallow root.
+        echo "$COMMIT" >"$g/shallow.new" && mv "$g/shallow.new" "$g/shallow" &&
+            git --git-dir="$g" repack -a -d -q || {
+            say "git cache: repack failed; not saved"
+            return
+        }
+    fi
+    if tar -C "$g" --transform 's|^\.|.git|' -cf - . |
+        aws s3 cp --only-show-errors - "s3://$EPHEMERAL_BUCKET/$GIT_KEY"; then
+        say "git cache: saved ${COMMIT:0:12} to $GIT_KEY ($GIT_SAVE, $(du -sm "$g" | cut -f1) MiB, $(($(date +%s) - t0)) s)"
+    else
+        say "git cache: save failed"
+    fi
+}
+
 FINISHED=false
 # The CLI stops following when status.json turns final, so everything else is
 # uploaded first: the log it downloads then is complete.
@@ -242,6 +340,10 @@ finish() {
     # termination, not the caller.
     if [ "$EXIT_CODE" != null ] && [ -n "$CACHE_PREFIX" ]; then
         cache_save
+        push_log
+    fi
+    if [ "$EXIT_CODE" != null ] && [ -n "$GIT_SAVE" ]; then
+        git_cache_save
         push_log
     fi
     $KEEP || shutdown -h now
@@ -323,18 +425,42 @@ COMMIT=$(job '.commit // ""')
 WORKDIR=$W
 if [ -n "$REPO" ] && [ -n "$COMMIT" ]; then
     status fetching "$COMMIT"
-    git init -q "$SRC"
-    cd "$SRC" || exit 1
-    git remote add origin "$REPO"
+    t0=$(date +%s)
+    # Restoring 2.4 GB of objects and checking out 6.6 GB passes the default
+    # dirty limit (20% of memory), after which every write waits for the gp3
+    # baseline of 125 MB/s: 35 s instead of 12 s for the checkout. Nothing on
+    # this disk outlives the instance, so let the page cache take it all.
+    sysctl -q -w vm.dirty_ratio=80 2>/dev/null || true
     mapfile -t PATHS < <(job '.paths[]?')
+    # Parallel checkout: about a third faster for this repository's 100k files.
+    checkout() { git -c checkout.workers=0 checkout -q -f FETCH_HEAD; }
     if [ ${#PATHS[@]} -gt 0 ]; then
         # Partial clone: only the blobs under the requested paths are fetched.
+        git init -q "$SRC"
+        cd "$SRC" || exit 1
+        git remote add origin "$REPO"
         git sparse-checkout set "${PATHS[@]}"
-        git fetch -q --depth 1 --filter=blob:none origin "$COMMIT"
+        { git fetch -q --depth 1 --filter=blob:none origin "$COMMIT" && checkout; } \
+            || fail "git fetch $COMMIT failed (is it pushed?)"
     else
-        git fetch -q --depth 1 origin "$COMMIT"
-    fi || fail "git fetch $COMMIT failed (is it pushed?)"
-    git checkout -q FETCH_HEAD
+        if [ "$(job 'if .cache == false then "off" else "on" end')" = on ]; then
+            git_cache_restore
+        else
+            git init -q "$SRC" && git -C "$SRC" remote add origin "$REPO"
+        fi
+        cd "$SRC" || exit 1
+        kib0=$(git_kib)
+        if ! { git fetch -q --depth 1 origin "$COMMIT" && checkout; }; then
+            [ -n "$GIT_BASE" ] || fail "git fetch $COMMIT failed (is it pushed?)"
+            say "git cache: fetch onto base ${GIT_BASE:0:12} failed; fetching from scratch"
+            cd "$W" && rm -rf "$SRC" && GIT_BASE='' kib0=0
+            git init -q "$SRC" && cd "$SRC" && git remote add origin "$REPO" &&
+                git fetch -q --depth 1 origin "$COMMIT" && checkout || fail "git fetch $COMMIT failed (is it pushed?)"
+        fi
+        kib=$(($(git_kib) - kib0))
+        say "git: fetched $((kib / 1024)) MiB from origin${GIT_BASE:+ on top of base ${GIT_BASE:0:12}}"
+        [ -n "$GIT_KEY" ] && git_cache_mark "$kib"
+    fi
     if [ "$(job '.patch // false')" = true ]; then
         aws s3 cp --only-show-errors "$S3/patch.diff" "$W/patch.diff"
         git apply --binary --whitespace=nowarn "$W/patch.diff" \
@@ -342,7 +468,7 @@ if [ -n "$REPO" ] && [ -n "$COMMIT" ]; then
         say "applied local patch ($(wc -c <"$W/patch.diff") bytes)"
     fi
     WORKDIR=$SRC
-    say "source at $(git rev-parse HEAD)"
+    say "source at $(git rev-parse HEAD) ($(($(date +%s) - t0)) s)"
 fi
 
 aws s3 cp --only-show-errors "$S3/cmd.sh" "$W/cmd.sh" || fail "no cmd.sh"
