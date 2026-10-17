@@ -1,0 +1,9 @@
+== A11 m=4 p1: commit f287673fe73be1b340167d1436d389f259926889, budget 300 s, grace 120 s, ulimit -v 13000000, started 2026-10-15T22:19:56Z
+A11  m=4 t= 2 target=0 b=2.000 |V|=4 n_vars=21 n_eqs=22 D=3 reached=3 0.0 s ok
+A11  m=4 t= 2 target=1 b=2.000 |V|=4 n_vars=21 n_eqs=22 D=3 reached=3 0.0 s ok
+A11  m=4 t= 3 target=0 b=3.000 |V|=8 n_vars=28 n_eqs=29 D=5 reached=5 0.3 s ok
+A11  m=4 t= 3 target=1 b=3.000 |V|=8 n_vars=28 n_eqs=29 D=5 reached=5 0.3 s ok
+A11  m=4 t= 4 target=0 b=4.000 |V|=16 n_vars=35 n_eqs=36 D=6 reached=6 303.5 s timeout (F4 budget of 300 s)
+A11  m=4 t= 4 target=1 b=4.000 |V|=16 n_vars=35 n_eqs=36 D=6 reached=6 302.0 s timeout (F4 budget of 300 s)
+-- A11 m=4: a system at t = 4 hit a limit or failed; the series stops
+== A11 m=4: ended 2026-10-15T22:30:07Z

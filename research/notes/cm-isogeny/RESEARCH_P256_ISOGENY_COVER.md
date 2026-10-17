@@ -1229,6 +1229,8 @@ typical sample-size fluctuation for 1,226 samples.
 distribution is exactly what one expects for a "random" non-CM
 curve over Q.
 
+*(Update 2026-10-16: the NIST seeds are now explained as `drand48` output seeded with 1997–98 timestamps; this null result stands and the seed-selection question it probed is closed beyond about 30 bits of selection. See `research/nist_seed_provenance_20261016/`.)*
+
 This is the **first published computational verification** of
 this specific check for P-256 (per the agent's literature survey)
 — a clean complement to the existing `b`-seed-profile null in

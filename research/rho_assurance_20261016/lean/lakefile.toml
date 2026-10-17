@@ -1,0 +1,6 @@
+name = "rho_formal"
+version = "0.1.0"
+defaultTargets = ["RhoFormal"]
+
+[[lean_lib]]
+name = "RhoFormal"

@@ -2,8 +2,9 @@
 //! queries that group curves by them or rank curves by likeness to one.
 //!
 //! ```text
-//! curve_traits build                       # docs/curves/registry.json → docs/curves/traits.json
+//! curve_traits build                       # registry + sources + hints → docs/curves/traits.json
 //! curve_traits check                       # the committed file is current
+//! curve_traits unfactored                  # composites the budget left, for the hint script
 //! curve_traits show ECC2K-130              # one curve's record
 //! curve_traits group --by cm,descent       # curves sharing those keys, across sizes
 //! curve_traits similar sect163k1 --other-sizes
@@ -16,12 +17,39 @@ use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
 use crypto_lib::cryptanalysis::curve_traits::query::{self, DEFAULT_WEIGHTS};
+use crypto_lib::cryptanalysis::curve_traits::sources::read_manifest;
 use crypto_lib::cryptanalysis::curve_traits::{
-    signature, CurveTraits, TraitFile, DEFAULT_BUDGET, DEFAULT_SIGNATURE, KEYS,
+    signature, CurveTraits, Factoring, Input, TraitFile, DEFAULT_BUDGET, DEFAULT_SIGNATURE, KEYS,
 };
 
 const REGISTRY: &str = "docs/curves/registry.json";
 const TRAITS: &str = "docs/curves/traits.json";
+const HINTS: &str = "docs/curves/factor-hints.txt";
+const SOURCES: &str = "docs/curves/trait-sources.json";
+
+fn read(path: &str) -> Result<Input, String> {
+    Ok(Input {
+        path: path.to_string(),
+        text: std::fs::read_to_string(path).map_err(|e| format!("{path}: {e}"))?,
+    })
+}
+
+/// Build from the registry, the hints and every source the manifest
+/// names, each read from its repository-relative path.
+fn build(registry: &str, budget: u64) -> Result<(TraitFile, Factoring), String> {
+    let manifest = read(SOURCES)?;
+    let files = read_manifest(&manifest.text)?
+        .iter()
+        .map(|s| read(&s.path))
+        .collect::<Result<Vec<_>, _>>()?;
+    TraitFile::build_from(
+        &read(registry)?,
+        Some(&read(HINTS)?),
+        Some(&manifest),
+        &files,
+        budget,
+    )
+}
 
 #[derive(Parser)]
 #[command(
@@ -95,6 +123,14 @@ enum Cmd {
     },
     /// List the grouping keys and what they mean.
     Keys,
+    /// Print, one per line, every composite the build left unsplit: the
+    /// input of `docs/curves/factor-hints.gp`.
+    Unfactored {
+        #[arg(long, default_value = REGISTRY)]
+        registry: String,
+        #[arg(long, default_value_t = DEFAULT_BUDGET)]
+        budget: u64,
+    },
 }
 
 fn load(path: &str) -> Result<TraitFile, String> {
@@ -110,7 +146,7 @@ fn find<'a>(file: &'a TraitFile, name: &str) -> Result<&'a CurveTraits, String> 
 fn field_label(c: &CurveTraits) -> String {
     match c.field.kind.as_str() {
         "binary" => format!("GF(2^{})", c.field.degree),
-        "prime" if c.field.degree > 1 => {
+        "prime" | "extension" if c.field.degree > 1 => {
             format!("GF(p^{}:{}b)", c.field.degree, c.field.size_bits)
         }
         _ => format!("GF(p:{}b)", c.field.size_bits),
@@ -171,7 +207,31 @@ fn show(c: &CurveTraits) {
         },
         status(f.status)
     );
+    println!(
+        "  source      {}{}{}",
+        c.source.kind,
+        c.source
+            .path
+            .as_deref()
+            .map_or(String::new(), |p| format!(" ({p})")),
+        if c.source.registered {
+            ""
+        } else {
+            ", slug computed, not registered"
+        }
+    );
     let e = &c.endomorphism;
+    let levels: Vec<String> = e
+        .levels
+        .iter()
+        .map(|l| match l.level {
+            Some(x) => format!("ℓ={}: level {x} of {}", l.ell, l.depth),
+            None => format!("ℓ={}: level ≤ {} of {}", l.ell, l.level_at_most, l.depth),
+        })
+        .collect();
+    if !levels.is_empty() {
+        println!("  volcanoes   {}", levels.join("; "));
+    }
     println!(
         "  End(E)      {}  [{}]  contains {}",
         match (e.maximal, e.conductor_divides.as_deref()) {
@@ -235,9 +295,7 @@ fn run(cli: Cli) -> Result<bool, String> {
             out,
             budget,
         } => {
-            let text =
-                std::fs::read_to_string(&registry).map_err(|e| format!("{registry}: {e}"))?;
-            let file = TraitFile::build(&text, budget)?;
+            let (file, _) = build(&registry, budget)?;
             std::fs::write(&out, file.to_json()).map_err(|e| format!("{out}: {e}"))?;
             eprintln!("wrote {} curves to {out}", file.curves.len());
             Ok(true)
@@ -246,9 +304,7 @@ fn run(cli: Cli) -> Result<bool, String> {
             let committed =
                 std::fs::read_to_string(&traits).map_err(|e| format!("{traits}: {e}"))?;
             let budget = load(&traits)?.factor_budget;
-            let text =
-                std::fs::read_to_string(&registry).map_err(|e| format!("{registry}: {e}"))?;
-            let fresh = TraitFile::build(&text, budget)?.to_json();
+            let fresh = build(&registry, budget)?.0.to_json();
             if fresh == committed {
                 eprintln!("{traits} is current");
                 return Ok(true);
@@ -376,6 +432,13 @@ fn run(cli: Cli) -> Result<bool, String> {
                     m.curve.slug,
                     m.differs.join(" ")
                 );
+            }
+            Ok(true)
+        }
+        Cmd::Unfactored { registry, budget } => {
+            let (_, fx) = build(&registry, budget)?;
+            for c in fx.leftovers() {
+                println!("{c}");
             }
             Ok(true)
         }
