@@ -24,6 +24,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
             docs/ecbench/schema.sql
@@ -138,6 +140,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            tools/volcano-cli/
+            isogeny_algos/
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
             docs/ecbench/schema.sql

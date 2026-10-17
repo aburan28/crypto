@@ -17,8 +17,8 @@ mod large_prime;
 mod params;
 #[path = "ic/price.rs"]
 mod price;
-#[path = "ic/prime.rs"]
-mod prime;
+#[path = "ic/progress.rs"]
+mod progress;
 #[path = "ic/rho.rs"]
 mod rho;
 #[path = "ic/workflow.rs"]
@@ -54,6 +54,9 @@ struct Cli {
     /// Print a machine-readable JSON report, without progress text.
     #[arg(long, global = true)]
     json: bool,
+    /// Trace index-calculus stages and individual trials as they finish (suppressed by --json).
+    #[arg(short, long, global = true)]
+    verbose: bool,
     /// Write the JSON report to a new file; existing files are never overwritten.
     #[arg(long, global = true)]
     out: Option<PathBuf>,
@@ -561,6 +564,11 @@ fn display(report: &Value) {
 }
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    // Generated parameters stay directly importable even with a global -v.
+    progress::init(cli.verbose && !cli.json && !matches!(cli.command, Some(Action::Generate(_))));
+    progress::line(format_args!(
+        "startup: capturing executable and source provenance"
+    ));
     // Before any work: the binary that is about to run, and the commit it
     // was built from.  See `BINARY_HASH`.
     let _ = binary_hash();
@@ -590,6 +598,7 @@ fn main() -> ExitCode {
     ) || report.get("operation").is_none();
     let text = serde_json::to_string_pretty(&report).expect("JSON serializable");
     if let Some(path) = &cli.out {
+        progress::line(format_args!("report: writing {}", path.display()));
         let result = OpenOptions::new()
             .write(true)
             .create_new(true)

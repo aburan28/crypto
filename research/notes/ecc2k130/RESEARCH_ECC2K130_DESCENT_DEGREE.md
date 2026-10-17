@@ -466,6 +466,22 @@ ran to completion.
 - **No row beats rho.** The free-oracle floor binds, and the units are
   unconverted.
 
+## 9. Guess-then-degree-4 (2026-10-17)
+
+`research/dreg_closure_specialise_20261017/` fixed single variables in the 8
+m = 3, ℓ = 7 draws that do not refute at degree 4.
+
+- **Single fixes.** Any one fixed variable lets degree 4 refute on 6 of 8.
+- **Both branches.** On 5 of 8, both values of one guess refute.
+- **That names a third oracle model.** Alongside "degree 4" (contradicted,
+  §8) and "degree 5" (optimistic, §8), there is **guess k variables, then
+  degree 4**, at `2^k · C(N−k, ≤4)^w` per target.
+  - It is measured only at ℓ = 7, where k = 1 often suffices.
+  - If k grows like `m·(ℓ−6)`, it is about 108 at m = 4, ℓ = 33. That is
+    far worse than degree 5, so no row is added.
+  - The measurement that would decide it is k at ℓ = 8 and 9.
+- **No row beats rho.**
+
 ## Scope and disclosures
 
 - **System.** `m = 3`, the chained `S₃`, with `b = 1`.

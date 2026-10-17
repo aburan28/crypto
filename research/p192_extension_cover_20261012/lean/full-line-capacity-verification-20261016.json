@@ -1,0 +1,22 @@
+{
+  "axiom_command": "lake env lean FullLineCapacity.lean",
+  "axiom_exit_code": 0,
+  "axiom_log_sha256": "68b6dd5d2ff31700c2e36fe071aa4217be6eed4266b2b94ffb8b1f0e3ee0d393",
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "build_command": "lake build FullLineCapacity",
+  "build_exit_code": 0,
+  "build_log_sha256": "6e6033ed4bae32a7f3a376fddae5d1eb62f215d51600350b211ce4b24564f067",
+  "fresh_command": "lake env leanchecker --fresh FullLineCapacity",
+  "fresh_exit_code": 0,
+  "fresh_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "fresh_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "lake_manifest_sha256": "fc1b089030173d9aad95d8dafe3e47168f93fccc14274413e9645acadabbf1b9",
+  "module": "FullLineCapacity",
+  "module_sha256": "0937f67aeaf6318f6464b0d050f0df03d4daf84376c10170c5ba93bc3b2d2990",
+  "status": "checked_p192_full_line_capacity_lean",
+  "toolchain_sha256": "d5edba4e4b8faad9c1baeadb265716d20d03be4d1a2647dc5e35b0c0325bea7b"
+}

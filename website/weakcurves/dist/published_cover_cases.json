@@ -1,0 +1,44 @@
+{
+  "schema": "weakcurves.published_cover_cases.v1",
+  "cases": [
+    {
+      "id": "JV2011-FP6-149",
+      "source": "Joux and Vitse, Cover and Decomposition Index Calculus on Elliptic Curves made practical, Section 6",
+      "url": "https://eprint.iacr.org/2011/020",
+      "evidence": "published_original_campaign",
+      "atlas_curve_id": null,
+      "independent_replay": null,
+      "field": {
+        "characteristic": 33554467,
+        "total_degree": 6,
+        "field_bits": 151,
+        "intermediate_degree": 2,
+        "relative_degree": 3,
+        "tower": "t^2=2; theta^3=t"
+      },
+      "source_curve": {
+        "equation": "y^2=x(x-alpha)(x-sigma(alpha))",
+        "sigma": "z -> z^(p^2)",
+        "alpha_theta_coefficients_low_to_high": [9819275, 31072607, 17686237, 31518659, 22546098, 17001125],
+        "group_order": "1427256625141384667867605801796205344407144852",
+        "selected_prime_order": "356814156285346166966901450449051336101786213",
+        "selected_prime_bits": 149
+      },
+      "destination": {
+        "field": "F_(p^2)",
+        "genus": 3,
+        "geometry": "hyperelliptic",
+        "transfer": "norm after pullback through the published cover",
+        "factor_base_size": 16775441,
+        "relation_method": "bihomogeneous quadratic sieve with structured elimination",
+        "relation_length": 8
+      },
+      "reported_phases": {
+        "relation_collection": "62 hours on 1024 Xeon 5570 cores",
+        "structured_elimination": "25.5 hours on 32 cores",
+        "iterative_linear_algebra": "about 28.5 days on 64 cores",
+        "six_target_descent": "72.5 seconds total"
+      }
+    }
+  ]
+}

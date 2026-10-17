@@ -1,0 +1,87 @@
+{
+  "all_arbitrary_degree_maps": "INFINITE_FAMILY_NOT_AN_ENUMERATION_TARGET",
+  "directed_kernel_edges": 36,
+  "dlp_workload": "NOT_RUN_BY_GRAPH_BUILD",
+  "edges_by_degree": [
+    [
+      2,
+      20
+    ],
+    [
+      3,
+      16
+    ]
+  ],
+  "expanded_vertices": 10,
+  "expected_class_vertices": 10,
+  "expected_strata": [
+    {
+      "conductor": 1,
+      "expected_vertices": 1
+    },
+    {
+      "conductor": 2,
+      "expected_vertices": 1
+    },
+    {
+      "conductor": 3,
+      "expected_vertices": 4
+    },
+    {
+      "conductor": 6,
+      "expected_vertices": 4
+    }
+  ],
+  "frontier_vertices": 0,
+  "independent_implementation_replay": "NOT_RUN",
+  "replay_receipt": {
+    "exact_map_identities": 36,
+    "expanded_vertices": 10,
+    "graph_complete": true,
+    "implementation_independence": "shared isogeny_algos arithmetic; independent implementation audit is a separate obligation",
+    "kernel_sets": "regenerated for every expanded vertex",
+    "replay_source_sha256": "d3c77f50dc2e737de38561203ce3693f7899fe3db502b8e863c7ac69e5818bed",
+    "status": "REPLAYED",
+    "strata": {
+      "method": "prime-degree floor distance; ordinary volcano theorem, D_K<-4",
+      "status": "VERIFIED_POPULATIONS",
+      "strata": [
+        {
+          "conductor": 1,
+          "expected_vertices": 1
+        },
+        {
+          "conductor": 2,
+          "expected_vertices": 1
+        },
+        {
+          "conductor": 3,
+          "expected_vertices": 4
+        },
+        {
+          "conductor": 6,
+          "expected_vertices": 4
+        }
+      ]
+    },
+    "vertex_class_complete": true,
+    "vertices": 10
+  },
+  "schema": "ordinary-isogeny-class/v1",
+  "selected_degree_edges_complete": true,
+  "selected_degrees": [
+    2,
+    3
+  ],
+  "source_identity": {
+    "curve_uid": null,
+    "ec1": null,
+    "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+    "icv1": "ICV1:fp-67:4:64:42:unk:unk:r:0c09e92f419f",
+    "model_json": "{\"a\":\"46\",\"b\":\"47\",\"field\":\"fp-67\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"67\",\"v\":\"1\"}",
+    "slug": "icv1-fp7-t4-0c09e92f"
+  },
+  "status": "COMPLETE_SELECTED_DEGREE_CLASS",
+  "vertex_class_complete": true,
+  "vertices": 10
+}

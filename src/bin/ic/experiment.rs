@@ -10,10 +10,12 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
 use crypto_lib::cryptanalysis::koblitz_index_calculus::is_irreducible_f2;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_subgroup_orbit_factor_base_with_cost, factor_x_n_minus_1, find_irreducible_sparse,
-    individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
-    order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
-    FactorBaseSelectionCost, FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions,
-    LinearAlgebra, LogTableReport, MAX_N, MAX_SUBFIELD_DEGREE,
+    individual_log, individual_log_with_progress,
+    koblitz_index_calculus_dlp_with_factor_base_and_progress, koblitz_point_count,
+    order_of_2_mod_n, solve_factor_base_logs, solve_factor_base_logs_with_progress,
+    DecompositionStrategy, FactorBaseLogTable, FactorBaseSelectionCost, FrobeniusFactorBase,
+    KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, LinearAlgebra, LogTableReport, LogTableStage,
+    MAX_N, MAX_SUBFIELD_DEGREE,
 };
 use crypto_lib::cryptanalysis::koblitz_sparse_la::{
     BlockLanczosOptions, BlockWiedemannOptions, FilterOptions, SparseCoreSolver,
@@ -806,8 +808,33 @@ pub fn logs(args: LogsArgs, quiet: bool) -> Result<Value, String> {
             args.filter_strategy,
         ),
     );
-    let (table, report) = solve_factor_base_logs(&c, &fb, &opts)
-        .ok_or("factor base has no usable projected columns for this summand count")?;
+    super::progress::line(format_args!(
+        "logs: constructing collector and pair table (if needed)"
+    ));
+    let result = if super::progress::enabled() {
+        solve_factor_base_logs_with_progress(&c, &fb, &opts, &mut |stage, report| {
+            let label = match stage {
+                LogTableStage::Collection => "collection",
+                LogTableStage::LinearAlgebraAndVerification => {
+                    "linear algebra and column verification started"
+                }
+                LogTableStage::Finished => "finished",
+            };
+            super::progress::line(format_args!(
+                "logs: {label}; {}/{} trials, {} relations, rank {}/{}; verified={}",
+                report.trials,
+                opts.max_trials,
+                report.relations,
+                report.coefficient_rank,
+                report.columns,
+                report.verified
+            ));
+        })
+    } else {
+        solve_factor_base_logs(&c, &fb, &opts)
+    };
+    let (table, report) =
+        result.ok_or("factor base has no usable projected columns for this summand count")?;
     if !report.verified {
         return Ok(
             json!({"schema_version":1,"operation":"logs","status":"incomplete",
@@ -882,7 +909,20 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
         let _ = std::io::stdout().flush();
     }
     let opts = ic_options(args.solver, args.summands, args.max_trials, args.seed);
-    let outcome = individual_log(&c, &fb, &table, &target, &opts);
+    super::progress::line(format_args!(
+        "solve: building descent tables and starting target search"
+    ));
+    let outcome = if super::progress::enabled() {
+        individual_log_with_progress(&c, &fb, &table, &target, &opts, &mut |trial, outcome| {
+            super::progress::line(format_args!(
+                "solve: trial {trial}/{}: {}",
+                opts.max_trials,
+                super::progress::outcome(outcome)
+            ));
+        })
+    } else {
+        individual_log(&c, &fb, &table, &target, &opts)
+    };
     let (recovered, report) = match outcome {
         Some((d, r)) => (Some(d), r),
         None => (
@@ -894,6 +934,10 @@ pub fn solve(args: SolveArgs, quiet: bool) -> Result<Value, String> {
         && recovered
             .as_ref()
             .is_some_and(|d| c.mul(c.generator(), d) == target);
+    super::progress::line(format_args!(
+        "solve: scalar verification {}",
+        if verified { "passed" } else { "incomplete" }
+    ));
     Ok(json!({"schema_version":1,"operation":"solve",
         "status":if verified{"complete"}else{"incomplete"},
         "evidence_scope":"synthetic_known_answer","degree":c.n,"curve_a":c.a,
@@ -1242,7 +1286,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
             *stage_start = Instant::now();
         }
         let elapsed = stage_start.elapsed().as_secs_f64();
-        if !quiet {
+        if !quiet && !super::progress::enabled() {
             let (index, label) = match stage {
                 "factor_base" => (1, "Factor base"),
                 "pair_table" => (1, "Pair table"),
@@ -1264,6 +1308,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         json!({}),
         &mut stage_start,
     );
+    super::progress::line(format_args!("[1/4] factor base: materializing recipe"));
     let fb = match materialize(&c, &spec) {
         Ok(fb) => fb,
         Err(reason) => {
@@ -1281,7 +1326,11 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         &fb,
         &opts,
         &mut |event| {
+            super::progress::event(&event, opts.max_trials);
             let (stage, state, details) = match event {
+                KoblitzIcEvent::PairTableStarted | KoblitzIcEvent::RelationBatchStarted { .. } => {
+                    return
+                }
                 KoblitzIcEvent::FactorBaseStarted => ("factor_base", "started", json!({})),
                 KoblitzIcEvent::FactorBaseReady { points, orbits } => {
                     columns = orbits;
@@ -1302,7 +1351,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
                     wanted,
                     trials,
                 } => {
-                    if !quiet {
+                    if !quiet && !super::progress::enabled() {
                         println!(
                             "      {collected}/{wanted} relations; {trials} trials; {:.3}s",
                             stage_start.elapsed().as_secs_f64()

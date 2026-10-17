@@ -1,0 +1,70 @@
+{
+  "schema": "volcano-repaired-recovery-launch/v1",
+  "epoch": "resume-20261017T161406Z",
+  "launched_utc": "2026-10-17T16:14:06.513686+00:00",
+  "pid": 8973,
+  "command": [
+    "/workspace/volcano_ic_repaired_survey_20261017/volcano-ic-driver",
+    "run",
+    "/workspace/volcano_ic_repaired_survey_20261017",
+    "24823",
+    "86400",
+    "2147483648"
+  ],
+  "log": "/workspace/volcano_ic_repaired_survey_20261017/resume-20261017T161406Z.log",
+  "source_head": "2bf7700b73b3a84810aa86cb29837d1359b28322",
+  "frozen_hashes": {
+    "ecbench": "35d89073f4d666b094c213a1d31b0c819b63600123e067c111af3c947d7609a9",
+    "volcano-ic-driver": "b8b489c7225c64ed492ffce39286c995f5ca820960956cf706c0d3110f5bdd2d",
+    "queue.jsonl": "45e277bede6017c30a49405096afefab3d34a18553ecd6b1a79238f2b9559728"
+  },
+  "repository_head_at_launch": "708c3e2ad39134a78befb8aaf2d72b67d9f54dfc",
+  "free_workspace_bytes_before_launch": 3845259264,
+  "native_status_before_launch": {
+    "campaign": "/workspace/volcano_ic_repaired_survey_20261017",
+    "coverage": [
+      {
+        "graph": "mixed",
+        "state": "audited",
+        "vertices": 989
+      },
+      {
+        "graph": "mixed",
+        "state": "queued",
+        "vertices": 9081
+      },
+      {
+        "graph": "three",
+        "state": "audited",
+        "vertices": 970
+      },
+      {
+        "graph": "three",
+        "state": "interrupted",
+        "vertices": 1
+      },
+      {
+        "graph": "three",
+        "state": "queued",
+        "vertices": 5590
+      },
+      {
+        "graph": "two",
+        "state": "audited",
+        "vertices": 976
+      },
+      {
+        "graph": "two",
+        "state": "queued",
+        "vertices": 7216
+      }
+    ]
+  },
+  "limits": {
+    "maximum_additional_vertices": 24823,
+    "elapsed_seconds": 86400,
+    "spool_bytes": 2147483648
+  },
+  "scope": "New runtime epoch. Same frozen mathematical protocol/binaries/queue. Retry interruption in a new numbered attempt; old raw evidence retained. Wall observations remain unqualified. No unattended upload or full-queue completion is implied.",
+  "process_verified": "PENDING separate process and native status readback"
+}

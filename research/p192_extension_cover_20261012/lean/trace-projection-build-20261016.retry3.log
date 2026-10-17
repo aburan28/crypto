@@ -1,0 +1,36 @@
+TraceProjection.lean:25:34: error: unsolved goals
+K : Type u_1
+inst✝ : AddCommGroup K
+f : K →+ K
+Q : K
+hfix : f Q = Q
+⊢ Q + Q + Q + Q + Q + Q = 6 • Q
+TraceProjection.lean:47:10: error(lean.unknownIdentifier): Unknown identifier `smul_smul`
+TraceProjection.lean:51:19: error(lean.unknownIdentifier): Unknown identifier `smul_smul`
+TraceProjection.lean:53:23: error(lean.unknownIdentifier): Unknown identifier `smul_smul`
+TraceProjection.lean:56:29: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  6 • (k • T - Q)
+in the target expression
+  6 • u • (k • T - Q) = 0
+
+K : Type u_1
+inst✝ : AddCommGroup K
+f : K →+ K
+P : K
+r h k u m v : ℕ
+hfix : f (h • P) = h • P
+hrTrace : r • sixTrace f P = 0
+hrQ : r • h • P = 0
+hk : 6 * k = h + r * m
+hu : 6 * u = 1 + r * v
+T : K := sixTrace f P
+Q : K := h • P
+hTrace : h • T = 6 • Q
+hSix : 6 • (k • T - Q) = 0
+hR : r • (k • T - Q) = 0
+hUnit : (6 * u) • (k • T - Q) = k • T - Q
+⊢ 6 • u • (k • T - Q) = 0
+'P192ExtensionCover.sixTrace_nsmul' depends on axioms: [propext]
+'P192ExtensionCover.sixTrace_fixed' depends on axioms: [sorryAx]
+'P192ExtensionCover.sixTrace_cofactor_projection' depends on axioms: [propext, sorryAx]
+'P192ExtensionCover.line_partner_from_constant' depends on axioms: [propext]

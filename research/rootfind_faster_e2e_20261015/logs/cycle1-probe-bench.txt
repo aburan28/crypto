@@ -1,0 +1,4 @@
+n=13 |F|=4005 probes=8000000 hits=0 (miss-dominated)
+shared hash (prefetch+reject): 1.38 ns/probe
+doubled hash (pre cycle-1):    4.08 ns/probe
+speedup (doubled/shared):       2.949×

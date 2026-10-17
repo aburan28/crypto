@@ -1,0 +1,25 @@
+TraceProjection.lean:22:18: error(lean.unknownIdentifier): Unknown identifier `smul_add`
+TraceProjection.lean:21:45: error: unsolved goals
+K : Type u_1
+inst✝ : AddCommGroup K
+f : K →+ K
+n : ℕ
+P : K
+⊢ n • P + n • f P + n • f (f P) + n • f (f (f P)) + n • f (f (f (f P))) + n • f (f (f (f (f P)))) =
+    n • (P + f P + f (f P) + f (f (f P)) + f (f (f (f P))) + f (f (f (f (f P)))))
+TraceProjection.lean:27:62: error(lean.unknownIdentifier): Unknown identifier `add_smul`
+TraceProjection.lean:25:34: error: unsolved goals
+K : Type u_1
+inst✝ : AddCommGroup K
+f : K →+ K
+Q : K
+hfix : f Q = Q
+⊢ Q + Q + Q + Q + Q + Q = 6 • Q
+TraceProjection.lean:45:8: error(lean.unknownIdentifier): Unknown identifier `smul_sub`
+TraceProjection.lean:51:8: error(lean.unknownIdentifier): Unknown identifier `smul_sub`
+TraceProjection.lean:53:12: error(lean.unknownIdentifier): Unknown identifier `add_smul`
+TraceProjection.lean:56:18: error(lean.unknownIdentifier): Unknown identifier `mul_smul`
+'P192ExtensionCover.sixTrace_nsmul' depends on axioms: [sorryAx]
+'P192ExtensionCover.sixTrace_fixed' depends on axioms: [sorryAx]
+'P192ExtensionCover.sixTrace_cofactor_projection' depends on axioms: [propext, sorryAx]
+'P192ExtensionCover.line_partner_from_constant' depends on axioms: [propext]

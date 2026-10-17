@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/scholten_descended_control.py", line 228, in <module>
+    (HERE/'scholten_descended_control.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
+                                                        ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/build-deps/cpython/cpython-3.14.3-macos-aarch64-none/lib/python3.14/json/__init__.py", line 242, in dumps
+    **kw).encode(obj)
+          ~~~~~~^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/build-deps/cpython/cpython-3.14.3-macos-aarch64-none/lib/python3.14/json/encoder.py", line 202, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/build-deps/cpython/cpython-3.14.3-macos-aarch64-none/lib/python3.14/json/encoder.py", line 263, in iterencode
+    return _iterencode(o, 0)
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/build-deps/cpython/cpython-3.14.3-macos-aarch64-none/lib/python3.14/json/encoder.py", line 182, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type Integer is not JSON serializable
+when serializing dict item 'final_rank'

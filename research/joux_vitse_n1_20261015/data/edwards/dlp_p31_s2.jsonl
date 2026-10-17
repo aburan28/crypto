@@ -1,0 +1,11 @@
+{"base_points":6,"d":[17,16,30,10,17],"fp_muls_per_add":452.0,"kind":"setup","log2_n":22.77093141050646,"ms":263.657774,"n":"7157039","p":31,"seed":2,"sym_precompute_muls":9950526,"trace_record_muls":56900400,"trace_record_tries":1,"trace_steps":13}
+{"k_secret":"1185051","kind":"instance","n":"7157039","p":31,"seed":2}
+{"expected_walk_ops":3352.9465507114514,"fp_muls":2153780,"fp_muls_per_op":452.0,"group_ops":4765,"k":"1185051","kind":"rho","p":31,"seed":2,"verified":true}
+{"a":"158572","b":"4101105","kind":"relation","p":31,"quad":{"eps":1,"terms":[[0,1],[1,1],[3,-1],[5,-1]]},"seed":2,"trial":86139,"verified":true}
+{"a":"1845792","b":"5611043","kind":"relation","p":31,"quad":{"eps":0,"terms":[[0,-1],[1,-1],[2,1],[5,1]]},"seed":2,"trial":178731,"verified":true}
+{"a":"703449","b":"19546","kind":"relation","p":31,"quad":{"eps":0,"terms":[[0,1],[1,-1],[4,1],[5,1]]},"seed":2,"trial":197386,"verified":true}
+{"a":"6679634","b":"855091","kind":"relation","p":31,"quad":{"eps":1,"terms":[[1,1],[3,-1],[4,-1],[5,1]]},"seed":2,"trial":229855,"verified":true}
+{"a":"4620845","b":"3953782","kind":"relation","p":31,"quad":{"eps":0,"terms":[[0,-1],[1,1],[4,-1],[5,-1]]},"seed":2,"trial":260493,"verified":true}
+{"a":"1476885","b":"936344","kind":"relation","p":31,"quad":{"eps":0,"terms":[[1,1],[3,-1],[4,1],[5,1]]},"seed":2,"trial":289855,"verified":true}
+{"a":"2542012","b":"609308","kind":"relation","p":31,"quad":{"eps":0,"terms":[[0,1],[2,1],[3,-1],[4,-1]]},"seed":2,"trial":310046,"verified":true}
+{"agg":{"consistent":8454,"e_solutions":8969,"f4_muls":12409096469830,"not_split":8834,"replay_mismatch":3936,"resolve_group_ops":192,"roots_muls":2631730,"target_gen_muls":9404798804,"undetermined":0,"weil_muls":4477713216},"k":"1185051","kind":"ic","linear_algebra_mulmods":288,"ms":6292193.4877430005,"online_muls":12422981700652,"oracle_disagree":0,"p":31,"ratio_online_ic_over_expected_rho_walk":8197110.324714616,"ratio_online_ic_over_rho":5767990.0921412585,"relations":7,"relations_unverified":0,"resolve_muls":86784,"seed":2,"trials":310048,"unknowns":7,"verified":true}

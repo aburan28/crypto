@@ -30,6 +30,16 @@ path = "src/main.rs"
 name = "ic"
 path = "src/bin/ic.rs"
 
+# `volcano-rho` — one ECDLP instance carried by explicit Vélu maps to every
+# curve of an ℓ-isogeny volcano, with Pollard rho timed on each stratum.
+[[bin]]
+name = "volcano-rho"
+path = "src/bin/volcano_rho.rs"
+
+[[bin]]
+name = "volcano-stats"
+path = "src/bin/volcano_stats.rs"
+
 [[bin]]
 name = "pkm-aux-search"
 path = "src/bin/pkm_aux_search.rs"
@@ -113,6 +123,15 @@ path = "src/bin/endo_chain_bench.rs"
 name = "crypto_lib"
 path = "src/lib.rs"
 
+# Checkpointed native ecbench orchestration and recorded-value aggregation.
+[[bin]]
+name = "volcano-ic-driver"
+path = "research/full_volcano_graphwide_ic_20261017/execution/driver.rs"
+
+[[bin]]
+name = "volcano-ic-summarize"
+path = "research/full_volcano_graphwide_ic_20261017/execution/summarize.rs"
+
 [features]
 # Keep the existing Redis TLS behavior in normal builds. The isolated,
 # network-disabled N83 capacity worker can omit its unused native OpenSSL
@@ -159,6 +178,9 @@ result_unit_err = "allow"
 chunks_exact_to_as_chunks = "allow"
 
 [dependencies]
+volcano-cli = { path = "tools/volcano-cli" }
+# Durable per-vertex IC campaign checkpoints; matches volcano-cli's backend.
+rusqlite = { version = "0.32", features = ["bundled"] }
 # Portable CPU-time and peak-RSS measurements for ic research reports.
 libc = "0.2"
 num-bigint = { version = "0.4", features = ["rand"] }
