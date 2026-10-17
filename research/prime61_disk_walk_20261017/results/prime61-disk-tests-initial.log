@@ -1,0 +1,30 @@
+   Compiling crypto v0.1.0 (/workspace/crypto-current)
+warning: unused variable: `m`
+   --> examples/support/isogeny_disk.rs:438:17
+    |
+438 |             let m = model(&self.f, &n);
+    |                 ^ help: if this is intentional, prefix it with an underscore: `_m`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `crypto` (example "isogeny_disk_walk" test) generated 1 warning (run `cargo fix --example "isogeny_disk_walk" -p crypto --tests` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 4m 23s
+     Running unittests examples/isogeny_disk_walk.rs (target/release/examples/isogeny_disk_walk-7d940355fb5ba15d)
+
+running 4 tests
+test isogeny_disk::tests::crash_child ... ok
+
+running 1 test
+test isogeny_disk::tests::wrong_policy_and_corrupt_j_index_fail_closed ... ok
+test isogeny_disk::tests::abrupt_exit_rolls_back_and_resume_is_identical_to_uninterrupted ... ok
+test isogeny_disk::tests::complete_small_classes_match_independent_point_counts_and_existing_walker ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running unittests examples/prime61_isogeny_experiment.rs (target/release/examples/prime61_isogeny_experiment-e96b5ef7e2dc88c5)
+
+running 1 test
+test tests::quotient_trace_evaluation_matches_existing_degree3_map_including_pole ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

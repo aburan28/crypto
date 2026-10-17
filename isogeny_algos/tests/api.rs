@@ -228,3 +228,66 @@ fn cli_records_and_exit_codes() {
         )
     );
 }
+
+#[test]
+fn cm_modular_polynomial_api_and_cli_are_end_to_end() {
+    let exact = isogeny_algos::find::modpoly::integer_coeffs(3);
+    assert_eq!(api::modular_polynomial_integer_cm(3, 42).unwrap(), exact);
+    // Targets include characteristic two, a composite, and a 200-bit integer.
+    for m in [
+        Int::one(),
+        Int::from(2u64),
+        Int::from(120u64),
+        Int::one().shl(200) + Int::from(7u64),
+    ] {
+        let expected: Vec<Vec<_>> = exact
+            .iter()
+            .map(|r| r.iter().map(|c| c.modulo(&m)).collect())
+            .collect();
+        assert_eq!(api::modular_polynomial_cm(&m, 3, 42).unwrap(), expected);
+    }
+    let p = Int::from(10007u64);
+    assert_eq!(
+        api::modular_polynomial_cm_at(&p, 3, &Int::from(1234u64), 42).unwrap(),
+        api::modular_polynomial_at(&p, 3, &Int::from(1234u64), 42).unwrap()
+    );
+    assert!(api::modular_polynomial_cm(&Int::from(-1i64), 3, 1).is_err());
+    assert!(api::modular_polynomial_cm_at(&Int::from(120u64), 3, &Int::one(), 1).is_err());
+
+    let bin = env!("CARGO_BIN_EXE_isogeny-algos");
+    let run = |tail: &[&str]| {
+        let out = Command::new(bin)
+            .args(["modpoly", "--method", "cm", "--ell", "3"])
+            .args(tail)
+            .output()
+            .unwrap();
+        (
+            out.status.code().unwrap(),
+            String::from_utf8(out.stdout).unwrap(),
+        )
+    };
+    let (code, out) = run(&["--integer"]);
+    assert_eq!(code, 0, "{out}");
+    assert!(out.contains("\"1855425871872000000000\""));
+    assert!(out.contains("\"method\":\"cm\""));
+    for args in [
+        &["--modulus", "120"][..],
+        &["--p", "10007"][..],
+        &["--p", "10007", "--j", "1234"][..],
+    ] {
+        let (code, out) = run(args);
+        assert_eq!(code, 0, "{out}");
+        assert!(out.contains("\"status\":\"PASS\""));
+        assert_eq!(out.trim().lines().count(), 1);
+    }
+    for args in [
+        &[][..],
+        &["--modulus", "0"][..],
+        &["--p", "120"][..],
+        &["--integer", "--modulus", "12"][..],
+        &["--modulus", "12", "--j", "0"][..],
+    ] {
+        let (code, out) = run(args);
+        assert_eq!(code, 2, "{out}");
+    }
+}

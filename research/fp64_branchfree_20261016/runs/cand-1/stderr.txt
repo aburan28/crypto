@@ -1,0 +1,66 @@
+fp64 (Fp64, 2^63-25): batched walk == unbatched reference, on curve; timed arithmetic == field
+fp64cm (Fp64, sub/redc by select_unpredictable (hwcost::kernel::Fp64Cm), 2^63-25): batched walk == unbatched reference, on curve; timed arithmetic == field
+pf64 (prime_fast::Fp64, 2^62-57): batched walk == unbatched reference, on curve; timed arithmetic == field
+w1 (FpWide<1>, 2^64-59): batched walk == unbatched reference, on curve; timed arithmetic == field
+clock
+  rep 1/7 of 2 arms
+  rep 2/7 of 2 arms
+  rep 3/7 of 2 arms
+  rep 4/7 of 2 arms
+  rep 5/7 of 2 arms
+  rep 6/7 of 2 arms
+  rep 7/7 of 2 arms
+field operations
+  rep 1/7 of 32 arms
+  rep 2/7 of 32 arms
+  rep 3/7 of 32 arms
+  rep 4/7 of 32 arms
+  rep 5/7 of 32 arms
+  rep 6/7 of 32 arms
+  rep 7/7 of 32 arms
+memory read bandwidth, 1 thread(s)
+  rep 1/7 of 10 arms
+  rep 2/7 of 10 arms
+  rep 3/7 of 10 arms
+  rep 4/7 of 10 arms
+  rep 5/7 of 10 arms
+  rep 6/7 of 10 arms
+  rep 7/7 of 10 arms
+memory read bandwidth, 4 thread(s)
+  rep 1/7 of 10 arms
+  rep 2/7 of 10 arms
+  rep 3/7 of 10 arms
+  rep 4/7 of 10 arms
+  rep 5/7 of 10 arms
+  rep 6/7 of 10 arms
+  rep 7/7 of 10 arms
+rho kernel
+  fp64: 10 batch sizes set up
+  fp64cm: 10 batch sizes set up
+  pf64: 10 batch sizes set up
+  w1: 10 batch sizes set up
+  rep 1/7 of 40 arms
+  rep 2/7 of 40 arms
+  rep 3/7 of 40 arms
+  rep 4/7 of 40 arms
+  rep 5/7 of 40 arms
+  rep 6/7 of 40 arms
+  rep 7/7 of 40 arms
+thread scaling
+  rep 1/7 of 12 arms
+  rep 2/7 of 12 arms
+  rep 3/7 of 12 arms
+  rep 4/7 of 12 arms
+  rep 5/7 of 12 arms
+  rep 6/7 of 12 arms
+  rep 7/7 of 12 arms
+prime_fast::rho_parallel, 44-bit curve, one thread
+  rep 1/7 of 1 arms
+  rep 2/7 of 1 arms
+  rep 3/7 of 1 arms
+  rep 4/7 of 1 arms
+  rep 5/7 of 1 arms
+  rep 6/7 of 1 arms
+  rep 7/7 of 1 arms
+wrote research/fp64_branchfree_20261016/runs/cand-1
+exit 0

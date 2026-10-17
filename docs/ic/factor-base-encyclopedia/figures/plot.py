@@ -30,14 +30,20 @@ VERDICT_LABEL = {
     "not-ECDLP": "genus >= 2 Jacobian (not an ECDLP route alone)",
     "below-rho-weak-class": "below rho, weak class only",
 }
+PRICING_TAG = {
+    "w0": "w=0",
+    "band": "band w=0-1",
+    "wall": "wall",
+    "model": "rho model, w=0",
+}
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9, "svg.fonttype": "none"})
 
 
 def taxonomy():
     columns = [
         ("Prime fields E(F_p)", [
-            ("0.1 Kummer g*mu_{2^t} [P-224]", "open", True),
-            ("0.2 Isogeny x(R'+<Q>) [P-192]", "open", True),
+            ("0.1 Kummer g*mu_{2^t}: F4 at P-224", "open", True),
+            ("0.2 Isogeny x(R'+<Q>): V at P-192", "open", True),
             ("A1 small abscissae (baseline)", "refuted", False),
             ("A2 geometry family (FB3)", "refuted", False),
             ("A3 automorphism orbits", "engineering", False),
@@ -50,6 +56,7 @@ def taxonomy():
             ("A10 fixed-degree / map images", "refuted", False),
             ("A11 isogeny-augmented, class nbrs", "refuted", False),
             ("A12 height box, degree-d maps", "open", False),
+            ("A13 coset vs low-x/random (stage)", "refuted", False),
         ]),
         ("Extension fields E(F_{p^k})", [
             ("B1 Gaudry-Diem x in F_p, k=2..5", "refuted", False),
@@ -74,17 +81,21 @@ def taxonomy():
             ("D5 u-frame symmetrised", "refuted", False),
             ("D6 prefix Frobenius closure", "engineering", False),
             ("D7 isogeny-transported", "refuted", False),
+            ("D8 N83 orbit bases: online only", "engineering", False),
+            ("D9 one/two large primes", "engineering", False),
+            ("D10 solver-cost selection", "engineering", False),
             ("# Jacobians and covers", None, False),
             ("E1 degree-1 places, g=2..4", "not-ECDLP", False),
             ("E2 Joux-Vitse g3 cover", "below-rho-weak-class", False),
             ("E3 P-192 CM class ideals", "open", False),
             ("E4 GHS covers ECC2K-130", "refuted", False),
             ("E5 Smith quartic codomain", "refuted", False),
+            ("E6 genus-3 cover, IC-2LP", "open", False),
         ]),
     ]
-    fig, ax = plt.subplots(figsize=(10, 9.2))
+    fig, ax = plt.subplots(figsize=(10, 11.4))
     ax.set_xlim(0, 3)
-    ax.set_ylim(-17.2, 1.2)
+    ax.set_ylim(-21.8, 1.2)
     ax.axis("off")
     for ci, (title, items) in enumerate(columns):
         x = ci + 0.03
@@ -102,9 +113,9 @@ def taxonomy():
                     color="white" if verdict in ("refuted", "open") else "black",
                     fontweight="bold" if flagship else "normal", wrap=True)
     handles = [plt.Rectangle((0, 0), 1, 1, fc=VERDICT_COLOR[k]) for k in VERDICT_LABEL]
-    ax.legend(handles, list(VERDICT_LABEL.values()), loc="lower left", bbox_to_anchor=(0.0, 0.0),
+    ax.legend(handles, list(VERDICT_LABEL.values()), loc="lower center", bbox_to_anchor=(0.5, 0.0),
               fontsize=9, frameon=False, title="recorded verdict (black border = flagship families, §0)")
-    ax.set_title("Factor-base families tried, by field regime\n(verdicts as recorded by each source; 2026-10-15)",
+    ax.set_title("Factor-base families tried, by field regime\n(verdicts as recorded by each source; updated 2026-10-16)",
                  fontsize=12)
     fig.tight_layout()
     fig.savefig(HERE / "taxonomy.svg")
@@ -113,7 +124,7 @@ def taxonomy():
 
 def cost_vs_rho():
     rows = DATA["cost_vs_rho"]
-    fig, ax = plt.subplots(figsize=(8.2, 7))
+    fig, ax = plt.subplots(figsize=(10, 9))
     for i, r in enumerate(rows):
         y = len(rows) - 1 - i
         c = VERDICT_COLOR[r["verdict"]]
@@ -122,15 +133,19 @@ def cost_vs_rho():
         else:
             ax.plot([r["lo"]], [y], "o", color=c, ms=8)
     ax.set_yticks(range(len(rows)))
-    ax.set_yticklabels([r["label"] for r in reversed(rows)], fontsize=8)
+    ax.set_yticklabels([f'{r["label"]} [{PRICING_TAG[r["pricing"]]}]' for r in reversed(rows)], fontsize=7.5)
     ax.set_xscale("log")
     ax.axvline(1.0, color="black", lw=1, ls="--")
     ax.text(1.05, len(rows) - 0.4, "rho parity", fontsize=8)
-    ax.set_xlabel("recorded cost / matched rho (log scale; bar = range over the sizes the source ran)")
+    ax.set_xlabel("recorded cost / matched rho (log scale; bar = range over sizes or band weights)")
     ax.set_title("Best recorded row per family, as each source reported it\n"
-                 "(different curve sizes and accounting per row: not a ranking)", fontsize=10)
+                 "(sizes and accounting differ per row: not a ranking)", fontsize=10)
     handles = [plt.Line2D([], [], color=VERDICT_COLOR[k], lw=6) for k in VERDICT_LABEL]
-    ax.legend(handles, list(VERDICT_LABEL.values()), fontsize=7, loc="lower right")
+    ax.legend(handles, list(VERDICT_LABEL.values()), fontsize=7, loc="upper center", title_fontsize=7,
+              bbox_to_anchor=(0.5, -0.07), ncol=2,
+              title="[w=0] lower-bound comparison, unpriced work left out\n"
+                    "[band w=0-1] priced at 0, 0.1, 1 GAE per op (AGENTS.md 5a)\n"
+                    "[wall] wall-clock ratio, not the S unit")
     ax.grid(axis="x", which="major", alpha=0.3)
     fig.tight_layout()
     fig.savefig(HERE / "cost_vs_rho.svg")
@@ -152,8 +167,9 @@ def pkm_degree():
     ax.set_xlabel("N = m*t  (tower variables; deployed size needs N ~ log2 r ~ 192-256)")
     ax.set_ylabel("F4 solving degree D (measured)")
     ax.set_ylim(2.5, 7.6)
-    ax.set_title("PKM tower bases: measured solving degree, toy primes only\n"
-                 "p0 = 786433 (20-bit), p1 = 2013265921 (31-bit); one or two targets per cell", fontsize=10)
+    ax.set_title("PKM tower bases: measured solving degree at p0 = 786433 (20-bit), p1 = 2013265921 (31-bit)\n"
+                 "one or two targets per cell; Kummer at the P-224 prime gives the same D in every cell run\n"
+                 "(m=2 N<=20, m=3 N<=12, m=4 N=8,12; PR #1942)", fontsize=9)
     ax.legend(fontsize=7, loc="upper left")
     ax.grid(alpha=0.3)
     fig.tight_layout()

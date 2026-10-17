@@ -1,0 +1,81 @@
+name: N83 one-target cold factor-base grid
+
+on:
+  push:
+    branches: [codex/n83-e2e-factor-base-20261016]
+    paths:
+      - .github/workflows/n83-e2e-factor-base.yml
+      - research/n83_e2e_factor_base_20261016/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-e2e-factor-base-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  cold-grid:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Freeze source and public point
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          mkdir -p "$RUNNER_TEMP/n83-e2e-factor-base"
+          python3 research/n83_e2e_factor_base_20261016/run.py --preflight > \
+            "$RUNNER_TEMP/n83-e2e-factor-base/preflight.json"
+          rustc --version > "$RUNNER_TEMP/n83-e2e-factor-base/rustc-version.txt"
+          cargo --version > "$RUNNER_TEMP/n83-e2e-factor-base/cargo-version.txt"
+
+      - name: Build and check exact IC and rho producers
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-e2e-factor-base-target"
+          export CARGO_BUILD_JOBS=2
+          cargo test --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-e2e-factor-base/ic-tests.log" 2>&1
+          cargo test --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-e2e-factor-base/rho-tests.log" 2>&1
+          cargo build --release --locked --example koblitz_orbit_dlp_fast > \
+            "$RUNNER_TEMP/n83-e2e-factor-base/ic-build.log" 2>&1
+          cargo build --release --locked --example n83_rho_optimization_eval > \
+            "$RUNNER_TEMP/n83-e2e-factor-base/rho-build.log" 2>&1
+
+      - name: Run fresh-process K grid and same-point rho
+        shell: bash
+        run: |
+          set -euo pipefail
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/n83-e2e-factor-base-target"
+          python3 research/n83_e2e_factor_base_20261016/run.py \
+            --binary "$CARGO_TARGET_DIR/release/examples/koblitz_orbit_dlp_fast" \
+            --rho-binary "$CARGO_TARGET_DIR/release/examples/n83_rho_optimization_eval" \
+            --output "$RUNNER_TEMP/n83-e2e-factor-base/results" \
+            2>&1 | tee "$RUNNER_TEMP/n83-e2e-factor-base/run.log"
+
+      - name: Replay base, relation, scalar and resource receipts
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "$RUNNER_TEMP/n83-e2e-factor-base/results" ]; then
+            python3 research/n83_e2e_factor_base_20261016/verify.py \
+              "$RUNNER_TEMP/n83-e2e-factor-base/results" \
+              2>&1 | tee "$RUNNER_TEMP/n83-e2e-factor-base/verify.log"
+          fi
+
+      - name: Preserve raw receipts and failed arms
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-e2e-factor-base-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-e2e-factor-base/
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,80 @@
+{
+  "baseline": "research/ecbench_rootfinding_alloc_20261014/sessions/baseline-a0",
+  "candidate": "research/ecbench_rootfinding_alloc_20261014/sessions/candidate-b",
+  "records_baseline": 128,
+  "records_candidate": 128,
+  "missing_baseline": [],
+  "missing_candidate": [],
+  "deterministic_mismatches": [],
+  "all_verified": true,
+  "l0_timing": {
+    "rho-neg": {
+      "candidate_over_baseline_solve_wall_geomean": 1.0126630441686701,
+      "target_cluster_bootstrap_95_percent": [
+        0.8052171922212632,
+        1.2291663096013457
+      ],
+      "target_log_ratios": [
+        0.2223015077029204,
+        0.23839278099172526,
+        0.0834315995622202,
+        0.29573716840419606,
+        -0.33421383650010034,
+        0.2640628362566513,
+        -0.5825713316726115,
+        -0.08647241824810929
+      ]
+    },
+    "b48-serial-8": {
+      "candidate_over_baseline_solve_wall_geomean": 1.176748282465812,
+      "target_cluster_bootstrap_95_percent": [
+        0.8755798772837823,
+        1.7142515574752966
+      ],
+      "target_log_ratios": [
+        0.4294571933519824,
+        0.08446441835282369,
+        0.1261254543096101,
+        -0.3986069742942614,
+        -0.3243819748422262,
+        1.3038943654332844,
+        0.12053640892383687,
+        -0.03944935730997381
+      ]
+    },
+    "b48-batch-8": {
+      "candidate_over_baseline_solve_wall_geomean": 0.9930885835311201,
+      "target_cluster_bootstrap_95_percent": [
+        0.8034843846711218,
+        1.2512497255833057
+      ],
+      "target_log_ratios": [
+        -0.27383229563043965,
+        -0.1625038970002102,
+        0.562532655840623,
+        0.39694748227915255,
+        0.07744967207204125,
+        -0.437710874924712,
+        0.029365585143417534,
+        -0.24773161520972053
+      ]
+    },
+    "rho-neg-aa": {
+      "candidate_over_baseline_solve_wall_geomean": 1.01699778644544,
+      "target_cluster_bootstrap_95_percent": [
+        0.8266569025157593,
+        1.203984654383707
+      ],
+      "target_log_ratios": [
+        0.37127365314220756,
+        0.10306688669225982,
+        -0.061157700501685515,
+        -0.6261404374330548,
+        -0.008554344231672017,
+        -0.0024074389607150345,
+        0.23553001416618632,
+        0.12322889121365668
+      ]
+    }
+  }
+}

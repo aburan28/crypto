@@ -1,0 +1,103 @@
+{
+  "schema": "ec-hardness/p61-certified-prefix-expansion/v1",
+  "status": "partial_census_pass",
+  "completed_utc": "2026-10-14T16:56:07Z",
+  "supersedes_prefix_manifest_sha256": "2149013faae96e85d41d7ed4814f7c89d7b4ae6b2688e189ddbdc9b665bb24dd",
+  "scope": {
+    "root_id": "p61-i0025",
+    "p": "2305843009213693951",
+    "trace": -704859453,
+    "fundamental_discriminant": "-8726545188371316595",
+    "certified_class_number": 358094304,
+    "x_start": 0,
+    "x_end": 16704,
+    "lanes": 18,
+    "records": 300672,
+    "coverage_percent": 0.083964474341,
+    "complete_class_coverage": false
+  },
+  "class_number_evidence": {
+    "preflight_receipt_sha256": "44e202b8eb9cdad3ef09fb50e416cc8bdcf0942a6f140e24db587a3c4d44493f",
+    "certification_receipt_sha256": "260382fbce4805ce84ce00fc77baf27c95243220ae88ca7725e31e4f4f9643c9",
+    "certification_state": "unconditional"
+  },
+  "new_segment": {
+    "x_start": 320,
+    "x_end": 16704,
+    "records": 294912,
+    "generation_source_commit": "c9bee1b28eda33b643ecf8b9a8b74724267d1cdf",
+    "segment": {
+      "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/segments/certified-v2-segment-000000000320-000000016704.jsonl.gz",
+      "sha256": "514e8b0d6236ab883eb11f4cf24d8aeb66ce2a3ef6efb41652fcdd9a4fa08961",
+      "bytes": 37455603,
+      "uncompressed_bytes": 161082807
+    },
+    "checkpoint": {
+      "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/checkpoints/certified-v2-checkpoint-000000016704.json",
+      "sha256": "293f7b82b0b081491552b3ffe78f6885cd0746f53d2d6040cada71e6f186c327",
+      "bytes": 7307,
+      "previous_checkpoint_sha256": "c1c3376f46b36781709c8514a8c9b920a1fd9fbbf2c29ab845403bf6845a1c35"
+    },
+    "generation_receipt": {
+      "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/receipts/certified-v2-generate-000000000320-000000016704.json",
+      "sha256": "99f09bdad81ff06641063e1cdbc4d3b106622c97d9685b30c218bf873889ea0f",
+      "bytes": 9778,
+      "elapsed_ms": 858472,
+      "audit_points": 1,
+      "audit_seed_x": 0,
+      "status": "pass"
+    },
+    "admitted_verification_receipt": {
+      "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/verification/certified-v2-verify-000000000320-000000016704.json",
+      "sha256": "93a36eeccdf6b821d4ffd8bebd552975ea2e0daa826672b2eb0dc88f95751dd8",
+      "bytes": 1219,
+      "elapsed_ms": 735772,
+      "audit_points": 2,
+      "audit_seed_x": 7,
+      "status": "pass"
+    }
+  },
+  "parallel_verifier_release": {
+    "source_commit": "d064729541f9c9cea2dc50b4a36572971cd2b099",
+    "binary": {
+      "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/bin/p61_isogeny_class-darwin-arm64-d06472954",
+      "sha256": "81c1a5b8897bcc39fd20c6427e17eb73d9160d838bb001f82810de4272579e82",
+      "bytes": 2093568
+    },
+    "source_bundle": {
+      "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-streaming-v1/source/crypto-p61-d06472954-incremental-from-1e9f40817.bundle",
+      "sha256": "d5fd5a15bb1c51e0b764bb66870ca94dd0d587890e0b460b16fe062ce5850cb2",
+      "bytes": 1437,
+      "bundle_verify": "pass"
+    }
+  },
+  "expanded_ledger": {
+    "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-audit-v1/ledgers/pilot-v6-certified-ledger-000000000000-000000016704.json",
+    "sha256": "822f6b0908432279351791e717dbc5caaf9600eb58bddc611834c63205dff5c2",
+    "bytes": 6113,
+    "entries": 4
+  },
+  "expanded_uniqueness_audit": {
+    "receipt": {
+      "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-audit-v1/receipts/pilot-v6-certified-uniqueness-000000000000-000000016704.json",
+      "sha256": "f014b8202ad435367824a5960387676bb3d568015e5e864f58cdde8c2bc069b1",
+      "bytes": 5106
+    },
+    "sorted_index": {
+      "path": "/Volumes/data/ec-hardness-atlas-20261012/p61-class-audit-v1/index/pilot-v6-certified-j-index-000000000000-000000016704.bin",
+      "sha256": "055fb9e007b0b7a261f4850b78450d1d8f306ec56e13c316cebf20514d1793ad",
+      "bytes": 4810768
+    },
+    "records": 300672,
+    "unique_j_invariants": 300672,
+    "duplicate_records": 0,
+    "complete_class_coverage": false,
+    "status": "partial_census_pass"
+  },
+  "durability": {
+    "per_file_sync_status": "sync_all_unsupported_by_filesystem",
+    "host_sync_barrier": "completed",
+    "post_barrier_digest_replay": "pass"
+  },
+  "interpretation": "The certified contiguous selected-class prefix is expanded, independently replayed, and globally deduplicated through x=16704. Full 358094304-vertex coverage and the selected-degree adjacency pass remain incomplete."
+}

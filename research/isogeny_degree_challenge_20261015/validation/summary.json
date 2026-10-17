@@ -1,0 +1,38 @@
+{
+  "schema": "isogeny-challenge-validation/v1",
+  "root_library": {
+    "status": "PASS",
+    "passed": 4121,
+    "failed": 0,
+    "ignored": 117,
+    "source_base": "3515af45efc81beadc1ce213fa88a7eb7419487f",
+    "command": "cargo test --release --lib --locked --offline -- --test-threads=1",
+    "exit_code": 0
+  },
+  "dedicated_package": {
+    "source": "9bb7cbce2b84151eff6846b02da842a8ef019343",
+    "status": "PASS",
+    "passed": 74,
+    "failed": 0,
+    "ignored": 0
+  },
+  "standalone_algorithms": {
+    "status": "PASS",
+    "passed": 128,
+    "failed": 0,
+    "ignored": 1
+  },
+  "installed_controls": {
+    "negative_cases_rejected": 9,
+    "resource_stress_accepted": 20,
+    "resource_stress_censored": 0,
+    "starting_source_rows": 3,
+    "short_budget": "CENSORED/TIMEOUT"
+  },
+  "clippy": {
+    "ordinary": "completed with 62 diagnostics in unchanged verifier/support code; none on the new challenge or regression",
+    "strict": "failed on existing generated repeated-module layout; raw diagnostics retained"
+  },
+  "archive_integrity": "every raw archive independently extracted and checked against member SHA256",
+  "binary_custody": "five immutable experimental judge versions indexed in store/index.json; ownership and public-access blocks verified; official ReleaseMe publication pending"
+}

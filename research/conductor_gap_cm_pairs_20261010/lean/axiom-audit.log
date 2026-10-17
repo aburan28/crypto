@@ -1,0 +1,35 @@
+# Axiom audit of research/conductor_gap_cm_pairs_20261010/lean, copied from a green CI run.
+# Source: workflow "Conductor-gap Lean proofs" (.github/workflows/conductor-gap-lean.yml), job `lean`
+#   run  https://github.com/aburan28/crypto/actions/runs/38984047520
+#   job  https://github.com/aburan28/crypto/actions/runs/38984047520/job/117251254820 (conclusion: success)
+#   PR   https://github.com/aburan28/crypto/pull/2026, checkout ref e5a8842272b3efbfdd53bc1b8f65bf4c644e3948
+#   date 2026-10-17T00:56:24Z (audit step), Lean v4.34.1 (lean-toolchain)
+#   artifact conductor-gap-axiom-audit, id 12084680520, zip sha256 2112012a2c47569353f1c77363baf4c65f277cd4c751d96eedfe03f687a7575e
+# The four .lean files in this directory are byte-identical at e5a884227 and at the commit that adds
+# this log, apart from comment-only docstring edits to TransferBound.lean in that same commit
+# (sheriff case SHF-20261017-e4d7f6, L-N2). Committed for finding L-N7 of that case.
+# Commands (from the job log): grep for sorry/admit/native_decide/axiom (none found); lake build;
+#   set -o pipefail; lake env lean AxiomAudit.lean | tee /tmp/axioms.txt (exactly 9 lines, allow-list);
+#   lake env leanchecker --fresh GenericInvariance; lake env leanchecker --fresh TransferBound (both exit 0, no output).
+# Lines below are the job's stdout of the audit step, timestamps stripped.
+✔ [2/4] Built TransferBound (320ms)
+✔ [3/4] Built GenericInvariance (443ms)
+Build completed successfully (4 jobs).
+AXIOM_AUDIT|GenericInvariance.decide_eq_map|[propext]
+AXIOM_AUDIT|GenericInvariance.step_map|[propext]
+AXIOM_AUDIT|GenericInvariance.run_map|[propext]
+AXIOM_AUDIT|GenericInvariance.dlog_invariant|[propext]
+AXIOM_AUDIT|TransferBound.Hom.map_pow|[propext]
+AXIOM_AUDIT|TransferBound.transfer|[propext]
+AXIOM_AUDIT|TransferBound.transfer_cost|[propext]
+AXIOM_AUDIT|TransferBound.transfer_answer|[propext]
+AXIOM_AUDIT|TransferBound.within_isogeny_cost|[propext]
+'GenericInvariance.decide_eq_map' depends on axioms: [propext]
+'GenericInvariance.step_map' depends on axioms: [propext]
+'GenericInvariance.run_map' depends on axioms: [propext]
+'GenericInvariance.dlog_invariant' depends on axioms: [propext]
+'TransferBound.Hom.map_pow' depends on axioms: [propext]
+'TransferBound.transfer' depends on axioms: [propext]
+'TransferBound.transfer_cost' depends on axioms: [propext]
+'TransferBound.transfer_answer' depends on axioms: [propext]
+'TransferBound.within_isogeny_cost' depends on axioms: [propext]
