@@ -79,3 +79,16 @@ characteristic-2 Velu walks, P by the repository walker
 No ECDLP-cost, weakness or security statement about any curve. The selection
 is exact arithmetic (orders, factorizations, class numbers); there is no
 empirical or comparative claim, so no control population is needed.
+
+## Amendment, 2026-10-17 (after all searches; the user's decision)
+
+After seeing both trios the user chose the 61-bit trio (K-61, B-61, P-61)
+as the primary picks; the 41/47-bit trio stays in the report for reference.
+No rule above was re-run or changed: B-61 and P-61 are the picks the frozen
+rule gave at 61 bits, and K-61 is the K "alternate" rule's pick.
+
+The user then added a criterion not in this protocol: **a large prime
+conductor gap** (a volcano at a large prime `l | f`, as in
+`research/drastic_prime_conductor_gap_round2_20261012/`). K-61 meets it
+(`l = 1951` and `587551`); B-61 (`f = 7^2`) and P-61 (`f = 3^2 5^3`) do
+not. Any re-selection for it gets its own frozen protocol.

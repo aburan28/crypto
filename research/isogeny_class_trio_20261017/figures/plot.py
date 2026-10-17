@@ -29,8 +29,8 @@ def save(fig, stem):
 
 
 def strata():
-    picks = [("K41", "K-41  (f = 409·1721)"), ("B47", "B-47  (f = 31²)"), ("P47", "P-47  (f = 3⁵)"),
-             ("K61", "K-61  (f = 1951·587551)"), ("B61", "B-61  (f = 7²)"), ("P61", "P-61  (f = 3²·5³)")]
+    picks = [("K61", "K-61  (f = 1951·587551)"), ("B61", "B-61  (f = 7²)"), ("P61", "P-61  (f = 3²·5³)"),
+             ("K41", "K-41  (f = 409·1721)"), ("B47", "B-47  (f = 31²)"), ("P47", "P-47  (f = 3⁵)")]
     fig, axes = plt.subplots(2, 3, figsize=(10, 5.6))
     for ax, (tag, title) in zip(axes.flat, picks):
         r = load(f"pick-{tag}.json")
@@ -54,7 +54,7 @@ def strata():
         ax.set_ylabel("curves in stratum  h(c² d_K)")
     for ax in axes[1]:
         ax.set_xlabel("stratum: conductor c of End(E), c | f")
-    fig.suptitle("Strata of each isogeny class (exact class numbers; top row = primary picks, bottom = 61-bit alternates)",
+    fig.suptitle("Strata of each isogeny class (exact class numbers; top row = the 61-bit picks, bottom = the 41/47-bit trio)",
                  fontsize=10, color=INK)
     fig.tight_layout()
     save(fig, "strata")
@@ -114,12 +114,12 @@ def volcanoes():
     """Schematic of one volcano component per primary class, from recorded strata."""
     fig, axes = plt.subplots(1, 3, figsize=(10, 3.6))
     specs = [
-        ("K41", "K-41: the single crater curve (End = Z[τ])\n409- and 1721-steps (inert craters)",
-         [("crater  O_K", 1), ("O_409", 410), ("O_1721", 1722), ("floor  O_f", 706020)]),
-        ("B47", "B-47: 11468 volcanoes of height 2\nl = 31, inert crater (no horizontal 31-edges)",
-         [("crater", 1), ("level 1", 32), ("floor", 992)]),
-        ("P47", "P-47: height-5 3-volcano, split crater\nper crater vertex (crater cycles not drawn)",
-         [("crater", 1), ("1", 2), ("2", 6), ("3", 18), ("4", 54), ("floor", 162)]),
+        ("K61", "K-61: the single crater curve (End = Z[τ])\n1951- and 587551-steps (inert craters)",
+         [("crater  O_K", 1), ("O_1951", 1952), ("O_587551", 587552), ("floor  O_f", 1146901504)]),
+        ("B61", "B-61: height-2 7-volcano, split crater\nper crater vertex (crater cycles not drawn)",
+         [("crater", 1), ("level 1", 6), ("floor", 42)]),
+        ("P61", "P-61: 5-volcano (height 3, split) per crater vertex;\neach vertex also heads a 3-tree 1 → 4 → 12 (inert)",
+         [("crater", 1), ("level 1", 4), ("level 2", 20), ("floor", 100)]),
     ]
     for ax, (tag, title, tiers) in zip(axes, specs):
         n = len(tiers)
@@ -129,8 +129,8 @@ def volcanoes():
             ax.barh(y, w, left=(1 - w) / 2, height=0.7, color=COL[tag[0]], alpha=0.25 + 0.75 * (1 - i / n),
                     edgecolor="white", linewidth=2)
             ax.text(0.5, y, f"{name}: {count:,}", ha="center", va="center", fontsize=7.5, color=INK)
-        ax.annotate("root (seeded)" if tag != "K41" else "root (Koblitz curve)",
-                    xy=(0.95 if tag != "K41" else 0.73, 0 if tag != "K41" else n - 1), xytext=(1.05, (n - 1) / 2),
+        ax.annotate("root (seeded)" if tag != "K61" else "root (Koblitz curve)",
+                    xy=(0.95 if tag != "K61" else 0.73, 0 if tag != "K61" else n - 1), xytext=(1.05, (n - 1) / 2),
                     fontsize=7, color=INK, ha="left", va="center",
                     arrowprops=dict(arrowstyle="->", color=INK2, linewidth=0.8))
         ax.set_xlim(0, 1.45)
