@@ -1,0 +1,16 @@
+{
+  "schema": "prime61.isogeny-experiment-protocol/v1",
+  "request": "Factor-base experiment for all horizontal isogenies and several vertical isogenies if they exist, over the requested large field",
+  "source_curve": {"p":"2305843009213693951","a":"2305843009213693948","b":"111","group_order":"2305843010818082053","subgroup_order":"2305843010818082053","cofactor":1,"generator":["1","1796364306280342617"],"target":["992726311114892094","558260110083040833"]},
+  "source_library": "de0c9391480155ebdd5a8495d2c79e4508d4795d",
+  "hypothesis": "The source class can be audited for horizontal and vertical rational prime-degree edges; checked maps preserve the frozen subgroup target and permit matched native factor-base runs on their codomains.",
+  "coverage_definition": "Original all-horizontal scope remains open pending clarification: all horizontal-class vertices versus all outgoing edges under a degree bound. No finite pilot is silently exhaustive.",
+  "structural_phase": "Compute t=p+1-N and Delta_pi=t^2-4p with native exact integers, factor completely using the repository u64 factorer and verify factor reconstruction and primality. Derive fundamental D_K and f_pi. Determine f_E only where certified. Determine whether vertical rational edges can exist.",
+  "construction_phase": "First inspect every outgoing odd-prime edge with 3<=ell<=13 as an implementation pilot, including inert primes as zero-neighbor controls. This does not discharge an unbounded or full-class request. Extend the exact degree list after coverage is clarified. Retain all roots, repeated roots, failed kernels, parallel maps and self-loops separately.",
+  "transport": "Verify each kernel independently, map G and Q through the same ordered path, check curve/subgroup membership and phi([k]G)=[k]phi(G) for public check scalars. Never substitute each codomain's independently chosen generator for transported G.",
+  "factor_base_phase": "Reuse prime_fast native two-summand collection with three inverse pairs and seeds 2026101600..2026101611, max_targets=100000 per stream, needed=20. Validate each native codomain base and each returned relation; verify any recovered scalar. Report caps as incomplete and retain target trials separately from unavailable total operation costs.",
+  "cost_scope": "Structural and relation-stage diagnostics only; map construction, transport and setup identified separately. No wall-time, full-cost, S or IC/rho gain claim. Class size, curve count and edge count are distinct.",
+  "execution_limits": "Initial native structural audit and one-hop construction each have an outer 300-second cap. These caps constrain pilots, not the user's requested final coverage. No remote compute or paid fleet is launched.",
+  "completion": "Require explicit horizontal coverage certificate and verified vertical-edge existence/status; all applicable mapped workloads retain failures and replay. Any full-class or degree range not executed remains unresolved.",
+  "workflow": "conductor check was attempted and is unavailable; keep this scope separate from frozen baseline records. Extend PR 1977 while open."
+}

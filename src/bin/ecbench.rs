@@ -974,6 +974,13 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
                 rep.replays.iter().filter(|r| r.reproduced).count(),
                 rep.problems.len()
             );
+            if rep.records_bound == Some(false) && rep.interruption.is_some() {
+                eprintln!(
+                    "warning: interruption {}: records_bound false (no records hash binds \
+                     records.jsonl); this session must not be cited as complete",
+                    rep.interruption.as_deref().unwrap_or("")
+                );
+            }
             if exit_code && !rep.ok {
                 return Ok(ExitCode::from(1));
             }

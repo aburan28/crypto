@@ -1,0 +1,14 @@
+  ***   variable name expected: ...);n=68162026;F=factor(n);I=Qfb(1,1,(1-D)/4);
+  ***                                                       ^-------------------
+  ***   at top-level: ...*7*237475387793728201!=D,error("discriminant m
+  ***                                             ^---------------------
+  ***   user error: discriminant mismatch
+  ***   at top-level: ...al=",I);print("power_n=",qfbpow(A,n))
+  ***                                             ^------------
+  *** qfbpow: incorrect type in qfbpow (t_POL).
+  ***   at top-level: if(qfbpow(A,n)!=I,error("order does not annihi
+  ***                    ^-------------------------------------------
+  *** qfbpow: incorrect type in qfbpow (t_POL).
+  ***   at top-level: for(i=1,matsize(F)[1],l=F[i,1];if(!isprime(l),
+  ***                         ^--------------------------------------
+  *** matsize: incorrect type in matsize (t_POL).

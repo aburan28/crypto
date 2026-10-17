@@ -49,10 +49,23 @@ Output: `structural_completeness.pdf` (~15 pages).
   construction; errata regarding the naive construction).
 - §7: empirical verification across secp256k1, P-256,
   brainpoolP256r1, Curve25519.
-- §8: the structural-completeness theorem with proof.
+- §8: the structural-completeness theorem with proof sketches.
 - §9: open questions and out-of-scope directions.
 - §10: reproducibility — full list of companion PARI scripts.
 - Bibliography.
+
+## Corrections
+
+- **2026-10-17** (sheriff case SHF-20261017-e4d7f6). P-N6: the abstract
+  (`.tex`, `abstract.txt`, Markdown twin) said "The theorem is proven by case
+  analysis"; §8 holds proof sketches, so it now says "argued by case analysis
+  (proof sketches in Section 8, not yet independently reviewed)". The Markdown
+  twin's stale "proof is *unconditional*" paragraph is deleted. P-N4: the
+  twist ℓ-rank remark now says both scripts skip `r = 0` (dropping
+  `(7,7,5)`), says "hypothesis classes", and gives the distinct `(ℓ,p,#E)`
+  check counts (26 278 instances = 336 distinct checks; 9 864 = 249),
+  recounted independently. P-N5: `recount/README.md` provenance corrected and
+  `recount/exp_zdoubleprime_lemma_extended.txt` regenerated.
 
 ## Companion artefacts
 
