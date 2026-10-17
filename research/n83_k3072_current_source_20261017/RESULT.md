@@ -45,3 +45,21 @@ the winner of the frozen K1104–K1120 finalist panel on fresh public points,
 with each IC arm paired to a same-point strong rho run and per-pair Tier 1
 calibration. The present point was exposed before that panel and has no role
 in its selection.
+
+Ten new public points for that followup are sealed before the finalist result
+is inspected. `generate.py --verify-sealed` replays the earlier exclusion sets
+and all ten scalar/subgroup certificates. Their public-point SHA-256 is
+`9bf9bfca72d4e82a5780759d52ac000b812ca25e831af04238983c8b72d2d777`;
+the answer sidecar SHA-256 is
+`3f7a75dc0134f883a77fa2b87eb6839b6df804c53950d8dc77e7f29b2500284c`.
+An independent read-only inventory scanned 490 `research/n83*/**/*.jsonl`
+files containing 32,366 earlier two-string point rows and found no overlap
+with these ten points.
+The answer sidecar is for independent replay, not a producer input. A run
+protocol should choose its second candidate by the preregistered finalist
+online selection output. If that selection is null or the panel is
+unadmitted, the fixed fallback is K1120/root11
+(`IC1N83Ckb1a1fb185920PDP4rootRCguidedLAgaussTDdirectISO0hc922b499a234`),
+chosen from the earlier exposed-point screen before the ten points above
+are used. The fallback does not turn a null finalist result into a selected
+winner. Use two dedicated Tier 1 host strata of five same-point IC/rho pairs.
