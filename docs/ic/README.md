@@ -590,9 +590,69 @@ The control that the counts are the workflow's own is
 `research/ic_exponent_20260926/control.py`, which compares a price
 report with `ic workflow`'s report and relation files, field by field.
 
+### SECG curves and `ic prime`
+
+`ic list` names **every SECG curve in the repository's standards database**
+(`docs/curves/standards/parameters.json`, read by
+`src/cryptanalysis/secg_standards.rs`): `secp112r1` … `secp521r1` and
+`sect113r1` … `sect571r1`, including `sect113r1`, `sect113r2`, `sect163r1`,
+`sect163r2` and `secp160k1/r1/r2`. `ic inspect --curve sect113r1` (or `ic
+sect113r1`) checks the order, the modulus or reduction polynomial,
+nonsingularity, that the generator is on the curve and that `[r]G = O`; the
+cardinality check is reported as not implemented for these curves.
+`secp192r1` is also `p192`, `nist-p192`, `p-192`.
+
+`search`, `run`, `logs`, `solve` and `workflow` are binary Koblitz pipelines.
+`ic prime` is the one factor-base measurement that covers every SECG curve:
+it builds the **small-x** factor base (the points with the smallest abscissae
+`x = 0, 1, 2, …` on the curve, both signs) and reports the probability that a
+random subgroup element is a signed sum of two base points, **exactly**. A base
+of `B` abscissae has `B²` pair-sum abscissae if none coincide, a target is
+covered when its abscissa is one, and the yield is `2·D/(n − 1)` for `D`
+distinct sum abscissae and `n` the order of the prime-order subgroup. `ic prime`
+computes `D` from every pair sum, checks it by Monte Carlo on random subgroup
+elements, and plants decompositions that must be detected and recovered.
+
+    ic prime --size 4096                       # P-192: exact yield 2^-167.0, 0 collisions
+    ic prime --curve sect113r1 --size 4096     # binary, cofactor 2
+    ic prime --curve sect163r2 --size 4096
+    ic prime --curve secp160r1 --size 4096     # prime, 160 bits
+    ic prime --curve sect571r1 --size 4096 --trials 100000
+    ic prime --curve toy:20,7,4 --size 512     # toy prime with cofactor 4: exact count against Monte Carlo hits
+    ic prime --curve toy-binary:17,7,4 --size 128   # toy binary curve, cofactor 4
+
+Fields: primes up to 521 bits (3, 4, 6 or 9 limbs of Montgomery arithmetic;
+Tonelli–Shanks when `p ≡ 1 mod 4`) and binary fields up to degree 571 (2, 3, 4,
+5, 7 or 9 limbs). The base is capped at 8192 abscissae and lower where the
+pair-sum keys would not fit in memory (`secp521r1`, `sect571k1/r1` stop at 4096).
+
+**Cofactor.** Every SECG binary curve has `h = 2` or `4`, and `secp112r2`,
+`secp128r2` have `h = 4`. A relation is a relation in the subgroup `⟨G⟩`, so
+each small-x point `P` enters the base as `[h]P` and a target is `[h]` of a
+uniform point; the yield is over that subgroup. `--raw-samples N` samples the
+share of raw small-x pair sums (no `[h]`) that lands in `⟨G⟩`: 1/h on nine of
+ten curves measured, which is the factor the raw variant loses.
+
+**Cost of a trial.** `--s3-trials N` decides `N` random subgroup targets by
+solving Semaev's `S₃(x₁, x₂, X) = 0` for `x₂` at every base abscissa (a
+quadratic each), checks every decision against the pair-sum table, plants
+decompositions that must be found, and times it against the table lookup and
+against Pollard rho on the same machine:
+
+    ic prime --curve sect163r2 --size 4096 --trials 1000 --s3-trials 20
+
+At `B = 4096` a target costs 5.4 ms on `sect113r1`, 9.6 ms on `sect163r2` and
+42 ms on `secp160r1`; collecting `B + 1` relations that way is 52, 77 and 79 bits
+slower than rho (52 to 280 bits over the 33 curves).
+
+On P-192 the yield is `2B²/(n − 1)`, from 2⁻¹⁷⁵ (`B = 256`) to 2⁻¹⁶⁵
+(`B = 8192`). Two-point sums only; linear algebra and descent are not measured.
+Measurements and limits: `research/prime_small_x_p192_20261014/REPORT.pdf`
+(P-192) and `research/secg_small_x_20261014/REPORT.pdf` (all SECG curves).
+
 ### Choosing a factor base
 
-Five families are recipes (`ic search --family`): `factor`, `divisor`
+Five families are recipes, and `greedy` is a sixth that is opt-in (`ic search --family`): `factor`, `divisor`
 and `union` are linear — an invariant subspace, a divisor of `x^e − 1`,
 or a union of Frobenius translates of a seed span — and `subgroup` is
 not. The linear families exist because the algebraic oracles need them:
@@ -610,6 +670,29 @@ uses no logarithm: `[h]P` is in the subgroup whatever `P` is.
 
 Use it with the pair-table solver. `groebner` and `sat` need a linear
 domain and will refuse.
+
+`greedy` (opt-in, not part of `--family all`) chooses the signed Frobenius
+orbits instead of drawing them: at each step it adds the orbit that covers
+the most new subgroup targets as a sum of two base points. At equal columns
+and equal points it covered up to 18% more targets than random orbits where
+coverage was partial (`K₀/2¹³`, `K₀/2¹⁵`, `K₁/2¹⁷`), and cut the expected
+trials at the best column count by 8–18%; the gain vanishes once coverage
+saturates. Use it with the pair-table solver, like `subgroup`. Up to
+`r = 2²²` it scans the enumerated orbits (every orbit up to `r = 2¹⁷`, a
+sample of 64 per step above that, which keeps less of the gain). Above `2²²`
+a sampled selector takes over: it draws candidate orbits and tracks covered
+sums in a hashed set, with no enumeration, capped at 8192 points per base.
+Its measured advantage over random orbits shrinks as the subgroup grows (about
+1.09 at `r = 2¹⁶`, 1.04 at `2²¹`, 1.012 at `2²⁷·⁸`, and 1.000 at `2³⁹`), so past
+`r ≈ 2²⁸` use `subgroup`. Measurements and limits:
+`research/greedy_factor_base_yield_20261014/REPORT.pdf`; the end-to-end
+`search → run → logs → solve → workflow` record is
+`research/greedy_factor_base_yield_20261014/e2e/E2E.md`.
+
+A greedy selection is saved **frozen**: `ic search --spec-out` and the
+workflow's select stage write `{"kind":"explicit_orbits","abscissae":[…]}`
+(inside `pruned` where pruning applied) in place of the `greedy_coverage`
+recipe, so a recipe rebuilds in milliseconds instead of re-running the scan.
 
 **How big?** With a subgroup base the work per target falls as
 `r/|F|²` — four times cheaper per doubling — while the pair table grows

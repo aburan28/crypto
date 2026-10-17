@@ -1,0 +1,32 @@
+{
+ "schema_version": 1,
+ "name": "k1n17-greedy-e2e",
+ "curve": {"degree": 17, "curve_a": 1},
+ "summands": 2,
+ "solver": "pair_table",
+ "seed": 17031,
+ "max_trials": 200000,
+ "collection": {"unit_trials": 256, "units": 2, "max_units": 64},
+ "factor_base": {
+  "mode": "search",
+  "family": "greedy",
+  "min_dimension": 3,
+  "max_dimension": 6,
+  "max_abscissae": 4096,
+  "union_min_seed": 2,
+  "union_max_seed": 5,
+  "union_samples": 0,
+  "targets": 1024,
+  "exhaustive_cap": 70000,
+  "extra_relations": 2,
+  "prune": true,
+  "saturate": false
+ },
+ "targets": [
+  {"known_log": "12345"},
+  {"known_log": "65000"},
+  {"random_seed": 7},
+  {"public_hash_seed": 17001},
+  {"public_hash_seed": 17002}
+ ]
+}
