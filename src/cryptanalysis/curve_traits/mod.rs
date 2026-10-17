@@ -1191,12 +1191,43 @@ fn endomorphism(
         } else {
             match small.and_then(|l| torsion::frobenius_is_scalar(&c.model, &c.trace, l)) {
                 Some(true) => {
-                    let m = e.min(depth - 1);
-                    (
-                        (m == 0).then_some(0),
-                        m,
-                        "Frobenius is a scalar on E[ℓ]: above the floor".into(),
-                    )
+                    // Scalar on E[ℓ^s] for every s up to the largest j
+                    // with j ≤ v_ℓ([End(E) : Z[π]]) = depth − level; the
+                    // bound level ≤ e already gives s ≥ depth − e.
+                    let mut s = 1u32.max(depth.saturating_sub(e));
+                    let mut stopped = false;
+                    while s < *depth {
+                        match small
+                            .and_then(|l| torsion::scalar_on_power(&c.model, &c.trace, l, s + 1))
+                        {
+                            Some(true) => s += 1,
+                            Some(false) => {
+                                stopped = true;
+                                break;
+                            }
+                            None => break,
+                        }
+                    }
+                    let at_most = depth - s;
+                    let exact = s == *depth || stopped;
+                    let method = match (s, stopped) {
+                        (1, true) => {
+                            "Frobenius is a scalar on E[ℓ], not on E[ℓ²]: one above the floor"
+                                .to_string()
+                        }
+                        (_, true) => {
+                            format!("Frobenius is a scalar on E[ℓ^{s}], not on E[ℓ^{}]", s + 1)
+                        }
+                        (1, false) if s < *depth => {
+                            "Frobenius is a scalar on E[ℓ]: above the floor".to_string()
+                        }
+                        (1, false) => "Frobenius is a scalar on E[ℓ]: the crater".to_string(),
+                        _ if s == *depth => {
+                            format!("Frobenius is a scalar on E[ℓ^{s}]: the crater")
+                        }
+                        _ => format!("Frobenius is a scalar on E[ℓ^{s}]: level at most {at_most}"),
+                    };
+                    (exact.then_some(at_most), at_most, method)
                 }
                 Some(false) => {
                     if *depth > e {

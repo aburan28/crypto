@@ -178,7 +178,7 @@ impl FpK {
         (u128::from(a) * u128::from(b) % u128::from(self.p)) as u64
     }
 
-    fn pow(&self, a: &[u64], e: &BigUint) -> Vec<u64> {
+    pub fn pow(&self, a: &[u64], e: &BigUint) -> Vec<u64> {
         let mut acc = self.one();
         for i in (0..e.bits()).rev() {
             acc = self.mul(&acc, &acc);
@@ -683,6 +683,159 @@ fn frobenius_fixes<F: Field>(f: &F, q: &BigUint, k: u32, m: &Poly<F::E>) -> bool
     acc == trim(f, x)
 }
 
+/// `(a div b, a mod b)` for any non-zero `b`.
+fn pdivrem<F: Field>(f: &F, a: &Poly<F::E>, b: &Poly<F::E>) -> (Poly<F::E>, Poly<F::E>) {
+    let db = b.len() - 1;
+    let lead_inv = f.inv(b.last().expect("non-zero divisor"));
+    let mut r = a.clone();
+    let mut quo = vec![f.zero(); a.len().saturating_sub(db).max(1)];
+    while r.len() > db && !r.is_empty() {
+        let shift = r.len() - 1 - db;
+        let c = f.mul(r.last().expect("non-empty"), &lead_inv);
+        for (i, bc) in b.iter().enumerate() {
+            r[shift + i] = f.sub(&r[shift + i], &f.mul(&c, bc));
+        }
+        quo[shift] = c;
+        r = trim(f, r);
+    }
+    (trim(f, quo), r)
+}
+
+/// `a⁻¹ mod m` by the extended Euclidean algorithm; `None` when
+/// `gcd(a, m) ≠ 1`.
+fn pinv_mod<F: Field>(f: &F, a: &Poly<F::E>, m: &Poly<F::E>) -> Option<Poly<F::E>> {
+    let (mut r0, mut r1) = (m.clone(), prem(f, a, m));
+    let (mut s0, mut s1): (Poly<F::E>, Poly<F::E>) = (Vec::new(), vec![f.one()]);
+    while !r1.is_empty() {
+        let (quo, rem) = pdivrem(f, &r0, &r1);
+        let s2 = psub(f, &s0, &pmul(f, &quo, &s1));
+        (r0, r1) = (r1, rem);
+        (s0, s1) = (s1, s2);
+    }
+    if r0.len() != 1 {
+        return None;
+    }
+    let c = f.inv(&r0[0]);
+    Some(prem(f, &pscale(f, &s0, &c), m))
+}
+
+/// `x([m]P) mod M` on `y² = x³ + ax + b` from the division polynomials
+/// `fs` (`fs.len() > m + 1`): `x − ψ_{m−1}ψ_{m+1}/ψ_m²`, with `ψ` even
+/// index `= 2y·f` and `4y² = r = 4(x³ + ax + b)`.  `None` when `ψ_m²` is
+/// not invertible mod `M`.
+fn x_multiple<F: Field>(
+    f: &F,
+    fs: &[Poly<F::E>],
+    r: &Poly<F::E>,
+    m: usize,
+    modulus: &Poly<F::E>,
+) -> Option<Poly<F::E>> {
+    let x = vec![f.zero(), f.one()];
+    if m == 1 {
+        return Some(prem(f, &x, modulus));
+    }
+    let around = prem(f, &pmul(f, &fs[m - 1], &fs[m + 1]), modulus);
+    let square = prem(f, &pmul(f, &fs[m], &fs[m]), modulus);
+    let (num, den) = if m % 2 == 1 {
+        (prem(f, &pmul(f, r, &around), modulus), square)
+    } else {
+        (around, prem(f, &pmul(f, r, &square), modulus))
+    };
+    let inv = pinv_mod(f, &den, modulus)?;
+    Some(psub(
+        f,
+        &prem(f, &x, modulus),
+        &prem(f, &pmul(f, &num, &inv), modulus),
+    ))
+}
+
+/// The largest `ℓ^j` [`scalar_on_power`] tries.
+pub const POWER_TEST_MAX: u64 = 64;
+
+/// Whether Frobenius acts on `E[ℓ^j]` as a scalar, `j ≥ 2`, which holds
+/// exactly when `j ≤ v_ℓ([End(E) : Z[π]])`; so with the volcano depth `d`
+/// the level is `d` minus the largest such `j`.
+///
+/// Write `n = ℓ^j`.  A scalar `λ` has `2λ ≡ t (mod n)` (the trace of an
+/// element of `n·End(E)` is divisible by `n`), which fixes `λ` for odd `ℓ`
+/// and leaves two candidates mod `2^j` for `ℓ = 2`.  The test is
+/// `x^q ≡ x([λ]P) (mod f_n)`, the roots of `f_n` being the x-coordinates
+/// of `E[n]` outside `E[2]`: it says `πP = ±λP` for every such `P`, and
+/// applied to a basis `e₁, e₂` and to `e₁ + e₂` (all of order `n`, and
+/// `2e ≠ O`) that forces `π = ±λ`, a scalar.  So the test is exact.
+/// `None` for models without the arithmetic, `ℓ` the characteristic, or a
+/// test beyond [`SCALAR_TEST_COST`].
+pub fn scalar_on_power(model: &Model, trace: &BigInt, ell: u64, j: u32) -> Option<bool> {
+    let n = ell
+        .checked_pow(j)
+        .filter(|&n| n <= POWER_TEST_MAX && j >= 2)?;
+    let tn = trace.mod_floor(&BigInt::from(n)).to_u64().expect("small");
+    let candidates: Vec<u64> = if ell == 2 {
+        if tn % 2 == 1 {
+            return None;
+        }
+        vec![tn / 2, (tn / 2 + n / 2) % n]
+    } else {
+        // 2 is invertible mod n: λ = t·(n + 1)/2.
+        vec![(u128::from(tn) * u128::from(n.div_ceil(2)) % u128::from(n)) as u64]
+    };
+    let q = model.q();
+    let deg = (n * n) / 2;
+    let limbs = match model {
+        Model::Extension { k: ext, .. } => u64::from(*ext),
+        _ => q.bits().div_ceil(64),
+    };
+    if cost(deg, q.bits(), 1, limbs).saturating_mul(candidates.len() as u64) > SCALAR_TEST_COST {
+        return None;
+    }
+    fn run<F: Field>(
+        f: &F,
+        a: &F::E,
+        b: &F::E,
+        q: &BigUint,
+        n: u64,
+        lambdas: &[u64],
+    ) -> Option<bool> {
+        let top = lambdas.iter().copied().max().unwrap_or(1).max(n) as usize + 1;
+        let fs = division_prime(f, a, b, top);
+        let modulus = monic(f, &fs[n as usize]);
+        let r = pscale(
+            f,
+            &trim(f, vec![b.clone(), a.clone(), f.zero(), f.one()]),
+            &f.int(4),
+        );
+        let x_q = ppow(f, &vec![f.zero(), f.one()], q, &modulus);
+        for &lambda in lambdas {
+            if lambda == 0 {
+                continue;
+            }
+            if x_multiple(f, &fs, &r, lambda as usize, &modulus)? == x_q {
+                return Some(true);
+            }
+        }
+        Some(false)
+    }
+    match model {
+        Model::Prime { p, a, b } => {
+            if (p % ell).is_zero() || p <= &BigUint::from(3u8) {
+                return None;
+            }
+            run(&Fp(p.clone()), a, b, &q, n, &candidates)
+        }
+        Model::Extension {
+            p, modulus, a, b, ..
+        } => {
+            let f = FpK::new(p, modulus)?;
+            if (BigUint::from(ell) % p).is_zero() {
+                return None;
+            }
+            let (a, b) = (f.element(a)?, f.element(b)?);
+            run(&f, &a, &b, &q, n, &candidates)
+        }
+        Model::Binary { .. } | Model::Other { .. } => None,
+    }
+}
+
 /// The order `k` of the double eigenvalue `λ` of Frobenius mod `ℓ`; 0
 /// when `λ ≡ 0`, which only happens for `ℓ` the characteristic.
 fn eigen_order(ell: u64, trace: &BigInt) -> u32 {
@@ -1006,6 +1159,117 @@ mod tests {
         }
         assert!(checked[0] > 0 && checked[1] > 0, "{checked:?}");
         assert!(certified[1] > 0, "{certified:?}");
+    }
+
+    /// `E[n] ⊆ E(GF(q))` by brute force, over `f` (`GF(p)` as `FpK` with
+    /// `k = 1`, or `GF(p^k)`).
+    fn full_torsion(f: &FpK, els: &[Vec<u64>], a: &Vec<u64>, b: &Vec<u64>, n: u64) -> bool {
+        let mut count = 1u64;
+        for x in els {
+            let rhs = f.add(&f.mul(&f.add(&f.mul(x, x), a), x), b);
+            for y in els {
+                if f.mul(y, y) == rhs && kills(f, a, x, y, &BigUint::from(n)) {
+                    count += 1;
+                }
+            }
+        }
+        count == n * n
+    }
+
+    /// Frobenius is a scalar on `E[4]` exactly when `E[4]` is rational on
+    /// `E` or on its quadratic twist (the units mod 4 are `±1`); for
+    /// `E[8]` and `E[9]` a rational full torsion on either side forces
+    /// "scalar".  Checked over GF(p) and GF(p²).
+    #[test]
+    fn the_prime_power_scalar_test_agrees_with_rational_torsion() {
+        let mut seen = [0usize; 2];
+        let fields: Vec<(u64, Vec<u64>)> = vec![
+            (13, vec![0]),
+            (17, vec![0]),
+            (29, vec![0]),
+            (37, vec![0]),
+            (41, vec![0]),
+            (5, vec![3, 0]),
+            (7, vec![1, 0]),
+        ];
+        for (p, low) in fields {
+            let f = FpK { p, modulus: low };
+            let k = f.k() as u32;
+            let q = p.pow(k);
+            let els: Vec<Vec<u64>> = (0..q).map(|i| f.nth(i)).collect();
+            // A non-square c: the twist is y² = x³ + c²a·x + c³b.
+            let half = BigUint::from((q - 1) / 2);
+            let c = els
+                .iter()
+                .find(|e| f.pow(e, &half) == f.neg(&f.one()))
+                .unwrap()
+                .clone();
+            let (c2, c3) = (f.mul(&c, &c), f.mul(&c, &f.mul(&c, &c)));
+            let wide = if k == 1 { 12 } else { 25 };
+            for a in els.iter().take(wide) {
+                for b in els.iter().skip(1).take(wide) {
+                    let disc = f.add(
+                        &f.mul(&f.int(4), &f.mul(a, &f.mul(a, a))),
+                        &f.mul(&f.int(27), &f.mul(b, b)),
+                    );
+                    if f.is_zero(&disc) {
+                        continue;
+                    }
+                    let mut count = 1i64;
+                    for x in &els {
+                        let rhs = f.add(&f.mul(&f.add(&f.mul(x, x), a), x), b);
+                        count += els.iter().filter(|y| f.mul(y, y) == rhs).count() as i64;
+                    }
+                    let t = q as i64 + 1 - count;
+                    if t % p as i64 == 0 {
+                        continue;
+                    }
+                    let (ta, tb) = (f.mul(&c2, a), f.mul(&c3, b));
+                    let model = if k == 1 {
+                        Model::Prime {
+                            p: BigUint::from(p),
+                            a: BigUint::from(a[0]),
+                            b: BigUint::from(b[0]),
+                        }
+                    } else {
+                        Model::Extension {
+                            p: BigUint::from(p),
+                            k,
+                            q: BigUint::from(q),
+                            field_id: String::new(),
+                            modulus: f.modulus.iter().map(|&c| BigUint::from(c)).collect(),
+                            a: a.iter().map(|&c| BigUint::from(c)).collect(),
+                            b: b.iter().map(|&c| BigUint::from(c)).collect(),
+                        }
+                    };
+                    let tt = BigInt::from(t);
+                    for (ell, j) in [(2u64, 2u32), (2, 3), (3, 2)] {
+                        let n = ell.pow(j);
+                        if (q as i64 + 1 - t) % (n * n) as i64 != 0
+                            && (q as i64 + 1 + t) % (n * n) as i64 != 0
+                        {
+                            // Neither side can hold all of E[n]; test anyway
+                            // for n = 4, where the equivalence is exact.
+                            if n != 4 {
+                                continue;
+                            }
+                        }
+                        let Some(scalar) = scalar_on_power(&model, &tt, ell, j) else {
+                            continue;
+                        };
+                        let rational =
+                            full_torsion(&f, &els, a, b, n) || full_torsion(&f, &els, &ta, &tb, n);
+                        if n == 4 {
+                            assert_eq!(scalar, rational, "GF({p}^{k}) a={a:?} b={b:?} n={n}");
+                        } else if rational {
+                            assert!(scalar, "GF({p}^{k}) a={a:?} b={b:?} n={n}");
+                        }
+                        seen[usize::from(scalar)] += 1;
+                    }
+                }
+            }
+        }
+        assert!(seen[0] > 0 && seen[1] > 0, "{seen:?}");
     }
 
     /// The same comparison over `GF(2^n)`, through the binary division
