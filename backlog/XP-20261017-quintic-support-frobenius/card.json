@@ -1,0 +1,141 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261017-quintic-support-frobenius",
+  "title": "Price cached quintic Frobenius in complete native support",
+  "created": "2026-10-17",
+  "authors": [
+    "generalized-rootfinding research program"
+  ],
+  "status": "blocked",
+  "status_note": "Native implementation/checker and source/input freezes are pending; managed executor offline. No task scheduled.",
+  "blocked_on": [
+    "problem:problems/generalized-rootfinding-all-roots-8x.md",
+    "note:native implementation, input freeze and independent checker not yet available",
+    "hw:managed executor connectivity offline"
+  ],
+  "links": {
+    "lead": "research/quintic_cached_frobenius_20261017_v1/README.md",
+    "notes": [
+      "research/quintic_cached_frobenius_20261017_v1/CONTRACT.md"
+    ],
+    "prs": [
+      1993
+    ]
+  },
+  "question": "Does the exact semilinear cache reduce complete support cost after setup and extraction across the declared field families?",
+  "decision_value": "A mismatch rejects the implementation. A regression rejects blanket dispatch, while a gain that vanishes under complete accounting redirects research upstream. A qualified component improvement motivates native integration but does not complete the all-roots eightfold objective.",
+  "protocol": {
+    "path": "PROTOCOL.md",
+    "blob": "32b1497df398f355b9d93c4fe37d1ec2c9b0c52b"
+  },
+  "code": {
+    "repo": "aburan28/crypto",
+    "commit": null,
+    "branch": "codex/quintic-frobenius-theory-20261017",
+    "build": [
+      [
+        "cargo",
+        "build",
+        "--release",
+        "--bin",
+        "quintic_support_bench",
+        "--bin",
+        "quintic_support_check"
+      ]
+    ]
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 4,
+    "disk_gb": 1,
+    "gpu": null,
+    "est_core_hours": null,
+    "est_wall_hours": null,
+    "notes": "90second cap per worker, not measured runtime. Source/checker not implemented; card blocked."
+  },
+  "run": {
+    "argv": [
+      "target/release/quintic_support_bench",
+      "--mode",
+      "{mode}",
+      "--seed",
+      "{seed}",
+      "--out",
+      "{out}",
+      "--resume",
+      "{checkpoint}"
+    ],
+    "env": {
+      "RAYON_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1"
+    },
+    "timeout_per_shard_s": 90
+  },
+  "shards": {
+    "count": 3,
+    "scheme": "list",
+    "params": {
+      "items": [
+        {
+          "name": "oracles",
+          "vars": {
+            "mode": "oracles",
+            "seed": "2026101701"
+          }
+        },
+        {
+          "name": "binary-support",
+          "vars": {
+            "mode": "binary-support",
+            "seed": "2026101702"
+          }
+        },
+        {
+          "name": "odd-support",
+          "vars": {
+            "mode": "odd-support",
+            "seed": "2026101703"
+          }
+        }
+      ]
+    },
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": "checkpoint.json",
+    "resume_flag": "--resume"
+  },
+  "outputs": {
+    "result_schema": "quintic.complete-support/v1",
+    "verify": [
+      "target/release/quintic_support_check",
+      "{artifact}"
+    ],
+    "land": "research/quintic_cached_frobenius_20261017_v1/runs"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261017-quintic-support-frobenius/shard-{k}"
+    ],
+    "ttl_s": 120,
+    "env": {
+      "name": "native-quintic-support",
+      "recipe": "unavailable until implementation is merged; no environment posted"
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 4096,
+      "timeout_s": 90,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261017-quintic-support-frobenius"
+    },
+    "funding": {
+      "units": 0,
+      "rationale": "Planning priority only; no posted task, paid compute or funding authorization."
+    },
+    "notes": "Metadata only; not posted or leased."
+  },
+  "owner_hint": "generalized-rootfinding research program"
+}

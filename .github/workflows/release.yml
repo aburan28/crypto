@@ -11,6 +11,21 @@ on:
   # recursively; an event-level path list cannot safely anticipate that set.
   # The `release` job is skipped for pull requests, so nothing is published.
   pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      # `cargo build --bins` consumes the library and every binary target.
+      # Exercise the cross-platform packaging path whenever any Rust source
+      # changes, including the cover/Jacobian command-line tools.
+      - 'src/**'
+      - 'tests/fixtures/ecbench_manifest_small.json'
+      - 'ecc2k130/Makefile'
+      - 'tools/isogeny-cli/**'
+      - 'tools/volcano-cli/**'
+      - 'isogeny_algos/**'
+      - 'research/p192_p224_large_degree_isogenies_20261009/**'
+      - 'docs/curves/registry.json'
   merge_group:
   workflow_dispatch:
 
@@ -132,6 +147,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
             /.gitattributes
             /.cargo/

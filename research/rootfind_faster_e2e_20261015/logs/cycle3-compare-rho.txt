@@ -1,0 +1,12 @@
+saved research/rootfind_faster_e2e_20261015/sessions/cycle3-ecbench-smoke/comparisons/rho-strong__ic-negfold-m2-d5.json
+ops (ok): ic-negfold-m2-d5 / rho-strong = 1.6923 [1.404, 2.230] (cluster) over 4 pairs on 2 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 12.2246, not a result: 4 admitted pairs; at least 5 are needed)
+measurement quality: 0 / 100; paired attempts 4, verified 4, admitted 0; levels {"L0": 4}; p95 foreign busy unknown%, p95 run queue unknown%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-negfold-m2-d5 / rho-strong | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 2 | 1.6923 | [1.4042, 2.2301] | cluster |
+
+| workload | curve | log2 r | rho-strong mean S | ic-negfold-m2-d5 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W24a1370d2b9b | icv1-f2m13-t181-515ee569 | 10.97 | 15.1116 | 21.5504 | 1.4261 |
+| Wc9bc11603684 | icv1-f2m13-t181-515ee569 | 10.97 | 13.9720 | 27.6673 | 1.9802 |

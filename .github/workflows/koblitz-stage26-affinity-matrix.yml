@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   validate-controls:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
   build-tools:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     needs: validate-controls
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -113,7 +113,7 @@ jobs:
           - n31-l5-m3-ggmp-a0-f0
           - n41-l5-m3-standard-a1-f0
           - n59-l9-m3-standard-a1-f0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4

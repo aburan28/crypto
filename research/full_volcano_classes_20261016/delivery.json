@@ -1,0 +1,31 @@
+{
+  "schema": "ordinary-isogeny-class-delivery/v1",
+  "source_commit": "7c2e8f46aa5aaa78e8b3ef3e0bcde93c85d3d9f2",
+  "pull_request": "https://github.com/aburan28/crypto/pull/2001",
+  "artifacts": [
+    {
+      "name": "ordinary_isogeny_class_cli_20261016_v2.zip",
+      "bytes": 5539526,
+      "local_sha256": "165c73b157f07de437da796a1d5d62e3b6273b3be29211b48655229d007f5070",
+      "drive_file_id": "13WS9DBYgY8-ltKTFMUMSQ0PCnZZPfVcR",
+      "url": "https://drive.google.com/file/d/13WS9DBYgY8-ltKTFMUMSQ0PCnZZPfVcR/view?usp=drivesdk",
+      "remote_metadata_readback_verified": true,
+      "remote_whole_file_hash_verified": false
+    },
+    {
+      "name": "report.pdf",
+      "bytes": 45314,
+      "local_sha256": "3abff98184291d9a0e43011497c5ab43bfc8cc9ae108ef578b63ea0b42784bd4",
+      "drive_file_id": "17aVS0cU-bz1l1suvFpzbxDyjI_UNt-bY",
+      "url": "https://drive.google.com/file/d/17aVS0cU-bz1l1suvFpzbxDyjI_UNt-bY/view?usp=drivesdk",
+      "remote_metadata_readback_verified": true,
+      "remote_whole_file_hash_verified": false
+    }
+  ],
+  "bundle_coverage": "Native CLI/source, 3 complete small controls, 5 partial large-case prefixes. Full historical B is distributed separately. Full A/C/D/E and graph-wide ECDLP/IC remain open.",
+  "previous_snapshot": {
+    "source_commit": "e5284b12de0cb7c072448ddba4697c143cc64638",
+    "drive_file_id": "14YWzRlxFmFatc678IitdBcZItvKPKrKr",
+    "status": "retained initial snapshot; use v2 for current delivery"
+  }
+}

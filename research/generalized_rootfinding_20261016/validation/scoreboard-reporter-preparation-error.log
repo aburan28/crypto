@@ -1,0 +1,11 @@
+Three scoreboard-only methods; whole-site assembly not invoked.
+test_scoreboard_panels_close_and_sit_at_the_top_level (test_build.BuildTests.test_scoreboard_panels_close_and_sit_at_the_top_level) ... Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/case.py", line 648, in run
+    result.addSuccess(self)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/runner.py", line 95, in addSuccess
+    self._write_status(test, "ok")
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/runner.py", line 73, in _write_status
+    self.stream.writeln(status)
+    ^^^^^^^^^^^^^^^^^^^
+AttributeError: '_io.TextIOWrapper' object has no attribute 'writeln'. Did you mean: 'write'?

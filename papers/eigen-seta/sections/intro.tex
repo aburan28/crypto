@@ -49,14 +49,24 @@ about $2^{277}$, $2^{408}$ or $2^{535}$ values, depending on the level, and keep
 \item Measured sizes, timings and correctness rates at all parameter sets, and
   constant-time evidence at Toy16 and L1 (\S\ref{sec:results}), each
   traceable to a committed record.
+\item Revision~2 adds an assessment (\S\ref{sec:assessment}). It contains a
+  public-key-only test for a candidate degree with a chain of half the
+  decapsulation length (Lemma~\ref{lem:pktest}), implemented and measured
+  (\S\ref{sec:pktest-results}). It also contains a corrected
+  quantum claim in two tiers (\S\ref{sec:nist}), the quantum-hardened
+  parameter sets, and an account of the hidden orientation of $\EA$ as
+  the main structural risk.
 \end{itemize}
 
 \paragraph{What this paper does not claim.} Security is a conjecture backed by
-the attacks we considered; no third party has analysed the scheme. The
-implementation is research code. Its decapsulation is slow, mainly because
-the dimension-2 chain is computed in Mumford coordinates; a theta-coordinate
-chain~\cite{DMPR23} is future work. Key generation is not constant time.
+the attacks we considered; no third party has analysed the scheme. In
+particular, L1 and L3 are not claimed to resist $2^{128}$ or $2^{192}$
+quantum queries. The implementation is research code. Revision~1's timings
+were measured on a Mumford-coordinate decapsulation chain. The maintained
+implementation~\cite{EigenX} uses a theta-coordinate chain~\cite{DMPR23}.
+Key generation is not constant time.
 
 \paragraph{Evidence conventions.} Each measured number carries the path of the
 record it comes from, relative to the root of the repository
-(\art{crypto:}). Derived quantities are marked as such.
+(\art{crypto:}) or of the sibling repository that holds the maintained
+implementation (\art{eigenx:}). Derived quantities are marked as such.

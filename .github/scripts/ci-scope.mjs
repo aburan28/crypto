@@ -18,6 +18,10 @@ const rustConfig = /^(Cargo\.(toml|lock)|build\.rs|rust-toolchain(\.toml)?|rustf
 // paths do not belong to the root Cargo package, so classify their own sources,
 // manifests, build script and embedded inputs explicitly.
 const isogenyCliRust = /^tools\/isogeny-cli\//;
+// The root crate depends on this path crate (`volcano-cli` in Cargo.toml), so
+// its sources and manifests, and those of its `isogeny_algos` path dependency,
+// are root-package inputs, not an independent lane.
+const volcanoCliRust = /^tools\/volcano-cli\//;
 const isogenyAlgosInputs = /^isogeny_algos\/(?:Cargo\.toml|build\.rs|src\/.*\.rs)$/;
 const isogenyEmbeddedInputs = new Set([
   'docs/curves/registry.json',
@@ -40,6 +44,8 @@ export function classify(files, embedded = new Set(), cargoSources = new Set()) 
   const result = Object.fromEntries(scopes.map(key => [key, false]));
   for (const file of files) {
     if (control.test(file)) return Object.fromEntries(scopes.map(key => [key, true]));
+    const root = /\.rs$/.test(file) && maintained.test(file) || frozenExamples.test(file) || cargoSources.has(file) || rustConfig.test(file) || embedded.has(file)
+      || (volcanoCliRust.test(file) && !prose.test(file)) || isogenyAlgosInputs.test(file);
     const releaseAttributes = file === '.gitattributes';
     const root = /\.rs$/.test(file) && maintained.test(file) || frozenExamples.test(file) || cargoSources.has(file) || rustConfig.test(file) || embedded.has(file);
     result.rust_root ||= root || sharedAnalysis.test(file) || file === 'scripts/clippy-maintained.sh';
@@ -49,6 +55,8 @@ export function classify(files, embedded = new Set(), cargoSources = new Set()) 
     result.rust_fmt ||= /\.rs$/.test(file) && (maintained.test(file) || /^cd_attack\//.test(file) || file === 'build.rs');
     result.release_rust ||= /^src\//.test(file) && !prose.test(file) || rustConfig.test(file)
       || file === 'tests/fixtures/ecbench_manifest_small.json'
+      || /^docs\/curves\//.test(file) || embedded.has(file)
+      || isogenyCliRust.test(file) || volcanoCliRust.test(file) || isogenyAlgosInputs.test(file)
       || rustReleasePayload.test(file) || rustReleaseRootPayload.test(file)
       || releaseAttributes || embedded.has(file)
       || isogenyCliRust.test(file) || isogenyAlgosInputs.test(file)

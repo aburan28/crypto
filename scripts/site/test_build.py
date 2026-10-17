@@ -889,6 +889,10 @@ class BuildTests(unittest.TestCase):
                 self.assertIn(t["round"], rounds, c["slug"])
         for f in data["factor_bases"]:
             self.assertTrue(f["curve"] is None or f["curve"] in slugs, f["fb_id"])
+            if f.get("recorded_curve"):
+                self.assertIsNone(f["curve"], f["fb_id"])
+                self.assertNotIn(f["recorded_curve"], slugs, f["fb_id"])
+                self.assertEqual(f["registration_status"], "pending")
             self.assertRegex(f["points_sha256"] or "", r"^[a-f0-9]{64}$", f["fb_id"])
         for k in data["candidates"]:
             self.assertTrue(k["slug"] is None or k["slug"] in slugs, k["candidate_id"])

@@ -6,7 +6,6 @@ on:
       - '.github/workflows/ecc2k130-leaf-m10-outcome.yml'
       - 'research/notes/ecc2k130/leaf_m10_support_20260930/evidence/**'
       - 'research/notes/ecc2k130/leaf_m10_support_outcome_20260930/**'
-      - 'docs/index-calculus-scoreboard.html'
 
 # A newer push to the same pull request cancels this workflow's run for the older commit.
 # Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.

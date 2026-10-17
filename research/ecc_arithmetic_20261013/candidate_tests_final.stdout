@@ -1,0 +1,61 @@
+
+running 34 tests
+test baseline::tests::add_is_xor ... ok
+test baseline::tests::soft_clmul_matches_shift_xor ... ok
+test baseline::tests::debug_output_is_unchanged ... ok
+test baseline::tests::flt_inverse_deg16_sanity ... ok
+test baseline::tests::flt_inverse_of_zero_is_none ... ok
+test baseline::tests::flt_inverse_roundtrip ... ok
+test baseline::tests::frobenius_endomorphism ... ok
+test baseline::tests::inverse_roundtrip_all_fields ... ok
+test baseline::tests::mul_by_one_is_identity ... ok
+test baseline::tests::mul_commutes ... ok
+test baseline::tests::inline_and_heap_storage_agree_across_the_boundary ... ok
+test baseline::tests::reduction_works_at_boundary ... ok
+test baseline::tests::schoolbook_and_karatsuba_agree ... ok
+test candidate::tests::add_is_xor ... ok
+test baseline::tests::word_mul_matches_bitwise_reference ... ok
+test candidate::tests::debug_output_is_unchanged ... ok
+test candidate::tests::flt_inverse_deg16_sanity ... ok
+test candidate::tests::flt_inverse_of_zero_is_none ... ok
+test baseline::tests::word_square_matches_mul ... ok
+test candidate::tests::flt_inverse_roundtrip ... ok
+test candidate::tests::frobenius_endomorphism ... ok
+test candidate::tests::inline_and_heap_storage_agree_across_the_boundary ... ok
+test candidate::tests::inverse_roundtrip_all_fields ... ok
+test candidate::tests::mul_by_one_is_identity ... ok
+test candidate::tests::mul_commutes ... ok
+test candidate::tests::reduction_works_at_boundary ... ok
+test candidate::tests::schoolbook_and_karatsuba_agree ... ok
+test candidate::tests::soft_clmul_matches_shift_xor ... ok
+test candidate::tests::word_square_matches_mul ... ok
+test candidate::tests::word_mul_matches_bitwise_reference ... ok
+test baseline::tests::trace_and_half_trace_tables_match_definitions ... ok
+test candidate::tests::trace_and_half_trace_tables_match_definitions ... ok
+test candidate::tests::reduce_words_matches_bitwise_reduction ... ok
+test baseline::tests::reduce_words_matches_bitwise_reduction ... ok
+
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+
+
+running 17 tests
+test f2m::tests::add_is_xor ... ok
+test f2m::tests::flt_inverse_deg16_sanity ... ok
+test f2m::tests::flt_inverse_of_zero_is_none ... ok
+test f2m::tests::frobenius_endomorphism ... ok
+test f2m::tests::mul_by_one_is_identity ... ok
+test f2m::tests::mul_commutes ... ok
+test f2m::tests::reduction_works_at_boundary ... ok
+test f2m::tests::schoolbook_and_karatsuba_agree ... ok
+test f2m::tests::soft_clmul_matches_shift_xor ... ok
+test f2m::tests::inverse_roundtrip_all_fields ... ok
+test f2m::tests::flt_inverse_roundtrip ... ok
+test f2m::tests::debug_output_is_unchanged ... ok
+test f2m::tests::inline_and_heap_storage_agree_across_the_boundary ... ok
+test f2m::tests::word_mul_matches_bitwise_reference ... ok
+test f2m::tests::word_square_matches_mul ... ok
+test f2m::tests::reduce_words_matches_bitwise_reduction ... ok
+test f2m::tests::trace_and_half_trace_tables_match_definitions ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+

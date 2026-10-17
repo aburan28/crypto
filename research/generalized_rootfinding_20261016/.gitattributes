@@ -1,0 +1,6 @@
+# Frozen bytes retain historical formatting; transport audit checks their hashes.
+historical/** -whitespace
+validation/*.log -whitespace
+*.pdf binary
+*.png binary
+*.gz binary

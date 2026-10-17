@@ -1,0 +1,31 @@
+# Full graph-wide IC campaign
+
+Run the full matrix in [the protocol](PROTOCOL.md), preserving every vertex,
+conductor, independent one-target workload, factor base and method, including
+failure, timeout and unsupported cases. This card is a draft, not a launched
+or leased job. [Certified input preparation](../../research/full_volcano_graphwide_ic_20261017/README.md)
+covers all 24,823 vertices of the three additional completed graphs. A separate
+[bounded native survey](../../research/full_volcano_graphwide_ic_20261017/execution/README.md)
+has a stopped checkpoint covering 99 vertices and all 51 strata, with 1,584
+audited attempts, 1,065 verified recoveries, 422 exhausted budgets and 97 timeouts.
+A separate optimized full-queue continuation has passed the frozen control and
+pilot parity gates (56 exact completed comparisons, four censored pairs). Controls and
+pilot also ran. These do not discharge this full matrix or the original A--E.
+
+Before ready: register exact per-vertex subgroup/generator representations;
+extend the passed subgroup-projection controls and audited native pilot to
+the qualified full contract; derive total core, memory,
+storage and time needs from that pilot; select/provision a worker and durable
+checkpoint/output storage. The resumable driver exists, with full launch
+deliberately gated until the remaining original prerequisites are met.
+The existing k=2 supersingular MOV teaching implementation is not finite-field
+IC for the actual large embedding degrees in the three classes.
+
+Acceptance: a per-vertex ledger matches every planned row with verified
+recovery or a specific retained failure status; full exclusive cold/online
+costs, raw relation yields/ranks and min/max/mean distributions are auditable;
+all deterministic records replay and every recovered scalar is independently
+checked. No timing is qualified without the required isolation/controls, no
+generic fallback is called IC, and no sample is called full graph coverage.
+No resource estimate is recorded yet; the 128 GiB disk entry is a proposed
+worker envelope, not an allocation or a measured requirement.

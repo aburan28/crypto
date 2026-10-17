@@ -69,6 +69,12 @@ const GENERAL_PROTOCOL: &[u8] =
     include_bytes!("../../../research/p192_p224_large_degree_isogenies_20261009/PROTOCOL.md");
 const HELP: &str = "isogeny — public-curve isogeny search and independent verification
 
+  isogeny class plan --curve curve.json [--degrees auto|2,3,5]
+  isogeny class build --curve curve.json --out graph.sqlite --steps all
+  isogeny class resume --input graph.sqlite --steps all
+  isogeny class verify --input graph.sqlite
+  isogeny class --help           full class-command scope, budgets and solve options
+
   isogeny search --curve p224 --ell 1471 --out RESULTS [--timeout 1800]
   isogeny search --curve p192 --ell 10453 --out RESULTS [--timeout 1800]
   isogeny verify --input RESULTS
@@ -280,6 +286,7 @@ fn general_worker(name: &str, ell: u64) -> Result<Json, String> {
 fn execute(args: &[String]) -> Result<(Value, i32), String> {
     let command = args.first().map(String::as_str).unwrap_or("help");
     match command {
+        "class" => volcano_cli::run(&args[1..]),
         "challenge" => challenge::execute(&args[1..]),
         "compact-cm" => compact_cm::execute(&args[1..]),
         "curves" => Ok((catalog::inventory(), 0)),
@@ -480,7 +487,8 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.is_empty()
         || args.first().is_some_and(|a| a == "help")
-        || args.iter().any(|a| matches!(a.as_str(), "--help" | "-h"))
+        || (args.first().is_none_or(|a| a != "class")
+            && args.iter().any(|a| matches!(a.as_str(), "--help" | "-h")))
     {
         println!("{HELP}");
         return;

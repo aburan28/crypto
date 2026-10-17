@@ -62,7 +62,7 @@ jobs:
   # altered-file rejection rebuild it, so each runs in its own job to stay
   # within the 25-minute PR budget (.github/scripts/check-pr-budgets.py).
   traits:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
     strategy:
       fail-fast: false
@@ -75,6 +75,8 @@ jobs:
           sparse-checkout: |
             /.github/scripts/
             /Cargo.toml
+            /tools/volcano-cli/
+            /isogeny_algos/
             /Cargo.lock
             /build.rs
             /.cargo/
