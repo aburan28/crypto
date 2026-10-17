@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+  <rect width="1200" height="720" fill="#ffffff"/>
+  <text x="70" y="58" font-family="DejaVu Sans" font-size="30" font-weight="700" fill="#17243a">n=41: faster extraction, larger counted ECDLP cost</text>
+  <text x="70" y="88" font-family="DejaVu Sans" font-size="16" fill="#56647a">Same public point; three measured rounds. Lower is better. IC totals exclude named native work.</text>
+
+  <text x="70" y="140" font-family="DejaVu Sans" font-size="21" font-weight="700" fill="#17243a">A. Cold group-addition equivalents / sqrt(r)</text>
+  <line x1="275" y1="176" x2="1075" y2="176" stroke="#aeb7c4" stroke-width="1"/>
+  <line x1="275" y1="176" x2="275" y2="440" stroke="#aeb7c4" stroke-width="1"/>
+  <g font-family="DejaVu Sans" font-size="14" fill="#637086">
+    <text x="271" y="165">0</text><text x="465" y="165">2</text><text x="665" y="165">4</text><text x="865" y="165">6</text><text x="1065" y="165">8 S</text>
+  </g>
+  <g stroke="#e3e7ed" stroke-width="1">
+    <line x1="475" y1="176" x2="475" y2="440"/><line x1="675" y1="176" x2="675" y2="440"/><line x1="875" y1="176" x2="875" y2="440"/><line x1="1075" y1="176" x2="1075" y2="440"/>
+  </g>
+  <g font-family="DejaVu Sans" font-size="18" fill="#25334a">
+    <text x="70" y="226">Strong rho</text><text x="70" y="286">B2 quartic*</text><text x="70" y="346">4-sum*</text><text x="70" y="406">B3 chain*</text>
+  </g>
+  <rect x="275" y="202" width="14" height="32" rx="3" fill="#2c7a7b"/>
+  <rect x="275" y="262" width="76" height="32" rx="3" fill="#78909c"/>
+  <rect x="275" y="322" width="552" height="32" rx="3" fill="#c58b2a"/>
+  <rect x="275" y="382" width="765" height="32" rx="3" fill="#b94949"/>
+  <g font-family="DejaVu Sans" font-size="17" font-weight="700" fill="#17243a">
+    <text x="301" y="225">0.138 (1.00x)</text><text x="363" y="285">0.761 (5.51x)</text><text x="839" y="345">5.524 (40.03x)</text><text x="1052" y="405" text-anchor="end" fill="#ffffff">7.652 (55.45x)</text>
+  </g>
+
+  <text x="70" y="493" font-family="DejaVu Sans" font-size="21" font-weight="700" fill="#17243a">B. Same-cell isolated extraction wall (B2 = 1.00)</text>
+  <line x1="275" y1="528" x2="1075" y2="528" stroke="#aeb7c4" stroke-width="1"/>
+  <g font-family="DejaVu Sans" font-size="18" fill="#25334a"><text x="70" y="574">B2 quartic</text><text x="70" y="634">B3 chain</text></g>
+  <rect x="275" y="550" width="760" height="32" rx="3" fill="#78909c"/>
+  <rect x="275" y="610" width="118" height="32" rx="3" fill="#2c7a7b"/>
+  <g font-family="DejaVu Sans" font-size="17" font-weight="700"><text x="1047" y="573" text-anchor="end" fill="#ffffff">1.000 (0.8756 s)</text><text x="405" y="633" fill="#17243a">0.155 (0.1360 s; 6.44x faster)</text></g>
+  <text x="70" y="690" font-family="DejaVu Sans" font-size="14" fill="#637086">* Lower bound: S3/S4, lookups, and other listed native work are unpriced. Session wall is L0 and descriptive.</text>
+</svg>

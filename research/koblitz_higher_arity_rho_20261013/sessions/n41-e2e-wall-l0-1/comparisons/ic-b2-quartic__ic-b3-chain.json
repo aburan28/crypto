@@ -1,0 +1,95 @@
+{
+  "schema": "ecbench.comparison/v1",
+  "comparison_id": "ECC1h09b8c2e93ec1",
+  "a": {
+    "session_id": "ECBS1hb77d7527b579",
+    "arm": "ic-b2-quartic",
+    "method_id": "ECM1h19983cc9d03d",
+    "method": "ic.pipeline",
+    "measured": 5,
+    "verified": 5,
+    "statuses": {
+      "verified": 5
+    },
+    "mean_s": 0.8986523709498904,
+    "mean_ratio_to_floor": 6.49289996974085,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "b": {
+    "session_id": "ECBS1hb77d7527b579",
+    "arm": "ic-b3-chain",
+    "method_id": "ECM1hd1133c03db2d",
+    "method": "ic.pipeline",
+    "measured": 5,
+    "verified": 5,
+    "statuses": {
+      "verified": 5
+    },
+    "mean_s": 9.095106868680654,
+    "mean_ratio_to_floor": 65.71352952646835,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "workloads": [
+    {
+      "workload_id": "W2d6c43bf8940",
+      "slug": "icv1-f2m41-tm2308219-7f48b14a",
+      "r": 549756390943,
+      "floor_s": 0.13840539283493047,
+      "pairs": 5,
+      "a_mean_s": 0.8986523709498904,
+      "b_mean_s": 9.095106868680654,
+      "ratio_b_over_a": 10.120828879655628
+    }
+  ],
+  "curves": [
+    {
+      "slug": "icv1-f2m41-tm2308219-7f48b14a",
+      "log2_r": 39.00000151433405,
+      "workloads": 1,
+      "pairs": 5,
+      "ratio_b_over_a": 10.120828879655628,
+      "ci95": [
+        10.04268770399704,
+        10.174936241155848
+      ],
+      "ci_method": "within"
+    }
+  ],
+  "ops": {
+    "status": "ok",
+    "unit": "ecbench.gae",
+    "ratio_b_over_a": 10.120828879655628,
+    "ci95": [
+      10.04268770399704,
+      10.174936241155848
+    ],
+    "ci_method": "within",
+    "pairs": 5,
+    "unpaired_runs": 0,
+    "same_seeds": true,
+    "same_session": true,
+    "pooled_curves": 1,
+    "bounded": true,
+    "resamples": 4000
+  },
+  "wall": {
+    "status": "descriptive",
+    "reasons": [
+      "5 of 5 pairs did not reach L2",
+      "0 admitted pairs; at least 5 are needed"
+    ],
+    "required_level": "L2",
+    "pairs": 5,
+    "pairs_below_level": 5,
+    "median_ratio": 0.13978475527396916,
+    "ci95": null,
+    "aa_arms": null,
+    "aa_pairs": 0,
+    "aa_median_ratio": null,
+    "aa_ci95": null,
+    "outside_noise": null
+  },
+  "verdict": "ops (ok): ic-b3-chain / ic-b2-quartic = 10.1208 [10.043, 10.175] (within) over 5 pairs on 1 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 0.1398, not a result: 5 of 5 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)"
+}

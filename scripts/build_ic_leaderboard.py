@@ -71,6 +71,7 @@ SOURCES = {
     "f4_f5_f6_cross_family": "research/f4_f5_f6_cross_family_20261011/ANALYSIS.json",
     "n41_n53_counted": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
     "conductor_gap_counts": "research/ecbench_conductor_gap_20261012/analysis.json",
+    "higher_arity_n41": "research/koblitz_higher_arity_rho_20261013/evidence.json",
     "frontier_audit": "research/ecbench_frontier_20261013/frontier-data.json",
     "n83_tier1_cold_holdout": "research/n83_e2e_holdout_20261016/ic1_rows_38955665283.json",
     "rho_optimization": "research/ecbench_rho_optimized_20261014/RESULT.json",
@@ -959,6 +960,13 @@ def build() -> dict:
         "online_speedup": None,
         "fully_priced_cold_speedup": None,
     }
+    higher_arity = load(SOURCES["higher_arity_n41"])
+    if (higher_arity["schema"] != "koblitz-higher-arity-rho-evidence/v1"
+            or not higher_arity["audit"]["ok"]
+            or higher_arity["audit"]["reproduced"] != higher_arity["audit"]["measured_replays"]
+            or higher_arity["curve"] != "icv1-f2m41-tm2308219-7f48b14a"
+            or higher_arity["isolation"]["session_level"] != "L0"):
+        raise SystemExit("review the higher-arity n41 diagnostic before updating the leaderboard")
     ladder, kob, kob1 = ladder_rows(names), koblitz_rows(names), koblitz_one_target_rows(names)
     board = ladder + kob1 + kob
     for r in board:
@@ -1030,6 +1038,7 @@ def build() -> dict:
                  "factor_base_link_status", "no_curves_yaml_record")}
             for c in roster(names, measured)],
         "n41_n53_counted_diagnostic": n41_n53_diagnostic,
+        "higher_arity_n41_diagnostic": higher_arity,
         # Native analysis computes these observations; this view only copies
         # and renders them, outside the fully priced rankings.
         "conductor_gap_count_diagnostic": load(SOURCES["conductor_gap_counts"]),
@@ -1327,6 +1336,19 @@ def markdown(doc: dict) -> str:
                      f"{qmd(q) if q else ('reference' if a['arm'] == 'rho-strong' else 'A/A control')} |")
         L.append(f"| `{c['curve']}` | {c['log2_r']:.2f} | K16 / K8 | — | — | — | — | {qmd(c['k16_over_k8'])} |")
     L.append("")
+    h = doc["higher_arity_n41_diagnostic"]
+    L += ["## n41 higher-arity extraction and matched rho, outside tables A–C", "",
+          "One public target, three paired measured rounds, L0. B2 and B3 use the same "
+          "pair-cell stream and verified the same relations; B3 replaces each S4 solve "
+          "with two S3 chains but charges three point additions per cell. All IC figures "
+          "are lower bounds because named native work is unpriced. "
+          f"Read the [study](../../{SOURCES['higher_arity_n41'].rsplit('/', 1)[0]}/README.md).", "",
+          "| arm | mean cold S (lower bound) | ratio to strong rho |",
+          "|:--|--:|--:|",
+          f"| strong rho | {h['rho']['mean_s']:.3f} | 1.000 |",
+          f"| B2 quartic | {h['arms']['ic_b2_quartic']['mean_s']:.3f} | {h['arms']['ic_b2_quartic']['ratio_to_rho']:.3f} |",
+          f"| 4-sum | {h['arms']['ic_4sum']['mean_s']:.3f} | {h['arms']['ic_4sum']['ratio_to_rho']:.3f} |",
+          f"| B3 two-S3 chain | {h['arms']['ic_b3_chain']['mean_s']:.3f} | {h['arms']['ic_b3_chain']['ratio_to_rho']:.3f} |", ""]
     L += ["## Large-prime conductor-gap counted diagnostics", "",
           "Copied from native analysis: eight independent one-target workloads per fixed curve; "
           "no transported targets. Counted S has unpriced native work. These observations do "
@@ -1737,6 +1759,19 @@ def page(doc: dict, standalone: bool) -> str:
         P.append(f'<tr><td><code>{esc(c["curve"])}</code></td><td class="n">{c["log2_r"]:.2f}</td><td>K16 / K8</td>'
                  f'<td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td>{qhtml(c["k16_over_k8"])}</td></tr>')
     P.append('</tbody></table></section>')
+    h = doc["higher_arity_n41_diagnostic"]
+    P.append('<section class="card" id="bounded-higher-arity-n41"><h2>n41 higher-arity extraction and matched rho, outside tables A–C</h2>'
+             '<p>One public target, three paired measured rounds at L0. B2 and B3 use the same '
+             'pair-cell stream and verified the same relations; B3 replaces each S4 solve with '
+             'two S3 chains but charges three point additions per cell. All IC figures remain '
+             'lower bounds because named native work is unpriced. '
+             f'<a href="https://github.com/aburan28/crypto/blob/main/{esc(SOURCES["higher_arity_n41"].rsplit("/", 1)[0])}/README.md">Study and audit</a>.</p>'
+             '<table><thead><tr><th>Arm</th><th class="n">Mean cold S</th><th class="n">Ratio to strong rho</th></tr></thead><tbody>'
+             f'<tr><td>strong rho</td><td class="n">{h["rho"]["mean_s"]:.3f}</td><td class="n">1.000</td></tr>'
+             f'<tr><td>B2 quartic</td><td class="n">{h["arms"]["ic_b2_quartic"]["mean_s"]:.3f}</td><td class="n">{h["arms"]["ic_b2_quartic"]["ratio_to_rho"]:.3f}</td></tr>'
+             f'<tr><td>4-sum</td><td class="n">{h["arms"]["ic_4sum"]["mean_s"]:.3f}</td><td class="n">{h["arms"]["ic_4sum"]["ratio_to_rho"]:.3f}</td></tr>'
+             f'<tr><td>B3 two-S3 chain</td><td class="n">{h["arms"]["ic_b3_chain"]["mean_s"]:.3f}</td><td class="n">{h["arms"]["ic_b3_chain"]["ratio_to_rho"]:.3f}</td></tr>'
+             '</tbody></table></section>')
 
     head_cells = ('<th class="n">#</th><th>curve</th><th class="n">log₂ r</th><th>recipe</th>'
                   '<th class="n">m</th><th class="n">|F|</th><th class="n">K</th><th class="n">S, IC</th>'

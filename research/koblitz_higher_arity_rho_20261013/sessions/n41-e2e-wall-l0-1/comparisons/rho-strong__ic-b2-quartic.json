@@ -1,0 +1,95 @@
+{
+  "schema": "ecbench.comparison/v1",
+  "comparison_id": "ECC1h5af3fdcb5981",
+  "a": {
+    "session_id": "ECBS1hb77d7527b579",
+    "arm": "rho-strong",
+    "method_id": "ECM1hb6123afffc07",
+    "method": "rho.signed_frobenius_strong",
+    "measured": 5,
+    "verified": 5,
+    "statuses": {
+      "verified": 5
+    },
+    "mean_s": 0.13806369734502327,
+    "mean_ratio_to_floor": 0.9975311981498098,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "b": {
+    "session_id": "ECBS1hb77d7527b579",
+    "arm": "ic-b2-quartic",
+    "method_id": "ECM1h19983cc9d03d",
+    "method": "ic.pipeline",
+    "measured": 5,
+    "verified": 5,
+    "statuses": {
+      "verified": 5
+    },
+    "mean_s": 0.8986523709498904,
+    "mean_ratio_to_floor": 6.49289996974085,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "workloads": [
+    {
+      "workload_id": "W2d6c43bf8940",
+      "slug": "icv1-f2m41-tm2308219-7f48b14a",
+      "r": 549756390943,
+      "floor_s": 0.13840539283493047,
+      "pairs": 5,
+      "a_mean_s": 0.13806369734502327,
+      "b_mean_s": 0.8986523709498904,
+      "ratio_b_over_a": 6.508969325253868
+    }
+  ],
+  "curves": [
+    {
+      "slug": "icv1-f2m41-tm2308219-7f48b14a",
+      "log2_r": 39.00000151433405,
+      "workloads": 1,
+      "pairs": 5,
+      "ratio_b_over_a": 6.508969325253868,
+      "ci95": [
+        4.60662946351031,
+        8.746827756410953
+      ],
+      "ci_method": "within"
+    }
+  ],
+  "ops": {
+    "status": "ok",
+    "unit": "ecbench.gae",
+    "ratio_b_over_a": 6.508969325253868,
+    "ci95": [
+      4.60662946351031,
+      8.746827756410953
+    ],
+    "ci_method": "within",
+    "pairs": 5,
+    "unpaired_runs": 0,
+    "same_seeds": true,
+    "same_session": true,
+    "pooled_curves": 1,
+    "bounded": true,
+    "resamples": 4000
+  },
+  "wall": {
+    "status": "descriptive",
+    "reasons": [
+      "5 of 5 pairs did not reach L2",
+      "0 admitted pairs; at least 5 are needed"
+    ],
+    "required_level": "L2",
+    "pairs": 5,
+    "pairs_below_level": 5,
+    "median_ratio": 1985.8062595981414,
+    "ci95": null,
+    "aa_arms": null,
+    "aa_pairs": 0,
+    "aa_median_ratio": null,
+    "aa_ci95": null,
+    "outside_noise": null
+  },
+  "verdict": "ops (ok): ic-b2-quartic / rho-strong = 6.5090 [4.607, 8.747] (within) over 5 pairs on 1 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1985.8063, not a result: 5 of 5 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)"
+}
