@@ -737,7 +737,7 @@ pub struct Jv4CostE {
     pub decompositions: usize,
 }
 
-fn polys_of(comps: &[HashMap<[u8; 5], u64>; 5], p: u64) -> Vec<f4_fp::Poly> {
+pub(crate) fn polys_of(comps: &[HashMap<[u8; 5], u64>; 5], p: u64) -> Vec<f4_fp::Poly> {
     let mut polys: Vec<f4_fp::Poly> = comps
         .iter()
         .map(|c| {
@@ -765,7 +765,7 @@ pub fn jv4_options(max_degree: u32, budget_secs: f64) -> F4Options {
 
 /// Signs and the `T`-component of a candidate index quadruple by group
 /// arithmetic: `R − Σ s_i P_i ∈ {O, T}` for one of the sixteen sign vectors.
-fn resolve(curve: &Ed5, base: &[PtE], r: &PtE, idx: [usize; 4]) -> Option<QuadE> {
+pub(crate) fn resolve(curve: &Ed5, base: &[PtE], r: &PtE, idx: [usize; 4]) -> Option<QuadE> {
     let t = curve.t();
     for mask in 0..16u32 {
         let mut acc = *r;
