@@ -1,0 +1,100 @@
+{
+  "schema": "backlog.card/v1",
+  "id": "XP-20261016-prime61-horizontal-class",
+  "title": "Certify and exhaust the prime61 horizontal class with a bounded-memory walker",
+  "created": "2026-10-16",
+  "authors": [
+    "native research lane"
+  ],
+  "status": "blocked",
+  "status_note": "Disk-backed implementation and Drive restore controls pass; the 250-curve pilot removes the retained-vector requirement. Full class/degree-set coverage, all-class workloads and a sized disk/compute envelope remain open.",
+  "blocked_on": [
+    "problem:problems/prime61-horizontal-class-memory.md"
+  ],
+  "links": {
+    "lead": "research/prime61_disk_walk_20261017/README.md",
+    "notes": [
+      "problems/prime61-horizontal-class-memory.md",
+      "research/prime61_isogeny_20261016/README.md"
+    ],
+    "prs": [
+      1977
+    ]
+  },
+  "question": "What are the factor-base results over every base-field isomorphism class in the fixed ordinary prime61 trace class?",
+  "decision_value": "Discharges the full-horizontal-class interpretation of the user's request. The degree-61 one-hop panel is complete within its bound but cannot establish a class-wide ranking. A verified resumable traversal would retain every cap and failure rather than infer the unseen results.",
+  "protocol": {
+    "path": null,
+    "blob": null
+  },
+  "code": {
+    "repo": "crypto",
+    "commit": "b68341cd72b51acf9c5ce6c4f755351cc83053db",
+    "branch": null,
+    "build": []
+  },
+  "resources": {
+    "cpus": 1,
+    "ram_gb": 16,
+    "disk_gb": 2,
+    "gpu": null,
+    "est_core_hours": null,
+    "est_wall_hours": null,
+    "notes": "Pilot envelope only. SQLite cache is bounded; full-class disk, CPU and runtime sizing remain unknown. Drive checkpoint upload/download/resume is verified for small archives, not full quota. Freeze a complete envelope before readiness; no remote compute is provisioned."
+  },
+  "run": {
+    "argv": [
+      "target/release/examples/isogeny_disk_walk",
+      "advance",
+      "research/prime61_disk_walk_20261017/spec.json",
+      "{out}/walk.db",
+      "1000000000"
+    ],
+    "env": {},
+    "timeout_per_shard_s": 300
+  },
+  "shards": {
+    "count": 1,
+    "scheme": "single",
+    "params": {},
+    "stop": "all"
+  },
+  "checkpoint": {
+    "file": "walk.db",
+    "resume_flag": null
+  },
+  "outputs": {
+    "result_schema": "isogeny-disk-status/v1 plus SQLite snapshot; full coverage certificate and protocol still required",
+    "verify": [
+      "target/release/examples/isogeny_disk_walk",
+      "verify",
+      "research/prime61_disk_walk_20261017/spec.json",
+      "{out}/walk.db",
+      "16"
+    ],
+    "land": "research/prime61_disk_walk_20261017"
+  },
+  "cairn": {
+    "mode": "lab-task",
+    "space": "TBD",
+    "tasks": [
+      "XP-20261016-prime61-horizontal-class"
+    ],
+    "ttl_s": 3600,
+    "env": {
+      "name": "crypto-native",
+      "recipe": "Native Rust worker with system libsqlite3.so.0; full coverage certificate and complete protocol pending"
+    },
+    "exec": {
+      "cpus": 1,
+      "memory_mb": 16384,
+      "timeout_s": 300,
+      "sandbox": "auto",
+      "publish": "runs/XP-20261016-prime61-horizontal-class"
+    },
+    "funding": {
+      "units": 131072,
+      "rationale": "Blocked exhaustive-coverage follow-up priority only; does not schedule or fund a remote experiment."
+    }
+  }
+}
