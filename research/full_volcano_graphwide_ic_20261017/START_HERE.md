@@ -108,3 +108,5 @@ now include source conductors 268,435,456 / 129,140,163 / 967,458,816 /
 [One-page report](https://drive.google.com/file/d/17jC_A1uSRHtJc5c8Sy9AkH9jt6UJTbBX/view).
 This is local certification, not complete original class populations. S3
 access was rechecked and still lacks a runtime AWS identity.
+
+Recovery resume **PID 8973 launched 2026-10-17T16:14:06.513686+00:00**, verified live at 2026-10-17T16:15:21.322908+00:00. The unchanged frozen queue/solver/driver retry the preserved interruption in attempt 2, under the same 24-hour / 2-GiB guard. This is a new runtime epoch; wall times remain unqualified. See `execution/recovery-20261017T1450Z/resumed-launch-verified.json` for actual native progress. The Drive archive and explorer remain the frozen 2,935-vertex checkpoint, not live uploads.
