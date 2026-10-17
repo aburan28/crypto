@@ -277,12 +277,23 @@ fn pohlig_hellman_and_cheon_are_unchanged() {
 
 const ECDLP_SMALL: u64 = 12_107_984_968_993_051_905;
 const ECDLP_MID: u64 = 3_865_584_706_469_309_340;
+// Re-pinned on purpose by research/generic_dlp_correctness_20261017
+// (before: [13_772_181_218_826_505_772, 6_695_007_987_417_753_287,
+// 9_866_830_489_845_429_253]): the negation-map 2-cycle escape now fires.
+// The `neg=false` sections of every transcript are byte-identical to the
+// old ones; the `neg=true` sections leave fruitless 2-cycles instead of
+// dying at the step cap (that study's `transcripts/`).
 const COLLAB: [u64; 3] = [
-    13_772_181_218_826_505_772,
-    6_695_007_987_417_753_287,
-    9_866_830_489_845_429_253,
+    2_036_972_982_326_603_231,
+    10_205_021_002_526_266_214,
+    15_079_881_244_305_917_738,
 ];
-const PH_CHEON: u64 = 16_994_138_649_881_210_032;
+// Re-pinned on purpose by the same study (before:
+// 16_994_138_649_881_210_032): Pohlig–Hellman digits are baby-step
+// giant-step.  Every answer, factorisation, residue and Cheon line is
+// identical; only `total_steps` changed (218,517 → 8,648 over the 72
+// Pohlig–Hellman lines).
+const PH_CHEON: u64 = 4_023_966_203_029_303_189;
 
 // ── Off the prime-field domain ───────────────────────────────────────
 //
