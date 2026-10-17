@@ -139,6 +139,20 @@ pub trait Field: Clone + Send + Sync + 'static {
         }
         r
     }
+    /// Square of a coefficient vector, `conv(a, a)`; multi-limb fields override it to form each
+    /// cross product once.
+    fn conv_sq(&self, a: &[Self::E]) -> Vec<Self::E> {
+        self.conv(a, a)
+    }
+    /// Length below which `poly::sqr_raw` squares with `conv_sq` instead of splitting.
+    fn sqr_threshold(&self) -> usize {
+        self.karatsuba_threshold()
+    }
+    /// Full product of long coefficient vectors by a sub-quadratic method specific to the
+    /// field, or None to use the generic Karatsuba of `poly::mul_raw`. Must equal `conv`.
+    fn conv_long(&self, _a: &[Self::E], _b: &[Self::E]) -> Option<Vec<Self::E>> {
+        None
+    }
     /// First `n` coefficients of the product (truncated power-series multiplication).
     fn conv_trunc(&self, a: &[Self::E], b: &[Self::E], n: usize) -> Vec<Self::E> {
         let mut r = vec![self.zero(); n];
