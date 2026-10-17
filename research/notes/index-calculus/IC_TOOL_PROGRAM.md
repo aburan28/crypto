@@ -613,6 +613,228 @@ nothing missing. R09's class excludes it.
 - **Then R06,** ported onto R10's outcome by an amendment before any run,
   on this host; R08 follows R06's decision.
 
+**R10 accepted: v4 is main's head (2026-10-16).**
+- **The pin held.** The rebuilt v3 and main both give v0's outputs on all
+  90 rows, and both recover the same logarithm under callgrind.
+- **Main costs what v3 costs.** Cold time, v3 over main, read
+  1.017 [0.990, 1.045], 1.034 [1.012, 1.055] and 1.007 [0.992, 1.022] at
+  `2^44.3`, `2^44.5` and `2^47.2` on the suite rows, and 0.992, 1.013 and
+  1.011 on the fresh holdouts. No size regresses beyond the round's own
+  A/A band. That matches the prediction: the drift on the timed path was
+  housekeeping.
+- **The class is engineering, credited to main.** The ledger moves to v4
+  ([results](../../ic_tool_program/rounds/R10-main-head/README.md),
+  `baselines.json`), and the distance to rho is the rule at v3's,
+  within these few percent.
+- **Next:** R06's amendment ports its candidate onto v4, then R06 runs
+  here.
+
+**R06 accepted: v5 is v4 plus the scan's key by GFNI and funnel shifts
+(2026-10-16).** The programme's first lever of its own since v2.
+- **The port.** Amendment 2 applied R06's frozen candidate to v4 unchanged
+  (the same lines) before any run. The tests passed on its tree, and its pin
+  held on all 90 rows.
+- **The gain.** Cold time, v4 over the candidate: 1.197 [1.167, 1.228],
+  1.220 [1.197, 1.243] and 1.241 [1.223, 1.260] at `2^44.3`, `2^44.5` and
+  `2^47.2` on the suite rows; 1.174, 1.202 and 1.268 on fresh holdouts.
+  Every interval lies above the declared 1.03, and every figure is above
+  the prediction (1.08–1.15, 1.07–1.13, 1.15–1.22). Collection ran
+  1.26–1.30× faster at those sizes; rho's online interval did not move.
+- **The class is engineering:** the keys are identical, so the counts and
+  the ratio to the floor are unchanged
+  ([results](../../ic_tool_program/rounds/R06-scan-key/README.md)).
+- **The distance to rho** is still the rule at v3's until the rule runs at
+  v5: 13.2×, 12.0× and 21.0× cold at the three largest sizes, before
+  R06's gain.
+- **Next:** R08 (the scan's subtraction by carry-less folds), ported onto
+  v5 by an amendment before any run, on this host.
+
+**R08 accepted: v6 is v5 plus the scan's subtraction by carry-less folds
+(2026-10-16).**
+- **The port.** Amendment 1 cherry-picked the frozen candidate from its
+  declared base onto v5 without a conflict (the same lines). The tests
+  passed on its tree, and its pin held on all 90 rows.
+- **The gain.** Cold time, v5 over the candidate: 1.326 [1.297, 1.356],
+  1.354 [1.316, 1.392] and 1.398 [1.370, 1.425] at `2^44.3`, `2^44.5` and
+  `2^47.2` on the suite rows; 1.319, 1.296 and 1.409 on fresh holdouts.
+  Every interval lies above the declared 1.05. Collection ran 1.47–1.53×
+  faster; rho's online interval did not move. Chained with R06, the scan is
+  1.59–1.73× faster cold than v4 (the product of two paired ratios, not a
+  third measurement).
+- **The smallest sizes** (`2^18`, `2^22`) read 0.90 and 0.94, inside the A/A
+  rule and with intervals reaching above 1; whether a fixed cost shows there
+  is open ([results](../../ic_tool_program/rounds/R08-scan-fold/README.md)).
+- **Next: the rule at v6.** R06 and R08 are the programme's first gains since
+  v2 that bear on the distance to rho. The rule's comparison at v3 left rho
+  13.2×, 12.0× and 21.0× faster cold at the three largest sizes. Re-running
+  it at v6, with the unpriced native work priced at 0, 0.1 and 1 GAE, is
+  the measurement that turns these gains into a distance.
+
+**The rule at v6: the distance to rho is about 40% smaller (2026-10-16).**
+- **What ran.** §23's comparison re-ran on v6:
+  - 408 of 408 rows checked, and every logarithm §23's;
+  - the strong-rho reference admissible at every size (rho at 0.70–0.85 of
+    the strong walk's time a step).
+- **The distance remaining.** Rho is still faster cold at every size:
+  3.78–12.06× (rule v3: 5.23–20.97×). At the three largest sizes it is
+  7.90×, 7.40× and 12.06×, against 13.24×, 12.03× and 20.97×.
+- **Online.** The index calculus is 14.2–36.4× faster than rho on the same
+  point.
+- **The gap still grows with the group,** but more slowly: as
+  `r^0.142` [0.105, 0.178], against `r^0.176` at v3.
+- **Pricing (§5a).** Both arms are timed in one process, so no native work
+  is unpriced on either arm, and the band gives one figure.
+- **Amendment 1** fixed two tools after the rows ran, and re-timed no row:
+  - the claim writer gained the five `vs_rho` fields the ledger has
+    required since 2026-10-13;
+  - the strong-rho fixture lost a size gate that a merge had re-imported,
+    which refused `n = 47, 57, 59`.
+
+  The leaderboard's table A now reads rule v6
+  ([results](../../ic_tool_program/rule/v6/README.md)).
+- **Next.** Measure where v6's set-up now goes (collection, build, linear
+  algebra) before choosing the next lever. The remaining 7.4–12.1× at the
+  top sizes is the target.
+
+**R11 accepted: v7 is v6 plus the streamed pair-table build (2026-10-16).**
+- **Why the build.** At v6 the set-up at the three target sizes is
+  collection 53–78% and build 18–35%; the linear algebra is under 0.5%
+  (R08's candidate arm, every repetition).
+- **The port.** A1's exploration on R08's candidate said a round was owed
+  on R08's baseline. Its patch ported onto v6 without a conflict (the same
+  lines). The tests and the pin held.
+- **The gain.** Cold time, v6 over the candidate: 1.134 [1.107, 1.162],
+  1.124 [1.100, 1.148] and 1.071 [1.049, 1.093] at `2^44.3`, `2^44.5` and
+  `2^47.2` on the suite rows; 1.126, 1.157 and 1.065 on fresh holdouts.
+  Every interval lies above the declared 1.03. The build ran 1.50–1.51×
+  faster, and collection did not move.
+- **Chained with R06 and R08,** cold time is 1.80–1.86× faster than v4 (a
+  product of paired ratios)
+  ([results](../../ic_tool_program/rounds/R11-build-streams/README.md)).
+- **Next:** land R11 in the tool, then measure v7's set-up again.
+  Collection is now the larger share at every target size, so the next
+  lever is the scan again. The rule at v7 measures the new distance.
+
+**The rule at v7: rho's cold lead narrower again (2026-10-16).**
+- **What ran.** §23's comparison re-ran on v7: 408 of 408 rows checked,
+  every logarithm §23's, and the reference admissible at every size.
+- **The distance remaining.** Rho is 3.43–11.51× faster cold (v6:
+  3.78–12.06×; v3: 5.23–20.97×). At the three largest sizes it is 7.03×,
+  6.37× and 11.51×, against the predicted 7.0×, 6.6× and 11.3×.
+- **Online** the index calculus is 14.1–37.0× faster, as at v6: R11
+  changed only the set-up.
+- **Since v3,** rho's cold lead has narrowed 1.52–1.89× at every size
+  ([results](../../ic_tool_program/rule/v7/README.md)). The leaderboard's
+  table A now reads rule v7.
+- **Next:** R12, the admitted keys' runs prefetched (A13), declared on v7
+  ([protocol](../../ic_tool_program/rounds/R12-admitted-prefetch/PROTOCOL.md)).
+
+**R12 accepted: v8 is v7 plus the admitted-run prefetch (2026-10-17).**
+- **The gain.** Cold time, v7 over the candidate: 1.055 [1.036, 1.075],
+  1.055 [1.038, 1.072] and 1.063 [1.053, 1.073] at the three target sizes,
+  and 1.065, 1.057 and 1.061 on fresh holdouts. Every interval lies above
+  the declared 1.03, and collection ran 1.08–1.11× faster.
+- **Smaller than predicted** (1.06–1.11, 1.10–1.17 and 1.06–1.12): the
+  exploration's few pairs had overstated it.
+- **It costs at the smaller sizes.** From `2^24.8` to `2^38.0` v8 is 1–5%
+  slower than v7; at `2^27.8` the interval lies wholly below 1
+  (0.971 [0.950, 0.992]). That is inside the A/A rule, but it is real: the
+  second pass pays only where the table outgrows the cache.
+- **Chained,** R06, R08, R11 and R12 make cold time 1.90–1.98× faster than
+  v4 at the three target sizes (a product of paired ratios)
+  ([results](../../ic_tool_program/rounds/R12-admitted-prefetch/README.md)).
+- **Next:**
+  - a size-gated pass, to give the smaller sizes their time back;
+  - R04's stage probes at v8, to see where a scanned summand's time now
+    goes before the next lever is chosen.
+
+**A14: the size gate gives nothing back (2026-10-17).**
+- **What was tried:** v8 with R12's pass skipped below 2^20 stored pairs,
+  timed against v8. 72 isolated processes at `2^27.8`, `2^38.0` and
+  `2^44.3`.
+- **Below the gate the gated arm is no faster.** Cold time, v8 over the gate:
+  - 0.992 [0.964, 1.022] at `2^27.8`;
+  - 0.961 [0.854, 1.083] at `2^38.0`;
+  - 1.011 [0.978, 1.046] at `2^44.3`, where both arms run the same code.
+- **The pass's cost is not measurable here.** Collection at `2^38.0` runs 2.9%
+  faster without the pass, about 1% of cold time, which this exploration
+  cannot resolve. R12's 0.971 at `2^27.8` is not recovered. So the
+  attribution above ("it is real") is not supported: R12's small-size
+  readings are inside its A/A rule, and removing the pass does not move
+  them.
+- **No round is declared, and the gate is not landed.** It cannot reach the
+  1.03 line at the target sizes
+  ([record](../../ic_tool_program/explorations/A14-prefetch-size-gate-20261017/README.md)).
+- **Next:** R04's stage probes at v8.
+
+**The scan's stages at v8 (2026-10-17).** R04's probes, ported onto v8
+([record](../../ic_tool_program/explorations/scan-stages-v8-20261017/README.md)).
+- **The scan costs 16.2, 16.8 and 17.6 ns per scanned summand** at the three
+  target sizes, against 35–36 at v3.
+- **The stages are now about equal:**
+  - subtract, 4.4 ns;
+  - key, 4.7–5.1 ns;
+  - filter, 5.0–6.6 ns (the largest; it grows with the filter's 4–8 MiB);
+  - admitted keys, 1.6–2.5 ns, R12's pass included.
+- **The scan is 97–99% of collection.** Collection is 56% of cold time at
+  `2^44.3` and `2^44.5`, and 82% at `2^47.2`. The build is 30% and 13%.
+
+**A15: the filter's hash done once is slower (2026-10-17).** Each key's
+filter slot hashed once a block, instead of once to prefetch it and once to test it.
+- **Cold time is 2–4% slower** at the three target sizes: v8 over the
+  candidate reads 0.958, 0.964 and 0.983.
+- **Collection is 2–6.5% slower.**
+- **The cause:** the filter stage waits on memory, and in v8 the second hash
+  overlaps that wait. No round is declared
+  ([record](../../ic_tool_program/explorations/A15-filter-slots-20261017/README.md)).
+- **Next:** the filter's memory access itself, or the build's 30% at
+  `2^44.3`–`2^44.5`.
+
+**A16 and A17: the filter on huge pages gains where it outgrows the TLB
+(2026-10-17).** The host's THP setting is `madvise`, and the tool had never
+advised, so the filter and the table sat on 4 KiB pages.
+- **A16 collapsed the scan's arrays after the build** (`MADV_COLLAPSE`).
+  - *The filter alone:* 1.046 [1.026, 1.067] cold at `2^47.2`, inconclusive
+    at the two `2^44` sizes.
+  - *Every array:* no gain; the build pays for collapsing the stored keys
+    ([record](../../ic_tool_program/explorations/A16-huge-pages-20261017/README.md)).
+- **A17 puts the whole filter on huge pages from its first touch:** a fresh 2 MiB-aligned mapping, advised before it is written.
+  - *v8 over the candidate:* 1.047, 0.976 and **1.051** [1.029, 1.075] at the three target sizes.
+  - *The copy costs nothing measurable.*
+  - *The probes:* the filter stage falls from 6.43 to 5.32 ns at `2^47.2`, with no consistent change at `2^44`.
+  - *A hypothesis, since the VM has no counters:* the 8 MiB filter spans as many base pages (2,048) as the core's second-level TLB holds; the 4 MiB filters span half that
+    ([record](../../ic_tool_program/explorations/A17-filter-huge-pages-20261017/README.md)).
+- **No round is declared.** At `2^44.5` the candidate cannot clear the
+  round's 1.03. The lever should grow with the table, beyond `2^47.2`, where the
+  distance to rho is largest. It is kept to pair with the next lever.
+
+**A18: a wider base at `2^47.2` buys little; the build is the next lever
+(2026-10-17).** It widened the factor base from 320 to 400 and 470 orbits, crossed with A17's filter, over 48 processes. This is a recipe change, so it falls under A12.
+- **The wider base on v8:** 1.020 and 1.023 cold. Collection falls 27%, but the build rises 2.28× for 2.17× the stored pairs.
+- **On top of A17:** nothing.
+- **A17 replicates:** 1.065 [1.040, 1.090]
+  ([record](../../ic_tool_program/explorations/A18-wider-base-2p47-20261017/README.md)).
+- **Next:** the build. It costs about 31–35 ns per stored pair, and it is 30% of cold
+  time at `2^44.3`–`2^44.5`. A cheaper build is also what would let a wider
+  base pay at `2^47.2`.
+
+**A19: the huge-page filter with the build's 64 partitions; `2^44.5` still
+does not move (2026-10-17).**
+- **Where the build goes:** step timers in a diagnostic build split its cost per stored pair:
+  - the addition and the key, about 8 ns;
+  - the append into the partition streams, 12–13 ns;
+  - the place step, 9.5–11.6 ns.
+
+  With 64 partitions (not 256), the append costs about 30% less.
+- **The combination, cold time v8 over the candidate:** 1.067 [1.010, 1.126], 1.014 [0.978, 1.051] and
+  1.054 [1.012, 1.097] at the three target sizes.
+- **At `2^44.5` collection did not move,** the third exploration in a row to see that.
+- **No round:** `icprog` accepts only if every target size's lower end is above 1.03
+  ([record](../../ic_tool_program/explorations/A19-filter-pages-build-parts-20261017/README.md)).
+- **Next:** the append itself (12 bytes a pair through memory) and the
+  `2^44.5` anomaly, which needs a measurement this VM cannot take (no
+  performance counters).
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**

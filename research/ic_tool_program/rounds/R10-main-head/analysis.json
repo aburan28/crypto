@@ -1,0 +1,1831 @@
+{
+ "what_this_is": "R10, the programme re-based on main's head again (`92246530`): every figure the README, the ledger and the scoreboard quote",
+ "host": {
+  "repository_commit": "fcf7892351ff905564fba36073c211b3ea5c013e",
+  "tree_status": "?? research/ic_tool_program/rounds/R10-main-head/tests.log",
+  "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+  "cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_flags_relevant": [
+   "pclmulqdq",
+   "popcnt",
+   "avx2",
+   "bmi2",
+   "avx512f",
+   "avx512dq",
+   "avx512ifma",
+   "avx512cd",
+   "avx512bw",
+   "avx512vl",
+   "avx512_bf16",
+   "avx512vbmi",
+   "avx512_vbmi2",
+   "gfni",
+   "vpclmulqdq",
+   "avx512_vnni",
+   "avx512_bitalg",
+   "avx512_vpopcntdq",
+   "avx512_fp16"
+  ],
+  "logical_cores": 4,
+  "memory": "MemTotal:       16479424 kB",
+  "transparent_hugepage": {
+   "enabled": "always [madvise] never",
+   "defrag": "always defer defer+madvise [madvise] never"
+  },
+  "os": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+  "arch": "x86_64",
+  "glibc": "glibc 2.39",
+  "binaries": {
+   "base": {
+    "path_basename": "ic-v3-995ea207-rebuilt",
+    "sha256": "00cff0b04c3edb9a46076af20857fb27ba1b80f177b277b65abb4c4cf2c3f562",
+    "built_from": "995ea2071cc7453877a503d30eb561ae82cddab9"
+   },
+   "candidate": {
+    "path_basename": "ic-main-92246530",
+    "sha256": "d8daac9aa75ab26e4bac70810f52d8925d518f2d2645ac2f98306d935f23a653",
+    "built_from": "92246530c4f333724374e70897330bc38fa159a1"
+   }
+  },
+  "isolation_tool": {
+   "path": "src/bin/isolated_bench.rs",
+   "binary_sha256": "e2c77079ab686c2a9c4512d42723b7fb1d68f13ebe85b0d7998ef4fd7205d07a"
+  },
+  "pinning": "isolated_bench run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); pins untimed under taskset -c 2",
+  "smt_siblings": {
+   "0": "0",
+   "1": "1",
+   "2": "2",
+   "3": "3"
+  },
+  "uptime": "02:00:25 up 23 min,  0 user,  load average: 2.78, 2.81, 2.39",
+  "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts",
+  "runner": "icprog (native)",
+  "note": "the host R10 ran on, at the round's start"
+ },
+ "host_resumed": {
+  "repository_commit": "815cf5c7ef1f4b3e7803d6341d5f2344e2020cf7",
+  "tree_status": "",
+  "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+  "cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_flags_relevant": [
+   "pclmulqdq",
+   "popcnt",
+   "avx2",
+   "bmi2",
+   "avx512f",
+   "avx512dq",
+   "avx512ifma",
+   "avx512cd",
+   "avx512bw",
+   "avx512vl",
+   "avx512_bf16",
+   "avx512vbmi",
+   "avx512_vbmi2",
+   "gfni",
+   "vpclmulqdq",
+   "avx512_vnni",
+   "avx512_bitalg",
+   "avx512_vpopcntdq",
+   "avx512_fp16"
+  ],
+  "logical_cores": 4,
+  "memory": "MemTotal:       16479424 kB",
+  "transparent_hugepage": {
+   "enabled": "always [madvise] never",
+   "defrag": "always defer defer+madvise [madvise] never"
+  },
+  "os": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+  "arch": "x86_64",
+  "glibc": "glibc 2.39",
+  "binaries": {
+   "base": {
+    "path_basename": "ic-v3-995ea207-rebuilt",
+    "sha256": "00cff0b04c3edb9a46076af20857fb27ba1b80f177b277b65abb4c4cf2c3f562"
+   },
+   "candidate": {
+    "path_basename": "ic-main-92246530",
+    "sha256": "d8daac9aa75ab26e4bac70810f52d8925d518f2d2645ac2f98306d935f23a653"
+   }
+  },
+  "isolation_tool": {
+   "path": "src/bin/isolated_bench.rs",
+   "binary_sha256": "e2c77079ab686c2a9c4512d42723b7fb1d68f13ebe85b0d7998ef4fd7205d07a"
+  },
+  "pinning": "isolated_bench run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); pins untimed under taskset -c 2",
+  "smt_siblings": {
+   "0": "0",
+   "1": "1",
+   "2": "2",
+   "3": "3"
+  },
+  "uptime": "02:32:44 up 2 min,  0 user,  load average: 1.06, 0.53, 0.20",
+  "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts",
+  "runner": "icprog (native)",
+  "note": "the host R10 resumed on after its container changed"
+ },
+ "hosts_resumed_later": [
+  {
+   "repository_commit": "815cf5c7ef1f4b3e7803d6341d5f2344e2020cf7",
+   "tree_status": "",
+   "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+   "cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+   "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+   "cpu_flags_relevant": [
+    "pclmulqdq",
+    "popcnt",
+    "avx2",
+    "bmi2",
+    "avx512f",
+    "avx512dq",
+    "avx512ifma",
+    "avx512cd",
+    "avx512bw",
+    "avx512vl",
+    "avx512_bf16",
+    "avx512vbmi",
+    "avx512_vbmi2",
+    "gfni",
+    "vpclmulqdq",
+    "avx512_vnni",
+    "avx512_bitalg",
+    "avx512_vpopcntdq",
+    "avx512_fp16"
+   ],
+   "logical_cores": 4,
+   "memory": "MemTotal:       16479424 kB",
+   "transparent_hugepage": {
+    "enabled": "always [madvise] never",
+    "defrag": "always defer defer+madvise [madvise] never"
+   },
+   "os": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+   "arch": "x86_64",
+   "glibc": "glibc 2.39",
+   "binaries": {
+    "base": {
+     "path_basename": "ic-v3-995ea207-rebuilt",
+     "sha256": "00cff0b04c3edb9a46076af20857fb27ba1b80f177b277b65abb4c4cf2c3f562"
+    },
+    "candidate": {
+     "path_basename": "ic-main-92246530",
+     "sha256": "d8daac9aa75ab26e4bac70810f52d8925d518f2d2645ac2f98306d935f23a653"
+    }
+   },
+   "isolation_tool": {
+    "path": "src/bin/isolated_bench.rs",
+    "binary_sha256": "e2c77079ab686c2a9c4512d42723b7fb1d68f13ebe85b0d7998ef4fd7205d07a"
+   },
+   "pinning": "isolated_bench run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); pins untimed under taskset -c 2",
+   "smt_siblings": {
+    "0": "0",
+    "1": "1",
+    "2": "2",
+    "3": "3"
+   },
+   "uptime": "03:06:08 up 0 min,  0 user,  load average: 0.14, 0.03, 0.01",
+   "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts",
+   "runner": "icprog (native)",
+   "note": "the host R10 resumed on after its container changed"
+  },
+  {
+   "repository_commit": "815cf5c7ef1f4b3e7803d6341d5f2344e2020cf7",
+   "tree_status": "",
+   "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+   "cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+   "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+   "cpu_flags_relevant": [
+    "pclmulqdq",
+    "popcnt",
+    "avx2",
+    "bmi2",
+    "avx512f",
+    "avx512dq",
+    "avx512ifma",
+    "avx512cd",
+    "avx512bw",
+    "avx512vl",
+    "avx512_bf16",
+    "avx512vbmi",
+    "avx512_vbmi2",
+    "gfni",
+    "vpclmulqdq",
+    "avx512_vnni",
+    "avx512_bitalg",
+    "avx512_vpopcntdq",
+    "avx512_fp16"
+   ],
+   "logical_cores": 4,
+   "memory": "MemTotal:       16479424 kB",
+   "transparent_hugepage": {
+    "enabled": "always [madvise] never",
+    "defrag": "always defer defer+madvise [madvise] never"
+   },
+   "os": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+   "arch": "x86_64",
+   "glibc": "glibc 2.39",
+   "binaries": {
+    "base": {
+     "path_basename": "ic-v3-995ea207-rebuilt",
+     "sha256": "00cff0b04c3edb9a46076af20857fb27ba1b80f177b277b65abb4c4cf2c3f562"
+    },
+    "candidate": {
+     "path_basename": "ic-main-92246530",
+     "sha256": "d8daac9aa75ab26e4bac70810f52d8925d518f2d2645ac2f98306d935f23a653"
+    }
+   },
+   "isolation_tool": {
+    "path": "src/bin/isolated_bench.rs",
+    "binary_sha256": "e2c77079ab686c2a9c4512d42723b7fb1d68f13ebe85b0d7998ef4fd7205d07a"
+   },
+   "pinning": "isolated_bench run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); pins untimed under taskset -c 2",
+   "smt_siblings": {
+    "0": "0",
+    "1": "1",
+    "2": "2",
+    "3": "3"
+   },
+   "uptime": "04:06:17 up 1 min,  0 user,  load average: 0.16, 0.04, 0.01",
+   "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts",
+   "runner": "icprog (native)",
+   "note": "the host R10 resumed on after its container changed"
+  }
+ ],
+ "aa_source": {
+  "host_matches_r01": false,
+  "aa": "the round's own"
+ },
+ "aa": [
+  {
+   "slug": "icv1-f2m19-tm797-9c54981b",
+   "a": 1,
+   "n": 19,
+   "log2_r": 18.002,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0113357246640349,
+    "min": 0.9382941690912104,
+    "max": 1.0922704863204962,
+    "lo": 0.9814716772257476,
+    "hi": 1.0421084700811751,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0272075379245333,
+    "min": 0.9627257454850903,
+    "max": 1.119280319857841,
+    "lo": 0.9909001987677708,
+    "hi": 1.0648452056837965,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9780728668527843,
+    "min": 0.5841710465887636,
+    "max": 1.5342242215753727,
+    "lo": 0.7845546481459591,
+    "hi": 1.21932428178751,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m23-tm5197-1f85e9e1",
+   "a": 1,
+   "n": 23,
+   "log2_r": 22.001,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.048907753164588,
+    "min": 0.968244876561787,
+    "max": 1.2499765302651848,
+    "lo": 0.9908274275512835,
+    "hi": 1.1103926315078105,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0365278258184374,
+    "min": 0.9633963924329081,
+    "max": 1.1472349770413257,
+    "lo": 0.9907604815754567,
+    "hi": 1.0844093539010125,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.0634797908390319,
+    "min": 0.8929770628307007,
+    "max": 1.1917353855028383,
+    "lo": 0.9926624992772065,
+    "hi": 1.139349241405357,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m45-tm6236725-40939294",
+   "a": 1,
+   "n": 45,
+   "log2_r": 24.803,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 0.9664787292275493,
+    "min": 0.8247986881201885,
+    "max": 1.016447850030514,
+    "lo": 0.9211378991669541,
+    "hi": 1.0140513541936012,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9768318144847766,
+    "min": 0.8479215456674473,
+    "max": 1.0388268368664995,
+    "lo": 0.9288854708054247,
+    "hi": 1.0272530078032613,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9834528092000435,
+    "min": 0.8465394947685927,
+    "max": 1.0521198530994218,
+    "lo": 0.9353322829970417,
+    "hi": 1.0340490171304353,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m37-tm534059-32aad96b",
+   "a": 0,
+   "n": 37,
+   "log2_r": 27.781,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 0.9640242833650363,
+    "min": 0.899601416476323,
+    "max": 1.015213518877719,
+    "lo": 0.9411373019540131,
+    "hi": 0.9874678402268688,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9736999092044255,
+    "min": 0.859686276441183,
+    "max": 1.0237711587243343,
+    "lo": 0.9393970767081973,
+    "hi": 1.0092553369518413,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9745941816837673,
+    "min": 0.9129763881766817,
+    "max": 1.012896307479576,
+    "lo": 0.9493267691237385,
+    "hi": 1.000534115190475,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m43-tm998717-e2e742b0",
+   "a": 1,
+   "n": 43,
+   "log2_r": 32.113,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0232314406240914,
+    "min": 0.9509092217008263,
+    "max": 1.0888183511430454,
+    "lo": 0.9854455820961691,
+    "hi": 1.0624661575472742,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.005843604876626,
+    "min": 0.9179654574002148,
+    "max": 1.0744948612179264,
+    "lo": 0.9656857947047285,
+    "hi": 1.0476713678702847,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.0083013000821273,
+    "min": 0.9535092559648722,
+    "max": 1.0954420147355426,
+    "lo": 0.9769812537635347,
+    "hi": 1.0406254038456504,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m47-t22705043-f4e44623",
+   "a": 1,
+   "n": 47,
+   "log2_r": 36.636,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0163790449114871,
+    "min": 0.9153015724728427,
+    "max": 1.2568130149482317,
+    "lo": 0.9467701842294656,
+    "hi": 1.0911057193630591,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9738862663691953,
+    "min": 0.8790080458047613,
+    "max": 1.09145058824773,
+    "lo": 0.9282024505632184,
+    "hi": 1.0218185259552206,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.996831004091131,
+    "min": 0.932297272394021,
+    "max": 1.1414911959872511,
+    "lo": 0.9568097027573936,
+    "hi": 1.0385263107739258,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m57-tm747311035-c1f545af",
+   "a": 0,
+   "n": 57,
+   "log2_r": 38.002,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0257909731192167,
+    "min": 0.8012375405406299,
+    "max": 1.1812789628712883,
+    "lo": 0.9495559660202513,
+    "hi": 1.108146500245809,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9996722194538525,
+    "min": 0.8791646376518911,
+    "max": 1.1142379134650588,
+    "lo": 0.9428087803038634,
+    "hi": 1.0599652519418699,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9856619847616626,
+    "min": 0.702223756024311,
+    "max": 1.0919851358340558,
+    "lo": 0.8975154588802734,
+    "hi": 1.082465531475486,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m41-tm2308219-7f48b14a",
+   "a": 0,
+   "n": 41,
+   "log2_r": 39.0,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 0.988517139315135,
+    "min": 0.6865195128081556,
+    "max": 1.39378276879737,
+    "lo": 0.8758290446171639,
+    "hi": 1.115704189904903,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0082400512599683,
+    "min": 0.8379408044917325,
+    "max": 1.2921736919229994,
+    "lo": 0.9334042890466866,
+    "hi": 1.0890757765886572,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9806300302098389,
+    "min": 0.8141950827131319,
+    "max": 1.2758106691326543,
+    "lo": 0.890987078051542,
+    "hi": 1.0792920344617172,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "a": 0,
+   "n": 53,
+   "log2_r": 44.259,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0335372513187184,
+    "min": 0.8944914752571803,
+    "max": 1.220144408223767,
+    "lo": 0.9701121436510727,
+    "hi": 1.10110903863467,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0207456502697998,
+    "min": 0.8845083496673878,
+    "max": 1.3513063458460268,
+    "lo": 0.9372200460617832,
+    "hi": 1.1117151056711723,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9983803069395484,
+    "min": 0.8884976547380435,
+    "max": 1.122311831211165,
+    "lo": 0.9401206386234339,
+    "hi": 1.0602503512147246,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "a": 1,
+   "n": 59,
+   "log2_r": 44.517,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 0.9974826344856819,
+    "min": 0.9060703057148981,
+    "max": 1.0896688624613506,
+    "lo": 0.9538325406578526,
+    "hi": 1.0431302809340834,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0569596837611157,
+    "min": 0.9611229594539691,
+    "max": 1.2697990753861232,
+    "lo": 0.997946083695977,
+    "hi": 1.1194630565199355,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.009663812980867,
+    "min": 0.917541916436187,
+    "max": 1.0876243151862746,
+    "lo": 0.9718208288147373,
+    "hi": 1.048980413896233,
+    "missing_pairs": 0
+   }
+  },
+  {
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "a": 0,
+   "n": 61,
+   "log2_r": 47.211,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 0.9799606065725736,
+    "min": 0.9155528954163283,
+    "max": 1.1005121847114696,
+    "lo": 0.9413575694433616,
+    "hi": 1.0201466707299534,
+    "missing_pairs": 0
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9660560752820165,
+    "min": 0.8378466619945474,
+    "max": 1.039102843534178,
+    "lo": 0.9239487593686868,
+    "hi": 1.010082356977211,
+    "missing_pairs": 0
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9809045928317222,
+    "min": 0.8210701541741808,
+    "max": 1.06854325020477,
+    "lo": 0.9273507898908893,
+    "hi": 1.037551087169047,
+    "missing_pairs": 0
+   }
+  }
+ ],
+ "accounting": {
+  "aa": {
+   "processes": 222,
+   "contended": 2,
+   "failed": 0
+  },
+  "compare": {
+   "processes": 400,
+   "contended": 0,
+   "failed": 0
+  },
+  "holdout": {
+   "processes": 321,
+   "contended": 1,
+   "failed": 0
+  }
+ },
+ "isolation_by_tool": {
+  "aa": {
+   "python": 0,
+   "native": 222
+  },
+  "compare": {
+   "python": 0,
+   "native": 400
+  },
+  "holdout": {
+   "python": 0,
+   "native": 321
+  }
+ },
+ "pin": {
+  "held": true,
+  "names_agree": true,
+  "rows": 90
+ },
+ "extended": {
+  "holdouts": [
+   "icv1-f2m59-tm943548413-98844ecc"
+  ]
+ },
+ "extension_test": [
+  {
+   "set": "suite",
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.01699687330909,
+   "min": 0.7900266942997787,
+   "max": 1.3426194931219828,
+   "lo": 0.9899126351148749,
+   "hi": 1.044822142512042,
+   "half_width": 0.027360230825896892,
+   "extended": false
+  },
+  {
+   "set": "suite",
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.0336697682157983,
+   "min": 0.8822921066974815,
+   "max": 1.1782781849900437,
+   "lo": 1.0124181684305376,
+   "hi": 1.0553674588630324,
+   "half_width": 0.02099093087020054,
+   "extended": false
+  },
+  {
+   "set": "suite",
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.0067019058999405,
+   "min": 0.8669681058796367,
+   "max": 1.1124613732067032,
+   "lo": 0.9920100859159656,
+   "hi": 1.0216113139684582,
+   "half_width": 0.014810151824625306,
+   "extended": false
+  },
+  {
+   "set": "holdouts",
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 0.9917478510620378,
+   "min": 0.799048785628423,
+   "max": 1.203630343538427,
+   "lo": 0.9659308208040345,
+   "hi": 1.0182549090497577,
+   "half_width": 0.026727618274478004,
+   "extended": false
+  },
+  {
+   "set": "holdouts",
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.0028084775823454,
+   "min": 0.6097304767501108,
+   "max": 1.4514851597128076,
+   "lo": 0.9580691753831088,
+   "hi": 1.0496369871297613,
+   "half_width": 0.046697361055736186,
+   "extended": true
+  },
+  {
+   "set": "holdouts",
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "rounds": 5,
+   "n": 40,
+   "geomean": 1.0108948901388097,
+   "min": 0.9126508598850777,
+   "max": 1.1299683173458048,
+   "lo": 0.9944297423760787,
+   "hi": 1.0276326575540873,
+   "half_width": 0.016557376616058717,
+   "extended": false
+  }
+ ],
+ "suite": [
+  {
+   "slug": "icv1-f2m19-tm797-9c54981b",
+   "a": 1,
+   "n": 19,
+   "log2_r": 18.002,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 0.9932787408687751,
+    "min": 0.641860695932186,
+    "max": 1.1230095730545466,
+    "lo": 0.886125091168738,
+    "hi": 1.1133898214761058,
+    "missing_pairs": 0,
+    "half_width": 0.1209238410783613
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9442381112116345,
+    "min": 0.6454127268080756,
+    "max": 1.0866450240680623,
+    "lo": 0.8535345060823528,
+    "hi": 1.0445806283296188,
+    "missing_pairs": 0,
+    "half_width": 0.10626823459733692
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 0.9416692759216377,
+    "min": 0.5237230841796079,
+    "max": 1.2543740445048412,
+    "lo": 0.7964582278987556,
+    "hi": 1.1133553451437286,
+    "missing_pairs": 0,
+    "half_width": 0.18232098424795362
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9128626938472614,
+    "min": 0.6028553344117027,
+    "max": 1.3531241971855108,
+    "lo": 0.7545545565441709,
+    "hi": 1.1043844220285977,
+    "missing_pairs": 0,
+    "half_width": 0.20980343426476078
+   },
+   "s_cold_base": 122.32555396603645,
+   "s_cold_cand": 117.21772802654634,
+   "collect_units_per_summand": {
+    "base": 20.897700404674215,
+    "cand": 21.98398354021734
+   },
+   "aa_cold": {
+    "geomean": 1.0113357246640349,
+    "lo": 0.9814716772257476,
+    "hi": 1.0421084700811751
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m23-tm5197-1f85e9e1",
+   "a": 1,
+   "n": 23,
+   "log2_r": 22.001,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.020162253784813,
+    "min": 0.9277980353066347,
+    "max": 1.1286075066511427,
+    "lo": 0.9752121104375661,
+    "hi": 1.0671842698716545,
+    "missing_pairs": 0,
+    "half_width": 0.046092683700450054
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9987761141604531,
+    "min": 0.9054327727392797,
+    "max": 1.0847780126849895,
+    "lo": 0.9545014606356448,
+    "hi": 1.0451044522793493,
+    "missing_pairs": 0,
+    "half_width": 0.04638510819598318
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.0088113164432766,
+    "min": 0.9259920717713332,
+    "max": 1.1109689457550314,
+    "lo": 0.9688708687798918,
+    "hi": 1.0503982573710946,
+    "missing_pairs": 0,
+    "half_width": 0.04122370581095325
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9453910624718251,
+    "min": 0.8013617491115277,
+    "max": 1.0559350719286098,
+    "lo": 0.8874289494494313,
+    "hi": 1.0071389507364004,
+    "missing_pairs": 0,
+    "half_width": 0.06531465201620246
+   },
+   "s_cold_base": 31.861444445631644,
+   "s_cold_cand": 30.67882285429879,
+   "collect_units_per_summand": {
+    "base": 9.119784420208548,
+    "cand": 9.159678899311322
+   },
+   "aa_cold": {
+    "geomean": 1.048907753164588,
+    "lo": 0.9908274275512835,
+    "hi": 1.1103926315078105
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m45-tm6236725-40939294",
+   "a": 1,
+   "n": 45,
+   "log2_r": 24.803,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.091137333052265,
+    "min": 0.9437284115272677,
+    "max": 1.399849762165022,
+    "lo": 1.0091041499753164,
+    "hi": 1.1798392461368155,
+    "missing_pairs": 0,
+    "half_width": 0.08129307869654001
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0300244938531578,
+    "min": 0.8990798456515287,
+    "max": 1.3873281088274434,
+    "lo": 0.945316481628309,
+    "hi": 1.1223230299655467,
+    "missing_pairs": 0,
+    "half_width": 0.08960809831532712
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.0392314600281853,
+    "min": 0.9156269786771066,
+    "max": 1.186323373934984,
+    "lo": 0.9819065068640044,
+    "hi": 1.099903117010198,
+    "missing_pairs": 0,
+    "half_width": 0.05838127435092
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.0152995558360334,
+    "min": 0.9591008508540146,
+    "max": 1.1159909222565627,
+    "lo": 0.9786429530583279,
+    "hi": 1.053329189015688,
+    "missing_pairs": 0,
+    "half_width": 0.037456564381474156
+   },
+   "s_cold_base": 20.015528343925673,
+   "s_cold_cand": 18.301691834749242,
+   "collect_units_per_summand": {
+    "base": 5.859355200332508,
+    "cand": 5.824322988649459
+   },
+   "aa_cold": {
+    "geomean": 0.9664787292275493,
+    "lo": 0.9211378991669541,
+    "hi": 1.0140513541936012
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m37-tm534059-32aad96b",
+   "a": 0,
+   "n": 37,
+   "log2_r": 27.781,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0317646714696247,
+    "min": 0.9106998610275838,
+    "max": 1.1408873880121944,
+    "lo": 0.9754533258777446,
+    "hi": 1.0913267801254525,
+    "missing_pairs": 0,
+    "half_width": 0.05772838545730474
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0183296106506272,
+    "min": 0.9237828371278459,
+    "max": 1.1141757744292828,
+    "lo": 0.9726655202654892,
+    "hi": 1.0661375100916604,
+    "missing_pairs": 0,
+    "half_width": 0.04694737238416136
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 0.9989351216108946,
+    "min": 0.8855749975063493,
+    "max": 1.124440410778625,
+    "lo": 0.9422905421360687,
+    "hi": 1.0589848168545855,
+    "missing_pairs": 0,
+    "half_width": 0.060113709033329465
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.0031270460225583,
+    "min": 0.9166344510221287,
+    "max": 1.0631185317778737,
+    "lo": 0.9701482666509206,
+    "hi": 1.0372268910356341,
+    "missing_pairs": 0,
+    "half_width": 0.03399354563141643
+   },
+   "s_cold_base": 9.046665022229213,
+   "s_cold_cand": 8.592418030681392,
+   "collect_units_per_summand": {
+    "base": 3.2318478312335435,
+    "cand": 3.162712523650893
+   },
+   "aa_cold": {
+    "geomean": 0.9640242833650363,
+    "lo": 0.9411373019540131,
+    "hi": 0.9874678402268688
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m43-tm998717-e2e742b0",
+   "a": 1,
+   "n": 43,
+   "log2_r": 32.113,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0941204665642077,
+    "min": 0.9998149700397065,
+    "max": 1.329687117491803,
+    "lo": 1.0155740909635402,
+    "hi": 1.178741763901159,
+    "missing_pairs": 0,
+    "half_width": 0.07734184664571897
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0616213202008835,
+    "min": 0.9577288929196633,
+    "max": 1.384785346255149,
+    "lo": 0.9862481920179521,
+    "hi": 1.1427547716959994,
+    "missing_pairs": 0,
+    "half_width": 0.07642409769969905
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.0670161938778975,
+    "min": 0.9589626388109742,
+    "max": 1.2893500259962203,
+    "lo": 0.9870952292914522,
+    "hi": 1.1534080240818503,
+    "missing_pairs": 0,
+    "half_width": 0.08096580979710888
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.0674455204563176,
+    "min": 0.9699643380302903,
+    "max": 1.3848053338644224,
+    "lo": 0.9840895420711603,
+    "hi": 1.15786205465017,
+    "missing_pairs": 0,
+    "half_width": 0.08470365228119614
+   },
+   "s_cold_base": 5.160256060058877,
+   "s_cold_cand": 4.923034451290675,
+   "collect_units_per_summand": {
+    "base": 1.8470353498299608,
+    "cand": 1.7926477656428006
+   },
+   "aa_cold": {
+    "geomean": 1.0232314406240914,
+    "lo": 0.9854455820961691,
+    "hi": 1.0624661575472742
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m47-t22705043-f4e44623",
+   "a": 1,
+   "n": 47,
+   "log2_r": 36.636,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.0377363268216526,
+    "min": 0.9261603686564074,
+    "max": 1.1452087842089804,
+    "lo": 0.9931510079904935,
+    "hi": 1.0843232049718705,
+    "missing_pairs": 0,
+    "half_width": 0.04489278918557549
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9708407249899973,
+    "min": 0.8249173371485939,
+    "max": 1.0484454364543028,
+    "lo": 0.9253240387561344,
+    "hi": 1.0185963768606947,
+    "missing_pairs": 0,
+    "half_width": 0.04918999650657363
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 0.9984080474953981,
+    "min": 0.939461658237167,
+    "max": 1.0938539964836247,
+    "lo": 0.9616960605911387,
+    "hi": 1.0365214854793574,
+    "missing_pairs": 0,
+    "half_width": 0.0381742095124038
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.010366329297209,
+    "min": 0.9197309405955613,
+    "max": 1.0728595881443208,
+    "lo": 0.9751808622161799,
+    "hi": 1.0468213220033582,
+    "missing_pairs": 0,
+    "half_width": 0.036080965536041454
+   },
+   "s_cold_base": 3.4643277213930954,
+   "s_cold_cand": 3.322154799320457,
+   "collect_units_per_summand": {
+    "base": 1.1218362616477715,
+    "cand": 1.1240818134500303
+   },
+   "aa_cold": {
+    "geomean": 1.0163790449114871,
+    "lo": 0.9467701842294656,
+    "hi": 1.0911057193630591
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m57-tm747311035-c1f545af",
+   "a": 0,
+   "n": 57,
+   "log2_r": 38.002,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 0.9425632902202133,
+    "min": 0.784950868322909,
+    "max": 1.218377918762206,
+    "lo": 0.863281348512828,
+    "hi": 1.0291263185533222,
+    "missing_pairs": 0,
+    "half_width": 0.0918378948461751
+   },
+   "online": {
+    "n": 10,
+    "geomean": 0.9631924464964638,
+    "min": 0.7655069573521394,
+    "max": 1.1130639570474403,
+    "lo": 0.8855308045963237,
+    "hi": 1.0476650661641984,
+    "missing_pairs": 0,
+    "half_width": 0.0877006666476643
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 0.9080309579728547,
+    "min": 0.6863872930226618,
+    "max": 1.110091037141523,
+    "lo": 0.8076497272036518,
+    "hi": 1.0208883787924496,
+    "missing_pairs": 0,
+    "half_width": 0.12428807611531756
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 0.9726620410133358,
+    "min": 0.6578201024928249,
+    "max": 1.3098717623614324,
+    "lo": 0.8555774055441989,
+    "hi": 1.1057695538680916,
+    "missing_pairs": 0,
+    "half_width": 0.13684867635636544
+   },
+   "s_cold_base": 3.776946348714317,
+   "s_cold_cand": 3.9872216288544857,
+   "collect_units_per_summand": {
+    "base": 1.1297984805712538,
+    "cand": 1.1970443971984828
+   },
+   "aa_cold": {
+    "geomean": 1.0257909731192167,
+    "lo": 0.9495559660202513,
+    "hi": 1.108146500245809
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m41-tm2308219-7f48b14a",
+   "a": 0,
+   "n": 41,
+   "log2_r": 39.0,
+   "rows": 2,
+   "rounds": 5,
+   "cold": {
+    "n": 10,
+    "geomean": 1.1129563437799541,
+    "min": 0.9956773587632181,
+    "max": 1.2942213087156424,
+    "lo": 1.0491908407188795,
+    "hi": 1.1805972517939027,
+    "missing_pairs": 0,
+    "half_width": 0.060775886127050205
+   },
+   "online": {
+    "n": 10,
+    "geomean": 1.0353698058597287,
+    "min": 0.9427017213372101,
+    "max": 1.1423148315675908,
+    "lo": 0.9927442630557497,
+    "hi": 1.0798255651322888,
+    "missing_pairs": 0,
+    "half_width": 0.042937082983259156
+   },
+   "collect_stage": {
+    "n": 10,
+    "geomean": 1.0981533810128354,
+    "min": 0.9614548191499609,
+    "max": 1.3471311197363394,
+    "lo": 1.0165132090545728,
+    "hi": 1.1863503961267061,
+    "missing_pairs": 0,
+    "half_width": 0.08031393122199915
+   },
+   "rho_online": {
+    "n": 10,
+    "geomean": 1.0429864459465874,
+    "min": 0.9725496966230247,
+    "max": 1.1241437840403208,
+    "lo": 1.0110824687459008,
+    "hi": 1.075897130110045,
+    "missing_pairs": 0,
+    "half_width": 0.03155427790203813
+   },
+   "s_cold_base": 4.936617519593686,
+   "s_cold_cand": 4.546922145978698,
+   "collect_units_per_summand": {
+    "base": 1.2009980625218202,
+    "cand": 1.12368357100293
+   },
+   "aa_cold": {
+    "geomean": 0.988517139315135,
+    "lo": 0.8758290446171639,
+    "hi": 1.115704189904903
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "a": 0,
+   "n": 53,
+   "log2_r": 44.259,
+   "rows": 8,
+   "rounds": 5,
+   "cold": {
+    "n": 40,
+    "geomean": 1.01699687330909,
+    "min": 0.7900266942997787,
+    "max": 1.3426194931219828,
+    "lo": 0.9899126351148749,
+    "hi": 1.044822142512042,
+    "missing_pairs": 0,
+    "half_width": 0.027360230825896892
+   },
+   "online": {
+    "n": 40,
+    "geomean": 1.051822402685793,
+    "min": 0.7048749025838343,
+    "max": 2.1937297409091965,
+    "lo": 0.9844256651307157,
+    "hi": 1.123833323306145,
+    "missing_pairs": 0,
+    "half_width": 0.06846300329454347
+   },
+   "collect_stage": {
+    "n": 40,
+    "geomean": 1.0043921646987848,
+    "min": 0.7655876693012683,
+    "max": 1.1972433243484841,
+    "lo": 0.9783234618374503,
+    "hi": 1.0311555021011292,
+    "missing_pairs": 0,
+    "half_width": 0.02664630245335564
+   },
+   "rho_online": {
+    "n": 40,
+    "geomean": 1.020759094974667,
+    "min": 0.6937754051018797,
+    "max": 1.5825689359451027,
+    "lo": 0.982264916876854,
+    "hi": 1.060761829188011,
+    "missing_pairs": 0,
+    "half_width": 0.039189201850155175
+   },
+   "s_cold_base": 5.84382302298926,
+   "s_cold_cand": 5.723352234452082,
+   "collect_units_per_summand": {
+    "base": 1.1318492353477096,
+    "cand": 1.1010284636693155
+   },
+   "aa_cold": {
+    "geomean": 1.0335372513187184,
+    "lo": 0.9701121436510727,
+    "hi": 1.10110903863467
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "a": 1,
+   "n": 59,
+   "log2_r": 44.517,
+   "rows": 8,
+   "rounds": 5,
+   "cold": {
+    "n": 40,
+    "geomean": 1.0336697682157983,
+    "min": 0.8822921066974815,
+    "max": 1.1782781849900437,
+    "lo": 1.0124181684305376,
+    "hi": 1.0553674588630324,
+    "missing_pairs": 0,
+    "half_width": 0.02099093087020054
+   },
+   "online": {
+    "n": 40,
+    "geomean": 1.0154854830425173,
+    "min": 0.6443795729710511,
+    "max": 1.656342506044163,
+    "lo": 0.9637669528380967,
+    "hi": 1.0699793795931576,
+    "missing_pairs": 0,
+    "half_width": 0.053662900613182574
+   },
+   "collect_stage": {
+    "n": 40,
+    "geomean": 1.038340312210325,
+    "min": 0.8999224621424494,
+    "max": 1.220745580165878,
+    "lo": 1.0136636279612365,
+    "hi": 1.0636177270457066,
+    "missing_pairs": 0,
+    "half_width": 0.024344056123154267
+   },
+   "rho_online": {
+    "n": 40,
+    "geomean": 1.0360141581225484,
+    "min": 0.8336519430907026,
+    "max": 1.4291156554474096,
+    "lo": 1.0015713998688824,
+    "hi": 1.0716413587397597,
+    "missing_pairs": 0,
+    "half_width": 0.034388719823843505
+   },
+   "s_cold_base": 5.481179570423026,
+   "s_cold_cand": 5.177079398614384,
+   "collect_units_per_summand": {
+    "base": 1.1645293620218362,
+    "cand": 1.128088833678666
+   },
+   "aa_cold": {
+    "geomean": 0.9974826344856819,
+    "lo": 0.9538325406578526,
+    "hi": 1.0431302809340834
+   },
+   "regresses_beyond_aa": false
+  },
+  {
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "a": 0,
+   "n": 61,
+   "log2_r": 47.211,
+   "rows": 8,
+   "rounds": 5,
+   "cold": {
+    "n": 40,
+    "geomean": 1.0067019058999405,
+    "min": 0.8669681058796367,
+    "max": 1.1124613732067032,
+    "lo": 0.9920100859159656,
+    "hi": 1.0216113139684582,
+    "missing_pairs": 0,
+    "half_width": 0.014810151824625306
+   },
+   "online": {
+    "n": 40,
+    "geomean": 0.9751749388760548,
+    "min": 0.6355251107261973,
+    "max": 1.5238498389889683,
+    "lo": 0.9307498222106805,
+    "hi": 1.0217204867718586,
+    "missing_pairs": 0,
+    "half_width": 0.04773045946961085
+   },
+   "collect_stage": {
+    "n": 40,
+    "geomean": 1.0095355868733107,
+    "min": 0.8797600844289459,
+    "max": 1.1205236630300566,
+    "lo": 0.9930993468238284,
+    "hi": 1.0262438540747876,
+    "missing_pairs": 0,
+    "half_width": 0.0165504489576489
+   },
+   "rho_online": {
+    "n": 40,
+    "geomean": 0.9960035360942189,
+    "min": 0.6657038698848252,
+    "max": 1.240511072580665,
+    "lo": 0.9597988398713445,
+    "hi": 1.0335739143476803,
+    "missing_pairs": 0,
+    "half_width": 0.037721129385535956
+   },
+   "s_cold_base": 7.7129036586156206,
+   "s_cold_cand": 7.6470374038529005,
+   "collect_units_per_summand": {
+    "base": 1.1040006927073676,
+    "cand": 1.092981434834728
+   },
+   "aa_cold": {
+    "geomean": 0.9799606065725736,
+    "lo": 0.9413575694433616,
+    "hi": 1.0201466707299534
+   },
+   "regresses_beyond_aa": false
+  }
+ ],
+ "holdouts": [
+  {
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "a": 0,
+   "n": 53,
+   "log2_r": 44.259,
+   "rows": 8,
+   "rounds": 5,
+   "cold": {
+    "n": 40,
+    "geomean": 0.9917478510620378,
+    "min": 0.799048785628423,
+    "max": 1.203630343538427,
+    "lo": 0.9659308208040345,
+    "hi": 1.0182549090497577,
+    "missing_pairs": 0,
+    "half_width": 0.026727618274478004
+   },
+   "online": {
+    "n": 40,
+    "geomean": 1.0100517759412553,
+    "min": 0.6863804732327122,
+    "max": 1.5033613975082083,
+    "lo": 0.9595356659341454,
+    "hi": 1.0632273778889445,
+    "missing_pairs": 0,
+    "half_width": 0.052646412010053156
+   },
+   "collect_stage": {
+    "n": 40,
+    "geomean": 0.9869050316566579,
+    "min": 0.7813832460121601,
+    "max": 1.2805324537892455,
+    "lo": 0.954029133954761,
+    "hi": 1.020913834645446,
+    "missing_pairs": 0,
+    "half_width": 0.034460056335612776
+   },
+   "rho_online": {
+    "n": 40,
+    "geomean": 0.9963945249367709,
+    "min": 0.6613158701699783,
+    "max": 1.5866374359657776,
+    "lo": 0.9538061362016946,
+    "hi": 1.0408845274130556,
+    "missing_pairs": 0,
+    "half_width": 0.0446509905091137
+   },
+   "s_cold_base": 6.051508561276023,
+   "s_cold_cand": 6.000063454058481,
+   "collect_units_per_summand": {
+    "base": 1.1602825210671348,
+    "cand": 1.1910173813911449
+   }
+  },
+  {
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "a": 1,
+   "n": 59,
+   "log2_r": 44.517,
+   "rows": 8,
+   "rounds": 10,
+   "cold": {
+    "n": 80,
+    "geomean": 1.012757593054088,
+    "min": 0.6097304767501108,
+    "max": 1.4514851597128076,
+    "lo": 0.9843036681880128,
+    "hi": 1.0420340545686089,
+    "missing_pairs": 0,
+    "half_width": 0.02890766923428778
+   },
+   "online": {
+    "n": 80,
+    "geomean": 0.9533233832170999,
+    "min": 0.5474184317095501,
+    "max": 1.6230993920123598,
+    "lo": 0.9140208270841871,
+    "hi": 0.9943159346682905,
+    "missing_pairs": 0,
+    "half_width": 0.042999628638979326
+   },
+   "collect_stage": {
+    "n": 80,
+    "geomean": 1.0131404733829852,
+    "min": 0.5948769637052932,
+    "max": 1.6714989673289027,
+    "lo": 0.9801234827201897,
+    "hi": 1.047269692955348,
+    "missing_pairs": 0,
+    "half_width": 0.03368656219843014
+   },
+   "rho_online": {
+    "n": 80,
+    "geomean": 1.0128024400597346,
+    "min": 0.6616864281390554,
+    "max": 1.5899764032481283,
+    "lo": 0.9783238417411244,
+    "hi": 1.0484961510959296,
+    "missing_pairs": 0,
+    "half_width": 0.03524252077640111
+   },
+   "s_cold_base": 5.8664974569806345,
+   "s_cold_cand": 5.74269626065259,
+   "collect_units_per_summand": {
+    "base": 1.1970864223032185,
+    "cand": 1.191447207878294
+   }
+  },
+  {
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "a": 0,
+   "n": 61,
+   "log2_r": 47.211,
+   "rows": 8,
+   "rounds": 5,
+   "cold": {
+    "n": 40,
+    "geomean": 1.0108948901388097,
+    "min": 0.9126508598850777,
+    "max": 1.1299683173458048,
+    "lo": 0.9944297423760787,
+    "hi": 1.0276326575540873,
+    "missing_pairs": 0,
+    "half_width": 0.016557376616058717
+   },
+   "online": {
+    "n": 40,
+    "geomean": 1.011500923123295,
+    "min": 0.7321202257207966,
+    "max": 1.7144981400212713,
+    "lo": 0.9649222030893674,
+    "hi": 1.060328090910889,
+    "missing_pairs": 0,
+    "half_width": 0.04827199528086079
+   },
+   "collect_stage": {
+    "n": 40,
+    "geomean": 1.0161897754596172,
+    "min": 0.9087543987333616,
+    "max": 1.172910759784777,
+    "lo": 0.9965058414017551,
+    "hi": 1.0362625253616988,
+    "missing_pairs": 0,
+    "half_width": 0.019752954011963864
+   },
+   "rho_online": {
+    "n": 40,
+    "geomean": 1.0208815604165062,
+    "min": 0.8945445392075556,
+    "max": 1.2718721984209922,
+    "lo": 0.9948023730044413,
+    "hi": 1.0476444253453625,
+    "missing_pairs": 0,
+    "half_width": 0.02621544551939725
+   },
+   "s_cold_base": 7.82313927003184,
+   "s_cold_cand": 7.74653758914444,
+   "collect_units_per_summand": {
+    "base": 1.167567826030065,
+    "cand": 1.1506971006848965
+   }
+  }
+ ],
+ "callgrind": {
+  "pairs": {
+   "icv1-f2m53-tm56619371-dac20a85-M1-T01": {
+    "ir_base_over_cand": 1.2560541324305567,
+    "kernels_identical": false,
+    "kernels": [
+     "<core::iter::adapters::map::Map<core::slice::iter::Iter<crypto_lib::binary_ecc::curve::BinaryPoint>, crypto_lib::cryptanalysis::koblitz_symmetrised::x5_solve_gate::{closure#0}> as core::iter::traits::iterator::Iterator>::fold::<(), core::iter::traits::iterator::Iterator::for_each::call<crypto_lib::cryptanalysis::koblitz_fast::FastPoint, <alloc::vec::Vec<crypto_lib::cryptanalysis::koblitz_fast::FastPoint>>::extend_trusted<core::iter::adapters::map::Map<core::slice::iter::Iter<crypto_lib::binary_ecc::curve::BinaryPoint>, crypto_lib::cryptanalysis::koblitz_symmetrised::x5_solve_gate::{closure#0}>>::{closure#0}>::{closure#0}>",
+     "<crypto_lib::cryptanalysis::koblitz_fast::FastCurve>::add_many_lazy_clmul",
+     "<crypto_lib::cryptanalysis::koblitz_fast::FastCurve>::ladder_clmul::<<crypto_lib::cryptanalysis::koblitz_fast::FastCurve>::mul::{closure#0}>",
+     "<crypto_lib::cryptanalysis::koblitz_fast::FrobeniusCanon>::canon_in_place"
+    ],
+    "differing_functions": {
+     "./malloc/./malloc/malloc.c:_int_free": [
+      17891877,
+      17912047
+     ],
+     "./malloc/./malloc/malloc.c:_int_malloc": [
+      13059703,
+      13263215
+     ],
+     "./malloc/./malloc/malloc.c:calloc": [
+      6733329,
+      6737410
+     ],
+     "./malloc/./malloc/malloc.c:free": [
+      7720384,
+      7731256
+     ],
+     "./malloc/./malloc/malloc.c:malloc": [
+      8894671,
+      8915203
+     ],
+     "./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:__memcpy_avx_unaligned_erms": [
+      46351842,
+      39931174
+     ],
+     "./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:__memset_avx2_unaligned_erms": [
+      258575762,
+      113935752
+     ],
+     "0x0000000000707ac0": [
+      26888075,
+      null
+     ],
+     "0x00000000009ed300": [
+      null,
+      36701703
+     ],
+     "<alloc::vec::Vec<u64> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<u64, num_bigint::biguint::iter::U64Digits>>::from_iter": [
+      5592614,
+      5558822
+     ],
+     "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write": [
+      29064159,
+      24144517
+     ],
+     "<core::iter::adapters::map::Map<core::slice::iter::Iter<crypto_lib::binary_ecc::curve::BinaryPoint>, crypto_lib::cryptanalysis::koblitz_symmetrised::x5_solve_gate::{closure#0}> as core::iter::traits::iterator::Iterator>::fold::<(), core::iter::traits::iterator::Iterator::for_each::call<crypto_lib::cryptanalysis::koblitz_fast::FastPoint, <alloc::vec::Vec<crypto_lib::cryptanalysis::koblitz_fast::FastPoint>>::extend_trusted<core::iter::adapters::map::Map<core::slice::iter::Iter<crypto_lib::binary_ecc::curve::BinaryPoint>, crypto_lib::cryptanalysis::koblitz_symmetrised::x5_solve_gate::{closure#0}>>::{closure#0}>::{closure#0}>": [
+      null,
+      3106308
+     ],
+     "<crypto_lib::binary_ecc::f2m::F2mElement>::from_biguint": [
+      6366842,
+      6312458
+     ],
+     "<crypto_lib::binary_ecc::f2m::F2mElement>::mask_in_place": [
+      3773286,
+      3755334
+     ],
+     "<crypto_lib::binary_ecc::f2m::F2mElement>::square_k_times": [
+      null,
+      3083866
+     ],
+     "<crypto_lib::binary_ecc::f2m::F2mElement>::to_biguint": [
+      null,
+      5250270
+     ],
+     "<crypto_lib::cryptanalysis::koblitz_fast::FastCurve>::ladder_clmul::<<crypto_lib::cryptanalysis::koblitz_fast::FastCurve>::mul::{closure#0}>": [
+      7927291,
+      5690155
+     ],
+     "<crypto_lib::cryptanalysis::koblitz_fast::FrobeniusCanon>::canon_in_place": [
+      786645135,
+      5380677938
+     ],
+     "<crypto_lib::cryptanalysis::koblitz_index_calculus::FrobeniusFactorBase>::m_can_decompose": [
+      3926093,
+      3936653
+     ],
+     "<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::keys_of": [
+      7158188044,
+      138425014
+     ],
+     "<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul": [
+      1018125031,
+      1018723761
+     ],
+     "<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv_clmul": [
+      34832705,
+      34875100
+     ],
+     "<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::mul_fold": [
+      18879390,
+      19825830
+     ],
+     "<hashbrown::map::HashMap<(num_bigint::biguint::BigUint, num_bigint::biguint::BigUint), usize, std::hash::random::RandomState>>::insert": [
+      null,
+      3241466
+     ],
+     "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&(num_bigint::biguint::BigUint, num_bigint::biguint::BigUint)>": [
+      7176048,
+      3678048
+     ],
+     "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&num_bigint::biguint::BigUint>": [
+      null,
+      2974020
+     ],
+     "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&usize>": [
+      19476850,
+      21956918
+     ],
+     "core::slice::sort::unstable::quicksort::quicksort::<u32, <": [
+      4679304,
+      4680673
+     ],
+     "core::slice::sort::unstable::quicksort::quicksort::<u32, <u32 as core::cmp::PartialOrd>::lt>": [
+      null,
+      2713713
+     ],
+     "core::slice::sort::unstable::quicksort::quicksort::<u32, <u32 as core::cmp::PartialOrd>::lt>'2": [
+      11067297,
+      11063640
+     ],
+     "core::slice::sort::unstable::quicksort::quicksort::<u64, <u64 as core::cmp::PartialOrd>::lt>'2": [
+      null,
+      3543526
+     ],
+     "crypto_lib::cryptanalysis::koblitz_index_calculus::build_projected_signed_orbit_map": [
+      null,
+      7672697
+     ],
+     "crypto_lib::cryptanalysis::koblitz_index_calculus::finish_factor_base_domain": [
+      6127199,
+      6255365
+     ],
+     "crypto_lib::cryptanalysis::koblitz_index_calculus::is_irreducible_f2": [
+      null,
+      3325470
+     ],
+     "crypto_lib::cryptanalysis::koblitz_index_calculus::projected_signed_orbit_map::{closure#0}": [
+      7456318,
+      null
+     ],
+     "crypto_lib::cryptanalysis::koblitz_sparse_la::to_u64_mod": [
+      3615967,
+      null
+     ]
+    },
+    "total_within_tolerance": false,
+    "same_log": true
+   },
+   "icv1-f2m61-t158598901-ab42b6c5-M1-T01": {
+    "ir_base_over_cand": 1.4500830620251741,
+    "kernels_identical": false,
+    "kernels": [
+     "<crypto_lib::cryptanalysis::koblitz_fast::FastCurve>::add_many_lazy_clmul",
+     "<crypto_lib::cryptanalysis::koblitz_fast::FrobeniusCanon>::canon_in_place"
+    ],
+    "differing_functions": {
+     "./malloc/./malloc/malloc.c:_int_free": [
+      null,
+      26417491
+     ],
+     "./malloc/./malloc/malloc.c:_int_malloc": [
+      null,
+      18178100
+     ],
+     "./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:__memcpy_avx_unaligned_erms": [
+      85010744,
+      73260423
+     ],
+     "./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:__memset_avx2_unaligned_erms": [
+      1157685570,
+      432958671
+     ],
+     "0x00000000009ed300": [
+      null,
+      36701703
+     ],
+     "<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write": [
+      null,
+      36486712
+     ],
+     "<crypto_lib::cryptanalysis::koblitz_fast::FrobeniusCanon>::canon_in_place": [
+      1412949090,
+      25825602351
+     ],
+     "<crypto_lib::cryptanalysis::koblitz_index_calculus::IndividualLogSolver>::solve_impl": [
+      null,
+      18508275
+     ],
+     "<crypto_lib::cryptanalysis::koblitz_index_calculus::PairSumTable>::keys_of": [
+      44712136032,
+      755154865
+     ],
+     "<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul": [
+      4712668016,
+      4712181907
+     ],
+     "<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv_clmul": [
+      125829600,
+      125880300
+     ],
+     "<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::mul_fold": [
+      47520885,
+      48740085
+     ],
+     "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&usize>": [
+      null,
+      33569670
+     ],
+     "crypto_lib::binary_ecc::f2m::reduce_words": [
+      null,
+      37425801
+     ]
+    },
+    "total_within_tolerance": false,
+    "same_log": true
+   }
+  },
+  "role": "cross-check",
+  "cross_check_held": true,
+  "rule": "both arms recover the same logarithm at every profiled row; the instruction counts and the functions that differ are reported, not tested (PROTOCOL.md, plan \u00a75)"
+ },
+ "decision": {
+  "accepted": true,
+  "reasons": [],
+  "note": "the tests run with cargo before the timed steps and are recorded beside this analysis"
+ }
+}

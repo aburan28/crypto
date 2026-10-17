@@ -1,0 +1,14 @@
+{
+ "baseline": "v6",
+ "previous": "v5",
+ "round": "R08",
+ "class": "engineering",
+ "commit": "92246530 + R06 candidate-v4.patch + R08 candidate-v5.patch",
+ "built_from": "3d4c5c0ef88057e8ece09dcc91e8fad4ff7e781a (local; v5, tree 6896b5c8, plus research/ic_tool_program/rounds/R08-scan-fold/candidate-v5.patch)",
+ "base": "v5 (binary 31982fde…)",
+ "src_tree": "ab57f3fc5c2731aba91a64f1f821de267a4e824d",
+ "binary_sha256": "4ccb1951134ff31b5183fc00033933b9add2e3c0c52003f9041fd04bac1f4012",
+ "source": "research/ic_tool_program/rounds/R08-scan-fold/analysis.json",
+ "what_changed": "the collection scan's subtraction: each product reduced by two vpclmulqdq folds on eight lanes for every tail and degree that folds, Montgomery's trick in two chains, the negated base as coordinate slices with each rest's abscissa straight into the key, and the build's rows past their own orbit on the same kernel; detected at run time (AVX-512F, VPCLMULQDQ); the same field elements by construction and by test, so every count and output is v5's",
+ "measured": "R08's comparison: M1's two rows at the eight smaller sizes and all eight at the three target sizes, five rounds each (ten at 2^44.3), paired with v5 in the same runs; s_cold is the candidate's median in v0's unit"
+}

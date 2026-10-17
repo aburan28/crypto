@@ -1,0 +1,57 @@
+== 01:54:48 tests
+   tests exit 0 test result: ok. 232 passed; 0 failed; 3 ignored; 0 measured; 4017 filtered out; finished in 18.25s 
+== 02:00:25 manifest
+   exit 0 {  "host_matches_r01": false,  "aa": "the round's own" } 
+== 02:00:25 pin
+   exit 0 {  "rows": [   {    "row": "icv1-f2m19-tm797-9c54981b/M1-T01",    "suite_id": "k1n19-M1-T01",    "slug": "icv1-f2m19-tm797-9c54981b",    "equal": true,    "differs_in": [],    "names_agree": true   },
+== 02:04:18 base pin
+   exit 0
+== 02:08:10 aa
+== 02:32:49 resumed after a container restart (boot about 02:30, same CPU model and kernel build); manifest-resumed written
+== 02:32:49 manifest
+   exit 0 {  "host_matches_r01": false,  "aa": "the round's own" } 
+== 02:32:49 pin
+   exit 0 {  "rows": [   {    "row": "icv1-f2m19-tm797-9c54981b/M1-T01",    "suite_id": "k1n19-M1-T01",    "slug": "icv1-f2m19-tm797-9c54981b",    "equal": true,    "differs_in": [],    "names_agree": true   },
+== 02:32:49 base pin
+   exit 0
+== 02:32:49 aa
+== 03:06:08 resumed after a container restart (boot about 03:05, same CPU model and kernel build); manifest-resumed written
+== 03:06:08 manifest
+   exit 0 {  "host_matches_r01": false,  "aa": "the round's own" } 
+== 03:06:08 pin
+   exit 0 {  "rows": [   {    "row": "icv1-f2m19-tm797-9c54981b/M1-T01",    "suite_id": "k1n19-M1-T01",    "slug": "icv1-f2m19-tm797-9c54981b",    "equal": true,    "differs_in": [],    "names_agree": true   },
+== 03:06:08 base pin
+   exit 0
+== 03:06:08 aa
+== 04:06:17 resumed after a container restart (boot about 04:05, same CPU model and kernel build); manifest-resumed written; run as a session-tracked task from here
+== 04:06:17 manifest
+   exit 0 {  "host_matches_r01": false,  "aa": "the round's own" } 
+== 04:06:17 pin
+   exit 0 {  "rows": [   {    "row": "icv1-f2m19-tm797-9c54981b/M1-T01",    "suite_id": "k1n19-M1-T01",    "slug": "icv1-f2m19-tm797-9c54981b",    "equal": true,    "differs_in": [],    "names_agree": true   },
+== 04:06:17 base pin
+   exit 0
+== 04:06:17 aa
+   exit 0 2: complete setup 22.446 online 0.0688 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A: complete setup 22.645 online 0.0196 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A2: complete setup 20.918 online 0.0234 
+== 04:43:37 compare
+   exit 0 mplete setup 19.538 online 0.0025 r5 icv1-f2m61-t158598901-ab42b6c5/M4-T08 base: complete setup 23.755 online 0.0259 r5 icv1-f2m61-t158598901-ab42b6c5/M4-T08 cand: complete setup 22.022 online 0.0245 
+== 06:05:15 holdout
+== 06:06:32 relaunched after the session task's two-hour limit (same container, no restart)
+== 06:06:32 manifest
+   exit 0 {  "host_matches_r01": false,  "aa": "the round's own" } 
+== 06:06:32 pin
+   exit 0 {  "rows": [   {    "row": "icv1-f2m19-tm797-9c54981b/M1-T01",    "suite_id": "k1n19-M1-T01",    "slug": "icv1-f2m19-tm797-9c54981b",    "equal": true,    "differs_in": [],    "names_agree": true   },
+== 06:06:32 base pin
+   exit 0
+== 06:06:32 aa
+   exit 0 2: complete setup 22.446 online 0.0688 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A: complete setup 22.645 online 0.0196 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A2: complete setup 20.918 online 0.0234 
+== 06:06:32 compare
+   exit 0 mplete setup 19.538 online 0.0025 r5 icv1-f2m61-t158598901-ab42b6c5/M4-T08 base: complete setup 23.755 online 0.0259 r5 icv1-f2m61-t158598901-ab42b6c5/M4-T08 cand: complete setup 22.022 online 0.0245 
+== 06:06:33 holdout
+   exit 0 te setup 21.260 online 0.0195 r5 icv1-f2m61-t158598901-ab42b6c5/M33-T158 base: complete setup 19.811 online 0.1145 r5 icv1-f2m61-t158598901-ab42b6c5/M33-T158 cand: complete setup 19.708 online 0.1187 
+== 06:49:31 extend
+   exit 0 ecc/M33-T158 cand: complete setup 17.013 online 0.2133 r10 icv1-f2m59-tm943548413-98844ecc/M33-T158 base: complete setup 13.441 online 0.0972 {  "holdouts": [   "icv1-f2m59-tm943548413-98844ecc"  ] } 
+== 07:02:41 callgrind
+   exit 0 -ab42b6c5-M1-T01: done callgrind base-icv1-f2m53-tm56619371-dac20a85-M1-T01: done callgrind cand-icv1-f2m61-t158598901-ab42b6c5-M1-T01: done callgrind cand-icv1-f2m53-tm56619371-dac20a85-M1-T01: done 
+== 07:29:29 analyse
+   exit 0
+== 07:29:32 all done

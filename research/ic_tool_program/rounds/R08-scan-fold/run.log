@@ -1,0 +1,23 @@
+== 11:51:00 manifest
+   exit 0 {  "host_matches_r01": false,  "aa": "the round's own" } 
+== 11:51:01 pin
+   exit 0 {  "rows": [   {    "row": "icv1-f2m19-tm797-9c54981b/M1-T01",    "suite_id": "k1n19-M1-T01",    "slug": "icv1-f2m19-tm797-9c54981b",    "equal": true,    "differs_in": [],    "names_agree": true   },
+== 11:54:31 aa
+   exit 0 2: complete setup 15.724 online 0.0448 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A: complete setup 19.072 online 0.0177 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A2: complete setup 19.820 online 0.0214 
+== 12:44:49 compare
+== 13:51:27 driver task hit its 2 h limit (same container, no restart); relaunch
+== 13:51:27 manifest
+   exit 0 {  "host_matches_r01": false,  "aa": "the round's own" } 
+== 13:51:27 pin
+   exit 0 {  "rows": [   {    "row": "icv1-f2m19-tm797-9c54981b/M1-T01",    "suite_id": "k1n19-M1-T01",    "slug": "icv1-f2m19-tm797-9c54981b",    "equal": true,    "differs_in": [],    "names_agree": true   },
+== 13:51:27 aa
+   exit 0 2: complete setup 15.724 online 0.0448 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A: complete setup 19.072 online 0.0177 r5 icv1-f2m61-t158598901-ab42b6c5/M1-T02 A2: complete setup 19.820 online 0.0214 
+== 13:51:27 compare
+   exit 0 mplete setup 10.741 online 0.0018 r5 icv1-f2m61-t158598901-ab42b6c5/M4-T08 base: complete setup 18.722 online 0.0193 r5 icv1-f2m61-t158598901-ab42b6c5/M4-T08 cand: complete setup 13.780 online 0.0260 
+== 14:05:40 holdout
+   exit 0 te setup 11.726 online 0.0304 r5 icv1-f2m61-t158598901-ab42b6c5/M25-T142 base: complete setup 17.560 online 0.0019 r5 icv1-f2m61-t158598901-ab42b6c5/M25-T142 cand: complete setup 13.216 online 0.0024 
+== 14:47:33 extend
+   exit 0 ecc/M25-T142 base: complete setup 13.080 online 0.0238 {  "suite": [   "icv1-f2m53-tm56619371-dac20a85"  ],  "holdouts": [   "icv1-f2m53-tm56619371-dac20a85",   "icv1-f2m59-tm943548413-98844ecc"  ] } 
+== 15:25:51 analyse
+   exit 0
+== 15:25:55 all done

@@ -315,6 +315,40 @@ impl FastCurve {
         self.add_many_lazy_scalar(p, qs, out, lambdas, scratch);
     }
 
+    /// [`Self::add_many_lazy`] on addends given as coordinate slices, the
+    /// sums' abscissae appended to `x3` as words rather than to a list
+    /// of points: `x₃` and `λ` for every `(qx[k], qy[k])`, appended to
+    /// `x3` and `lambdas`, the same field elements the scalar path
+    /// computes.
+    ///
+    /// A scan keys every sum by its abscissa alone, so a word is all it
+    /// reads; this skips the point list, and the copies into and out of
+    /// the kernel's own layout that [`Self::add_many_lazy`] makes.
+    ///
+    /// Only the eight-lane folding kernel takes slices.  This returns
+    /// `false`, having appended nothing, wherever that kernel does not
+    /// run — another CPU, a field that does not fold,
+    /// `KIC_SCAN_FOLD=shift` — and on a degenerate sum (`R = O`, or some
+    /// `x_k = x_R`); the caller then takes [`Self::add_many_lazy`],
+    /// which handles every case.  No addend may be `O`, which a slice
+    /// cannot say.
+    pub fn add_many_lazy_soa(
+        &self,
+        p: FastPoint,
+        qx: &[u64],
+        qy: &[u64],
+        x3: &mut Vec<u64>,
+        lambdas: &mut Vec<u64>,
+        scratch: &mut BatchScratch,
+    ) -> bool {
+        #[cfg(target_arch = "x86_64")]
+        if let Some(simd) = &self.simd {
+            return simd.add_many_lazy_soa(self, p, qx, qy, x3, lambdas, scratch);
+        }
+        let _ = (p, qx, qy, x3, lambdas, scratch);
+        false
+    }
+
     /// The portable body of [`Self::add_many_lazy`]; also what the SIMD
     /// kernel falls back to on a block with a degenerate sum.
     fn add_many_lazy_scalar(
@@ -651,6 +685,10 @@ pub struct FrobeniusCanon {
     /// `tables[i][b]`: the normal coordinates of the field element whose
     /// `i`-th byte is `b` and whose other bytes are zero.
     tables: Vec<[u64; 256]>,
+    /// The same map as GFNI affine matrices, for [`Self::coords16_gfni`]:
+    /// `gfni[i]`'s lane `k` is the 8 × 8 block from byte `i` of the field
+    /// element to byte `k` of its coordinates.
+    gfni: [[u64; 8]; 8],
 }
 
 impl FrobeniusCanon {
@@ -692,7 +730,7 @@ impl FrobeniusCanon {
             .map(|j| (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i)))
             .collect();
         let bytes = n.div_ceil(8) as usize;
-        let tables = (0..bytes)
+        let tables: Vec<[u64; 256]> = (0..bytes)
             .map(|bi| {
                 let mut table = [0u64; 256];
                 for (b, slot) in table.iter_mut().enumerate() {
@@ -708,7 +746,60 @@ impl FrobeniusCanon {
                 table
             })
             .collect();
-        Some(Self { n, mask, tables })
+        let gfni = gfni_blocks(&tables);
+        Some(Self {
+            n,
+            mask,
+            tables,
+            gfni,
+        })
+    }
+
+    /// [`Self::coords`] of sixteen words at once, by GFNI.
+    ///
+    /// The basis change is linear over `F_2`, so byte `k` of the
+    /// coordinates is the sum over the element's bytes `i` of an 8 × 8
+    /// block applied to byte `i`, which is what `vgf2p8affineqb` computes
+    /// for every byte of a lane.  Eight words are transposed as bytes
+    /// (`vpermb`), so that lane `i` holds byte `i` of all eight; each
+    /// lane is broadcast and multiplied by the column of blocks `gfni[i]`,
+    /// whose lane `k` is the block into byte `k`; the sum over `i` holds
+    /// byte `k` of all eight coordinates in lane `k`, and the same
+    /// transpose puts each word back in its lane.  One affine product and
+    /// one XOR a byte of the element, for eight words, where the tables
+    /// take a lookup and an XOR a byte for each word.
+    ///
+    /// # Safety
+    ///
+    /// The CPU must support AVX-512F, AVX-512BW, AVX-512 VBMI and GFNI,
+    /// and `xs` must hold at least sixteen words.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "avx512f,avx512bw,avx512vbmi,gfni")]
+    unsafe fn coords16_gfni(&self, xs: &[u64], out: &mut [u64; 16]) {
+        use std::arch::x86_64::*;
+        debug_assert!(xs.len() >= 16);
+        let transpose = _mm512_loadu_si512(TRANSPOSE_8X8_BYTES.as_ptr().cast());
+        let ta = _mm512_permutexvar_epi8(transpose, _mm512_loadu_si512(xs.as_ptr().cast()));
+        let tb = _mm512_permutexvar_epi8(transpose, _mm512_loadu_si512(xs.as_ptr().add(8).cast()));
+        let (mut acc_a, mut acc_b) = (_mm512_setzero_si512(), _mm512_setzero_si512());
+        for (i, blocks) in self.gfni.iter().enumerate().take(self.tables.len()) {
+            let m = _mm512_loadu_si512(blocks.as_ptr().cast());
+            let lane = _mm512_set1_epi64(i as i64);
+            let (ba, bb) = (
+                _mm512_permutexvar_epi64(lane, ta),
+                _mm512_permutexvar_epi64(lane, tb),
+            );
+            acc_a = _mm512_xor_si512(acc_a, _mm512_gf2p8affine_epi64_epi8::<0>(ba, m));
+            acc_b = _mm512_xor_si512(acc_b, _mm512_gf2p8affine_epi64_epi8::<0>(bb, m));
+        }
+        _mm512_storeu_si512(
+            out.as_mut_ptr().cast(),
+            _mm512_permutexvar_epi8(transpose, acc_a),
+        );
+        _mm512_storeu_si512(
+            out.as_mut_ptr().add(8).cast(),
+            _mm512_permutexvar_epi8(transpose, acc_b),
+        );
     }
 
     /// The normal coordinates of a field element.
@@ -740,6 +831,17 @@ impl FrobeniusCanon {
         self.canon_in_place(out);
         for (key, p) in out.iter_mut().zip(points) {
             *key = if p.infinity { 0 } else { *key + 1 };
+        }
+    }
+
+    /// [`Self::point_keys`] for affine points given by their abscissae:
+    /// `canon(x) + 1` for each `x`, into `out`, which is cleared first.
+    pub(crate) fn x_keys(&self, xs: &[u64], out: &mut Vec<u64>) {
+        out.clear();
+        out.extend_from_slice(xs);
+        self.canon_in_place(out);
+        for key in out.iter_mut() {
+            *key += 1;
         }
     }
 
@@ -915,14 +1017,31 @@ impl FrobeniusCanon {
     pub fn canon_in_place(&self, xs: &mut [u64]) {
         #[cfg(target_arch = "x86_64")]
         if canon_simd_enabled() {
+            let funnel = canon_funnel_enabled();
+            let gfni = canon_gfni_enabled();
             let mut chunks = xs.chunks_exact_mut(16);
             for chunk in &mut chunks {
                 let mut c = [0u64; 16];
-                for (slot, &x) in c.iter_mut().zip(chunk.iter()) {
-                    *slot = self.coords(x);
+                if gfni {
+                    // SAFETY: `canon_gfni_enabled` checked AVX-512F, BW,
+                    // VBMI and GFNI; the chunk holds sixteen words.
+                    unsafe { self.coords16_gfni(chunk, &mut c) };
+                } else {
+                    for (slot, &x) in c.iter_mut().zip(chunk.iter()) {
+                        *slot = self.coords(x);
+                    }
                 }
-                // SAFETY: `canon_simd_enabled` checked AVX-512F.
-                let mins = unsafe { least_rotation16_avx512(&c, self.n, self.mask) };
+                // SAFETY: `canon_simd_enabled` checked AVX-512F, and
+                // `canon_funnel_enabled` AVX-512 VBMI2 as well; the
+                // basis change is built for `2 ≤ n ≤ 63` only when a
+                // normal element exists, which needs `n ≥ 1`.
+                let mins = unsafe {
+                    if funnel && self.n >= 2 {
+                        least_rotation16_funnel_avx512(&c, self.n)
+                    } else {
+                        least_rotation16_avx512(&c, self.n, self.mask)
+                    }
+                };
                 chunk.copy_from_slice(&mins);
             }
             for x in chunks.into_remainder() {
@@ -1080,6 +1199,153 @@ unsafe fn least_rotation16_avx512(c: &[u64; 16], n: u32, mask: u64) -> [u64; 16]
     out
 }
 
+/// Whether [`FrobeniusCanon::canon_in_place`] takes each rotation as one
+/// funnel shift ([`least_rotation16_funnel_avx512`]): the AVX-512 path is
+/// on, the CPU has AVX-512 VBMI2, and `KIC_CANON_KERNEL=chain` has not
+/// asked for the chained kernel, which stays as the same-binary control.
+#[cfg(target_arch = "x86_64")]
+fn canon_funnel_enabled() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| {
+        canon_simd_enabled()
+            && is_x86_feature_detected!("avx512vbmi2")
+            && std::env::var("KIC_CANON_KERNEL").as_deref() != Ok("chain")
+    })
+}
+
+/// Whether [`FrobeniusCanon::canon_in_place`] changes basis by GFNI
+/// ([`FrobeniusCanon::coords16_gfni`]): the AVX-512 path is on, the CPU
+/// has AVX-512BW, AVX-512 VBMI and GFNI, and `KIC_CANON_COORDS=tables`
+/// has not asked for the byte tables, which stay as the same-binary
+/// control.
+#[cfg(target_arch = "x86_64")]
+fn canon_gfni_enabled() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| {
+        canon_simd_enabled()
+            && is_x86_feature_detected!("avx512bw")
+            && is_x86_feature_detected!("avx512vbmi")
+            && is_x86_feature_detected!("gfni")
+            && std::env::var("KIC_CANON_COORDS").as_deref() != Ok("tables")
+    })
+}
+
+/// `vpermb` indices that transpose eight words as an 8 × 8 matrix of
+/// bytes: byte `8i + k` of the result is byte `i` of word `k`.  The
+/// transpose is its own inverse.
+#[cfg(target_arch = "x86_64")]
+const TRANSPOSE_8X8_BYTES: [u8; 64] = {
+    let mut idx = [0u8; 64];
+    let mut i = 0;
+    while i < 8 {
+        let mut k = 0;
+        while k < 8 {
+            idx[8 * i + k] = (8 * k + i) as u8;
+            k += 1;
+        }
+        i += 1;
+    }
+    idx
+};
+
+/// The basis change's 8 × 8 blocks in GFNI's layout, from its byte
+/// tables: `blocks[i]`'s lane `k` maps byte `i` of an element to byte `k`
+/// of its coordinates.  `vgf2p8affineqb` makes output bit `r` of a byte
+/// the parity of the input byte under the matrix's byte `7 − r`, so that
+/// byte holds, in bit `c`, whether input bit `8i + c` reaches coordinate
+/// bit `8k + r` — which `tables[i][1 << c]` says.
+fn gfni_blocks(tables: &[[u64; 256]]) -> [[u64; 8]; 8] {
+    let mut blocks = [[0u64; 8]; 8];
+    for (i, table) in tables.iter().enumerate().take(8) {
+        for (k, block) in blocks[i].iter_mut().enumerate() {
+            for r in 0..8 {
+                let mut row = 0u64;
+                for c in 0..8 {
+                    row |= ((table[1 << c] >> (8 * k + r)) & 1) << c;
+                }
+                *block |= row << (8 * (7 - r));
+            }
+        }
+    }
+    blocks
+}
+
+/// The least cyclic rotation of each of sixteen `n`-bit words, every
+/// rotation one funnel shift of the word written twice.
+///
+/// [`least_rotation16_avx512`] makes each rotation from the one before:
+/// two shifts and a mask, a chain of `n − 1` dependent steps.  Instead,
+/// write the word twice, `D = c·2^n + c`, at the top of 128 bits,
+/// `X = D·2^{128−2n}`, held as two words `hi:lo`.  The top `n` bits of
+/// `(X << t) >> 64` are `rotl^t(c)`: they are the `n`-bit window of
+/// `c c` that starts `t` bits in.  One `vpshldq` (VBMI2) forms that word
+/// from `hi` and `lo`, so every rotation comes from the same two words and
+/// none waits for another.  The bits under the window are other bits of
+/// `X`, and nothing masks them: comparing the windows top-aligned
+/// compares the rotations first, and two words that tie there are equal
+/// rotations, whichever wins.  The least window's top `n` bits are the
+/// least rotation.
+///
+/// One shift and one minimum a rotation, where the chained kernel takes
+/// two shifts, a ternary-logic mask and a minimum, with the same sixteen
+/// keys in two registers.
+///
+/// # Safety
+///
+/// The CPU must support AVX-512F and AVX-512 VBMI2, and `2 ≤ n ≤ 63`.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f,avx512vbmi2")]
+unsafe fn least_rotation16_funnel_avx512(c: &[u64; 16], n: u32) -> [u64; 16] {
+    use std::arch::x86_64::*;
+    let count = |s: u32| _mm_cvtsi64_si128(i64::from(s));
+    // `hi:lo = X`.  Past 32 bits the doubled word spills into `lo`;
+    // up to 32 it fits in `hi` with `lo` empty.
+    let doubled = |v: __m512i| -> (__m512i, __m512i) {
+        if n > 32 {
+            (
+                _mm512_or_si512(
+                    _mm512_sll_epi64(v, count(64 - n)),
+                    _mm512_srl_epi64(v, count(2 * n - 64)),
+                ),
+                _mm512_sll_epi64(v, count(128 - 2 * n)),
+            )
+        } else {
+            (
+                _mm512_sll_epi64(
+                    _mm512_or_si512(_mm512_sll_epi64(v, count(n)), v),
+                    count(64 - 2 * n),
+                ),
+                _mm512_setzero_si512(),
+            )
+        }
+    };
+    let (hi_a, lo_a) = doubled(_mm512_loadu_si512(c.as_ptr().cast()));
+    let (hi_b, lo_b) = doubled(_mm512_loadu_si512(c.as_ptr().add(8).cast()));
+    // Rotation 0 is `hi` itself.
+    let (mut best_a, mut best_b) = (hi_a, hi_b);
+    macro_rules! rotations {
+        ($($t:literal)*) => {$(
+            if $t < n {
+                best_a = _mm512_min_epu64(best_a, _mm512_shldi_epi64::<$t>(hi_a, lo_a));
+                best_b = _mm512_min_epu64(best_b, _mm512_shldi_epi64::<$t>(hi_b, lo_b));
+            }
+        )*};
+    }
+    rotations!(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
+        31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59
+        60 61 62);
+    let mut out = [0u64; 16];
+    _mm512_storeu_si512(
+        out.as_mut_ptr().cast(),
+        _mm512_srl_epi64(best_a, count(64 - n)),
+    );
+    _mm512_storeu_si512(
+        out.as_mut_ptr().add(8).cast(),
+        _mm512_srl_epi64(best_b, count(64 - n)),
+    );
+    out
+}
+
 /// Invert an `n × n` matrix over `F_2` given as its columns, returning
 /// the rows of the inverse; `None` when the columns are dependent.
 fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
@@ -1112,6 +1378,10 @@ pub struct BatchScratch {
     qx: Vec<u64>,
     #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
     qy: Vec<u64>,
+    /// The folding kernel's prefix products, a vector of eight per group.
+    pre: Vec<u64>,
+    /// The folding kernel's lane products, inverted together.
+    lanes: Vec<u64>,
 }
 
 /// Eight-lane AVX-512 field arithmetic for the decomposition scan.
@@ -1122,15 +1392,27 @@ pub struct BatchScratch {
 /// independent across `k`.  `vpclmulqdq` forms four 64 × 64 carry-less
 /// products per instruction, so two of them multiply eight lanes.
 ///
-/// **Reduction without a table.**  The scalar field folds the high half
-/// through byte-indexed tables; a vector version would need gathers.
-/// Instead, write the product as `L + z^n·H`: since `z^n ≡ t(z)`, the
-/// tail of the reduction polynomial, it equals `L + H·t`, and when `t`
-/// is short (`n + deg t ≤ 65`) `H·t` fits in one word and is a handful
-/// of shifts and XORs over `t`'s terms.  A second such fold finishes
-/// when `2·deg t ≤ n + 1`.  Every field the pipeline runs — the
-/// low-tail polynomials `find_irreducible_sparse` picks — qualifies; a
-/// field that does not simply never builds a [`Simd512`].
+/// **Reduction without a table.**  Write the product as `L + z^n·H`:
+/// since `z^n ≡ t(z)`, the tail of the reduction polynomial, it equals
+/// `L + H·t`, and a second fold of `H·t`'s part above `z^n` finishes
+/// when `2·deg t ≤ n + 1`.  Two ways to form the folds:
+///
+/// - **By carry-less multiplies**, whenever the field folds
+///   ([`Gf2::folds`]): [`Gf2`]'s own trick, eight lanes wide.  Shift one
+///   operand up by `s = 64 − n` and the product's high word is exactly
+///   `H`, its low word `L` at the top; the tail shifted the same way
+///   makes each fold one `vpclmulqdq` whose high word is the next fold's
+///   input, with nothing masked or shifted in between.  Six multiplies,
+///   two three-way XORs and an unpack make eight products, and the
+///   products are in the same shifted form, so a chain of them stays
+///   there.  No bound on `n + deg t`: the 128-bit products carry every
+///   bit, so `GF(2^59)` and `GF(2^61)`, whose tails reach `z^66`, run
+///   here too.
+/// - **By shifts and XORs** over `t`'s terms, when `n + deg t ≤ 65`: the
+///   kernel this one replaced, kept for a field that does not fold and
+///   as a same-binary control (`KIC_SCAN_FOLD=shift`).  Its shifts take
+///   their count from a register, two micro-ops each on this hardware,
+///   and a pentanomial's tail spends sixteen of them a product.
 ///
 /// The results are the same field elements as the scalar path, lane for
 /// lane (the tests compare them), so nothing downstream can tell which
@@ -1148,6 +1430,10 @@ mod simd512 {
         mask: u64,
         terms: [u32; 8],
         nterms: usize,
+        /// The tail `irr − zⁿ` shifted up by `64 − n` when products
+        /// reduce by carry-less folds, and zero when they reduce by
+        /// shifts.  No tail is zero, so the one word is also the switch.
+        fold: u64,
     }
 
     impl Simd512 {
@@ -1160,37 +1446,133 @@ mod simd512 {
             if std::env::var("KIC_SCAN_SIMD").as_deref() == Ok("0") {
                 return None;
             }
-            Self::for_field(field)
+            // `KIC_SCAN_FOLD=shift` keeps the shift-and-XOR reduction
+            // where it applies: the same-binary control for the folds.
+            let fold = std::env::var("KIC_SCAN_FOLD").as_deref() != Ok("shift");
+            Self::for_field_with(field, fold)
         }
 
-        /// The field-shape half of [`Self::new`], without the CPU check.
-        pub(super) fn for_field(field: &Gf2) -> Option<Self> {
+        /// The field-shape half of [`Self::new`], without the CPU check,
+        /// with the folds allowed or not.
+        pub(super) fn for_field_with(field: &Gf2, fold: bool) -> Option<Self> {
             let n = field.n;
             if !(2..=63).contains(&n) {
                 return None;
             }
             let tail = field.irr ^ (1u64 << n);
             let t_max = 63 - tail.leading_zeros();
+            let mut terms = [0u32; 8];
+            let mut nterms = 0;
+            if tail.count_ones() as usize <= 8 {
+                for t in 0..n {
+                    if (tail >> t) & 1 == 1 {
+                        terms[nterms] = t;
+                        nterms += 1;
+                    }
+                }
+            }
+            let mask = (1u64 << n) - 1;
+            // `Gf2` folds only where two folds finish, and that bound is
+            // all the folding kernel needs.
+            if fold && field.folds() {
+                return Some(Self {
+                    n,
+                    mask,
+                    terms,
+                    nterms,
+                    fold: tail << (64 - n),
+                });
+            }
             // H has at most n − 1 bits, so H·t has degree ≤ n − 2 + deg t,
-            // which must stay inside one word; the second fold's input has
-            // degree ≤ deg t − 2, and its output must land below z^n.
+            // which the shifts must keep inside one word; the second
+            // fold's input has degree ≤ deg t − 2, and its output must
+            // land below z^n.
             if n + t_max > 65 || 2 * t_max > n + 1 || tail.count_ones() as usize > 8 {
                 return None;
             }
-            let mut terms = [0u32; 8];
-            let mut nterms = 0;
-            for t in 0..n {
-                if (tail >> t) & 1 == 1 {
-                    terms[nterms] = t;
-                    nterms += 1;
-                }
-            }
             Some(Self {
                 n,
-                mask: (1u64 << n) - 1,
+                mask,
                 terms,
                 nterms,
+                fold: 0,
             })
+        }
+
+        /// Whether products reduce by carry-less folds (test hook).
+        #[cfg(test)]
+        pub(super) fn folds(&self) -> bool {
+            self.fold != 0
+        }
+
+        /// [`FastCurve::add_many_lazy_soa`]: appends `x₃` and `λ` for
+        /// every addend and returns `true`, or returns `false` having
+        /// appended nothing.  Only the folding kernel takes coordinate
+        /// slices; the shift kernel returns `false`.
+        #[allow(clippy::too_many_arguments)]
+        pub(super) fn add_many_lazy_soa(
+            &self,
+            curve: &FastCurve,
+            p: FastPoint,
+            qx: &[u64],
+            qy: &[u64],
+            x3: &mut Vec<u64>,
+            lambdas: &mut Vec<u64>,
+            scratch: &mut BatchScratch,
+        ) -> bool {
+            if self.fold == 0 {
+                return false;
+            }
+            let BatchScratch { pre, lanes, .. } = scratch;
+            self.fold_into(curve, p, qx, qy, x3, lambdas, pre, lanes)
+        }
+
+        /// The folding kernel on coordinate slices, appending to `x3` and
+        /// `lambdas`; `false`, with nothing appended, on `R = O`, an
+        /// empty slice or a degenerate sum (some `x_k = x_R`).
+        #[allow(clippy::too_many_arguments)]
+        fn fold_into(
+            &self,
+            curve: &FastCurve,
+            p: FastPoint,
+            qx: &[u64],
+            qy: &[u64],
+            x3: &mut Vec<u64>,
+            lambdas: &mut Vec<u64>,
+            pre: &mut Vec<u64>,
+            lanes: &mut Vec<u64>,
+        ) -> bool {
+            assert_eq!(qx.len(), qy.len(), "one ordinate per abscissa");
+            if p.infinity || qx.is_empty() {
+                return false;
+            }
+            let len = qx.len();
+            let padded = len.div_ceil(8) * 8;
+            let (x0, l0) = (x3.len(), lambdas.len());
+            pre.clear();
+            pre.resize(padded, 0);
+            x3.resize(x0 + padded, 0);
+            lambdas.resize(l0 + padded, 0);
+            // SAFETY: a folding `Simd512` is only built after detecting
+            // avx512f and vpclmulqdq, on a field that folds; `pre` and
+            // both outputs hold `padded` words, and the kernel reads the
+            // inputs only below `len`.
+            let ok = unsafe {
+                self.kernel_fold(
+                    curve,
+                    p,
+                    qx,
+                    qy,
+                    pre,
+                    lanes,
+                    &mut x3[x0..],
+                    &mut lambdas[l0..],
+                )
+            };
+            let keep = if ok { len } else { 0 };
+            x3.truncate(x0 + keep);
+            lambdas.truncate(l0 + keep);
+            ok
         }
 
         /// [`FastCurve::add_many_lazy`] eight lanes at a time.  Returns
@@ -1209,8 +1591,38 @@ mod simd512 {
             if p.infinity || qs.is_empty() {
                 return false;
             }
+            if self.fold != 0 {
+                let BatchScratch {
+                    dens,
+                    acc,
+                    qx,
+                    qy,
+                    pre,
+                    lanes,
+                } = scratch;
+                qx.clear();
+                qy.clear();
+                for q in qs {
+                    if q.infinity {
+                        return false;
+                    }
+                    qx.push(q.x);
+                    qy.push(q.y);
+                }
+                acc.clear();
+                dens.clear();
+                if !self.fold_into(curve, p, qx, qy, acc, dens, pre, lanes) {
+                    return false;
+                }
+                out.reserve(qs.len());
+                out.extend(acc.iter().map(|&x| FastPoint::affine(x, 0)));
+                lambdas.extend_from_slice(dens);
+                return true;
+            }
             let padded = qs.len().div_ceil(8) * 8;
-            let BatchScratch { dens, acc, qx, qy } = scratch;
+            let BatchScratch {
+                dens, acc, qx, qy, ..
+            } = scratch;
             dens.clear();
             qx.clear();
             qy.clear();
@@ -1284,6 +1696,138 @@ mod simd512 {
             }
         }
 
+        /// Montgomery's trick by the folding multiply, in **two chains**,
+        /// then the slope and abscissa of every sum: `x3` and `lambdas`
+        /// take `x₃` and `λ` lane for lane, the last group's lanes past
+        /// `qx.len()` holding whatever the padding made of them.
+        ///
+        /// Each multiply depends on the one before it along the running
+        /// product, so one chain runs at the multiply's latency, which is
+        /// three dependent `vpclmulqdq` deep; the groups are split into a
+        /// first and a second half, each with its own running product,
+        /// and the two chains are stepped in turn.  The sixteen lane
+        /// products are inverted together, with one field inversion.
+        ///
+        /// The running products are kept shifted up by `s = 64 − n`, the
+        /// form [`mul_fold`] returns, and multiplied by unshifted
+        /// factors; each value that is itself a factor later — the
+        /// prefix products, `λ` — is shifted down once.
+        ///
+        /// Returns `false` at once if some `x_k = x_R`, before anything
+        /// is inverted.
+        ///
+        /// # Safety
+        ///
+        /// The CPU must have AVX-512F and VPCLMULQDQ, `self.fold` must be
+        /// non-zero, `qx` and `qy` must be equally long and non-empty, and
+        /// `pre`, `x3` and `lambdas` must each hold `qx.len()` rounded up
+        /// to a multiple of eight words.
+        #[allow(clippy::too_many_arguments)]
+        #[target_feature(enable = "avx512f,vpclmulqdq")]
+        unsafe fn kernel_fold(
+            &self,
+            curve: &FastCurve,
+            p: FastPoint,
+            qx: &[u64],
+            qy: &[u64],
+            pre: &mut [u64],
+            lanes: &mut Vec<u64>,
+            x3: &mut [u64],
+            lambdas: &mut [u64],
+        ) -> bool {
+            let len = qx.len();
+            let groups = len.div_ceil(8);
+            let last = groups - 1;
+            // The last group's lanes past the end load nothing.
+            let last_mask: __mmask8 = 0xff >> (groups * 8 - len);
+            let mask_of = |g: usize| if g == last { last_mask } else { 0xff };
+            let s = _mm512_set1_epi64(i64::from(64 - self.n));
+            let tail = _mm512_set1_epi64(self.fold as i64);
+            let one = _mm512_set1_epi64(1);
+            let px = _mm512_set1_epi64(p.x as i64);
+            // A group's abscissae and denominators `x_R + x_k`, a lane
+            // past the end carrying a denominator of 1.
+            let load = |src: &[u64], g: usize| {
+                _mm512_maskz_loadu_epi64(mask_of(g), src.as_ptr().add(8 * g) as *const i64)
+            };
+            let den = |x: __m512i, g: usize| {
+                _mm512_mask_blend_epi64(mask_of(g), one, _mm512_xor_si512(px, x))
+            };
+
+            // Forward: the prefix products, unshifted, and each chain's
+            // product of all its denominators.
+            let half = groups.div_ceil(2);
+            let z_s = _mm512_set1_epi64((1u64 << (64 - self.n)) as i64);
+            let (mut acc_a, mut acc_b) = (z_s, z_s);
+            let mut degenerate: __mmask8 = 0;
+            for i in 0..half {
+                let x = load(qx, i);
+                degenerate |= _mm512_mask_cmpeq_epi64_mask(mask_of(i), x, px);
+                _mm512_storeu_si512(
+                    pre.as_mut_ptr().add(8 * i) as *mut _,
+                    _mm512_srlv_epi64(acc_a, s),
+                );
+                acc_a = mul_fold(den(x, i), acc_a, tail);
+                let g = half + i;
+                if g < groups {
+                    let x = load(qx, g);
+                    degenerate |= _mm512_mask_cmpeq_epi64_mask(mask_of(g), x, px);
+                    _mm512_storeu_si512(
+                        pre.as_mut_ptr().add(8 * g) as *mut _,
+                        _mm512_srlv_epi64(acc_b, s),
+                    );
+                    acc_b = mul_fold(den(x, g), acc_b, tail);
+                }
+            }
+            if degenerate != 0 {
+                return false;
+            }
+
+            // The sixteen products are non-zero; invert them together.
+            let mut products = [0u64; 16];
+            _mm512_storeu_si512(products.as_mut_ptr() as *mut _, _mm512_srlv_epi64(acc_a, s));
+            _mm512_storeu_si512(
+                products.as_mut_ptr().add(8) as *mut _,
+                _mm512_srlv_epi64(acc_b, s),
+            );
+            curve.field.batch_inv(&mut products, lanes);
+            let mut inv_a = _mm512_sllv_epi64(_mm512_loadu_si512(products.as_ptr() as *const _), s);
+            let mut inv_b =
+                _mm512_sllv_epi64(_mm512_loadu_si512(products.as_ptr().add(8) as *const _), s);
+
+            // Backward: `1/d_g`, then `λ` and `x₃`, each chain from its
+            // last group to its first.
+            let py = _mm512_set1_epi64(p.y as i64);
+            let px_a = _mm512_set1_epi64((p.x ^ curve.a) as i64);
+            let x3 = x3.as_mut_ptr();
+            let lambdas = lambdas.as_mut_ptr();
+            let step = |g: usize, inv_acc: __m512i| {
+                let x = load(qx, g);
+                let inv = mul_fold(
+                    _mm512_loadu_si512(pre.as_ptr().add(8 * g) as *const _),
+                    inv_acc,
+                    tail,
+                );
+                let next = mul_fold(den(x, g), inv_acc, tail);
+                let lambda_s = mul_fold(_mm512_xor_si512(py, load(qy, g)), inv, tail);
+                let lambda = _mm512_srlv_epi64(lambda_s, s);
+                let square = _mm512_srlv_epi64(mul_fold(lambda, lambda_s, tail), s);
+                let x3v =
+                    _mm512_ternarylogic_epi64::<0x96>(square, lambda, _mm512_xor_si512(px_a, x));
+                _mm512_storeu_si512(x3.add(8 * g) as *mut _, x3v);
+                _mm512_storeu_si512(lambdas.add(8 * g) as *mut _, lambda);
+                next
+            };
+            for i in (0..half).rev() {
+                let g = half + i;
+                if g < groups {
+                    inv_b = step(g, inv_b);
+                }
+                inv_a = step(i, inv_a);
+            }
+            true
+        }
+
         /// Eight field multiplications: two `vpclmulqdq` for the 128-bit
         /// products, then two shift-and-XOR folds by the tail.
         #[inline]
@@ -1315,20 +1859,62 @@ mod simd512 {
             acc
         }
 
-        /// Test hook: multiply eight pairs through the kernel's `mul`.
+        /// Test hook: multiply eight pairs through the kernel's multiply,
+        /// the folding one when the field folds.
         #[cfg(test)]
         pub(super) fn mul8(&self, a: &[u64; 8], b: &[u64; 8]) -> [u64; 8] {
             let mut out = [0u64; 8];
             // SAFETY: tests call this only after the CPU check.
             unsafe {
-                let r = self.mul(
-                    _mm512_loadu_si512(a.as_ptr() as *const _),
-                    _mm512_loadu_si512(b.as_ptr() as *const _),
-                );
+                let a = _mm512_loadu_si512(a.as_ptr() as *const _);
+                let b = _mm512_loadu_si512(b.as_ptr() as *const _);
+                let r = if self.fold != 0 {
+                    let s = _mm512_set1_epi64(i64::from(64 - self.n));
+                    let tail = _mm512_set1_epi64(self.fold as i64);
+                    _mm512_srlv_epi64(mul_fold(a, _mm512_sllv_epi64(b, s), tail), s)
+                } else {
+                    self.mul(a, b)
+                };
                 _mm512_storeu_si512(out.as_mut_ptr() as *mut _, r);
             }
             out
         }
+    }
+
+    /// Eight products `a·b mod irr` by carry-less folds: `b` comes shifted
+    /// up by `s = 64 − n`, the product goes back the same way, and `tail`
+    /// holds the tail `irr − zⁿ` shifted by `s` in every word.
+    ///
+    /// `vpclmulqdq` multiplies one word of each 128-bit lane, so the even
+    /// and the odd words take one each.  With `b` shifted, the product
+    /// `a·b·zˢ` has `H` as its high word and `L·zˢ` as its low one.  Each
+    /// fold multiplies the high word by the shifted tail: `H·t·zˢ` has
+    /// `H·t`'s part above `zⁿ` as its high word and the rest, shifted, as
+    /// its low one, and that part, multiplied again, lands below `zⁿ`
+    /// (`2·deg t ≤ n + 1`, which [`Gf2`] checks before it folds).  The
+    /// three low words sum to `(a·b mod irr)·zˢ`; the high words are left
+    /// behind by the unpack.  It is [`Gf2`]'s `fold_shifted`, lane for
+    /// lane.
+    ///
+    /// # Safety
+    ///
+    /// The CPU must have AVX-512F and VPCLMULQDQ; `a` must be reduced
+    /// and `b` a reduced element shifted up by `s`.
+    #[inline]
+    #[target_feature(enable = "avx512f,vpclmulqdq")]
+    unsafe fn mul_fold(a: __m512i, b_s: __m512i, tail: __m512i) -> __m512i {
+        // [L·zˢ, H] for the even words and for the odd ones.
+        let even = _mm512_clmulepi64_epi128::<0x00>(a, b_s);
+        let odd = _mm512_clmulepi64_epi128::<0x11>(a, b_s);
+        // [(H·t mod zⁿ)·zˢ, H·t div zⁿ], then that high word times `t`.
+        let f_even = _mm512_clmulepi64_epi128::<0x01>(even, tail);
+        let f_odd = _mm512_clmulepi64_epi128::<0x01>(odd, tail);
+        let g_even = _mm512_clmulepi64_epi128::<0x01>(f_even, tail);
+        let g_odd = _mm512_clmulepi64_epi128::<0x01>(f_odd, tail);
+        _mm512_unpacklo_epi64(
+            _mm512_ternarylogic_epi64::<0x96>(even, f_even, g_even),
+            _mm512_ternarylogic_epi64::<0x96>(odd, f_odd, g_odd),
+        )
     }
 }
 
@@ -1360,6 +1946,7 @@ mod tests {
                 n,
                 mask,
                 tables: Vec::new(),
+                gfni: [[0; 8]; 8],
             };
             let mut words = vec![0, mask, 1, 1 << (n - 1), mask ^ 1, mask >> 1];
             for period in 1..=n.min(12) {
@@ -1397,6 +1984,73 @@ mod tests {
                     for (&c, &v) in lanes.iter().zip(&got) {
                         assert_eq!(v, brute(c, n, mask).0, "laned, n = {n}, c = {c:#x}");
                     }
+                }
+            }
+        }
+    }
+
+    /// The funnel-shift kernel against the chained one and the scalar scan,
+    /// sixteen words at a time, on the same word classes as
+    /// [`least_rotation_matches_exhaustive_scan`] and for every `n` it can
+    /// be called with, on both sides of the 32-bit split in how the
+    /// doubled word is held; mixed blocks put the classes side by side.
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn the_funnel_kernel_matches_the_chained_one() {
+        if !(is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512vbmi2")) {
+            eprintln!("skipped: the CPU lacks AVX-512F or AVX-512 VBMI2");
+            return;
+        }
+        let mut s = 0x9E37_79B9_7F4A_7C15u64;
+        let mut next = move || {
+            s ^= s << 13;
+            s ^= s >> 7;
+            s ^= s << 17;
+            s
+        };
+        for n in 2u32..=63 {
+            let mask = (1u64 << n) - 1;
+            let canon = FrobeniusCanon {
+                n,
+                mask,
+                tables: Vec::new(),
+                gfni: [[0; 8]; 8],
+            };
+            let mut words = vec![0, mask, 1, 1 << (n - 1), mask ^ 1, mask >> 1];
+            for period in 1..=n.min(12) {
+                if n % period == 0 {
+                    for pat in 1..(1u64 << period).min(64) {
+                        let mut w = 0u64;
+                        for k in 0..n / period {
+                            w |= pat << (k * period);
+                        }
+                        words.push(w & mask);
+                    }
+                }
+            }
+            for _ in 0..600 {
+                let r = next();
+                words.push(r & mask);
+                words.push(r & (r >> 3) & (r >> 7) & mask);
+                words.push((r | (r >> 5) | (r >> 11)) & mask);
+            }
+            // Shuffle so each block mixes classes.
+            for i in (1..words.len()).rev() {
+                words.swap(i, (next() % (i as u64 + 1)) as usize);
+            }
+            for block in words.chunks(16) {
+                let mut c = [0u64; 16];
+                c[..block.len()].copy_from_slice(block);
+                // SAFETY: both features were checked above; `2 ≤ n ≤ 63`.
+                let (funnel, chained) = unsafe {
+                    (
+                        least_rotation16_funnel_avx512(&c, n),
+                        least_rotation16_avx512(&c, n, mask),
+                    )
+                };
+                for lane in 0..16 {
+                    assert_eq!(funnel[lane], chained[lane], "n = {n}, c = {:#x}", c[lane]);
+                    assert_eq!(funnel[lane], canon.least_rotation(c[lane]).0, "n = {n}");
                 }
             }
         }
@@ -1524,6 +2178,47 @@ mod tests {
                     canon.canon(point.x) + 1
                 };
                 assert_eq!(key, want, "degree {n}, x = {:#x}", point.x);
+            }
+        }
+    }
+
+    /// The GFNI basis change against the byte tables, word for word, at
+    /// every degree from 2 to 63 on the field `find_irreducible_sparse`
+    /// gives: random words, single bits (one column of the map each), the
+    /// all-zero and all-one words, and words filling one byte.
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn the_gfni_basis_change_matches_the_tables() {
+        if !(is_x86_feature_detected!("avx512f")
+            && is_x86_feature_detected!("avx512bw")
+            && is_x86_feature_detected!("avx512vbmi")
+            && is_x86_feature_detected!("gfni"))
+        {
+            eprintln!("skipped: the CPU lacks AVX-512F, BW, VBMI or GFNI");
+            return;
+        }
+        for n in 2u32..=63 {
+            let Some(irreducible) =
+                crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse(n)
+            else {
+                continue;
+            };
+            let f = Gf2::new(&irreducible);
+            let canon = FrobeniusCanon::new(&f, n).unwrap();
+            let mask = (1u64 << n) - 1;
+            let mut rng = StdRng::seed_from_u64(0x6F6E_6900 + n as u64);
+            let mut words: Vec<u64> = (0..n).map(|j| 1u64 << j).collect();
+            words.extend([0, mask, mask >> 1, 0xff & mask, (0xff << 8) & mask]);
+            words.extend((0..2000).map(|_| rng.gen::<u64>() & mask));
+            words.resize(words.len().next_multiple_of(16), 0);
+            for block in words.chunks(16) {
+                let mut got = [0u64; 16];
+                // SAFETY: the features were checked above; the block holds
+                // sixteen words.
+                unsafe { canon.coords16_gfni(block, &mut got) };
+                for (g, &x) in got.iter().zip(block) {
+                    assert_eq!(*g, canon.coords(x), "n = {n}, x = {x:#x}");
+                }
             }
         }
     }
@@ -1667,31 +2362,46 @@ mod tests {
             return;
         }
         let mut rng = StdRng::seed_from_u64(0x512);
-        let mut accepted = 0;
-        for n in 2u32..=62 {
+        let (mut accepted, mut folding, mut shifting) = (0, 0, 0);
+        for n in 2u32..=63 {
             let field = nb_field(n);
-            let Some(simd) = simd512::Simd512::for_field(&field) else {
-                continue;
-            };
-            accepted += 1;
-            for _ in 0..200 {
-                let a: [u64; 8] = std::array::from_fn(|_| rng.gen::<u64>() & field.mask);
-                let b: [u64; 8] = std::array::from_fn(|i| {
-                    if i == 7 {
-                        field.mask
-                    } else {
-                        rng.gen::<u64>() & field.mask
+            // Both reductions where each applies: the folds, and the
+            // shifts the folds replaced, which a field that does not fold
+            // still takes.
+            for fold in [true, false] {
+                let Some(simd) = simd512::Simd512::for_field_with(&field, fold) else {
+                    continue;
+                };
+                accepted += usize::from(fold);
+                if simd.folds() {
+                    folding += 1;
+                } else {
+                    shifting += 1;
+                }
+                for _ in 0..200 {
+                    let a: [u64; 8] = std::array::from_fn(|_| rng.gen::<u64>() & field.mask);
+                    let b: [u64; 8] = std::array::from_fn(|i| {
+                        if i == 7 {
+                            field.mask
+                        } else {
+                            rng.gen::<u64>() & field.mask
+                        }
+                    });
+                    let got = simd.mul8(&a, &b);
+                    for l in 0..8 {
+                        assert_eq!(
+                            got[l],
+                            field.mul(a[l], b[l]),
+                            "n = {n}, lane {l}, folds = {}",
+                            simd.folds()
+                        );
                     }
-                });
-                let got = simd.mul8(&a, &b);
-                for l in 0..8 {
-                    assert_eq!(got[l], field.mul(a[l], b[l]), "n = {n}, lane {l}");
                 }
             }
         }
         assert!(
-            accepted >= 50,
-            "the kernel accepted only {accepted} degrees"
+            accepted >= 50 && folding >= 50 && shifting >= 50,
+            "the kernel accepted only {accepted} degrees ({folding} folding, {shifting} by shifts)"
         );
 
         let mut curves = 0;
@@ -1728,6 +2438,69 @@ mod tests {
             }
         }
         assert!(curves >= 2, "only {curves} curves exercised the kernel");
+    }
+
+    /// The folding kernel on coordinate slices against the scalar batched
+    /// addition: every `x₃` and `λ`, appended after what the outputs
+    /// already hold, on slices of every length around the lane width and
+    /// the split into two chains.  The degrees reach both sides of the
+    /// shift kernel's `n + deg t ≤ 65`: `GF(2^59)` and `GF(2^61)` are past
+    /// it.  A sum with `x_k = x_R` must be declined with nothing appended;
+    /// the summands include `R` itself to make some.
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn the_folding_kernel_matches_the_scalar_addition_on_slices() {
+        if !(is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("vpclmulqdq")) {
+            eprintln!("skipped: no AVX-512 + VPCLMULQDQ on this CPU");
+            return;
+        }
+        let (mut curves, mut wide, mut declined, mut taken) = (0, 0, 0, 0);
+        for n in [19u32, 31, 41, 53, 59, 61] {
+            let Some(kc) = [0u8, 1].into_iter().find_map(|a| KoblitzCurve::new(a, n)) else {
+                continue;
+            };
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            if !fc.simd.is_some_and(|simd| simd.folds()) {
+                continue;
+            }
+            curves += 1;
+            let tail = fc.field.irr ^ (1u64 << n);
+            wide += usize::from(n + (63 - tail.leading_zeros()) > 65);
+            let points: Vec<FastPoint> = random_points(&kc, 64, 11 * u64::from(n))
+                .iter()
+                .map(|p| fc.lift(p))
+                .filter(|p| !p.infinity)
+                .collect();
+            assert!(points.len() >= 60, "n = {n}: too few points");
+            let mut scratch = BatchScratch::default();
+            for len in (1..=34).chain([47, 48, 49, 55]) {
+                let qs = &points[..len];
+                let qx: Vec<u64> = qs.iter().map(|q| q.x).collect();
+                let qy: Vec<u64> = qs.iter().map(|q| q.y).collect();
+                for &p in points[..3].iter().chain(&points[56..60]) {
+                    let degenerate = qs.iter().any(|q| q.x == p.x);
+                    let (mut want, mut want_l) = (Vec::new(), Vec::new());
+                    fc.add_many_lazy_scalar(p, qs, &mut want, &mut want_l, &mut scratch);
+                    let (mut x3, mut lambdas) = (vec![7u64], vec![9u64]);
+                    let done =
+                        fc.add_many_lazy_soa(p, &qx, &qy, &mut x3, &mut lambdas, &mut scratch);
+                    assert_eq!(done, !degenerate, "n = {n}, len = {len}");
+                    if done {
+                        let want_x: Vec<u64> = want.iter().map(|w| w.x).collect();
+                        assert_eq!(x3[1..], want_x[..], "n = {n}, len = {len}: x₃");
+                        assert_eq!(lambdas[1..], want_l[..], "n = {n}, len = {len}: λ");
+                        taken += 1;
+                    } else {
+                        assert_eq!((x3, lambdas), (vec![7], vec![9]), "n = {n}: appended");
+                        declined += 1;
+                    }
+                }
+            }
+        }
+        assert!(
+            curves >= 4 && wide >= 1 && declined > 0 && taken > 0,
+            "{curves} curves, {wide} past n + deg t = 65, {declined} declined, {taken} taken"
+        );
     }
 
     /// The López–Dahab ladder against affine double-and-add, on both

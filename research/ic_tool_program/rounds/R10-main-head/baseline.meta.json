@@ -1,0 +1,14 @@
+{
+ "baseline": "v4",
+ "previous": "v3",
+ "round": "R10",
+ "class": "engineering",
+ "commit": "92246530",
+ "built_from": "92246530c4f333724374e70897330bc38fa159a1",
+ "base": "v3 995ea207, rebuilt on this host (binary 00cff0b0…; v3's own binary and lock were lost with a replaced container)",
+ "src_tree": "9860f728a8a6f02de331c5b1885ae17bcb73dda5",
+ "binary_sha256": "d8daac9aa75ab26e4bac70810f52d8925d518f2d2645ac2f98306d935f23a653",
+ "source": "research/ic_tool_program/rounds/R10-main-head/analysis.json",
+ "what_changed": "main's head, about 1,450 commits past v3, 44 on the timed path (batched-inversion scratch, portable-path lockstep keys, #1652's wide inversions, isogenous curves); every pinned output is v0's; cold time within a few percent of v3 at every size",
+ "measured": "R10's comparison: M1's two rows at the eight smaller sizes and all eight at the three target sizes, five rounds each, paired with v3 (rebuilt) in the same runs; s_cold is the candidate's median in v0's unit"
+}

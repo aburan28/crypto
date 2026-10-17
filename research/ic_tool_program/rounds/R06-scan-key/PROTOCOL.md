@@ -228,3 +228,64 @@ arms, rows, holdouts and rules, with the host in its manifest. If the
 programme's baseline moves first, R06 does not run on this declaration. A
 further amendment then ports the candidate onto the new baseline before
 any run, as R02b's amendment 3 did.
+
+## Amendment 2 (2026-10-16, before any R06 run): ported onto v4, on a host of its class
+
+**No R06 step has run.** Amendment 1 left R06 waiting for a host of its
+class. It also said that if the baseline moved first, an amendment would
+port the candidate onto the new baseline before any run. Both have now
+happened:
+- **The host.** This container is an Emerald Rapids
+  (`Intel(R) Xeon(R) Processor @ 2.10GHz`, family 6 model 207, kernel
+  build `6.18.44-fc-v139`, 4 logical cores, 16 GB). `icprog host-class
+  r06` finds nothing missing.
+- **The baseline.** R10 accepted main at `92246530` as baseline v4
+  ([R10's results](../R10-main-head/README.md)).
+
+**The port.**
+- `git am -3 candidate.patch` onto `92246530c` applies both commits
+  cleanly.
+- The ported patch, [`candidate-v4.patch`](candidate-v4.patch) (SHA-256
+  in `candidate-v4.patch.sha256`), adds and removes exactly the lines
+  `candidate.patch` does; only the context offsets differ.
+- Between v3 and v4, three commits touch `koblitz_fast.rs`. One of them,
+  `a98ba95a`, keys orbits in lockstep lanes on the portable path. The
+  candidate's dispatch in `canon_in_place` sits on the AVX-512 branch,
+  ahead of that portable path, so on this class the candidate replaces the
+  same key code it replaced on v3.
+- The candidate's commits are local; `--cand-commit` records the head of
+  that local branch. The binary's SHA-256 in the manifest identifies the
+  candidate. It is reproduced as v4 plus `candidate-v4.patch`, built with
+  `cargo build --release --locked --bin ic` and `IC_BUILD_COMMIT` set.
+
+**The arms, from here.**
+- **The base: v4,** R10's candidate binary, built from `92246530c` with
+  `rustc 1.97.0` and main's committed `Cargo.lock`. SHA-256
+  `d8daac9aa75ab26e4bac70810f52d8925d518f2d2645ac2f98306d935f23a653`.
+- **The candidate:** v4 plus `candidate-v4.patch`, with the same
+  toolchain and lock. SHA-256
+  `31982fde53e6e6aa536c9981d5d2d7c15709a08331d4c2b31ddf93d14a51eddc`, from local commit `ab211e39733fd279f2bfab2fe4bfc5d1e7bfc564`. The tests passed on its tree (36 of 36, [`tests.log`](tests.log)).
+
+**Everything else stands as declared:**
+- the tests (`cargo test --release --locked --lib -- koblitz_fast` on the
+  candidate's tree, logged in `tests.log`);
+- the candidate's pin on all 90 rows;
+- the A/A, now of v4 against a byte-identical copy, on `M1`'s 22 rows;
+- the suite rows;
+- the fresh holdouts (seeds 218–221, `T127`–`T134`, which no round,
+  exploration or diagnostic has run);
+- the extension;
+- the acceptance rule: above 1.03 at each target size, on the suite rows
+  and holdouts separately, and no size beyond its A/A band.
+
+If accepted, the candidate becomes v5.
+
+**The prediction stands, with one caveat.** The explorations measured the
+key's gain on v3 and on another kernel build. v4 runs within about 3% of
+v3 at the target sizes (R10), so collection's share, and with it the
+key's, should be about the same. The prediction is not re-drawn.
+
+**The driver** is [`run.sh`](run.sh): `run.sh <scratch dir> <candidate
+commit>`. It runs from a session-tracked task, so the container is not
+suspended mid-round (R10's lesson). Each resume after a restart runs
+`icprog run r06 manifest-resumed` first.

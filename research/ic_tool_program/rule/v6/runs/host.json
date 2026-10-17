@@ -1,0 +1,59 @@
+{
+ "repository_commit": "9cbef7af3ce836d5b5407e4dd8e2e0d337229bf6",
+ "tree_status": "",
+ "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+ "cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "cpu_flags_relevant": [
+  "pclmulqdq",
+  "popcnt",
+  "avx2",
+  "bmi2",
+  "avx512f",
+  "avx512dq",
+  "avx512ifma",
+  "avx512cd",
+  "avx512bw",
+  "avx512vl",
+  "avx512_bf16",
+  "avx512vbmi",
+  "avx512_vbmi2",
+  "gfni",
+  "vpclmulqdq",
+  "avx512_vnni",
+  "avx512_bitalg",
+  "avx512_vpopcntdq",
+  "avx512_fp16"
+ ],
+ "logical_cores": 4,
+ "memory": "MemTotal:       16479424 kB",
+ "transparent_hugepage": {
+  "enabled": "always [madvise] never",
+  "defrag": "always defer defer+madvise [madvise] never"
+ },
+ "os": "Linux-6.18.44-fc-v139-x86_64-with-glibc2.39",
+ "arch": "x86_64",
+ "glibc": "glibc 2.39",
+ "binaries": {
+  "ic": {
+   "path_basename": "ic-r08-v5-3d4c5c0e",
+   "sha256": "4ccb1951134ff31b5183fc00033933b9add2e3c0c52003f9041fd04bac1f4012",
+   "built_from": "3d4c5c0ef88057e8ece09dcc91e8fad4ff7e781a"
+  }
+ },
+ "isolation_tool": {
+  "path": "src/bin/isolated_bench.rs",
+  "binary_sha256": "e2c77079ab686c2a9c4512d42723b7fb1d68f13ebe85b0d7998ef4fd7205d07a"
+ },
+ "pinning": "isolated_bench run --wait --cpus 2 with RAYON_NUM_THREADS=1, after PSI some avg10 falls below 4.0; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI at most 5); pins untimed under taskset -c 2",
+ "smt_siblings": {
+  "0": "0",
+  "1": "1",
+  "2": "2",
+  "3": "3"
+ },
+ "uptime": "15:40:24 up  5:58,  0 user,  load average: 5.45, 5.77, 3.36",
+ "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts",
+ "runner": "icprog (native)",
+ "note": "the host the rule's comparison ran on, at its start"
+}

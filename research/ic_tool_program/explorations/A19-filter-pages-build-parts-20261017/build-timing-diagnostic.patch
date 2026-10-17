@@ -1,0 +1,104 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index b255ce6d8..a35b06b61 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -5174,9 +5174,10 @@ impl PairSumTable {
+         let rows = row_lens.len();
+         let bucket_shift = 64 - bucket_bits;
+         let buckets = 1usize << bucket_bits;
+-        let part_bits = bucket_bits.min(8);
++        let part_bits = bucket_bits.min(std::env::var("KIC_PART_BITS").ok().and_then(|v| v.parse().ok()).unwrap_or(8));
+         let parts = 1usize << part_bits;
+         let part_shift = 64 - part_bits;
++        let t0 = std::time::Instant::now();
+         // 1. Every row keyed once, straight into its run's streams.
+         let runs = rayon::current_num_threads().clamp(1, rows.max(1));
+         let per_run = rows.div_ceil(runs);
+@@ -5190,8 +5191,10 @@ impl PairSumTable {
+                 let room = mean + 6 * (mean as f64).sqrt() as usize + 16;
+                 let mut hs: Vec<Vec<u64>> = (0..parts).map(|_| Vec::with_capacity(room)).collect();
+                 let mut ws: Vec<Vec<u32>> = (0..parts).map(|_| Vec::with_capacity(room)).collect();
++                let mut append_ns = 0u64;
+                 for r in here {
+                     each_row(r, &mut |keys, orbit| {
++                        let ta = std::time::Instant::now();
+                         for &key in keys {
+                             let h = pair_filter_hash(key);
+                             let p = (h >> part_shift) as usize;
+@@ -5202,11 +5205,16 @@ impl PairSumTable {
+                                 Self::compact_rest_from_hash(h)
+                             });
+                         }
++                        append_ns += ta.elapsed().as_nanos() as u64;
+                     });
+                 }
++                if std::env::var_os("KIC_BUILD_TIMING").is_some() {
++                    eprintln!("build-timing append_ms={:.1}", append_ns as f64 / 1e6);
++                }
+                 (hs, ws)
+             })
+             .collect();
++        let t1 = std::time::Instant::now();
+         let mut part_start = vec![0usize; parts + 1];
+         for p in 0..parts {
+             let len: usize = streams.iter().map(|(hs, _)| hs[p].len()).sum();
+@@ -5277,6 +5285,7 @@ impl PairSumTable {
+                 present
+             })
+             .collect();
++        let t2 = std::time::Instant::now();
+         bucket_start[buckets] = total as u32;
+         let present = filters
+             .into_iter()
+@@ -5287,6 +5296,9 @@ impl PairSumTable {
+                 all
+             })
+             .unwrap_or_else(|| vec![0u64; filter_words]);
++        if std::env::var_os("KIC_BUILD_TIMING").is_some() {
++            eprintln!("build-timing streams_ms={:.1} place_ms={:.1} or_ms={:.1} pairs={total}", (t1 - t0).as_secs_f64() * 1e3, (t2 - t1).as_secs_f64() * 1e3, t2.elapsed().as_secs_f64() * 1e3);
++        }
+         (bucket_start, rests, present, present_mask)
+     }
+ 
+@@ -5309,6 +5321,7 @@ impl PairSumTable {
+         byte_budget: u128,
+         bulk: bool,
+     ) -> Option<Self> {
++        let t_start = std::time::Instant::now();
+         if !kc.frobenius_is_endomorphism {
+             return None;
+         }
+@@ -5466,6 +5479,7 @@ impl PairSumTable {
+         };
+         // Keyed once and partitioned (see [`Self::FOLD_PARTITION_BYTES`]),
+         // or, past that transient budget, the two-pass count-then-fill.
++        let tb = std::time::Instant::now();
+         let partition = bulk && pairs * 12 <= Self::FOLD_PARTITION_BYTES;
+         let (bucket_start, rests, present, present_mask) = if partition {
+             let row_lens: Vec<usize> = reps
+@@ -5523,7 +5537,11 @@ impl PairSumTable {
+                 .collect();
+             (bucket_start, rests, present, present_mask)
+         };
+-        Some(Self::assemble_folded(
++        if std::env::var_os("KIC_BUILD_TIMING").is_some() {
++            eprintln!("build-timing before_partition_ms={:.1} partition_total_ms={:.1}", (tb - t_start).as_secs_f64() * 1e3, tb.elapsed().as_secs_f64() * 1e3);
++        }
++        let ta = std::time::Instant::now();
++        let built = Self::assemble_folded(
+             curve,
+             points,
+             fb,
+@@ -5538,7 +5556,11 @@ impl PairSumTable {
+                 canon_tables: Vec::new(),
+             },
+             tagged,
+-        ))
++        );
++        if std::env::var_os("KIC_BUILD_TIMING").is_some() {
++            eprintln!("build-timing assemble_ms={:.1}", ta.elapsed().as_secs_f64() * 1e3);
++        }
++        Some(built)
+     }
+ }
+ 

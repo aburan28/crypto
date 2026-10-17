@@ -123,6 +123,8 @@ enum Round {
     R08,
     R09,
     R10,
+    R11,
+    R12,
 }
 
 #[derive(Clone, Copy, PartialEq, ValueEnum)]
@@ -130,6 +132,8 @@ enum Comparison {
     S23,
     V2,
     V3,
+    V6,
+    V7,
 }
 
 #[derive(Subcommand)]
@@ -359,7 +363,7 @@ enum Command {
     Rule {
         /// manifest, pin, size, all, reference, claims or analyse.
         step: String,
-        /// Which comparison: ledger §23's (frozen), or the one at baseline v2 or v3.
+        /// Which comparison: ledger §23's (frozen), or the one at baseline v2, v3, v6 or v7.
         #[arg(long, value_enum, default_value = "s23")]
         comparison: Comparison,
         /// The repository checkout (default: the current directory).
@@ -607,12 +611,12 @@ enum Command {
     /// class and 3 outside it, so a chain can check before it starts a
     /// round; `run` refuses outside it.
     HostClass { round: Round },
-    /// One of a round's declared steps, natively (R05, R02b, R06, R07, R08, R09).
+    /// One of a round's declared steps, natively (R05, R02b, R06, R07, R08, R09, R10, R11, R12).
     Run {
         round: Round,
         /// R05: plan, manifest-resumed, pin, compare, holdout or extend.
         /// R02b and R07: plan, manifest, pin, aa, compare, holdout, extend,
-        /// callgrind or manifest-resumed; R06, R08 and R09 the same but callgrind.
+        /// callgrind or manifest-resumed; R06, R08, R09, R11 and R12 the same but callgrind.
         step: String,
         /// The repository checkout (default: the current directory).
         #[arg(long, default_value = ".")]
@@ -650,6 +654,8 @@ fn round_dir(round: Round, root: &std::path::Path) -> Result<(PathBuf, PathBuf),
         Round::R08 => "R08-scan-fold",
         Round::R09 => "R09-slope-keys",
         Round::R10 => "R10-main-head",
+        Round::R11 => "R11-build-streams",
+        Round::R12 => "R12-admitted-prefetch",
     };
     let round_dir = programme.join("rounds").join(dir);
     Ok((programme, round_dir))
@@ -692,6 +698,8 @@ fn round_spec(round: Round) -> Option<&'static rounds::Spec> {
         Round::R08 => Some(&rounds::r08::SPEC),
         Round::R09 => Some(&rounds::r09::SPEC),
         Round::R10 => Some(&rounds::r10::SPEC),
+        Round::R11 => Some(&rounds::r11::SPEC),
+        Round::R12 => Some(&rounds::r12::SPEC),
     }
 }
 
@@ -792,6 +800,8 @@ fn run(round: Round, step: &str, args: RunArgs) -> Result<String, String> {
         Round::R08 => rounds::r08::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R09 => rounds::r09::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R10 => rounds::r10::run(&ctx, step, &b, &arms, &root, &commits)?,
+        Round::R11 => rounds::r11::run(&ctx, step, &b, &arms, &root, &commits)?,
+        Round::R12 => rounds::r12::run(&ctx, step, &b, &arms, &root, &commits)?,
         Round::R03 => return Err("R03 is complete; its runs are frozen".into()),
     };
     Ok(match doc {
@@ -861,6 +871,8 @@ fn rule(step: &str, args: RuleArgs) -> Result<String, String> {
         Comparison::S23 => ("research/ic_single_target_20260930", &rule::S23),
         Comparison::V2 => ("research/ic_tool_program/rule/v2", &rule::V2),
         Comparison::V3 => ("research/ic_tool_program/rule/v3", &rule::V3),
+        Comparison::V6 => ("research/ic_tool_program/rule/v6", &rule::V6),
+        Comparison::V7 => ("research/ic_tool_program/rule/v7", &rule::V7),
     };
     let here = abs(&args.dir.clone().unwrap_or_else(|| root.join(default_dir)))?;
     let comparison = rule::Comparison {
@@ -951,6 +963,8 @@ fn analyse(round: Round, root: PathBuf, runs: Option<PathBuf>) -> Result<String,
         Round::R08 => rounds::r08::analyse(&ctx)?,
         Round::R09 => rounds::r09::analyse(&ctx)?,
         Round::R10 => rounds::r10::analyse(&ctx)?,
+        Round::R11 => rounds::r11::analyse(&ctx)?,
+        Round::R12 => rounds::r12::analyse(&ctx)?,
     };
     Ok(json::dumps(&doc, 1))
 }
@@ -1699,7 +1713,9 @@ fn main() -> ExitCode {
             | Round::R07
             | Round::R08
             | Round::R09
-            | Round::R10 => report::r05(&doc),
+            | Round::R10
+            | Round::R11
+            | Round::R12 => report::r05(&doc),
             Round::R03 => Err("R03's tables are in its README, written before icprog".into()),
         }),
         Command::Holdouts {

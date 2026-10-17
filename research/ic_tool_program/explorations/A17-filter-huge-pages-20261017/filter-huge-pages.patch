@@ -1,0 +1,211 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index b255ce6d8..f5d1198b8 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -4075,7 +4075,7 @@ pub struct PairSumTable {
+     /// entries are far too large to cache, so this turns the hot path
+     /// from a miss in a table of hundreds of megabytes into one in a
+     /// few.  No false negatives, so the answer is unchanged.
+-    present: Vec<u64>,
++    present: FilterWords,
+     present_mask: u64,
+     /// [`filter_extra`] of the probes the filter was built with.
+     filter_extra: u64,
+@@ -4877,7 +4877,7 @@ impl PairSumTable {
+             negated_y,
+             bucket_start,
+             bucket_shift,
+-            present,
++            present: FilterWords::from(present),
+             present_mask,
+             filter_extra: FILTER_EXTRA,
+             fold: false,
+@@ -4997,7 +4997,7 @@ impl PairSumTable {
+             negated_y,
+             bucket_start,
+             bucket_shift,
+-            present,
++            present: FilterWords::from(present),
+             present_mask,
+             filter_extra: FILTER_EXTRA,
+             fold: false,
+@@ -5120,7 +5120,7 @@ impl PairSumTable {
+             negated_y,
+             bucket_start,
+             bucket_shift,
+-            present,
++            present: FilterWords::from(present),
+             present_mask,
+             filter_extra: FILTER_EXTRA,
+             fold: false,
+@@ -5579,7 +5579,7 @@ impl PairSumTable {
+             negated_y,
+             bucket_start: parts.bucket_start,
+             bucket_shift: parts.bucket_shift,
+-            present: parts.present,
++            present: FilterWords::from(parts.present),
+             present_mask: parts.present_mask,
+             filter_extra: filter_extra(parts.filter_probes),
+             fold: true,
+@@ -21745,3 +21745,161 @@ mod admissibility_walk_differential {
+         assert!(answers[0] > 0 && answers[1] > 0, "{answers:?}");
+     }
+ }
++
++/// **The presence filter's words**, on 2 MiB pages where Linux grants them.
++///
++/// The collection scan reads one filter word per scanned summand, at
++/// random, from a filter of 4–8 MiB at the suite's target sizes.  On base
++/// pages nearly every such read also misses the TLB.  A filter of at
++/// least 2 MiB is therefore copied into a fresh anonymous mapping that
++/// starts on a 2 MiB boundary and is advised `MADV_HUGEPAGE` before it is
++/// written, so its first touch faults in whole huge pages: one TLB entry
++/// then covers 512 times the bytes.  (Memory from the allocator may have
++/// been touched already, and advice does not convert pages that exist.)
++/// The words, and every answer read from them, are unchanged.
++/// `KIC_FILTER_HUGE=0` keeps the filter on the heap (a same-binary
++/// control); a smaller filter, or a host whose THP setting is `never`,
++/// gets ordinary pages either way.
++pub(crate) struct FilterWords {
++    ptr: std::ptr::NonNull<u64>,
++    len: usize,
++    /// Whether `ptr` is our own mapping (`munmap` on drop) rather than
++    /// the allocator's.
++    mapped: bool,
++}
++
++// SAFETY: `FilterWords` owns its storage outright, like a `Box<[u64]>`.
++unsafe impl Send for FilterWords {}
++// SAFETY: shared access is read-only, through `Deref`.
++unsafe impl Sync for FilterWords {}
++
++impl FilterWords {
++    const HUGE: usize = 2 << 20;
++
++    fn mapped_len(len: usize) -> usize {
++        (len * std::mem::size_of::<u64>() + Self::HUGE - 1) & !(Self::HUGE - 1)
++    }
++
++    /// A fresh 2 MiB-aligned anonymous mapping for `len` words, advised
++    /// `MADV_HUGEPAGE`; `None` where that is unavailable or not wanted.
++    fn map_huge(len: usize) -> Option<std::ptr::NonNull<u64>> {
++        #[cfg(all(target_os = "linux", target_env = "gnu"))]
++        {
++            if len * std::mem::size_of::<u64>() < Self::HUGE
++                || std::env::var("KIC_FILTER_HUGE").as_deref() == Ok("0")
++            {
++                return None;
++            }
++            let want = Self::mapped_len(len);
++            let total = want + Self::HUGE;
++            // SAFETY: a new private anonymous mapping; nothing else
++            // refers to the range it returns.
++            let base = unsafe {
++                libc::mmap(
++                    std::ptr::null_mut(),
++                    total,
++                    libc::PROT_READ | libc::PROT_WRITE,
++                    libc::MAP_PRIVATE | libc::MAP_ANONYMOUS,
++                    -1,
++                    0,
++                )
++            };
++            if base == libc::MAP_FAILED {
++                return None;
++            }
++            let base = base as usize;
++            let start = (base + Self::HUGE - 1) & !(Self::HUGE - 1);
++            // SAFETY: the head and tail trimmed here lie inside the
++            // mapping just made and outside `start..start + want`.
++            unsafe {
++                if start > base {
++                    libc::munmap(base as *mut libc::c_void, start - base);
++                }
++                let end = start + want;
++                if base + total > end {
++                    libc::munmap(end as *mut libc::c_void, base + total - end);
++                }
++                libc::madvise(start as *mut libc::c_void, want, libc::MADV_HUGEPAGE);
++            }
++            std::ptr::NonNull::new(start as *mut u64)
++        }
++        #[cfg(not(all(target_os = "linux", target_env = "gnu")))]
++        {
++            let _ = len;
++            None
++        }
++    }
++
++    fn copy_of(words: &[u64]) -> Self {
++        let len = words.len();
++        if len == 0 {
++            return Self {
++                ptr: std::ptr::NonNull::dangling(),
++                len: 0,
++                mapped: false,
++            };
++        }
++        let (ptr, mapped) = match Self::map_huge(len) {
++            Some(ptr) => (ptr, true),
++            None => {
++                let layout = std::alloc::Layout::array::<u64>(len).expect("filter layout");
++                // SAFETY: `layout` has a non-zero size.
++                let raw = unsafe { std::alloc::alloc(layout) } as *mut u64;
++                match std::ptr::NonNull::new(raw) {
++                    Some(ptr) => (ptr, false),
++                    None => std::alloc::handle_alloc_error(layout),
++                }
++            }
++        };
++        // SAFETY: the storage holds `len` words and does not overlap
++        // `words`.
++        unsafe { std::ptr::copy_nonoverlapping(words.as_ptr(), ptr.as_ptr(), len) };
++        Self { ptr, len, mapped }
++    }
++}
++
++impl From<Vec<u64>> for FilterWords {
++    fn from(words: Vec<u64>) -> Self {
++        Self::copy_of(&words)
++    }
++}
++
++impl std::ops::Deref for FilterWords {
++    type Target = [u64];
++    fn deref(&self) -> &[u64] {
++        // SAFETY: `ptr` holds `len` initialised words (or is dangling with
++        // `len` zero), owned by `self`.
++        unsafe { std::slice::from_raw_parts(self.ptr.as_ptr(), self.len) }
++    }
++}
++
++impl Drop for FilterWords {
++    fn drop(&mut self) {
++        if self.len == 0 {
++            return;
++        }
++        if self.mapped {
++            #[cfg(all(target_os = "linux", target_env = "gnu"))]
++            // SAFETY: `map_huge` mapped exactly this range.
++            unsafe {
++                libc::munmap(self.ptr.as_ptr() as *mut libc::c_void, Self::mapped_len(self.len));
++            }
++        } else {
++            let layout = std::alloc::Layout::array::<u64>(self.len).expect("filter layout");
++            // SAFETY: allocated in `copy_of` with this same layout.
++            unsafe { std::alloc::dealloc(self.ptr.as_ptr() as *mut u8, layout) };
++        }
++    }
++}
++
++impl Clone for FilterWords {
++    fn clone(&self) -> Self {
++        Self::copy_of(self)
++    }
++}
++
++impl std::fmt::Debug for FilterWords {
++    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
++        f.debug_struct("FilterWords").field("len", &self.len).finish()
++    }
++}

@@ -1787,7 +1787,14 @@ fn main() {
         shared_corpus.is_none() || batch_seed.is_some(),
         "KIC_RHO_BATCH_CORPUS requires the batch_seed argument"
     );
-    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53 | 61));
+    // The single-word flow below serves every degree up to 63 (wider rungs
+    // returned above).  A list of the degrees once wired here came back with
+    // a merge and refused the rule's own sizes 47, 57 and 59, which this
+    // walk ran at baseline v3.
+    assert!(
+        (2..=63).contains(&n),
+        "the single-word walk takes 2 <= n <= 63"
+    );
     let fixture_target = FixtureTarget::parse(args.get(7).map(String::as_str));
     assert!(matches!(backend, "reference" | "packed" | "strong"));
     if backend != "strong" {
