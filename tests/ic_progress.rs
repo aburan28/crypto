@@ -5,6 +5,73 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
 use num_bigint::BigUint;
 
 #[test]
+fn live_run_equations_match_actual_probes_and_preserve_the_query_stream() {
+    use crypto_lib::{
+        binary_ecc::BinaryPoint,
+        cryptanalysis::koblitz_index_calculus::{
+            build_frobenius_factor_base, koblitz_index_calculus_dlp_with_factor_base,
+            koblitz_index_calculus_dlp_with_factor_base_and_trace,
+        },
+    };
+    let curve = KoblitzCurve::new(0, 9).unwrap();
+    let base = build_frobenius_factor_base(&curve, 0).unwrap();
+    let target = curve.mul(curve.generator(), &BigUint::from(53u32));
+    let options = KoblitzIcOptions {
+        strategy: DecompositionStrategy::Enumerate,
+        max_trials: 1000,
+        allow_direct_relation: false,
+        ..Default::default()
+    };
+    let expected =
+        koblitz_index_calculus_dlp_with_factor_base(&curve, &target, &base, &options).unwrap();
+    let calls = std::sync::Mutex::new(Vec::new());
+    let traced = koblitz_index_calculus_dlp_with_factor_base_and_trace(
+        &curve,
+        &target,
+        &base,
+        &options,
+        &mut |_| {},
+        Some(&|trace| {
+            let a: BigUint = trace.a.to_string().parse().unwrap();
+            let b: BigUint = trace.b.to_string().parse().unwrap();
+            let probe = curve.add(&curve.mul(curve.generator(), &a), &curve.mul(&target, &b));
+            if let Some(indices) = trace.points {
+                let sum = indices.iter().fold(BinaryPoint::Infinity, |sum, &i| {
+                    curve.add(&sum, &base.points[i])
+                });
+                assert_eq!(sum, probe);
+            }
+            calls.lock().unwrap().push((
+                trace.trial as usize + 1,
+                a,
+                b,
+                probe,
+                trace.points.map(<[usize]>::to_vec),
+            ));
+        }),
+    )
+    .unwrap();
+    let expected_calls: Vec<_> = expected
+        .attempt_records
+        .iter()
+        .map(|record| {
+            (
+                record.trial,
+                record.coefficient_a.clone(),
+                record.coefficient_b.clone(),
+                record.target.clone(),
+                record.decomposition_indices.clone(),
+            )
+        })
+        .collect();
+    assert_eq!(calls.into_inner().unwrap(), expected_calls);
+    assert_eq!(traced.log, expected.log);
+    assert_eq!(traced.trials, expected.trials);
+    assert_eq!(traced.relations, expected.relations);
+    assert_eq!(traced.terminal_matrix_rank, expected.terminal_matrix_rank);
+}
+
+#[test]
 fn progress_covers_the_matrix_path_and_preserves_the_result() {
     let curve = KoblitzCurve::new(0, 9).unwrap();
     let expected = BigUint::from(53u32);

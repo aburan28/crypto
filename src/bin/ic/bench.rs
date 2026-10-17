@@ -38,7 +38,7 @@ use crypto_lib::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
 };
 use crypto_lib::cryptanalysis::ic_framework::{
-    format_markdown, run_pipeline, PipelineSpec, RunReport,
+    format_markdown, run_pipeline, run_pipeline_with_progress, PipelineSpec, RunReport,
 };
 
 #[derive(Args, Clone)]
@@ -570,7 +570,7 @@ fn run_prime(
                 ))
             }
         };
-        out.push(run_pipeline(
+        out.push(run_traced(
             &ctx, &spec, base, oracle, planted, calib, rho_s,
         )?);
     }
@@ -674,11 +674,50 @@ fn run_binary(
             "symmetrised" => symmetrised.as_mut().expect("built above"),
             other => return Err(format!("oracle `{other}` is not available here")),
         };
-        out.push(run_pipeline(
+        out.push(run_traced(
             &ctx, &spec, base, oracle, planted, calib, rho_s,
         )?);
     }
     Ok(out)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_traced<G: CountedGroup>(
+    ctx: &InstanceCtx<G>,
+    spec: &PipelineSpec,
+    base: &dyn FactorBaseBuilder<G>,
+    oracle: &mut dyn DecompositionOracle<G>,
+    planted: u64,
+    calib: &Calibration,
+    rho_s: Option<f64>,
+) -> Result<RunReport, String> {
+    if super::progress::enabled() {
+        super::progress::line(format_args!(
+            "bench: {}; factor base {}; oracle {}; matrix {}",
+            ctx.name, spec.factor_base, spec.oracle, spec.linalg
+        ));
+        if super::progress::level() >= 2 {
+            super::progress::line(format_args!(
+                "bench: G = {:?}; Q = {:?}",
+                ctx.generator, ctx.target
+            ));
+        }
+        if spec.targets == Targets::Residual {
+            super::progress::line(format_args!("bench: residual collector reports setup and final rank; per-query equations are unavailable for this query law"));
+        }
+        run_pipeline_with_progress(
+            ctx,
+            spec,
+            base,
+            oracle,
+            planted,
+            calib,
+            rho_s,
+            &mut |event| super::progress::pipeline(event, spec.max_trials, ctx.cofactor, ctx.r),
+        )
+    } else {
+        run_pipeline(ctx, spec, base, oracle, planted, calib, rho_s)
+    }
 }
 
 /// The instance a sweep runs every configuration on, built once.

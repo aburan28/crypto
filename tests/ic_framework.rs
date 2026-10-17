@@ -50,7 +50,7 @@ fn verbose_run_traces_trials_and_preserves_report_and_json_output() {
     let (ok, expected) = command(&args);
     assert!(ok, "{expected}");
     let output = Command::new(env!("CARGO_BIN_EXE_ic"))
-        .arg("-v")
+        .arg("-vvv")
         .args(args)
         .arg("--out")
         .arg(&file)
@@ -79,6 +79,122 @@ fn verbose_run_traces_trials_and_preserves_report_and_json_output() {
 }
 
 #[test]
+fn verbosity_selects_relations_coordinates_and_failed_attempts() {
+    // The default base covers every query on this small curve. A saved,
+    // smaller recipe exercises both found relations and discarded misses.
+    let base = path();
+    std::fs::write(
+        &base,
+        serde_json::to_vec(&json!({
+            "schema_version": 1, "degree": 9, "curve_a": 0,
+            "spec": {"kind": "standard_subspace", "dimension": 4}
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+    let args = [
+        "run",
+        "--degree",
+        "9",
+        "--solver",
+        "enumerate",
+        "--factor-base",
+        base.to_str().unwrap(),
+        "--batch",
+        "1",
+        "--control",
+        "--max-trials",
+        "64",
+    ];
+    let (_, expected) = command(&args);
+    for (flag, details, misses) in [
+        ("-v", false, false),
+        ("-vv", true, false),
+        ("-vvv", true, true),
+    ] {
+        let file = path();
+        let output = Command::new(env!("CARGO_BIN_EXE_ic"))
+            .args(args)
+            .arg(flag)
+            .arg("--out")
+            .arg(&file)
+            .output()
+            .unwrap();
+        let text = String::from_utf8(output.stdout).unwrap();
+        let trials: Vec<_> = text
+            .lines()
+            .filter(|line| line.contains("ic: [2/4] trial ") && line.contains("/64:"))
+            .collect();
+        assert!(!trials.is_empty(), "{flag}: {text}");
+        assert!(
+            trials.iter().any(|line| line.contains("relation found")
+                && line.contains("]G")
+                && line.contains(" = F[")),
+            "{flag}: {text}"
+        );
+        assert_eq!(
+            trials.iter().any(|line| !line.contains("relation found")),
+            misses,
+            "{flag}: {text}"
+        );
+        assert_eq!(text.contains("G = (0x"), details, "{flag}: {text}");
+        assert_eq!(text.contains("] = (0x"), details, "{flag}: {text}");
+        let report: Value = serde_json::from_slice(&std::fs::read(&file).unwrap()).unwrap();
+        for key in ["result", "counts", "arguments", "linear_algebra"] {
+            assert_eq!(report[key], expected[key], "{flag}: {key}");
+        }
+        std::fs::remove_file(file).unwrap();
+        let (_, json) = command(&["run", "--degree", "9", flag]);
+        assert_eq!(json["result"]["verified"], true);
+    }
+    std::fs::remove_file(base).unwrap();
+}
+
+#[test]
+fn pluggable_bench_streams_equations_and_keeps_json_clean() {
+    let args = [
+        "bench",
+        "--bits",
+        "16",
+        "--factor-base",
+        "prime-abscissa:size=24",
+        "--oracle",
+        "mitm",
+        "--max-trials",
+        "10000",
+    ];
+    let output = Command::new(env!("CARGO_BIN_EXE_ic"))
+        .args(args)
+        .arg("-v")
+        .output()
+        .unwrap();
+    let text = String::from_utf8(output.stdout).unwrap();
+    assert!(output.status.success(), "{text}");
+    for fragment in [
+        "bench: factor base: ready;",
+        "bench: oracle precomputation: ready;",
+        "relation found (pending verification); R = [",
+        " = F[",
+        "rank ",
+        "verified=true",
+    ] {
+        assert!(text.contains(fragment), "missing {fragment}: {text}");
+    }
+    let (ok, json) = command(&[
+        "bench",
+        "--bits",
+        "16",
+        "--factor-base",
+        "prime-abscissa:size=24",
+        "--oracle",
+        "mitm",
+        "-vvv",
+    ]);
+    assert!(ok, "{json}");
+    assert_eq!(json["all_verified"], true);
+}
+
+#[test]
 fn verbose_trial_lines_are_visible_while_collection_is_still_running() {
     use std::{
         io::{BufRead, BufReader},
@@ -100,7 +216,7 @@ fn verbose_trial_lines_are_visible_while_collection_is_still_running() {
             "1000000",
             "--batch",
             "1",
-            "--verbose",
+            "-vvv",
         ])
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
@@ -149,7 +265,7 @@ fn verbose_workflow_collection_reports_every_probe_and_json_remains_clean() {
         dir.to_str().unwrap(),
         "--collect-units",
         "0",
-        "--verbose",
+        "-vvv",
     ];
     let output = Command::new(env!("CARGO_BIN_EXE_ic"))
         .args(args)
@@ -159,7 +275,7 @@ fn verbose_workflow_collection_reports_every_probe_and_json_remains_clean() {
     let text = String::from_utf8(output.stdout).unwrap();
     assert_eq!(
         text.lines()
-            .filter(|line| line.contains("unit 00000, trial "))
+            .filter(|line| line.contains("unit 00000, probe ") && line.contains("/4:"))
             .count(),
         4,
         "{text}"
@@ -209,7 +325,7 @@ fn verbose_log_precomputation_and_descent_report_actual_work() {
         .unwrap();
     assert!(output.status.success(), "{output:?}");
     let text = String::from_utf8(output.stdout).unwrap();
-    assert!(text.contains("solve: trial 1/"), "{text}");
+    assert!(text.contains("solve: trial "), "{text}");
     assert!(text.contains("solve: scalar verification passed"), "{text}");
     std::fs::remove_file(db).unwrap();
     let output = Command::new(env!("CARGO_BIN_EXE_ic"))

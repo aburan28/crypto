@@ -54,9 +54,9 @@ struct Cli {
     /// Print a machine-readable JSON report, without progress text.
     #[arg(long, global = true)]
     json: bool,
-    /// Trace index-calculus stages and individual trials as they finish (suppressed by --json).
-    #[arg(short, long, global = true)]
-    verbose: bool,
+    /// Live stages and relations; -vv adds point coordinates, -vvv includes unsuccessful attempts. Suppressed by --json.
+    #[arg(short, long, global = true, action = clap::ArgAction::Count)]
+    verbose: u8,
     /// Write the JSON report to a new file; existing files are never overwritten.
     #[arg(long, global = true)]
     out: Option<PathBuf>,
@@ -565,7 +565,13 @@ fn display(report: &Value) {
 fn main() -> ExitCode {
     let cli = Cli::parse();
     // Generated parameters stay directly importable even with a global -v.
-    progress::init(cli.verbose && !cli.json && !matches!(cli.command, Some(Action::Generate(_))));
+    progress::init(
+        if cli.json || matches!(cli.command, Some(Action::Generate(_))) {
+            0
+        } else {
+            cli.verbose
+        },
+    );
     progress::line(format_args!(
         "startup: capturing executable and source provenance"
     ));

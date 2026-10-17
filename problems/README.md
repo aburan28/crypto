@@ -11,6 +11,7 @@ Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
+| [IC live-trace validation on a noncompiling main](ic-live-trace-main-compile.md) | open | full current-main validation and merging the live relation/verbosity change | repair the existing quartic/ecbench compilation failures, then pass the release library and IC CLI tests on the integrated revision |
 | [Photographed-volcano checkpoints unavailable](photo-volcano-checkpoints-unavailable.md) | open | resuming and independently auditing the original 46-curve, 100-problem-per-curve campaign | exact original archives, manifest and checkpoint verification, durable immutable readback, then resume-path validation |
 | [Generalized rootfinding complete all-roots8x qualification](generalized-rootfinding-all-roots-8x.md) | open | novel qualified8x over matched genuine all-roots F4/F5/F6 across requested fields | native complete-output integration, independent replay, strongest external references and the unchanged hard gate |
 | [Prime61 exhaustive horizontal class memory](prime61-horizontal-class-memory.md) | open; disk-backed pilot verified | certified full-class coverage and all-class workload execution; retained-vector requirement removed on the new path | certified degree-set coverage, provisioned disk/compute envelope and replayed remaining workloads |
