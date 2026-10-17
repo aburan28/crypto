@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="480" viewBox="0 0 1100 480">
+<rect width="1100" height="480" fill="#f6f8fc"/>
+<g font-family="DejaVu Sans, sans-serif" fill="#14243c">
+<text x="40" y="46" font-size="24" font-weight="bold">Native factor-base baseline · 2026-10-16</text>
+<text x="40" y="78" font-size="16">Stage counts only · distinct curves and base sizes · no comparative cost claim</text>
+<rect x="40" y="112" width="480" height="198" rx="12" fill="#e3f3eb" stroke="#348567"/>
+<text x="64" y="148" font-size="20" font-weight="bold">Positive control</text>
+<text x="64" y="184" font-size="18">p = 1,048,571 · 16 inverse pairs</text>
+<text x="64" y="216" font-size="18">1 seed · 62,676 target trials · 33 relations</text>
+<text x="64" y="250" font-size="18">33 relation replays · verified scalar 596767</text>
+<text x="64" y="284" font-size="18" font-weight="bold">VERIFIED_SOLVE</text>
+<rect x="550" y="112" width="510" height="198" rx="12" fill="#fff0d9" stroke="#a5782d"/>
+<text x="574" y="148" font-size="20" font-weight="bold">Requested prime-field baseline</text>
+<text x="574" y="184" font-size="18">p = 2^61 − 1 · 3 inverse pairs</text>
+<text x="574" y="216" font-size="18">12 seeds · 100,000 target trials each</text>
+<text x="574" y="250" font-size="18">0 relations each · no recovered scalar</text>
+<text x="574" y="284" font-size="18" font-weight="bold">EXHAUSTED_TRIAL_CAP (12/12)</text>
+<rect x="40" y="340" width="1020" height="104" rx="12" fill="#e9edf6" stroke="#75829c"/>
+<text x="64" y="376" font-size="18" font-weight="bold">Original candidate-isogeny experiment remains unresolved</text>
+<text x="64" y="407" font-size="17">1,000 / 2,000 candidates · 12 paired runs · original driver and degree-7 map not located</text>
+<text x="40" y="470" font-size="13">Source: results/control.jsonl, results/prime61.jsonl · protocol.json · no total operations, S or IC/rho ratio</text>
+</g></svg>

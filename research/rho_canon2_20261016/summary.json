@@ -1,0 +1,81 @@
+{
+  "instructions": {
+    "arms": [
+      {
+        "arm": "baseline",
+        "ir": 2847169163,
+        "walk_steps": 3034474,
+        "ir_per_step": 938.2743641896421,
+        "output_digest": "50acd17588d6deba"
+      },
+      {
+        "arm": "candidate1-4",
+        "ir": 2580125642,
+        "walk_steps": 3034474,
+        "ir_per_step": 850.2711316689482,
+        "output_digest": "50acd17588d6deba"
+      },
+      {
+        "arm": "candidate",
+        "ir": 2557912731,
+        "walk_steps": 3034474,
+        "ir_per_step": 842.9509466879598,
+        "output_digest": "50acd17588d6deba"
+      },
+      {
+        "arm": "final",
+        "ir": 2369298800,
+        "walk_steps": 3034474,
+        "ir_per_step": 780.793903655131,
+        "output_digest": "50acd17588d6deba"
+      }
+    ],
+    "identical": true,
+    "baseline_over_final": 1.2016927383747462
+  },
+  "native_time": {
+    "cells": [
+      {
+        "slug": "icv1-f2m53-tm56619371-dac20a85",
+        "aa_spread": 0.20609400760070473,
+        "baseline_ns": {
+          "median": 130.84220362408774,
+          "min": 127.89566231247984,
+          "max": 145.00670099661423,
+          "n": 5
+        },
+        "candidate_ns": {
+          "median": 111.50070918386514,
+          "min": 105.28177667694632,
+          "max": 116.0770986998076,
+          "n": 5
+        },
+        "identical": true,
+        "ratio": 1.1734652145425228
+      },
+      {
+        "slug": "icv1-f2m61-t158598901-ab42b6c5",
+        "aa_spread": 0.12068306395751915,
+        "baseline_ns": {
+          "median": 139.7112864323542,
+          "min": 130.3199530628021,
+          "max": 147.262046120013,
+          "n": 5
+        },
+        "candidate_ns": {
+          "median": 123.10697000976774,
+          "min": 110.53405804729034,
+          "max": 128.49280633963426,
+          "n": 5
+        },
+        "identical": true,
+        "ratio": 1.1348771431972455
+      }
+    ],
+    "isolation": {
+      "runs": 32,
+      "contended": [],
+      "nonzero_exit": 0
+    }
+  }
+}
