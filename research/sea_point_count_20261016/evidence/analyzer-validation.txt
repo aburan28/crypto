@@ -1,0 +1,10 @@
+   Compiling isogeny_algos v0.1.0 (/workspace/crypto/isogeny_algos)
+   Compiling sea-validation v0.1.0 (/workspace/crypto/research/sea_point_count_20261016/native)
+    Finished `release` profile [optimized] target(s) in 54.20s
+     Running unittests src/bin/analyze.rs (research/sea_point_count_20261016/native/target/release/deps/analyze-71cf0990bd18b9d9)
+
+running 1 test
+test tests::rejects_wrong_answers_different_work_and_failed_runs ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
