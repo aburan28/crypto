@@ -1,0 +1,60 @@
+pair46: order_ok=true lam_root=true family=true xmap_deg5_verified_1000=true ord(lambda)=849671142308806
+pair46 timing ns: add=462.4 psi_x=454.2 legendre=497.2 c_E=0.982 c_L=1.075
+toy b=16 t=103 p=55021 N=54919 twist=false lam=27722 ord_lam=3051 c_E=1.069 c_L=0.747
+  rho                      ok=40/40 S=5.092 [4.899,5.279] S(c_E=1)=5.092 A=1193 E=0 L=0
+  rho-neg                  ok=40/40 S=5.564 [5.303,5.826] S(c_E=1)=5.564 A=1304 E=0 L=0
+  bsgs-pm                  ok=40/40 S=1.172 [1.080,1.262] S(c_E=1)=1.172 A=275 E=0 L=0
+  abscissa-k1              ok=40/40 S=54.673 [44.709,64.546] S(c_E=1)=54.673 A=12486 E=0 L=438
+  endo-chain-k4            ok=40/40 S=6.359 [5.600,7.092] S(c_E=1)=6.307 A=1215 E=177 L=115
+  endo-chain-k16           ok=40/40 S=4.367 [3.866,4.931] S(c_E=1)=4.302 A=761 E=221 L=35
+  endo-chain-k64           ok=40/40 S=2.754 [2.488,3.021] S(c_E=1)=2.686 A=393 E=232 L=6
+  endo-chain-kF            ok=40/40 S=2.202 [2.077,2.335] S(c_E=1)=2.133 A=265 E=234 L=1
+  endo-chain-known         ok=40/40 S=1.745 [1.505,2.024] S(c_E=1)=1.698 A=238 E=160 L=0
+  endo-chain-k16-nofold    ok=40/40 S=60.942 [50.546,70.773] S(c_E=1)=60.877 A=14019 E=221 L=35
+  ratio k16/abscissa = 0.080 [0.064,0.102]  nofold/k16 = 13.956 [11.140,17.047]
+toy b=18 t=187 p=178417 N=178231 twist=true lam=88644 ord_lam=2285 c_E=1.058 c_L=0.728
+  rho                      ok=40/40 S=3.674 [3.500,3.860] S(c_E=1)=3.674 A=1551 E=0 L=0
+  rho-neg                  ok=40/40 S=4.268 [3.910,4.670] S(c_E=1)=4.268 A=1802 E=0 L=0
+  bsgs-pm                  ok=40/40 S=1.167 [1.077,1.249] S(c_E=1)=1.167 A=493 E=0 L=0
+  abscissa-k1              ok=40/40 S=106.680 [87.993,124.014] S(c_E=1)=106.680 A=44423 E=0 L=844
+  endo-chain-k4            ok=40/40 S=9.532 [8.341,10.775] S(c_E=1)=9.488 A=3541 E=318 L=202
+  endo-chain-k16           ok=40/40 S=4.881 [4.266,5.521] S(c_E=1)=4.826 A=1606 E=397 L=47
+  endo-chain-k64           ok=40/40 S=3.448 [2.964,3.973] S(c_E=1)=3.390 A=1008 E=417 L=9
+  endo-chain-kF            ok=40/40 S=2.434 [2.182,2.715] S(c_E=1)=2.376 A=580 E=422 L=2
+  endo-chain-known         ok=40/40 S=1.639 [1.399,1.901] S(c_E=1)=1.599 A=385 E=290 L=0
+  endo-chain-k16-nofold    ok=40/40 S=119.008 [98.959,138.632] S(c_E=1)=118.953 A=49788 E=397 L=47
+  ratio k16/abscissa = 0.046 [0.037,0.057]  nofold/k16 = 24.382 [19.260,29.869]
+toy b=20 t=357 p=644047 N=643691 twist=true lam=322743 ord_lam=321845 c_E=1.143 c_L=0.864
+  rho                      ok=40/40 S=2.512 [2.317,2.713] S(c_E=1)=2.512 A=2015 E=0 L=0
+  rho-neg                  ok=40/40 S=3.443 [3.071,3.848] S(c_E=1)=3.443 A=2762 E=0 L=0
+  bsgs-pm                  ok=40/40 S=1.038 [0.951,1.126] S(c_E=1)=1.038 A=833 E=0 L=0
+  abscissa-k1              ok=40/40 S=205.452 [171.256,238.594] S(c_E=1)=205.452 A=163469 E=0 L=1581
+  endo-chain-k4            ok=40/40 S=11.152 [9.839,12.477] S(c_E=1)=11.045 A=7921 E=603 L=391
+  endo-chain-k16           ok=40/40 S=5.142 [4.435,5.883] S(c_E=1)=5.008 A=3164 E=753 L=116
+  endo-chain-k64           ok=40/40 S=3.698 [3.214,4.226] S(c_E=1)=3.558 A=2040 E=791 L=27
+  endo-chain-kF            ok=40/40 S=2.350 [2.142,2.575] S(c_E=1)=2.207 A=968 E=802 L=1
+  endo-chain-known         ok=40/40 S=1.691 [1.499,1.911] S(c_E=1)=1.597 A=751 E=530 L=0
+  endo-chain-k16-nofold    ok=40/40 S=191.317 [157.209,225.157] S(c_E=1)=191.183 A=152534 E=753 L=116
+  ratio k16/abscissa = 0.025 [0.020,0.031]  nofold/k16 = 37.210 [28.990,46.805]
+toy b=22 t=733 p=2700391 N=2699659 twist=false lam=1347993 ord_lam=1349829 c_E=1.063 c_L=0.805
+  rho                      ok=40/40 S=2.019 [1.827,2.237] S(c_E=1)=2.019 A=3318 E=0 L=0
+  rho-neg                  ok=40/40 S=2.932 [2.609,3.256] S(c_E=1)=2.932 A=4817 E=0 L=0
+  bsgs-pm                  ok=40/40 S=0.955 [0.863,1.049] S(c_E=1)=0.955 A=1569 E=0 L=0
+  abscissa-k1              ok=40/40 S=389.911 [312.219,463.377] S(c_E=1)=389.911 A=637960 E=0 L=3339
+  endo-chain-k4            ok=40/40 S=17.211 [14.007,20.957] S(c_E=1)=17.164 A=26316 E=1233 L=810
+  endo-chain-k16           ok=40/40 S=8.323 [7.196,9.594] S(c_E=1)=8.264 A=11891 E=1542 L=180
+  endo-chain-k64           ok=40/40 S=4.607 [4.105,5.113] S(c_E=1)=4.545 A=5815 E=1619 L=41
+  endo-chain-kF            ok=40/40 S=2.117 [1.902,2.337] S(c_E=1)=2.054 A=1729 E=1643 L=3
+  endo-chain-known         ok=40/40 S=1.472 [1.282,1.686] S(c_E=1)=1.428 A=1221 E=1126 L=0
+  endo-chain-k16-nofold    ok=40/40 S=340.755 [272.177,407.146] S(c_E=1)=340.695 A=558097 E=1542 L=180
+  ratio k16/abscissa = 0.021 [0.017,0.027]  nofold/k16 = 40.942 [31.736,52.369]
+phase2 random                                 F=201 rate=0.1167 [0.1057,0.1286] random-set heuristic=0.1180
+phase2 small-x                                F=201 rate=0.1203 [0.1092,0.1325] random-set heuristic=0.1180
+phase2 endo-chain-k16                         F=201 rate=0.1213 [0.1101,0.1335] random-set heuristic=0.1180
+phase2 endo-chain-kF2                         F=201 rate=0.1170 [0.1060,0.1290] random-set heuristic=0.1180
+phase2 arith-progression (positive control)   F=201 rate=0.0010 [0.0003,0.0029] random-set heuristic=0.1180
+cut=[] wall=22.6s
+
+real	0m22.560s
+user	0m22.213s
+sys	0m0.020s

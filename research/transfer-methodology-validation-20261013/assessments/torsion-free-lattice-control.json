@@ -1,0 +1,60 @@
+{
+  "format": "correspondence-assessment-v3",
+  "case_id": "known-false-torsion-free-lattice-transfer",
+  "authority": "Algebraic type-checking control; finite lattice quotients and relation lattices remain separate candidates.",
+  "source": {"object":"cyclic elliptic subgroup S=<P>","order":"prime r"},
+  "destination": {"object":"ordinary lattice Lambda isomorphic to Z^m","group_object":"torsion-free additive group"},
+  "transformation": {"kind":"proposed group homomorphism S->Lambda","formula":null},
+  "typed_path": {
+    "nodes": ["finite cyclic group Z/rZ", "torsion-free group Z^m"],
+    "edges": ["every homomorphism is zero"],
+    "weakest_open_obligation": "replace the destination by an explicitly typed finite quotient or other torsion-bearing object"
+  },
+  "algebraic_screen": {
+    "dimension": {"state":"not_applicable","evidence":[],"scope":"An ordinary lattice is not an abelian variety."},
+    "group_order": {"state":"refuted","evidence":["methodology"],"scope":"Z^m has no nonzero finite-order element, hence no order-r image."},
+    "frobenius_or_weil_polynomial": {"state":"not_applicable","evidence":[],"scope":"No abelian variety is proposed."},
+    "field_of_definition": {"state":"not_applicable","evidence":[],"scope":"The proposal is already ill-typed as a torsion transfer."},
+    "riemann_hurwitz_or_different": {"state":"not_applicable","evidence":[],"scope":"No curve cover is proposed."},
+    "polarization_or_jacobian_locus": {"state":"not_applicable","evidence":[],"scope":"No Jacobian is proposed."}
+  },
+  "obligations": {
+    "existence": {"state":"supported","evidence":["methodology"],"scope":"The ordinary lattice exists, but it lacks the needed torsion."},
+    "explicit_construction": {"state":"unknown","evidence":[],"scope":"No torsion-bearing quotient or reconstruction map is supplied."},
+    "map_correctness": {"state":"refuted","evidence":["methodology"],"scope":"The only group homomorphism from Z/rZ to Z^m is zero."},
+    "subgroup_preservation": {"state":"refuted","evidence":["methodology"],"scope":"A zero map is not injective on S."},
+    "scalar_recovery": {"state":"refuted","evidence":["methodology"],"scope":"The image contains no scalar information."},
+    "destination_solver_applicability": {"state":"not_applicable","evidence":[],"scope":"There is no valid transported subgroup."},
+    "computational_advantage": {"state":"not_applicable","evidence":[],"scope":"The proposed transfer is rejected."},
+    "scaling_support": {"state":"not_applicable","evidence":[],"scope":"The proposed transfer is rejected."},
+    "novelty_within_boundary": {"state":"not_applicable","evidence":[],"scope":"This is a known-false control."}
+  },
+  "solver_assessment": {
+    "name": null,
+    "family": "none",
+    "implementation": null,
+    "applicability": {"state":"not_applicable","evidence":[],"scope":"The torsion-free destination cannot carry the subgroup."},
+    "image_subgroup_access": {"state":"not_applicable","evidence":[],"scope":"The proposed homomorphism has zero image."},
+    "relation_or_search_compatibility": {"state":"not_applicable","evidence":[],"scope":"No typed finite quotient or relation lattice is supplied."},
+    "individual_log_and_recovery": {"state":"not_applicable","evidence":[],"scope":"The zero image contains no recoverable scalar."}
+  },
+  "cost_comparison": {"accounting_complete":"not_applicable","modeled_or_measured":"unmeasured"},
+  "advantage_measurement": {
+    "claim_scope":"unmeasured","basis":"unmeasured","unit":null,"target_count":1,
+    "source_reference":null,"destination_generic_control":null,"destination_candidate":null,
+    "net_speedup":null,"net_speedup_ci95":null,"verified_pairs":0,"scaling_sizes":0,
+    "replay_receipts":[],"unpriced_work":[],"resource_envelope":null,"evidence":[]
+  },
+  "sources": [
+    {"id":"methodology","uri":"docs/transfer-assessment/METHODOLOGY.md#5-representation-specific-rejection-tests","revision":"this-change"}
+  ],
+  "open_obligations": ["Name a finite quotient Lambda/L, torus, kernel lattice, or relation lattice and prove non-circular coordinate recovery."],
+  "verdicts": {
+    "valid_transfer":"refuted",
+    "algorithmically_relevant":"refuted",
+    "modeled_advantage":"not_applicable",
+    "measured_advantage":"not_applicable",
+    "novel_reduction_within_boundary":"not_applicable"
+  },
+  "official_status_change": "none"
+}

@@ -1,0 +1,25 @@
+ops (ok): ic-negfold-d4-renew / rho-frob = 5.7870 [4.890, 6.545] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 0.0491 [0.045, 0.057]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 377.78%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-negfold-d4-renew / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m13-t181-515ee569 | 10.97 | 16 | 5.7870 | [4.8901, 6.5446] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | ic-negfold-d4-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W15ae365cd1d5 | icv1-f2m13-t181-515ee569 | 10.97 | 2.0642 | 10.8813 | 5.2714 |
+| W25d2db1af57a | icv1-f2m13-t181-515ee569 | 10.97 | 1.8165 | 10.5663 | 5.8168 |
+| W30d90ed055be | icv1-f2m13-t181-515ee569 | 10.97 | 1.8178 | 12.1550 | 6.6866 |
+| W38b2c0d2aba3 | icv1-f2m13-t181-515ee569 | 10.97 | 2.0983 | 12.8470 | 6.1225 |
+| W66d440e7d0f2 | icv1-f2m13-t181-515ee569 | 10.97 | 1.8761 | 12.2589 | 6.5343 |
+| W93163213ce4c | icv1-f2m13-t181-515ee569 | 10.97 | 1.9498 | 12.6214 | 6.4731 |
+| Wa69aa565cafd | icv1-f2m13-t181-515ee569 | 10.97 | 2.1374 | 12.1481 | 5.6836 |
+| Wb116b1c53d1f | icv1-f2m13-t181-515ee569 | 10.97 | 1.8863 | 11.2625 | 5.9707 |
+| Wb73c6757b4d6 | icv1-f2m13-t181-515ee569 | 10.97 | 1.9385 | 9.5549 | 4.9291 |
+| Wba589889423f | icv1-f2m13-t181-515ee569 | 10.97 | 2.1850 | 12.7902 | 5.8536 |
+| Wc431d8362b5e | icv1-f2m13-t181-515ee569 | 10.97 | 1.8631 | 10.1899 | 5.4694 |
+| Wc69ee092ae5e | icv1-f2m13-t181-515ee569 | 10.97 | 3.3334 | 10.3132 | 3.0939 |
+| Wd0fcff24632c | icv1-f2m13-t181-515ee569 | 10.97 | 1.9128 | 15.2148 | 7.9543 |
+| We63712432bc3 | icv1-f2m13-t181-515ee569 | 10.97 | 1.7959 | 10.7929 | 6.0097 |
+| Wfd822aaf5387 | icv1-f2m13-t181-515ee569 | 10.97 | 2.0065 | 14.4423 | 7.1977 |
+| Wfdefec758828 | icv1-f2m13-t181-515ee569 | 10.97 | 1.7170 | 9.4516 | 5.5047 |

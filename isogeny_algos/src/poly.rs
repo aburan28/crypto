@@ -55,15 +55,69 @@ pub fn scale<F: Field>(f: &F, a: &Poly<F>, c: F::E) -> Poly<F> {
 /// Karatsuba threshold (schoolbook below this many coefficients).
 pub const KARATSUBA_THRESHOLD: usize = 32;
 
+/// Longest modulus (coefficient count) `powmod`/`powmod_big` reduce with the table of x^k mod m;
+/// longer ones use the Newton/Barrett `PolyModulus`.
+pub const POWMOD_TABLE_MAX: usize = 160;
+
+thread_local! {
+    /// Override of `POWMOD_TABLE_MAX` (for tuning runs; None = built-in default).
+    pub static POWMOD_TABLE_N: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
+}
+
+fn powmod_table_max() -> usize {
+    POWMOD_TABLE_N.with(|k| k.get()).unwrap_or(POWMOD_TABLE_MAX)
+}
+
 fn school<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
     f.conv(a, b)
 }
 
-/// Untrimmed product of two non-empty coefficient slices, length a.len() + b.len() - 1.
+/// Untrimmed square of a non-empty coefficient slice (Karatsuba on squares: three half-size
+/// squarings; `Field::conv_sq` at the leaves, the NTT above its threshold).
+pub fn sqr_raw<F: Field>(f: &F, a: &[F::E]) -> Vec<F::E> {
+    if a.len() < f.sqr_threshold() {
+        return f.conv_sq(a);
+    }
+    if let Some(r) = f.conv_long(a, a) {
+        return r;
+    }
+    let h = a.len().div_ceil(2);
+    let (a0, a1) = a.split_at(h);
+    let z0 = sqr_raw(f, a0);
+    let z2 = sqr_raw(f, a1);
+    let s: Vec<F::E> = (0..h)
+        .map(|i| f.add(a0[i], if i < a1.len() { a1[i] } else { f.zero() }))
+        .collect();
+    let mut z1 = sqr_raw(f, &s);
+    for (k, &v) in z0.iter().enumerate() {
+        z1[k] = f.sub(z1[k], v);
+    }
+    for (k, &v) in z2.iter().enumerate() {
+        z1[k] = f.sub(z1[k], v);
+    }
+    let mut r = vec![f.zero(); 2 * a.len() - 1];
+    r[..z0.len()].copy_from_slice(&z0);
+    r[2 * h..2 * h + z2.len()].copy_from_slice(&z2);
+    for (k, &v) in z1.iter().enumerate() {
+        if h + k < r.len() {
+            r[h + k] = f.add(r[h + k], v);
+        }
+    }
+    r
+}
+
+/// Untrimmed product of two non-empty coefficient slices, length a.len() + b.len() - 1. The
+/// same slice twice (a squaring) goes to `sqr_raw`.
 pub fn mul_raw<F: Field>(f: &F, a: &[F::E], b: &[F::E]) -> Vec<F::E> {
+    if std::ptr::eq(a, b) {
+        return sqr_raw(f, a);
+    }
     let (a, b) = if a.len() >= b.len() { (a, b) } else { (b, a) };
     if b.len() < f.karatsuba_threshold() {
         return school(f, a, b);
+    }
+    if let Some(r) = f.conv_long(a, b) {
+        return r;
     }
     if a.len() >= 2 * b.len() {
         // unbalanced: chunk the longer operand
@@ -142,6 +196,58 @@ pub fn mul_schoolbook<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>) -> Poly<F> {
     r
 }
 
+/// base^e by left-to-right sliding windows of up to 4 bits (odd powers base^1 .. base^15
+/// precomputed): about nbits squarings and nbits / 5 multiplications, against nbits / 2 for
+/// plain binary powering (all nbits for an all-ones exponent such as (2^127 - 2) / 2). `mul`
+/// multiplies modulo the caller's modulus; a squaring passes the same reference twice.
+fn pow_window<T: Clone>(
+    one: T,
+    base: &T,
+    nbits: usize,
+    bit: impl Fn(usize) -> bool,
+    mut mul: impl FnMut(&T, &T) -> T,
+) -> T {
+    const K: usize = 4;
+    let b2 = mul(base, base);
+    let mut tbl = vec![base.clone()];
+    for i in 1..1 << (K - 1) {
+        let next = mul(&tbl[i - 1], &b2);
+        tbl.push(next);
+    }
+    let mut r = one;
+    let mut started = false;
+    let mut i = nbits as isize - 1;
+    while i >= 0 {
+        if !bit(i as usize) {
+            if started {
+                r = mul(&r, &r);
+            }
+            i -= 1;
+            continue;
+        }
+        // window [j, i]: the lowest set bit at or above i - K + 1
+        let mut j = (i - K as isize + 1).max(0);
+        while !bit(j as usize) {
+            j += 1;
+        }
+        let mut val = 0usize;
+        for t in (j..=i).rev() {
+            val = (val << 1) | bit(t as usize) as usize;
+        }
+        if started {
+            for _ in j..=i {
+                r = mul(&r, &r);
+            }
+            r = mul(&r, &tbl[(val - 1) / 2]);
+        } else {
+            r = tbl[(val - 1) / 2].clone();
+            started = true;
+        }
+        i = j - 1;
+    }
+    r
+}
+
 /// Reducer for a fixed modulus: remainder by two multiplications with a precomputed
 /// inverse of the reversed modulus (Newton/Barrett style division).
 pub struct PolyModulus<F: Field> {
@@ -190,6 +296,9 @@ impl<F: Field> PolyModulus<F> {
     pub fn powmod_big(&self, f: &F, a: &Poly<F>, e: &Big) -> Poly<F> {
         let mut r = constant(f, f.one());
         let b = self.rem(f, &rem(f, a, &self.m));
+        if b.len() > 2 {
+            return pow_window(r, &b, e.bits(), |i| e.bit(i), |x, y| self.mulmod(f, x, y));
+        }
         for i in (0..e.bits()).rev() {
             r = self.mulmod(f, &r, &r);
             if e.bit(i) {
@@ -282,7 +391,7 @@ pub fn mulmod<F: Field>(f: &F, a: &Poly<F>, b: &Poly<F>, m: &Poly<F>) -> Poly<F>
     rem(f, &mul(f, a, b), m)
 }
 pub fn powmod<F: Field>(f: &F, a: &Poly<F>, e: u128, m: &Poly<F>) -> Poly<F> {
-    if m.len() > 64 {
+    if m.len() > powmod_table_max() {
         return PolyModulus::new(f, m).powmod_big(f, a, &Big::from_u128(e));
     }
     if m.len() >= 3 {
@@ -304,7 +413,7 @@ pub fn powmod<F: Field>(f: &F, a: &Poly<F>, e: u128, m: &Poly<F>) -> Poly<F> {
     r
 }
 pub fn powmod_big<F: Field>(f: &F, a: &Poly<F>, e: &Big, m: &Poly<F>) -> Poly<F> {
-    if m.len() > 64 {
+    if m.len() > powmod_table_max() {
         return PolyModulus::new(f, m).powmod_big(f, a, e);
     }
     if m.len() >= 3 {
@@ -386,6 +495,11 @@ impl<F: Field> TableModulus<F> {
         let linear = b[2..].iter().all(|&c| f.is_zero(c));
         let mut r = vec![f.zero(); n];
         r[0] = f.one();
+        if !linear {
+            let mut r = pow_window(r, &b, nbits, bit, |x, y| self.reduce(f, &mul_raw(f, x, y)));
+            trim(f, &mut r);
+            return r;
+        }
         for i in (0..nbits).rev() {
             r = self.reduce(f, &mul_raw(f, &r, &r));
             if bit(i) {
@@ -420,6 +534,8 @@ impl<F: Field> TableModulus<F> {
 /// g(Y^q) = g(Y)^q = 0 mod g.
 pub struct Composer<F: Field> {
     m: PolyModulus<F>,
+    /// table reducer for the products when the modulus is short (`POWMOD_TABLE_MAX`)
+    tab: Option<TableModulus<F>>,
     n: usize,
     s: usize,
     /// cols[t][s-1-i] = coefficient t of xi^i (reversed for `dot_rev`)
@@ -437,9 +553,20 @@ impl<F: Field> Composer<F> {
         let n = m.m.len() - 1;
         let s = s.clamp(1, n.max(1));
         let xi = rem(f, xi, &m.m);
+        let tab = (n >= 2 && n < powmod_table_max()).then(|| TableModulus::new(f, &m.m));
+        let mul = |a: &Poly<F>, b: &Poly<F>| -> Poly<F> {
+            match &tab {
+                Some(t) if !a.is_empty() && !b.is_empty() => {
+                    let mut r = t.reduce(f, &mul_raw(f, a, b));
+                    trim(f, &mut r);
+                    r
+                }
+                _ => m.mulmod(f, a, b),
+            }
+        };
         let mut pows: Vec<Poly<F>> = vec![constant(f, f.one())];
         for _ in 1..=s {
-            let next = m.mulmod(f, pows.last().unwrap(), &xi);
+            let next = mul(pows.last().unwrap(), &xi);
             pows.push(next);
         }
         let giant = pows.pop().unwrap();
@@ -449,6 +576,7 @@ impl<F: Field> Composer<F> {
             .collect();
         Composer {
             m,
+            tab,
             n,
             s,
             cols,
@@ -474,7 +602,15 @@ impl<F: Field> Composer<F> {
             acc = if acc.is_empty() {
                 block
             } else {
-                add(f, &self.m.mulmod(f, &acc, &self.giant), &block)
+                let prod = match &self.tab {
+                    Some(t) if !self.giant.is_empty() => {
+                        let mut r = t.reduce(f, &mul_raw(f, &acc, &self.giant));
+                        trim(f, &mut r);
+                        r
+                    }
+                    _ => self.m.mulmod(f, &acc, &self.giant),
+                };
+                add(f, &prod, &block)
             };
         }
         acc
@@ -529,6 +665,105 @@ pub fn multipoint_eval_tree<F: Field>(f: &F, a: &Poly<F>, tree: &[Vec<Poly<F>>])
     rems.iter()
         .map(|r| if r.is_empty() { f.zero() } else { r[0] })
         .collect()
+}
+
+/// Multipoint evaluation at a fixed point set by Bernstein's scaled remainder tree ("Scaled
+/// remainder trees", 2004). For a node Q of the subproduct tree, s_Q holds the coefficients of
+/// x^-1 .. x^-deg Q of A/Q; for Q = Q1 Q2, the coefficients of x^-1 .. x^-deg Q1 of s_Q Q2 are
+/// s_Q1 (a middle product: deg Q1 dot products of length deg Q2 + 1), and at a leaf x - r the one
+/// coefficient is A(r). At the root, s_P comes from the series quotient rev(A) / rev(P) (P is
+/// monic), and every product is a lazily reduced dot product.
+pub struct EvalTree<F: Field> {
+    /// subproduct tree, level 0 = leaves (x - r_i), last level = the root
+    pub tree: Vec<Vec<Poly<F>>>,
+    /// each node polynomial reversed (the middle products read it backwards)
+    rev: Vec<Vec<Poly<F>>>,
+}
+
+impl<F: Field> EvalTree<F> {
+    /// Tree for the points `roots` (not empty).
+    pub fn new(f: &F, roots: &[F::E]) -> Self {
+        let tree = subproduct_tree(f, roots);
+        let rev = tree
+            .iter()
+            .map(|lvl| {
+                lvl.iter()
+                    .map(|q| q.iter().rev().copied().collect())
+                    .collect()
+            })
+            .collect::<Vec<Vec<Poly<F>>>>();
+        EvalTree { tree, rev }
+    }
+
+    pub fn len(&self) -> usize {
+        self.tree[0].len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.tree[0].is_empty()
+    }
+
+    /// The values a(r_i) in the order of the roots.
+    pub fn eval(&self, f: &F, a: &Poly<F>) -> Vec<F::E> {
+        let top = self.tree.len() - 1;
+        let n = self.tree[top][0].len() - 1;
+        let la = a.len();
+        if la == 0 {
+            return vec![f.zero(); self.len()];
+        }
+        // root: the coefficient of x^-m in A/P is S_{la-1-n+m}, S = rev(A) / rev(P) as a power
+        // series; rev(P) has constant term 1, so S_k = rev(A)_k - sum_{j=1..} rev(P)_j S_{k-j}
+        let pr = &self.rev[top][0];
+        let mut sq: Vec<F::E> = Vec::with_capacity(la);
+        for k in 0..la {
+            let m = k.min(n);
+            let t = f.dot_rev(&pr[1..=m], &sq[k - m..k]);
+            sq.push(f.sub(a[la - 1 - k], t));
+        }
+        let s: Vec<F::E> = (1..=n)
+            .map(|m| {
+                let k = la as isize - 1 - n as isize + m as isize;
+                if k < 0 {
+                    f.zero()
+                } else {
+                    sq[k as usize]
+                }
+            })
+            .collect();
+        let mut cur: Vec<Vec<F::E>> = vec![s];
+        for lvl in (0..top).rev() {
+            let nodes = &self.tree[lvl];
+            let mut next: Vec<Vec<F::E>> = Vec::with_capacity(nodes.len());
+            for (i, sq) in cur.iter().enumerate() {
+                let (l, r) = (2 * i, 2 * i + 1);
+                if r >= nodes.len() {
+                    // odd node carried up unchanged
+                    next.push(sq.clone());
+                    continue;
+                }
+                for (child, sib) in [(l, r), (r, l)] {
+                    let d1 = nodes[child].len() - 1;
+                    let qr = &self.rev[lvl][sib]; // reversed sibling, length d2 + 1
+                    let d2 = qr.len() - 1;
+                    // coefficient m: sum_j q_j s_{m+j} = dot_rev(rev(q), s[m-1 ..= m-1+d2])
+                    next.push(
+                        (1..=d1)
+                            .map(|m| f.dot_rev(qr, &sq[m - 1..m + d2]))
+                            .collect(),
+                    );
+                }
+            }
+            cur = next;
+        }
+        cur.into_iter().map(|v| v[0]).collect()
+    }
+
+    /// prod_i a(r_i).
+    pub fn prod(&self, f: &F, a: &Poly<F>) -> F::E {
+        self.eval(f, a)
+            .into_iter()
+            .fold(f.one(), |acc, v| f.mul(acc, v))
+    }
 }
 
 /// Product of (x - r) over the given roots.

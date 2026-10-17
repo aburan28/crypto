@@ -1,0 +1,13 @@
+{
+  "schema": "isogeny-coverage-regression/v1",
+  "binary_source": "ff71f577203179760211cdc1dc3da7a33fc77ec1",
+  "test_source": "2934a2eca",
+  "observation_time_basis": "original command file creation time in UTC",
+  "observed_run": "20261016T0022Z",
+  "expected": "REJECTED",
+  "observed": "ACCEPTED with unsupported COMPLETE coverage",
+  "claimed_maps": 2,
+  "distinct_kernels": 1,
+  "degree": 13,
+  "classification": "coverage metadata correctness defect; the mathematical degree remains valid"
+}

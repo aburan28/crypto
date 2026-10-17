@@ -86,6 +86,7 @@ jobs:
             /build.rs
             /rustfmt.toml
             /clippy.toml
+            /crates/crypto-analysis-core/
             /src/
             /tests/
             /examples/
@@ -99,3 +100,4 @@ jobs:
       # Warnings stay out of the gate: this job answers "does it compile",
       # and the examples carry dead code on purpose.
       - run: RUSTFLAGS=-Awarnings cargo check --workspace --all-targets
+      - run: cargo test --manifest-path crates/crypto-analysis-core/Cargo.toml --lib

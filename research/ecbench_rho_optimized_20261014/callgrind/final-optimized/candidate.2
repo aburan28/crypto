@@ -1,0 +1,2090 @@
+# callgrind format
+version: 1
+creator: callgrind-3.19.0
+pid: 404
+cmd:  /candidate exec
+part: 2
+
+
+desc: I1 cache: 
+desc: D1 cache: 
+desc: LL cache: 
+
+desc: Timerange: Basic block 34463395 - 34809769
+desc: Trigger: Client Request: generic_ic_setup
+
+positions: line
+events: Ir
+summary: 3019137
+
+
+ob=(7) /candidate
+fl=(152) ???
+fn=(1318) <str as core::fmt::Display>::fmt
+0 5
+cfn=(1320) <core::fmt::Formatter>::pad
+calls=1 0 
+0 198
+
+fn=(1394) <core::ffi::c_str::CStr>::from_bytes_with_nul
+0 4
+
+ob=(1) /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+fl=(1) ???
+fn=(0) 0x000000000001ab70
+cob=(7)
+cfi=(152)
+cfn=(846) (below main)
+calls=0 0 
+0 3019137
+
+ob=(7)
+fl=(152)
+fn=(1098) __rustc::__rust_no_alloc_shim_is_unstable_v2
+0 42
+
+fn=(1394)
+0 79
+
+fn=(1768) <serde_json::number::Number as core::convert::From<u64>>::from
+0 10
+cfn=(1770) <u64 as itoa::Unsigned>::fmt
+calls=1 0 
+0 110
+0 7
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100) __rustc::__rust_alloc
+calls=1 0 
+0 51
+0 7
+cob=(3) /usr/lib/x86_64-linux-gnu/libc.so.6
+cfi=(193) ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S
+cfn=(1002) __memcpy_avx_unaligned_erms
+calls=1 264 
+0 10
+0 10
+
+fn=(1838) <serde_json::value::ser::Serializer as serde_core::ser::Serializer>::serialize_seq
+0 23
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 51
+0 15
+
+fn=(1964) std::sys::env::unix::getenv
+0 13
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 10
+0 6
+cfn=(1394)
+calls=1 0 
+0 83
+0 5
+cfn=(1966) std::sys::env::unix::getenv::{closure#0}
+calls=1 0 
+0 237
+0 14
+
+fn=(1980) <std::thread::local::LocalKey<core::cell::RefCell<crypto_lib::cryptanalysis::ic_measurement::State>>>::with::<<crypto_lib::cryptanalysis::ic_measurement::Session>::begin::{closure#0}, core::result::Result<crypto_lib::cryptanalysis::ic_measurement::Session, &str>>
+0 6
+cfn=(1982) <crypto_lib::cryptanalysis::ic_measurement::CURRENT::{K#0}::{closure#1} as core::ops::function::FnOnce<(core::option::Option<&mut core::option::Option<core::cell::RefCell<crypto_lib::cryptanalysis::ic_measurement::State>>>,)>>::call_once
+calls=1 0 
+0 99
+0 18
+cfn=(1986) <std::time::Instant>::now
+calls=1 0 
+0 28
+0 38
+
+fn=(2030) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::inv
+0 1920932
+cfn=(1686) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::mul_fold
+calls=10865 0 
+0 162975
+0 69536
+cfn=(1686)
+calls=6519 0 
+0 97785
+0 26076
+cfn=(1686)
+calls=6519 0 
+0 97785
+0 41287
+cfn=(1686)
+calls=2173 0 
+0 32595
+
+fn=(1728) <alloc::raw_vec::RawVec<u8>>::grow_one
+0 15
+cfn=(1126) <alloc::raw_vec::RawVecInner>::finish_grow
+calls=1 0 
+0 329
+0 10
+
+fn=(1360) ecbench::run
+cfn=(1382) crypto_lib::cryptanalysis::ecbench::record::child_main
+calls=0 0 
+0 3019137
+
+fn=(1660) __rustc::__rust_alloc_zeroed
+0 1
+cfn=(1662) __rustc::__rdl_alloc_zeroed
+calls=1 0 
+0 196
+
+fn=(1836) <serde_json::value::ser::Serializer as serde_core::ser::Serializer>::collect_seq::<&[u64]>
+0 13
+cfn=(1838)
+calls=1 0 
+0 94
+0 28
+cfn=(1768)
+calls=1 0 
+0 209
+0 33
+
+fn=(1890) crypto_lib::cryptanalysis::ecbench::methods::decl
+0 19
+
+fn=(2022) rand_chacha::guts::refill_wide
+0 34
+cfn=(2024) rand_chacha::guts::refill_wide::impl_avx2
+calls=2 0 
+0 1178
+
+fn=(2024)
+0 1178
+
+fn=(2028) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::add
+0 24560
+cfn=(2030)
+calls=720 0 
+0 811440
+0 7200
+cfn=(1686)
+calls=720 0 
+0 10800
+0 3600
+cfn=(1686)
+calls=720 0 
+0 10800
+0 5760
+cfn=(1686)
+calls=720 0 
+0 10800
+0 7920
+
+fn=(1106) std::rt::lang_start::<std::process::ExitCode>::{closure#0}
+cfn=(1108) std::sys::backtrace::__rust_begin_short_backtrace::<fn() -> std::process::ExitCode, std::process::ExitCode>
+calls=0 0 
+0 3019137
+
+fn=(1382)
+cfn=(1976) crypto_lib::cryptanalysis::ic_measurement::dump
+calls=1 0 
+0 9
+0 9
+cfn=(1978) crypto_lib::cryptanalysis::ecbench::methods::solve
+calls=1 0 
+0 3019119
+
+fn=(1662)
+0 19
+cob=(3)
+cfi=(173) ./malloc/./malloc/malloc.c
+cfn=(1078) calloc
+calls=1 3619 
+0 177
+
+fn=(1686)
+0 512550
+
+fn=(1774) <alloc::collections::btree::map::entry::VacantEntry<alloc::string::String, serde_json::value::Value>>::insert_entry
+0 35
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 80
+
+fn=(1994) crypto_lib::cryptanalysis::ecbench::methods::solve_inner
+0 51
+cfn=(1986)
+calls=1 0 
+0 28
+0 5
+cfn=(1996) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::new
+calls=1 0 
+0 261688
+0 11
+cfn=(1560) <crypto_lib::binary_ecc::f2m::F2mElement>::from_biguint
+calls=1 0 
+0 343
+0 10
+cfn=(1560)
+calls=1 0 
+0 343
+0 68
+cfn=(1962) std::env::var::inner
+calls=1 0 
+0 394
+0 17
+cfn=(2006) crypto_lib::cryptanalysis::ecbench::methods::param_u64
+calls=1 0 
+0 174
+0 12
+cfn=(2006)
+calls=1 0 
+0 121
+0 11
+cfn=(2006)
+calls=1 0 
+0 239
+0 21
+cob=(4) /usr/lib/x86_64-linux-gnu/libm.so.6
+cfi=(267) ./math/../sysdeps/ieee754/dbl-64/e_log2.c
+cfn=(2008) __log2_fma
+calls=1 56 
+0 53
+0 13
+cfn=(1834) crypto_lib::cryptanalysis::ecbench::canonical::derive_u64
+calls=1 0 
+0 15699
+0 6
+cfn=(2010) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::jumps
+calls=1 0 
+0 2738045
+0 4
+cfn=(2012) <rand::rngs::std::StdRng as rand_core::SeedableRng>::seed_from_u64
+calls=1 0 
+0 177
+0 7
+cfn=(2032) <std::thread::local::LocalKey<core::cell::RefCell<crypto_lib::cryptanalysis::ic_measurement::State>>>::with::<crypto_lib::cryptanalysis::ic_measurement::begin_online::{closure#0}, ()>
+calls=1 0 
+0 47
+
+fn=(2012)
+0 200
+cfn=(2014) rand_chacha::guts::init_chacha
+calls=2 0 
+0 78
+0 76
+
+fn=(1724) crypto_lib::hash::sha256::sha256
+0 9
+cfn=(1726) crypto_lib::hash::sha256::pad
+calls=1 0 
+0 1006
+0 15
+cfn=(1730) crypto_lib::hash::sha256::compress
+calls=1 0 
+0 4226
+0 4
+cfn=(1730)
+calls=1 0 
+0 4226
+0 34
+cfn=(1264) __rustc::__rust_dealloc
+calls=1 0 
+0 201
+0 8
+
+fn=(1110) ecbench::main
+cfn=(1360)
+calls=0 0 
+0 3019137
+
+fn=(1156) __rustc::__rdl_realloc
+0 110
+cob=(3)
+cfi=(173)
+cfn=(1030) realloc
+calls=5 3394 
+0 1415
+
+fn=(1540) <crypto_lib::binary_ecc::f2m::F2mElement>::mask_in_place
+0 68
+
+fn=(1840) crypto_lib::cryptanalysis::ecbench::canonical::write
+0 38
+cfn=(1842) <alloc::vec::Vec<&alloc::string::String> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<&alloc::string::String, serde_json::map::Keys>>::from_iter
+calls=1 0 
+0 188
+0 20
+cfn=(1848) crypto_lib::cryptanalysis::ecbench::canonical::write_str
+calls=1 0 
+0 408
+0 43
+cob=(3)
+cfi=(216) ./string/../sysdeps/x86_64/multiarch/memcmp-avx2-movbe.S
+cfn=(1298) __memcmp_avx2_movbe
+calls=1 80 
+0 18
+0 22
+cfn=(1841) crypto_lib::cryptanalysis::ecbench::canonical::write'2
+calls=1 0 
+0 1440
+0 21
+cfn=(1264)
+calls=1 0 
+0 90
+0 21
+cfn=(1848)
+calls=1 0 
+0 152
+0 45
+cob=(3)
+cfi=(216)
+cfn=(1298)
+calls=2 80 
+0 39
+0 35
+cfn=(1841)
+calls=1 0 
+0 1162
+0 14
+cfn=(1846) core::slice::sort::shared::smallsort::insertion_sort_shift_left::<&alloc::string::String, <&alloc::string::String as core::cmp::PartialOrd>::lt>
+calls=1 0 
+0 68
+0 7
+cfn=(1138) <alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>
+calls=1 0 
+0 125
+0 1
+
+fn=(1841)
+0 57
+cfn=(1841)
+calls=1 0 
+0 1112
+0 7
+cfn=(1850) <serde_json::number::Number>::is_f64
+calls=1 0 
+0 221
+0 6
+cfn=(1848)
+calls=1 0 
+0 1412
+0 12
+cfn=(1852) <serde_json::number::Number as core::fmt::Display>::fmt
+calls=1 0 
+0 208
+0 15
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 10
+0 20
+cfn=(1264)
+calls=1 0 
+0 90
+0 33
+cfn=(1138)
+calls=1 0 
+0 508
+0 3
+
+fn=(2014)
+0 26
+cfn=(2016) rand_chacha::guts::init_chacha::impl_avx
+calls=2 0 
+0 38
+0 14
+
+fn=(2018) <alloc::vec::Vec<crypto_lib::cryptanalysis::koblitz_strong_rho::JumpG<u64, u64>> as alloc::vec::spec_from_iter::SpecFromIter<crypto_lib::cryptanalysis::koblitz_strong_rho::JumpG<u64, u64>, core::iter::adapters::map::Map<core::ops::range::Range<usize>, <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::jumps::{closure#0}>>>::from_iter
+0 25
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 51
+0 15
+cfn=(2020) <core::iter::adapters::map::Map<core::ops::range::Range<usize>, <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::jumps::{closure#0}> as core::iter::traits::iterator::Iterator>::fold::<(), core::iter::traits::iterator::Iterator::for_each::call<crypto_lib::cryptanalysis::koblitz_strong_rho::JumpG<u64, u64>, <alloc::vec::Vec<crypto_lib::cryptanalysis::koblitz_strong_rho::JumpG<u64, u64>>>::extend_trusted<core::iter::adapters::map::Map<core::ops::range::Range<usize>, <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::jumps::{closure#0}>>::{closure#0}>::{closure#0}>
+calls=1 0 
+0 2737732
+0 12
+
+fn=(2034) <crypto_lib::cryptanalysis::ic_measurement::Trace>::boundary
+0 12
+
+fn=(884) std::rt::lang_start_internal
+cfn=(1106)
+calls=0 0 
+0 3019137
+
+fn=(1266) __rustc::__rdl_dealloc
+0 38
+cob=(3)
+cfi=(173)
+cfn=(1040) free
+calls=38 3350 
+0 3706
+
+fn=(1680) <crypto_lib::cryptanalysis::semaev_decomp::Gf2>::new
+0 102
+
+fn=(1772) <alloc::collections::btree::map::BTreeMap<alloc::string::String, serde_json::value::Value>>::insert
+0 51
+cob=(3)
+cfi=(216)
+cfn=(1298)
+calls=1 80 
+0 21
+0 56
+cfn=(1774)
+calls=2 0 
+0 170
+0 28
+
+fn=(1842)
+0 11
+cfn=(1844) <alloc::collections::btree::map::Iter<alloc::string::String, serde_json::value::Value> as core::iter::traits::iterator::Iterator>::next
+calls=1 0 
+0 42
+0 20
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 51
+0 59
+
+fn=(1976)
+0 9
+
+fn=(1992) crypto_lib::cryptanalysis::ecbench::methods::parse_hex
+0 32
+cfn=(1816) <core::str::pattern::StrSearcher>::new
+calls=2 0 
+0 286
+0 10
+cfn=(1818) <core::str::pattern::StrSearcher as core::str::pattern::Searcher>::next
+calls=2 0 
+0 184
+0 6
+cfn=(1818)
+calls=2 0 
+0 172
+0 554
+
+fn=(2000) <crypto_lib::cryptanalysis::koblitz_strong_rho::Linear<u64>>::from_images
+0 52
+cfn=(1098)
+calls=2 0 
+0 2
+0 8
+cfn=(1100)
+calls=2 0 
+0 5789
+0 50
+cob=(3)
+cfi=(205) ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S
+cfn=(1068) __memset_avx2_unaligned_erms
+calls=2 167 
+0 252
+0 48
+cob=(3)
+cfi=(205)
+cfn=(1068)
+calls=12 167 
+0 1512
+0 58
+cob=(3)
+cfi=(205)
+cfn=(1068)
+calls=2 167 
+0 252
+0 49164
+
+fn=(2004) <alloc::collections::btree::map::IntoIter<u64, alloc::collections::btree::set_val::SetValZST>>::dying_next
+0 3569
+cfn=(1264)
+calls=1 0 
+0 111
+0 7
+cfn=(1264)
+calls=1 0 
+0 90
+0 244
+cfn=(1264)
+calls=16 0 
+0 1604
+0 1306
+cfn=(1264)
+calls=1 0 
+0 90
+0 985
+
+fn=(2006)
+0 141
+cob=(3)
+cfi=(216)
+cfn=(1298)
+calls=6 80 
+0 117
+0 276
+
+fn=(2010)
+0 12
+cfn=(2012)
+calls=1 0 
+0 177
+0 9
+cfn=(2018)
+calls=1 0 
+0 2737840
+0 7
+
+fn=(1726)
+0 12
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 8
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 21
+0 4
+cfn=(1728)
+calls=1 0 
+0 354
+0 552
+
+fn=(1100)
+0 41
+cfn=(1102) __rustc::__rdl_alloc
+calls=41 0 
+0 9666
+
+fn=(1102)
+0 369
+cob=(3)
+cfi=(173)
+cfn=(920) malloc
+calls=41 3281 
+0 9297
+
+fn=(1108)
+cfn=(1110)
+calls=0 0 
+0 3019137
+
+fn=(1126)
+0 150
+cfn=(1154) __rustc::__rust_realloc
+calls=4 0 
+0 1232
+0 14
+cfn=(1098)
+calls=2 0 
+0 2
+0 6
+cfn=(1100)
+calls=2 0 
+0 99
+0 88
+cfn=(1154)
+calls=1 0 
+0 298
+0 13
+
+fn=(1320)
+0 25
+cfn=(1182) <alloc::string::String as core::fmt::Write>::write_str
+calls=1 0 
+0 173
+
+fn=(1562) <alloc::vec::Vec<u64> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<u64, num_bigint::biguint::iter::U64Digits>>::from_iter
+0 132
+cfn=(1098)
+calls=4 0 
+0 4
+0 16
+cfn=(1100)
+calls=4 0 
+0 204
+0 108
+
+fn=(1606) __umodti3
+0 854
+
+fn=(1808) core::ptr::drop_glue::<serde_json::value::Value>
+0 30
+cfn=(1812) <alloc::collections::btree::map::IntoIter<alloc::string::String, serde_json::value::Value>>::dying_next
+calls=1 0 
+0 54
+0 30
+cfn=(1264)
+calls=2 0 
+0 180
+0 8
+cfn=(1809) core::ptr::drop_glue::<serde_json::value::Value>'2
+calls=2 0 
+0 369
+0 6
+cfn=(1812)
+calls=2 0 
+0 176
+0 14
+
+fn=(1809)
+0 28
+cfn=(1264)
+calls=1 0 
+0 90
+0 47
+cfn=(1809)
+calls=1 0 
+0 118
+0 16
+cfn=(1264)
+calls=1 0 
+0 90
+0 8
+cfn=(1264)
+calls=1 0 
+0 90
+
+fn=(1846)
+0 34
+cob=(3)
+cfi=(216)
+cfn=(1298)
+calls=1 80 
+0 21
+0 13
+
+fn=(1852)
+0 5
+cfn=(1318)
+calls=1 0 
+0 203
+
+fn=(1984) <std::sys::thread_local::native::lazy::Storage<core::cell::RefCell<crypto_lib::cryptanalysis::ic_measurement::State>, !>>::get_or_init_slow::<crypto_lib::cryptanalysis::ic_measurement::CURRENT::__rust_std_internal_init_fn>
+0 15
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 64
+0 7
+
+fn=(1996)
+0 21
+cfn=(1562)
+calls=1 0 
+0 116
+0 16
+cfn=(1562)
+calls=1 0 
+0 116
+0 12
+cfn=(1264)
+calls=1 0 
+0 90
+0 3
+cfn=(1680)
+calls=1 0 
+0 102
+0 86
+cfn=(1098)
+calls=2 0 
+0 2
+0 6
+cfn=(1100)
+calls=2 0 
+0 102
+0 996
+cfn=(1686)
+calls=122 0 
+0 1830
+0 632
+cfn=(1998) <alloc::vec::Vec<(u64, u64)> as alloc::vec::spec_from_iter::SpecFromIter<(u64, u64), core::iter::adapters::map::Map<core::ops::range::Range<usize>, crypto_lib::cryptanalysis::koblitz_strong_rho::invert_columns<u64>::{closure#0}>>>::from_iter
+calls=2 0 
+0 54726
+0 75995
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1660)
+calls=1 0 
+0 197
+0 28
+cfn=(1264)
+calls=2 0 
+0 180
+0 11
+cfn=(1264)
+calls=1 0 
+0 90
+0 31741
+cfn=(2000)
+calls=1 0 
+0 31213
+0 4
+cfn=(2000)
+calls=1 0 
+0 25974
+0 20
+cfn=(1264)
+calls=1 0 
+0 90
+0 7
+cfn=(1264)
+calls=1 0 
+0 90
+0 3
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 563
+cfn=(2002) <alloc::collections::btree::map::entry::VacantEntry<usize, alloc::collections::btree::set_val::SetValZST>>::insert_entry
+calls=61 0 
+0 6131
+0 488
+cfn=(1606)
+calls=61 0 
+0 854
+0 7029
+cfn=(2002)
+calls=1 0 
+0 100
+0 540
+cfn=(2002)
+calls=60 0 
+0 6355
+0 6346
+cfn=(2004)
+calls=1 0 
+0 71
+0 366
+cfn=(2004)
+calls=122 0 
+0 7935
+0 253
+cfn=(1264)
+calls=1 0 
+0 90
+0 9
+
+fn=(1998)
+0 58
+cfn=(1098)
+calls=2 0 
+0 2
+0 8
+cfn=(1100)
+calls=2 0 
+0 175
+0 54483
+
+fn=(2002)
+0 3361
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=95 264 
+0 1082
+0 713
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 169
+cfn=(1098)
+calls=8 0 
+0 8
+0 7
+cfn=(1098)
+calls=7 0 
+0 7
+0 45
+cfn=(1100)
+calls=15 0 
+0 2630
+0 270
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=15 264 
+0 165
+0 303
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=12 264 
+0 129
+0 321
+cfn=(1098)
+calls=1 0 
+0 1
+0 3
+cfn=(1100)
+calls=1 0 
+0 51
+0 20
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 11
+0 16
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 11
+0 87
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 12
+0 6
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 12
+0 48
+cfn=(1098)
+calls=2 0 
+0 2
+0 6
+cfn=(1100)
+calls=2 0 
+0 102
+0 243
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=10 264 
+0 118
+0 80
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=10 264 
+0 118
+0 2374
+
+fn=(2020)
+0 1359
+cfn=(2022)
+calls=2 0 
+0 1212
+0 21220
+cfn=(2026) <crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::double
+calls=1485 0 
+0 1813504
+0 6730
+cfn=(2028)
+calls=752 0 
+0 892880
+0 827
+
+fn=(2032)
+0 7
+cfn=(1982)
+calls=1 0 
+0 8
+0 20
+cfn=(2034)
+calls=1 0 
+0 12
+
+fn=(1730)
+0 8452
+
+fn=(846)
+cob=(3)
+cfi=(153) ./csu/../csu/libc-start.c
+cfn=(848) __libc_start_main@@GLIBC_2.34
+calls=0 242 
+0 3019137
+
+fn=(1138)
+0 162
+cfn=(1126)
+calls=6 0 
+0 1573
+0 54
+
+fn=(1560)
+0 100
+cfn=(1562)
+calls=2 0 
+0 232
+0 52
+cfn=(1540)
+calls=2 0 
+0 68
+0 38
+cfn=(1264)
+calls=2 0 
+0 180
+0 16
+
+fn=(1770)
+0 110
+
+fn=(1816)
+0 156
+cob=(3)
+cfi=(216)
+cfn=(1298)
+calls=2 80 
+0 18
+0 112
+
+fn=(1850)
+0 221
+
+fn=(1962)
+0 10
+cfn=(1964)
+calls=1 0 
+0 368
+0 16
+
+fn=(2026)
+0 26218
+cfn=(2030)
+calls=1453 0 
+0 1637531
+0 11624
+cfn=(1686)
+calls=1453 0 
+0 21795
+0 8718
+cfn=(1686)
+calls=1453 0 
+0 21795
+0 10171
+cfn=(1686)
+calls=1453 0 
+0 21795
+0 8718
+cfn=(1686)
+calls=1453 0 
+0 21795
+0 23344
+
+fn=(882) main
+cfn=(884)
+calls=0 0 
+0 3019137
+
+fn=(1182)
+0 16
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 10
+0 16
+cfn=(1138)
+calls=1 0 
+0 128
+0 3
+
+fn=(1812)
+0 115
+cfn=(1264)
+calls=1 0 
+0 90
+0 25
+
+fn=(1844)
+0 42
+
+fn=(1966)
+0 17
+cob=(3)
+cfi=(237) ./stdlib/./stdlib/getenv.c
+cfn=(1968) getenv
+calls=1 34 
+0 202
+0 18
+
+fn=(1982)
+0 18
+cfn=(1984)
+calls=1 0 
+0 86
+0 3
+
+fn=(1986)
+0 4
+cfn=(1988) <std::sys::pal::unix::time::Timespec>::now
+calls=2 0 
+0 52
+
+fn=(2016)
+0 38
+
+fn=(1154)
+0 5
+cfn=(1156)
+calls=5 0 
+0 1525
+
+fn=(1264)
+0 38
+cfn=(1266)
+calls=38 0 
+0 3744
+
+fn=(1818)
+0 356
+
+fn=(1834)
+0 14
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 48
+0 14
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 51
+0 7
+cob=(3)
+cfi=(193)
+cfn=(1002)
+calls=1 264 
+0 10
+0 12
+cfn=(1772)
+calls=1 0 
+0 154
+0 3
+cfn=(1098)
+calls=1 0 
+0 1
+0 4
+cfn=(1100)
+calls=1 0 
+0 48
+0 12
+cfn=(1836)
+calls=1 0 
+0 377
+0 11
+cfn=(1772)
+calls=1 0 
+0 172
+0 14
+cfn=(1840)
+calls=1 0 
+0 3957
+0 9
+cfn=(1724)
+calls=1 0 
+0 9729
+0 6
+cfn=(1264)
+calls=1 0 
+0 156
+0 4
+cfn=(1808)
+calls=1 0 
+0 867
+0 9
+
+fn=(1848)
+0 888
+cfn=(1138)
+calls=2 0 
+0 803
+0 54
+cfn=(1138)
+calls=1 0 
+0 225
+0 2
+
+fn=(1978)
+0 20
+cfn=(1890)
+calls=1 0 
+0 19
+0 20
+cfn=(1980)
+calls=1 0 
+0 189
+0 16
+cfn=(1992)
+calls=1 0 
+0 622
+0 8
+cfn=(1992)
+calls=1 0 
+0 622
+0 16
+cfn=(1994)
+calls=1 0 
+0 3017587
+
+fn=(1988)
+0 12
+cob=(3)
+cfi=(266) ./time/../sysdeps/unix/sysv/linux/clock_gettime.c
+cfn=(1990) clock_gettime@@GLIBC_2.17
+calls=2 38 
+0 20
+0 20
+
+ob=(4)
+fl=(267)
+fn=(2008)
+56 1
+fi=(268) ./math/../sysdeps/ieee754/dbl-64/math_config.h
++11 1
+fe=(267)
+-11 1
+-17 1
++17 1
+-17 1
++17 2
++28 3
++17 1
++5 1
++2 1
++6 1
+-13 1
++14 1
++23 1
+-36 2
++4 4
+-3 2
++5 1
++20 1
+-24 3
++10 2
++24 2
+-23 1
++1 1
++13 1
+-13 1
++14 1
+-14 1
++18 1
+-4 2
++8 2
+-3 1
++3 3
++1 2
++1 1
+
+ob=(3)
+fl=(153)
+fn=(848)
+cfi=(155) ./csu/../sysdeps/nptl/libc_start_call_main.h
+cfn=(874) (below main)
+calls=0 29 
+360 3019137
+
+fl=(193)
+fn=(1002)
+264 156
++6 156
++1 156
++2 80
++1 80
++1 80
++3 70
++1 70
++1 70
++3 140
++30 76
++1 76
++2 26
++1 26
++33 50
++1 50
++1 50
++1 50
++2 50
++17 26
++1 26
++1 26
++1 26
++1 26
++7 9
++1 9
++1 9
++1 9
++1 9
++1 9
++1 18
++5 10
++1 10
++5 10
++1 10
++2 9
++1 9
++1 9
++20 1
++1 1
++4 1
++2 1
++4 1
++1 1
++11 1
++3 1
++2 1
++2 1
++4 1
++1 1
++9 1
++1 1
++2 1
++2 1
++1 1
++1 1
++3 1
++2 1
++2 1
++2 2
++6 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
+-11 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++1 1
++2 1
++1 1
++1 1
++1 1
++2 1
++4 2
+
+fl=(238) ./string/../sysdeps/x86_64/multiarch/strcmp-avx2.S
+fn=(1972) __strncmp_avx2
+230 1
++5 1
++14 1
++25 1
++1 1
++1 1
++2 1
++1 1
++4 1
++4 1
++2 1
++2 1
++3 1
++2 1
++1 1
++11 1
++10 1
++1 1
++3 1
++4 2
++5 1
++1 1
++1 1
+957 1
++1 1
++1 1
++1 1
++2 1
++3 1
++1 1
++4 1
++1 1
+
+fl=(266)
+fn=(1990)
+38 4
++2 4
++28 4
++1 4
+-25 2
++42 2
+
+fl=(173)
+fn=(944) alloc_perturb
+1999 6
++2 2
+
+fn=(1078)
+3619 1
++10 1
+-10 4
++10 8
++8 2
++3 3
++2 2
++34 4
+fi=(174) ./malloc/./malloc/arena.c
+162 2
+fe=(173)
+3652 1
++1 1
++21 2
+-21 2
++21 1
+cfn=(932) _int_malloc
+calls=1 1338 
+* 71
++2 2
++40 1
+-12 1
++12 7
++11 1
++2 2
++2 2
+-55 3
++3 2
++78 1
+-25 2
++25 4
+-25 1
+cfi=(205)
+cfn=(1068)
+calls=1 167 
+* 42
+* 1
+
+fn=(1368) malloc_consolidate
+4711 1
++17 1
+-17 4
++28 1
+-28 3
++15 1
++2 1
++13 2
++1 2
+-1 18
++1 18
++62 30
++1 8
+-31 116
++4 34
++2 17
++1 34
++1 34
++2 34
+-4 41
++1 82
++1 82
++2 82
++1 12
++4 6
++2 6
+-2 12
++3 6
++9 12
+-12 52
++2 52
+-2 104
++3 52
++9 157
+-56 116
++4 174
++1 232
++8 58
+-3 116
++3 58
+-3 58
++4 58
+-4 58
++5 58
+-5 58
++5 116
++2 116
++1 14
++2 14
+-1 14
++2 56
++2 84
+cfn=(1158) unlink_chunk.constprop.0
+calls=14 1620 
+* 283
+* 56
++3 116
++5 82
+-1 41
++1 41
+cfn=(1158)
+calls=41 1620 
+* 832
+* 82
+
+fn=(920)
+3281 205
++7 82
+1338 82
++19 202
+3298 76
++2 164
++3 82
++10 24
++28 60
+-36 117
+3187 58
++1 58
++2 29
++1 29
+-1 87
++1 29
++1 29
+3341 145
+-26 48
+cfn=(932)
+calls=12 1338 
+* 7607
++1 60
+fi=(174)
+162 24
+fe=(173)
+
+fn=(1030)
+3394 45
++6 10
++4 10
++7 10
++11 5
+-2 5
++5 5
+-3 10
++2 10
++4 15
+fi=(174)
+162 15
+fe=(173)
+3436 20
++1 10
+1338 10
++19 30
+3447 10
++31 10
++2 30
+cfn=(1034) _int_realloc
+calls=5 4814 
+* 1050
+* 5
++1 25
+fi=(174)
+162 20
+fe=(173)
+3481 10
++29 45
+
+fn=(1034)
+4814 35
++11 20
++1 20
++6 10
++2 10
++1 20
++2 20
++3 10
++14 2
++53 4
+-53 4
++57 2
+-57 2
++57 4
+-2 4
++2 2
++1 1
++16 1
++1 9
+-1 1
++1 36
+-79 8
++12 8
++12 9
+cfn=(932)
+calls=3 1338 
+* 338
+* 3
++1 6
++3 3
++1 3
++5 6
++8 3
+-1 3
++4 3
+-3 18
++3 3
+cfi=(193)
+cfn=(1002)
+calls=3 264 
+* 42
+* 3
++1 12
+cfn=(1036) _int_free
+calls=3 4417 
+* 211
++2 3
++22 1
+-4 1
++3 1
++5 1
+-4 1
+-1 1
++1 1
++4 1
+-1 1
++1 1
+cfn=(1036)
+calls=1 4417 
+* 107
+* 1
+-60 1
+-1 2
++5 3
+cfn=(1158)
+calls=1 1620 
+* 20
++44 4
+
+fn=(1158)
+1620 70
++2 350
++3 70
++1 140
++2 280
+-3 70
++6 70
++1 70
++1 164
++2 6
++1 9
++3 6
++14 3
++1 3
++3 140
+
+fn=(1036)
+4417 336
++10 42
+-10 126
++10 84
++6 210
++1 84
++4 210
++8 210
+-1 84
++1 84
++9 42
++9 42
+-15 42
++6 84
++20 168
++14 26
++11 40
++2 30
+2006 30
+4523 10
++1 10
++4 20
++2 10
+-2 10
++2 10
++4 20
++2 40
++1 10
++19 34
+4698 462
+4565 6
++6 9
++7 3
+-4 3
++4 6
++3 6
++5 9
++3 6
++1 6
++1 6
+2006 9
+4597 6
++1 1
++2 1
+-1 1
++2 4
++2 2
+cfn=(1158)
+calls=1 1620 
+* 32
++3 6
++5 6
++4 1
++9 1
+-1 1
++1 3
++1 2
+-1 2
+-1 2
++1 6
++1 4
++12 3
+-10 3
++11 3
+-1 3
+-8 6
++2 2
++3 1
++1 1
++2 1
++1 1
++30 2
+3177 29
++2 29
+-4 29
++2 87
++1 29
++1 29
+4478 29
+4634 2
++1 2
++2 2
++1 2
++50 9
+-76 2
++1 2
+-1 2
+cfn=(1158)
+calls=2 1620 
+* 40
++1 2
+
+fn=(1040)
+3350 76
+-4 38
++14 38
+-14 76
++12 38
++4 38
+-4 38
++4 76
++17 114
+fi=(174)
+162 114
+fe=(173)
+3385 76
+cfn=(1036)
+calls=38 4417 
+* 2794
++3 38
++1 152
+
+fn=(932)
+1338 32
+3766 128
+1357 16
+3766 16
+1357 48
+3807 32
++27 32
++2 66
++3 11
++2 22
++56 10
++62 30
++1 6
++20 11
+-1 11
+-1 11
++1 22
++1 44
++4 11
++6 53
+-1 9
++1 9
++3 18
++1 9
++2 18
+-3 36
++1 18
++2 36
++1 81
++2 27
++1 108
++2 108
+-10 27
++12 54
++1 54
++2 54
++11 72
++31 21
++1 21
++4 42
++29 42
++8 27
++1 9
++1 3
+-1 3
++4 6
++5 3
+-2 3
++2 9
++1 6
++7 2
+-1 8
++2 6
+3900 14
++2 14
+-2 14
++2 28
++2 5
++1 10
++6 5
+-4 5
++1 5
++1 5
++2 10
++7 20
+-1 10
++1 10
++5 22
++1 15
++2 2
+-2 13
+1999 1
+3940 1
+1999 6
+3940 4
+1999 8
+3841 42
+3961 2
+cfn=(1368)
+calls=1 4711 
+* 4108
+* 1
+4409 144
+4085 48
++1 72
++1 24
+-1 24
++57 48
++9 24
+-9 48
++9 24
+-9 48
++1 24
++1 24
++1 24
++1 24
++6 48
+-10 6
++9 3
+-9 6
++9 3
+-9 6
++1 3
++1 3
++1 3
++1 3
++6 6
+3990 90
+4168 18
++11 22
++2 4
++3 2
+-3 2
++3 4
++1 4
++67 9
++1 9
++1 9
+-1 9
++1 9
++1 18
++1 27
++5 60
++16 15
++2 30
+-4 60
++8 15
++3 30
++2 6
++1 6
++1 6
+-2 24
+-27 6
+-99 81
+4019 14
++2 6
+-1 12
++29 6
++1 6
++4 12
++29 12
++8 2
+3928 1
++1 1
++1 2
++2 1
+3177 1
++2 1
+3933 1
+3175 2
++2 4
+-6 1
++8 1
++1 1
+3899 9
+4114 5
++1 2
++6 2
++7 1
+-1 4
++2 2
++2 1
++1 3
++2 1
++1 2
+4295 18
++3 18
++2 9
++3 9
+-3 18
++3 9
+cfn=(1158)
+calls=9 1620 
+* 180
++3 27
++15 14
+-5 7
++5 14
++1 14
++3 7
++1 7
++1 7
++3 14
++1 7
++1 14
++5 56
++2 21
++1 7
+1999 7
+4343 7
+1999 16
+4343 2
+1999 4
+4309 2
+-1 2
++1 4
+4188 2
++1 12
++6 4
++5 2
++1 2
+-1 4
++1 2
+cfn=(1158)
+calls=2 1620 
+* 64
++3 6
++13 4
+-4 2
++4 4
++1 4
++3 2
++1 2
++1 2
++1 4
++2 2
++3 8
++2 3
++1 1
++3 1
+4405 4
+cfn=(944)
+calls=1 1999 
+* 4
+4229 8
++2 3
++1 1
++3 1
+4405 4
+cfn=(944)
+calls=1 1999 
+* 4
+* 4
+
+fl=(215) ./string/../sysdeps/x86_64/multiarch/strlen-avx2.S
+fn=(1258) __strlen_avx2
+65 1
++1 1
++1 1
++3 1
++2 1
++1 1
++3 1
++1 1
++8 1
++1 1
++1 1
++5 2
+
+fl=(237)
+fn=(1968)
+34 7
++4 8
++3 1
++10 1
+-10 1
++50 9
+-26 1
+cfi=(215)
+cfn=(1258)
+calls=1 * 
+* 13
+* 1
++8 1
+-6 1
+-2 1
++7 1
++3 78
++9 42
+cfi=(238)
+cfn=(1972)
+calls=1 230 
+* 33
+* 1
+* 2
+
+fl=(216)
+fn=(1298)
+80 13
++1 13
++75 6
++10 6
++1 6
++1 6
++3 12
+401 13
++1 13
++5 11
++1 11
++1 11
++1 11
++1 11
++3 11
++1 11
++1 11
++1 11
++3 11
++1 11
++1 5
++1 10
++31 2
++1 2
++1 2
++1 2
++2 2
+
+fl=(205)
+fn=(1068)
+167 34
++5 17
++1 17
++1 17
++1 17
++1 17
++69 17
++1 17
++6 17
++1 17
++12 17
++3 17
++1 17
++12 17
++1 17
++13 17
++1 17
++2 17
++3 17
++3 17
++3 17
++1 17
++1 17
++1 17
++1 17
++1 17
++1 17
+-6 209
++1 209
++1 209
++1 209
++1 209
++1 209
++1 226
++3 17
++1 17
++1 17
++1 17
++3 34
+
+fl=(155)
+fn=(874)
+cob=(7)
+cfi=(152)
+cfn=(882)
+calls=0 0 
+58 3019137
+
+totals: 3019137

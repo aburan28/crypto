@@ -1,0 +1,12 @@
+{
+  "exit_code": 1,
+  "expected_error": "raw stage stream changed: arm-00.stdout",
+  "mutated_stream": "logs/arm-00.stdout",
+  "mutation": "first status PASS changed to FAIL in isolated copied log",
+  "schema": "n83.pareto-shape-retained-tamper/v1",
+  "source_sha256": "bc1e06cb4a448082a5c6188b9e784684842d7054ab9623d939738888a03a7fce",
+  "status": "PASS_FAIL_CLOSED_RAW_STREAM_CONTROL",
+  "stderr_sha256": "44da17d9fca4b5c22b42b86ed8c16c7d432bba4f5978ac689b626b97f283fe20",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "utc": "2026-10-15T05:40:51.108760+00:00"
+}

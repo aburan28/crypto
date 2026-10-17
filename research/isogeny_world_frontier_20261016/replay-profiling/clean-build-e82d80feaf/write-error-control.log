@@ -1,0 +1,11 @@
+
+running 1 test
+
+thread 'replay_trace::write_failure_tests::requested_trace_write_failure_propagates_without_double_panic' (517944) panicked at src/replay_trace.rs:102:12:
+requested replay trace could not be written/flushed: Os { code: 9, kind: Uncategorized, message: "Bad file descriptor" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+requested replay trace failed during terminal recording: Bad file descriptor (os error 9)
+test replay_trace::write_failure_tests::requested_trace_write_failure_propagates_without_double_panic ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 84 filtered out; finished in 0.00s
+

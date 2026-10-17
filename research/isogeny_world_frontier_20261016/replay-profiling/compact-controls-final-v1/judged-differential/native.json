@@ -1,0 +1,17 @@
+{
+  "record": {
+    "elapsed_ms_operational_only": 0,
+    "error": "differential/separability check failed",
+    "input_sha256": "712a9fd474efa9c59baceafc60be31fbf437e0ec65056c01eaec40a8fac62725",
+    "score": null,
+    "status": "REJECTED",
+    "tool": {
+      "git_commit": "300e867ca999a7506c2a52bf192df424b758010f",
+      "git_dirty": "true",
+      "name": "isogeny",
+      "standards_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+      "version": "0.1.0"
+    }
+  },
+  "status": "FAIL"
+}

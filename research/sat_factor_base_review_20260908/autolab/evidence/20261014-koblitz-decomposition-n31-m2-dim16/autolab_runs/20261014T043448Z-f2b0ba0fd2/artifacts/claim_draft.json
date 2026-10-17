@@ -1,0 +1,138 @@
+{
+  "a": 0,
+  "acceptance_vs_ledger": {
+    "dim_16_m_2_quadratic": true,
+    "disagreements_zero": true,
+    "ffd_logged": true,
+    "median_under_1h": true
+  },
+  "arms": {
+    "sym_f4": {
+      "deg": 2,
+      "effort_splits": 4095.0,
+      "eqs": 31,
+      "ffd": 4,
+      "found": 0,
+      "found_ms_median": NaN,
+      "gate": "ok",
+      "inconclusive": 0,
+      "refuted": 1,
+      "refuted_ms_median": 7826.0,
+      "vars": 31,
+      "via_t": 0
+    },
+    "x_chained_f4": {
+      "deg": 2,
+      "effort_splits": 7056.0,
+      "eqs": 31,
+      "ffd": 3,
+      "found": 1,
+      "found_ms_median": 13915.0,
+      "gate": "ok",
+      "inconclusive": 0,
+      "refuted": 0,
+      "refuted_ms_median": NaN,
+      "vars": 32,
+      "via_t": 0
+    }
+  },
+  "autolab_run_id": "20261014T043448Z-f2b0ba0fd2",
+  "beat_id": "koblitz.decomposition.n31_m2_dim16",
+  "claim_boundary": "Public synthetic Koblitz Semaev decomposition oracle measure only. Not key recovery, not asymptotic sub-rho, not imported points, not ledger promotion until independent validation.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-sqrt",
+    "not imported/external points",
+    "not ledger promotion until independent validation"
+  ],
+  "created_at": "2026-10-14T05:22:04.605775+00:00",
+  "dimension_l_or_dim": 16,
+  "disagreements": 0,
+  "divisor_indices": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "eq_var_ratio": 0.96875,
+  "evidence_paths": [
+    "/Volumes/SSD990/ic-auto-202610132132/research/sat_factor_base_review_20260908/autolab/runs/20261014T043448Z-f2b0ba0fd2/logs/direct.stdout.jsonl",
+    "/Volumes/SSD990/ic-auto-202610132132/research/sat_factor_base_review_20260908/autolab/runs/20261014T043448Z-f2b0ba0fd2/receipts/direct.resource.json"
+  ],
+  "executable_or_source_hash": {
+    "executable": "56db268c9eade85503fc603726ff3e1af80ef7204f55b5378d85accadabe388a",
+    "source": "b5c15cfb6879bb85512e31aed14dc0409a2e94e65a8f253b96dc4616933a3fc4"
+  },
+  "fb_sizes": {
+    "F_u": 69441,
+    "F_x": 68327
+  },
+  "ffd_or_degree_of_regularity": {
+    "draws": 1,
+    "max": 4,
+    "mean": 3.5,
+    "min": 3,
+    "note": "FFD from first target draw in paired_bench; control-plane decomposition launch",
+    "sym_f4": 4,
+    "x_chained_f4": 3
+  },
+  "fixture_hash": "b5c15cfb6879bb85512e31aed14dc0409a2e94e65a8f253b96dc4616933a3fc4",
+  "host_id": {
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Mac.attlocal.net",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs/20261014T043448Z-f2b0ba0fd2/validation/independent_replay.json",
+  "largest_solvable": {
+    "budget": "1h",
+    "dim": 16,
+    "m": 2,
+    "n": 31,
+    "observed_median_ms": 13915.0,
+    "under_budget": true,
+    "unknowns": 32,
+    "verdict_mix": {
+      "found": 1,
+      "inconclusive": 0,
+      "refuted": 0
+    }
+  },
+  "m_summands": 2,
+  "median_ms_per_target": 13915.0,
+  "median_ms_per_target_detail": {
+    "reported_as": "max(found, refuted) class medians for 1h gate honesty",
+    "sym_f4_found_median_ms": NaN,
+    "sym_f4_refuted_median_ms": 7826.0,
+    "x_chained_f4_found_median_ms": 13915.0,
+    "x_chained_f4_refuted_median_ms": NaN
+  },
+  "n": 31,
+  "n_or_bits": 31,
+  "node_budget": 50000,
+  "oracle_class": "groebner",
+  "peak_rss_bytes": 3738796032,
+  "producer_exit_codes": {
+    "direct": 0
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "common_cap_bytes": 17179869184,
+    "node_budget": 50000,
+    "observed_peak_rss_bytes": 3738796032,
+    "under_cap": true
+  },
+  "sat": false,
+  "schema_version": 2,
+  "seeds": {
+    "paired_bench_default": "0x5eed"
+  },
+  "stage": "decomposition",
+  "system_degree": "quadratic",
+  "targets": 1,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "unknowns": 32,
+  "verdict": "N31_M2_DIM16_PANEL_PASS_UNDER_1H_PENDING_INDEPENDENT_VALIDATION",
+  "wall_s": 158.9
+}

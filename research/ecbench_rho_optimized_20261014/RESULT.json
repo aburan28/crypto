@@ -1,0 +1,175 @@
+{
+  "schema": "crypto.ecbench_rho_optimization/v1",
+  "date": "2026-10-14",
+  "classification": "engineering improvement; deterministic instruction result; native wall not admitted",
+  "protocol": "research/ecbench_rho_optimized_20261014/PROTOCOL.md",
+  "implementation": {
+    "standing_method": "rho.signed_frobenius_strong",
+    "comparison_method": "rho.signed_frobenius_strong_legacy",
+    "baseline_revision": "7badd44a3",
+    "candidate_revision": "2fd065a6c32533a81c1936121e17daa03c4448e8",
+    "baseline_binary_sha256": "77e1d4accc239c9aad55b8e8629161601d7e239f6e70ea56c04b861274b219a3",
+    "candidate_binary_sha256": "8778c2a8face12fa50fa9495e96f861ff7f34417a24101b2a1472d324ae31b22",
+    "compiler": "rustc 1.98.1 (48a229cea 2026-09-01), LLVM 22.1.8",
+    "changes": [
+      "apply each normal-basis linear map to x and y in one table traversal",
+      "specialize the six-, seven-, and eight-byte table shapes used by the registered one-word frontier curves",
+      "multiply both walk coefficients by one orbit multiplier through one checked modular-reduction dispatch",
+      "retain the literal pre-change canonicalization as a trajectory-identical benchmark control"
+    ]
+  },
+  "frozen_profile": {
+    "curve": "icv1-f2m61-t158598901-ab42b6c5",
+    "workload_id": "W3a517768b166",
+    "target_seed": 2026101401,
+    "target_index": 0,
+    "algorithm_seed": 5480128907060238240,
+    "optimized_input": "profile-input-n61-seq265.json",
+    "optimized_input_sha256": "6e0ee6aa53999eefa8f59f9b387b3881883b64f238240f69dd9bcd2f07ccfed2",
+    "legacy_input": "profile-input-n61-seq266-legacy.json",
+    "legacy_input_sha256": "2bb2ab69f010e60b5766e447426fadd1fc3ef1c9ea11c75cd632e4cd0b2ce518",
+    "recovered_scalar": 41931826107977,
+    "total_gae": 1700726.5708825574,
+    "walk_steps": 1591865,
+    "canonicalizations": 1698247,
+    "walks": 106382,
+    "table_entries": 105928,
+    "trajectory_and_count_projection_identical": true
+  },
+  "callgrind": {
+    "unit": "callgrind.Ir",
+    "valgrind": "3.19.0",
+    "complete_solve": true,
+    "acceptance_ratio_at_most": 0.85,
+    "archived_baseline": {
+      "solve_ir": 1989285300,
+      "prework_ir": 171576572,
+      "raw_prefix": "callgrind/baseline-7badd44a3/baseline"
+    },
+    "same_binary_legacy": {
+      "solve_ir": 1995304985,
+      "prework_ir": 171419687,
+      "raw_prefix": "callgrind/final-legacy/legacy"
+    },
+    "optimized": {
+      "solve_ir": 1600543701,
+      "prework_ir": 171419018,
+      "raw_prefix": "callgrind/final-optimized/candidate"
+    },
+    "optimized_over_archived_baseline": 0.804582279,
+    "archived_baseline_reduction_percent": 19.541772,
+    "optimized_over_same_binary_legacy": 0.802154915,
+    "same_binary_reduction_percent": 19.784508,
+    "same_binary_speedup": 1.246642,
+    "gate_passed": true,
+    "attribution": {
+      "baseline_rho_solve_ir": 1986242185,
+      "baseline_canonicalize_inclusive_ir": 1070864152,
+      "baseline_canonicalize_share": 0.539143,
+      "optimized_rho_solve_ir": 1597499923,
+      "optimized_canonicalize_inclusive_ir": 678619624,
+      "optimized_canonicalize_share": 0.424801
+    },
+    "iterations": [
+      {
+        "label": "baseline",
+        "binary_sha256": "77e1d4accc239c9aad55b8e8629161601d7e239f6e70ea56c04b861274b219a3",
+        "solve_ir": 1989285300,
+        "ratio_to_baseline": 1.0,
+        "status": "baseline"
+      },
+      {
+        "label": "paired linear maps and coefficient reduction",
+        "binary_sha256": "f9896b3b13ee07d6511e8d54d6e090bbf4bbf2d96bed84e6abc62c222b6c9ce6",
+        "solve_ir": 1867868681,
+        "ratio_to_baseline": 0.938962,
+        "status": "retained unsuccessful attempt; missed 0.85 gate",
+        "raw_prefix": "callgrind/candidate-1/candidate"
+      },
+      {
+        "label": "range-proved signed float conversion",
+        "binary_sha256": "1056bfbb3b403434521082efcf2013cf55b88d172d25160dea09acba38674424",
+        "solve_ir": 1777918951,
+        "ratio_to_baseline": 0.893759,
+        "status": "retained unsuccessful attempt; missed 0.85 gate",
+        "raw_prefix": "callgrind/candidate-2/candidate"
+      },
+      {
+        "label": "fixed six-, seven-, and eight-byte shapes",
+        "binary_sha256": "8778c2a8face12fa50fa9495e96f861ff7f34417a24101b2a1472d324ae31b22",
+        "solve_ir": 1600543701,
+        "ratio_to_baseline": 0.804582279,
+        "status": "accepted deterministic result",
+        "raw_prefix": "callgrind/final-optimized/candidate"
+      }
+    ]
+  },
+  "ecbench_session": {
+    "session_id": "ECBS1hffaa276d8a5c",
+    "spec_id": "ECS1h87343a2f7167",
+    "path": "sessions/run-20261014T012000Z",
+    "curves": 6,
+    "workloads": 48,
+    "warmup_rounds": 1,
+    "measured_rounds": 5,
+    "records": 864,
+    "verified_records": 864,
+    "measured_replays": 720,
+    "replays_identical": 720,
+    "audit_receipt_sha256": "b5bd4cfca7a54a5d0b3f04cc0c3e9a19fa98dc8c4f6ab403c944fd5c442703a4",
+    "operation_comparison": {
+      "unit": "ecbench.gae",
+      "pairs": 240,
+      "ratio_optimized_over_legacy": 1.0,
+      "ci95": [1.0, 1.0],
+      "same_seeds": true,
+      "same_session": true
+    },
+    "native_wall": {
+      "status": "descriptive only; not a result",
+      "earned_level": "L0",
+      "required_level": "L2",
+      "admitted_pairs": 0,
+      "pairs_below_level": 240,
+      "optimized_over_legacy_median": 0.9585836525559679,
+      "optimized_aa_median": 0.9996863141669985,
+      "ci95": null,
+      "blockers": ["PSI cpu unavailable", "PSI memory unavailable"]
+    },
+    "protocol_deviation": {
+      "occurred": true,
+      "detail": "The preregistered run without --allow-busy refused before creating a session because PSI was unavailable. A retained --allow-busy L0 session was then run for deterministic counts and descriptive timing, despite the preregistered prohibition. It is excluded from the native runtime gate."
+    }
+  },
+  "historical_replays": [
+    {
+      "session_id": "ECBS1hb09194fe1d2e",
+      "scope": "factor-base K17 replay-all",
+      "identical": 20,
+      "total": 20,
+      "receipt_sha256": "710f62c55f767c3a264f2b3c828030cc8e0156a65a946810b4a9cb1784f8c04a"
+    },
+    {
+      "session_id": "ECBS1h2b56c13eeaec",
+      "scope": "F4/F5/F6 K13 replay-all",
+      "identical": 48,
+      "total": 48,
+      "receipt_sha256": "a5afddc9b303a186aa5f3c7bb8e1842ca7f300dbe36e9d4ca69c8fcf78ad4f0a"
+    },
+    {
+      "session_id": "ECBS1hfd5bf1885227",
+      "scope": "root-finder K13 sampled rho rows",
+      "identical": 8,
+      "total": 8,
+      "receipt_sha256": "9d5c7efdd1f3a3f2ca021b2da59fff53c5342ce72185af19b1b9dea983bd603f"
+    }
+  ],
+  "frontier_effect": {
+    "ranked_rows_changed": false,
+    "operation_boundary_changed": false,
+    "canonical_method_changed": false,
+    "implementation_throughput_improved": true,
+    "native_wall_claim_admitted": false,
+    "reason": "The standing strong-rho method, recovered answers, trajectories, charged GAE and every counter are unchanged. Existing operation ratios and bounds therefore stay fixed. Historical wall ratios remain attached to their measured binaries; this L0 study cannot reprice or promote them."
+  }
+}

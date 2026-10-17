@@ -1,0 +1,1 @@
+2026-10-15: target/release/ecbench was rebuilt during P32 (analysis-only changes: band.rs, bounds.rs fit options, CLI). Sessions record their own binary_sha256; the replay-all audits are the check that counts are unaffected.

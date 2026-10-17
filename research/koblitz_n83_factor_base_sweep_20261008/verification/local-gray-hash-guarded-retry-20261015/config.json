@@ -1,0 +1,30 @@
+{
+  "authorization_sha256": "5544acbcf9bb825f2b7eebc38778bc37cf7b8a4e9e8c081bd4b572a94996a265",
+  "authorized_output": "/private/tmp/n83-local-gray-hash-pair-20261015-01",
+  "max_wait_seconds": 900,
+  "quiet_samples_required": 3,
+  "sample_interval_seconds": 45,
+  "schema": "n83.local-paired-quiet-watch-config/v1",
+  "source_commit": "7a7f8842bcc0374fbbe01ba1b6afcff706b16e22",
+  "source_sha256": {
+    "Cargo.lock": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+    "Cargo.toml": "49b5f9478f133f905d5388d8c609d097830d69fe912c46dbc95b387b5d14a3de",
+    "examples/koblitz_n83_mixed_orbit_worker.rs": "5f310f7495989a94004a6545bed5682d54d3bc4b4f41db543ed24408a1fa1b7b",
+    "research/koblitz_n83_factor_base_sweep_20261008/chain_search_supervisor.py": "fa0443e453e5fb7011019a08b61a219834e1594acc99e007f405f27e44b97a66",
+    "research/koblitz_n83_factor_base_sweep_20261008/compact_probe_supervisor.py": "4a9c363d8164f000ac3a6b654e37d001375d64744173bd90d7ad3dd2be692d37",
+    "research/koblitz_n83_factor_base_sweep_20261008/k600_mixed_orbit_supervisor.py": "3747ad6f6d7b472ab2ebf723e1b93b7167fca1e36e468565cf92a68f598cbe43",
+    "research/koblitz_n83_factor_base_sweep_20261008/pilot-01/manifest.json": "5bd862987844f709e03beeab9fd265e3d2024011bcadcb82f5af9c72018df6a6",
+    "research/koblitz_n83_factor_base_sweep_20261008/pilot-01/probe-corpus.json": "760ae5c2e88615152e2569653a0e0c0cf3b2f84691f2b0731247f9ee3759dcbd",
+    "research/koblitz_n83_factor_base_sweep_20261008/structured_orbit_search_supervisor.py": "045d2eed66f2ae49ec3be7564dee3a2f563e89151d2f682cf7587d321b2145f7",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/k600-gray-hash-paired-protocol-20261014/plan.json": "fbd3fb943bc0f181797d106c41ee9961b8d70768b5c65a5584002e3c1b5e488f",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/k600-gray-hash-paired-protocol-20261014/preflight.py": "4122150c4fd05ac290a4aa753e1d1438f21f20185b405e43da405d02dc0e2c4e",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/k600-gray-hash-paired-protocol-20261014/receipt_audit.py": "13670f64cd4ba7c1fa1a29d88044795352cd79d4db0909b4efaa9cb0cc9eafad",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/k600-gray-hash-paired-protocol-20261014/supervisor.py": "448b3f4556e8f46b486f89a1da57181bc6b04bc092417df9ed2085ababf83895",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/paired-capacity-screen-20261013/screen.py": "116617e9de7552e48b548e632e80121508515e7079878305de0b975c8a924c5d",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/pilot-pair-live-s3-20261014/audit.json": "0c281fcc873eb914686c6e4ef3ef2bba51347c9cd88ddaad117e3b0c3f83b78e",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/pilot-pair-live-s3-20261014/audit.py": "705737152725f5630eb7da5ab9f6d3b3f67cb54259f5fc81ba06595de049d030",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/pilot-pair-support-screen-20261014/screen.json": "2c2229b9bfc78935cbc6c3ca7c6612f8fade2a40a0e0592f93a99b855d41dd45",
+    "src:git-tree": "f5dac3ceb6d264227ef74b197e49f3cf01d1164e"
+  },
+  "watcher_sha256": "d43325356a2ff6c62f9f65b5e1995ef9d3af66482217b8ebcac1aa2e867bac58"
+}

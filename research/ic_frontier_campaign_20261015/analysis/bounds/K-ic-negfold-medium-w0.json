@@ -1,0 +1,258 @@
+{
+  "admissibility": {
+    "bounded": false,
+    "deterministic": true,
+    "reasons": [
+      "1 size(s): below 4, so the exponent is descriptive and this is a constant bound"
+    ],
+    "status": "admissible",
+    "unpriced": []
+  },
+  "bound_id": "ECBND1h5202b15a0a5b",
+  "constant": {
+    "declared_ratio_to_floor": null,
+    "ratio_to_floor": {
+      "ci95": [
+        1998.4390891674097,
+        2768.348985215023
+      ],
+      "ci_method": "within",
+      "value": 2356.4452504612264
+    },
+    "s": {
+      "ci95": [
+        292.82968870737915,
+        402.6869729674764
+      ],
+      "ci_method": "within",
+      "value": 343.321840843197
+    }
+  },
+  "dimensions": {
+    "memory": {
+      "ci95": null,
+      "known": false,
+      "lower_is_better": true,
+      "source": "first of counters.inserts_uncharged, counters.table_inserts_uncharged, counters.table_entries, counters.distinguished_points",
+      "statistic": "mean table entries / sqrt(r) over verified runs",
+      "value": null
+    },
+    "ops": {
+      "ci95": [
+        1998.4390891674097,
+        2768.348985215023
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "cost.total_gae, workload.curve.r, automorphisms_available",
+      "statistic": "mean S / sqrt(pi / 2A) over verified runs",
+      "value": 2356.4452504612264
+    },
+    "uncharged": {
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "known": true,
+      "lower_is_better": true,
+      "source": "counters.*_uncharged",
+      "statistic": "mean sum of *_uncharged counters / sqrt(r) over verified runs",
+      "value": 0.0
+    }
+  },
+  "domain": {
+    "envelope": {
+      "precomputation": "none",
+      "targets": 1,
+      "threads": 1
+    },
+    "family": "koblitz",
+    "problem": "ecdlp.single_target",
+    "target_kind": "public",
+    "tier": "medium",
+    "unit": "ecbench.gae+band(w=0)"
+  },
+  "domain_id": "ECDOM1h49d80ea7fd98",
+  "fit": {
+    "alpha": 0.4,
+    "alpha_agrees_with_declared": null,
+    "alpha_ci95": null,
+    "ci_method": "none",
+    "declared_alpha": null,
+    "log2_c": 11.052577590624551,
+    "model": "gae = C * r^alpha",
+    "points": 32,
+    "r_squared": 0.0,
+    "scaling_claim": false,
+    "size_parameter": "r",
+    "sizes": 1
+  },
+  "fit_options": {
+    "curves": [],
+    "param_rule": "per-size parameters chosen on the train panel by PROTOCOL.md A4 (research/ic_frontier_campaign_20261015/params.json)",
+    "resamples": 2000,
+    "seed": 20261005,
+    "tier": "medium",
+    "weight": 0.0
+  },
+  "improves_on": [],
+  "label": "ic-frontier ic-negfold medium w=0",
+  "level": "constant",
+  "method": {
+    "entry": "ic_framework::run_pipeline",
+    "family": "ic",
+    "id": "ic.pipeline",
+    "method_id": "ic.pipeline under rule: per-size parameters chosen on the train panel by PROTOCOL.md A4 (research/ic_frontier_campaign_20261015/params.json)",
+    "params": {
+      "factor_base": "per size",
+      "linalg": "incremental-gauss",
+      "max_trials": "50000000",
+      "oracle": "pdp3-koblitz:m=2,engine=rootfind-negfold",
+      "solver": "",
+      "solver_budget_seconds": "0",
+      "targets": "walk"
+    }
+  },
+  "notes": "",
+  "provenance": {
+    "audits": [],
+    "records": 32,
+    "sessions": [
+      {
+        "arm": "ic-negfold",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K13",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "3e85fec4d3fbd2730cd73a5264823b9997d78eb23370b54dc0071ee7ace5320b",
+        "role": "candidate",
+        "session_id": "ECBS1hbfd8fb2d966d",
+        "spec_id": "ECS1hfda9e6ca03ae",
+        "status": "complete"
+      },
+      {
+        "arm": "ic-negfold",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K17",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "bf935190a370afa5f13ccabe6f7f5664822dad4b5e30ab2aa6380415884386d4",
+        "role": "candidate",
+        "session_id": "ECBS1hb9677faec03f",
+        "spec_id": "ECS1hdc50ad017f36",
+        "status": "complete"
+      },
+      {
+        "arm": "ic-negfold",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K19",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "1af7fb2a6b575454a19e1d5b8d7a4bba4a8473d0bcf243b8d336713fd9d24e39",
+        "role": "candidate",
+        "session_id": "ECBS1hce49b18f393e",
+        "spec_id": "ECS1h7905a959ebbd",
+        "status": "complete"
+      },
+      {
+        "arm": "ic-negfold",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K23",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "827d23e83544165d54104f917eb607359b7de8ce06cc4ba07aaf6c0c1ac4ef15",
+        "role": "candidate",
+        "session_id": "ECBS1hc12e48be2952",
+        "spec_id": "ECS1h00407182702b",
+        "status": "complete"
+      },
+      {
+        "arm": "ic-negfold",
+        "binary_sha256": "7a8f0a63dd91e4f6bed408b57acc90c02f178d368191f14c8dfbaafb03184cf6",
+        "dir": "research/ic_frontier_campaign_20261015/phase1/sessions/K37",
+        "env_class_id": "ECBENV2hdc4243564840",
+        "git_commit": "215e6e5a6e9c908abe80b23d0ff89d82ae890fb8",
+        "records_sha256": "81b1b715564e6d58541feb9ddb9ed49a933c7a1a1337226f3ef09ba0181d932e",
+        "role": "candidate",
+        "session_id": "ECBS1h5dbe3414ae38",
+        "spec_id": "ECS1h5be38c4bdc85",
+        "status": "complete"
+      }
+    ],
+    "statuses": {
+      "verified": 32
+    },
+    "verified": 32
+  },
+  "schema": "ecbench.bound/v1",
+  "sizes": [
+    {
+      "automorphisms_available": 74,
+      "declared_ratio_to_floor": null,
+      "declared_s": null,
+      "field_bits": 37,
+      "floor_s": 0.14569480906717377,
+      "levels": {
+        "L0": 32
+      },
+      "log2_r": 27.78083708554834,
+      "mean_gae": 5213556.28125,
+      "mean_s": 343.32184084319687,
+      "memory_entries_per_sqrt_r": null,
+      "r": 230603167,
+      "ratio_to_floor": 2356.4452504612264,
+      "runs": 32,
+      "s_ci95": [
+        284.4407151193276,
+        413.3392661927895
+      ],
+      "slug": "icv1-f2m37-tm534059-32aad96b",
+      "uncharged_per_sqrt_r": 0.0,
+      "verified": 32,
+      "workloads": 16
+    }
+  ],
+  "stages": [
+    {
+      "alpha": null,
+      "alpha_ci95": null,
+      "mean_gae": 230.10214300000004,
+      "name": "factor_base",
+      "share_of_gae": 0.0000437160024991167,
+      "sizes_with_work": 1
+    },
+    {
+      "alpha": null,
+      "alpha_ci95": null,
+      "mean_gae": 1027181.0,
+      "name": "oracle_setup",
+      "share_of_gae": 0.19514919147469728,
+      "sizes_with_work": 1
+    },
+    {
+      "alpha": null,
+      "alpha_ci95": null,
+      "mean_gae": 4236116.077293532,
+      "name": "relations",
+      "share_of_gae": 0.8047993756473291,
+      "sizes_with_work": 1
+    },
+    {
+      "alpha": null,
+      "alpha_ci95": null,
+      "mean_gae": 2.0557972499999995,
+      "name": "linear_algebra",
+      "share_of_gae": 3.905710592129391e-7,
+      "sizes_with_work": 1
+    },
+    {
+      "alpha": null,
+      "alpha_ci95": null,
+      "mean_gae": 38.5625,
+      "name": "verify",
+      "share_of_gae": 7.3263044159140545e-6,
+      "sizes_with_work": 1
+    }
+  ],
+  "verdict_id": null
+}
