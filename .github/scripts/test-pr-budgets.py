@@ -114,6 +114,20 @@ class BudgetPolicyTests(unittest.TestCase):
                 self.assertFalse(policy.frozen_proof_budget_exception(
                     workflow_path, job, timeout, "pull_request", root=root))
 
+    def test_named_exceptions_are_exact(self):
+        for (workflow_path, job), exception in policy.NAMED_BUDGET_EXCEPTIONS.items():
+            timeout = exception["timeout"]
+            doc = {"on": {"pull_request": None, "merge_group": None},
+                   "jobs": {job: {"timeout-minutes": timeout}}}
+            self.assertFalse(policy.problems(doc, workflow_path))
+            # another timeout, another job or another workflow is not covered
+            doc["jobs"][job]["timeout-minutes"] = timeout + 1
+            self.assertTrue(policy.problems(doc, workflow_path))
+            doc = {"on": {"pull_request": None}, "jobs": {"other": {"timeout-minutes": timeout}}}
+            self.assertTrue(policy.problems(doc, workflow_path))
+            doc = {"on": {"pull_request": None}, "jobs": {job: {"timeout-minutes": timeout}}}
+            self.assertTrue(policy.problems(doc, ".github/workflows/other.yml"))
+
     def test_metadata_is_not_executed(self):
         self.assertIs(policy.expression("__import__('os').system('false')", "pull_request"), policy.UNKNOWN)
 

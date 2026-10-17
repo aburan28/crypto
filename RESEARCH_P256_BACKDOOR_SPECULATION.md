@@ -13,6 +13,28 @@ probes; that file is not currently declared in `cryptanalysis/mod.rs`, so the
 new module carries its own copies of its `PublicResearchStatus` /
 `ProbeVerdict` enums).
 
+> **Update 2026-10-16: the seed is explained.** The P-256 seed is block 1842
+> of `(int)(drand48() * 256)` output after `srand48(871696354)`
+> (1997-08-16 01:52:34 UTC). Every other X9.62 / FIPS 186-2 prime-curve seed
+> comes from the same procedure on another date between May 1997 and April
+> 1998 (Anthropic Frontier Red Team, *Claude reveals ECDSA curve origins*;
+> F. Valsorda, *NIST Elliptic Curves Seeds Bounty Has Been Claimed*; both
+> 2026-10-16). `src/cryptanalysis/nist_seed_provenance.rs` regenerates all ten
+> seeds natively, and `research/nist_seed_provenance_20261016/` holds the
+> independent reproduction (full accept/reject census, report, graph, PDF).
+> Consequences for this note:
+> - §2 "Unresolved: the seed" is resolved. The generator's remaining freedom
+>   was the start time and the choice among accepted candidates, about 30 bits
+>   per curve.
+> - §3's grind budget is superseded: hypotheses 1 and 3 could only have
+>   targeted a weak class containing at least about one prime-order curve in
+>   2^30.
+> - Hypotheses 2 (the prime) and 4 (an unknown algorithm) are untouched. So
+>   are two open questions: why about half of the valid candidates in each run
+>   were skipped, and how the P-224/256/384/521 base points were chosen. Neither
+>   affects ECDLP hardness.
+> - P-256 was generated in August 1997, not c. 1999 as §2 says.
+
 ---
 
 ## 0. The one-paragraph answer
@@ -20,7 +42,7 @@ new module carries its own copies of its `PublicResearchStatus` /
 There is no demonstrated backdoor in the P-256 *curve*. The documented NSA
 backdoor is **Dual_EC_DRBG**, a random-number generator built on two P-256
 points, and it says nothing about ECDLP on the curve. The P-256 *concern* is
-that the curve's `b` was derived from a seed nobody can explain, so the
+that the curve's `b` was derived from a seed nobody could explain (explained on 2026-10-15, see the update above), so the
 "verifiably random" generation is verifiable only from the seed onward. If a
 curve-level trapdoor existed it would have to be one of four things (§4), and
 each is either excluded by public probes (several of them implemented in this
@@ -39,6 +61,9 @@ repository) or unfalsifiable in principle.
 | Implicates curve math | **No** |
 
 ## 2. Unresolved: the seed
+
+*Resolved 2026-10-15: see the update at the top. The text below is the
+assessment as written before the seed was explained.*
 
 P-256 was generated at NSA (Jerry Solinas, c. 1999) by the ANSI X9.62 A.3.3.1
 procedure with `a = −3` and the Solinas prime `p = 2²⁵⁶ − 2²²⁴ + 2¹⁹² + 2⁹⁶ − 1`
@@ -247,7 +272,7 @@ excludes the Teske/GHS magic-number trapdoor implemented in `ec_trapdoor.rs`
 (it needs a composite degree). That reads as defensive design.
 
 **What would change this assessment.** A seed preimage (closes the question
-in the mundane direction); a public ECDLP method that beats rho on generic
+in the mundane direction; met on 2026-10-15, see the update at the top); a public ECDLP method that beats rho on generic
 prime-field curves (opens hypothesis 4); a non-uniform statistic on `b` or a
 coefficient-level invariant with an attack behind it (opens hypothesis 1).
 
@@ -269,4 +294,8 @@ coefficient-level invariant with an attack behind it (opens hypothesis 1).
 - J. Fried, P. Gaudry, N. Heninger, E. Thomé, *A kilobit hidden SNFS discrete
   logarithm computation*, EUROCRYPT 2017.
 - E. Teske, *An elliptic curve trapdoor system*, J. Cryptology 19(1), 2006.
-- Public seed-preimage bounty announced by F. Valsorda, 2023.
+- Public seed-preimage bounty announced by F. Valsorda, 2023; claimed
+  2026-10-15 (F. Valsorda, *NIST Elliptic Curves Seeds Bounty Has Been
+  Claimed*, words.filippo.io/seeds-solved, 2026-10-16).
+- Anthropic Frontier Red Team, *Claude reveals ECDSA curve origins*,
+  anthropic.com/research/ecdsa-curve-origins, 2026-10-16.
