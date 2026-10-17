@@ -48,7 +48,7 @@ jobs:
   # the failures it catches were invisible until someone ran `make check-cli`
   # by hand. The fruitless-cycle check has its own job below.
   offline-checks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +63,7 @@ jobs:
   # caught in one runs to maxIters and reports nothing, on the campaign's
   # budget. `check-cycles` exits non-zero on a real hit or a degenerate step.
   no-fruitless-cycles:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +78,7 @@ jobs:
   # merge.py is retired: the certification suite's merge tests run against
   # it, then test_merge_parity.py holds the two side by side on real corpora.
   merge-parity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
@@ -102,7 +102,7 @@ jobs:
   # Python-compatible JSON the Rust ports print through. The unit tests hold
   # bytes CPython printed; the smoke run reads a rehearsal store end to end.
   status:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -130,7 +130,7 @@ jobs:
           '
 
   local-software:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4

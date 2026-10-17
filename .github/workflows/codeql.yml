@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   scope:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -82,7 +82,7 @@ jobs:
     # Consider using larger runners or machines with greater resources for possible analysis time improvements.
     # Rust uses the standard public-repository ARM runner with the same four
     # CPUs and 16 GiB envelope; CodeQL provides a Linux arm64 bundle.
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || (matrix.language == 'rust' && 'ubuntu-24.04-arm') || 'ubuntu-latest' }}
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || (matrix.language == 'rust' && 'ubuntu-24.04-arm') || 'ubuntu-24.04' }}
     permissions:
       # required for all workflows
       security-events: write
@@ -358,7 +358,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     needs: scope
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       security-events: write
       packages: read

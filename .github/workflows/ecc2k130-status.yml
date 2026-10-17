@@ -86,7 +86,7 @@ jobs:
   # pins the two step lists to each other.
   test:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -110,7 +110,7 @@ jobs:
 
   publish:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # 35 min so the index-only fallback plus a stretch of hour-chunk
     # backfill (300 s each, resumed next run) plus history merge and Pages
     # deploy still fit. Later runs read the rollup and finish in the old 15.
