@@ -56,3 +56,15 @@ separately seeded same-point rho solve, alternating execution order,
 before/after calibration and independent scalar replay. Its paired online
 intervals and exact sign-flip tests will determine whether this local
 selection transfers to fresh points and the cloud resource envelope.
+
+The first four-host dispatch, [run 39037685265](https://github.com/aburan28/crypto/actions/runs/39037685265),
+stopped in the preflight selector test before either producer was built or
+measured. On the Linux runner, `import select` resolved Python's standard
+module instead of this experiment's `select.py`; all four jobs reported the
+same `AttributeError`. The [failed-dispatch copy](results/failed_dispatch_39037685265.json)
+and [provider failure receipt](results/preflight_failure_39037685265.json)
+retain the original head, four artifact digests, job-log hash, and failure
+classification. The four provider ZIPs and full job receipts remain under
+`/Volumes/SSD990/crypto/artifacts/n83_intermediate_holdout_20261017/failed_run_39037685265/`.
+The selector test now loads its exact sibling file by path; a successor
+dispatch will bind that correction while preserving the original failed run.

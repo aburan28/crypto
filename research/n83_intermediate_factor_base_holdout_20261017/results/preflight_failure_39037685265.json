@@ -1,0 +1,40 @@
+{
+  "artifact_rows": [
+    {
+      "bytes": 1183,
+      "id": 12104885783,
+      "name": "n83-intermediate-stratum-3-39037685265-1",
+      "sha256": "9d444cb20312bd79786dd56173e4e01e6a2d343ef824a4d8ebd81b33a77124ec"
+    },
+    {
+      "bytes": 1183,
+      "id": 12104496484,
+      "name": "n83-intermediate-stratum-2-39037685265-1",
+      "sha256": "fc6fee4b318305358537e82e89ab20b1cd0b58848c828d8911b4c23520c67ce7"
+    },
+    {
+      "bytes": 1183,
+      "id": 12104436835,
+      "name": "n83-intermediate-stratum-1-39037685265-1",
+      "sha256": "3ee91d05cc5252575654b435acdadace2de6090b0fa63f8058ff04c6f77b2c2d"
+    },
+    {
+      "bytes": 1183,
+      "id": 12104318940,
+      "name": "n83-intermediate-stratum-0-39037685265-1",
+      "sha256": "e83ecc8c4de8922305bc0ae86d76a114776959c56f2e16e709c6cd01eb001abb"
+    }
+  ],
+  "classification": "PRECHECK_TEST_IMPORT_FAILURE_NO_PRODUCER_STARTED",
+  "failed_dispatch_sha256": "1ee2b0fe64d8c5ce7322fe4810a5a57e047269b08214a251ca9c01bd23c28156",
+  "failed_log_sha256": "50c9e4ef754f07cb7eab986ec06c53d4d4b7750af6d6f34fbae74efd446ecd53",
+  "failed_step": "Replay sealed inputs and dispatch",
+  "head_sha": "823d3da44da6c99bcff7dd0de10521dc266791a3",
+  "provider_jobs_sha256": "e7d7655aea5ef12267955f687430e273e89c25d3d9103f1bd3cf6396526ced81",
+  "raw_archive_root": "/Volumes/SSD990/crypto/artifacts/n83_intermediate_holdout_20261017/failed_run_39037685265",
+  "run_attempt": 1,
+  "run_conclusion": "failure",
+  "run_id": 39037685265,
+  "run_status": "completed",
+  "schema": "n83.intermediate-preflight-failure/v1"
+}

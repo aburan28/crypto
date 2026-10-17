@@ -18,6 +18,8 @@ FILES = (
     'prepare_dispatch.py', 'check_dispatch.py',
     'results/batch_selection.json', 'results/batch_full_replay.json',
     'results/verifier_correction.json',
+    'results/failed_dispatch_39037685265.json',
+    'results/preflight_failure_39037685265.json',
     'results/batch_k2304_result.json', 'results/batch_k2543_result.json',
     'results/batch_k2688_result.json', 'results/batch_k2816_result.json',
     'results/batch_k3072_result.json',
