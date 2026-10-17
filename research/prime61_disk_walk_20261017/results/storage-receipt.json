@@ -1,0 +1,37 @@
+{
+  "schema": "prime61.drive-checkpoint-storage/v1",
+  "private_drive_object_ids": "intentionally omitted from the public repository; returned to the user in the conversation",
+  "checkpoint_1": {
+    "archive_name": "prime61-native-checkpoint-000001.tar.gz",
+    "archive_bytes": 18412,
+    "archive_sha256": "aacd49f18e1df4acc11bca58c4fc2a1b1ef0a996962e9a8cb00e9121814796a3",
+    "upload_completed": true,
+    "metadata_size_readback_matched": true,
+    "download_archive_bytes_matched": true,
+    "manifest_verified": true,
+    "raw_database_bytes_matched": true,
+    "resumed_to_expanded_sources": 8,
+    "resumed_to_measured_curves": 64,
+    "resumed_logical_dump_matches_local_continuation": true,
+    "evidence": "drive-restore/result.txt"
+  },
+  "checkpoint_32": {
+    "archive_name": "prime61-native-checkpoint-000032.tar.gz",
+    "archive_bytes": 278866,
+    "archive_sha256": "eb5ee1c252943ddeae9d62f49e3065e6b2e5f06e20a2c8598d804f8fc35dec32",
+    "expanded_sources": 32,
+    "discovered_curves": 250,
+    "measured_curves": 64,
+    "committed_run_rows": 768,
+    "upload_completed": true,
+    "metadata_size_readback_matched": true,
+    "download_archive_bytes_matched": true,
+    "manifest_verified": true,
+    "raw_database_bytes_matched": true,
+    "logical_dump_matched": true,
+    "evidence": "drive-restore/latest-result.txt"
+  },
+  "same_host_control": true,
+  "full_drive_quota_verified": false,
+  "autonomous_future_uploads_running": false
+}
