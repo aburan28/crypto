@@ -1,0 +1,33 @@
+   Compiling quintic-rational-support v0.1.0 (/workspace/generalized_roots/research/quintic_rational_support_20261017_v1)
+error[E0428]: the name `oracle` is defined multiple times
+  --> src/../../quintic_resultant_20261016_v1/src/main.rs:39:1
+   |
+39 | fn oracle()->Value{let all=fields();field_controls(&all);let mut count=0;let mut support_count=0;for name in ["Fp3","Fp5","GF2^2"]{l...
+   | ^^^^^^^^^^^^^^^^^^ `oracle` redefined here
+   |
+  ::: src/main.rs:20:5
+   |
+20 |     fn oracle(f:&F,h:&P,domain:&[N])->bool{let mut total=0;for i in 0..f.order().to_usize().unwrap(){let x=N::from(i);if eval(f,h,&x...
+   |     -------------------------------------- previous definition of the value `oracle` here
+   |
+   = note: `oracle` must be defined only once in the value namespace of this module
+
+error[E0061]: this function takes 3 arguments but 0 arguments were supplied
+  --> src/../../quintic_resultant_20261016_v1/src/main.rs:41:108
+   |
+41 | ...trols"){println!("{}",oracle());return;}let id=args.get(1).expect("experiment id");let seed=args.get(2).expect("seed").parse().un...
+   |                          ^^^^^^-- three arguments of type `&F`, `&Vec<BigUint>`, and `&[BigUint]` are missing
+   |
+note: function defined here
+  --> src/main.rs:20:8
+   |
+20 |     fn oracle(f:&F,h:&P,domain:&[N])->bool{let mut total=0;for i in 0..f.order().to_usize().unwrap(){let x=N::from(i);if eval(f,h,&x...
+   |        ^^^^^^ ---- ---- -----------
+help: provide the arguments
+   |
+41 | fn main(){let args:Vec<_>=env::args().collect();if args.get(1).is_some_and(|x|x=="controls"){println!("{}",oracle(/* &F */, /* &Vec<BigUint> */, /* &[BigUint] */));return;}let id=args.get(1).expect("experiment id");let seed=args.get(2).expect("seed").parse().unwrap();let start=Instant::now();let e=panel(seed);let mut result=json!({"schema":"scientific_result_v1","experiment_id":id,"status":"passed","summary":"Native inverse-free squarefree criteria agree with native Euclidean reference across20fields.","evidence":e,"next_actions":["Compare total support and all-roots pipelines before promotion; do not multiply stage gains.","IfPRSregresses reject blanketdispatch; preserve resultants as char2 specialization."]});let encoded=serde_json::to_string(&result).unwrap();if start.elapsed().as_secs()>=70{result["status"]=json!("inconclusive");result["summary"]=json!("late serialization");}println!("{}",if result["status"]=="passed"{encoded}else{result.to_string()});}
+   |                                                                                                                   +++++++++++++++++++++++++++++++++++++++++++++++
+
+Some errors have detailed explanations: E0061, E0428.
+For more information about an error, try `rustc --explain E0061`.
+error: could not compile `quintic-rational-support` (bin "quintic-rational-support") due to 2 previous errors

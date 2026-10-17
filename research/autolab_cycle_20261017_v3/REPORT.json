@@ -1,0 +1,226 @@
+{
+  "date": "2026-10-17T02:59:11.657022+00:00",
+  "records": [
+    {
+      "id": "native-actual-norm-U-rank-n83-20261017-v1",
+      "status": "passed",
+      "summary": "Actual norm-family affine U,V ranks reconstructed natively and checked against literal norms.",
+      "evidence": {
+        "original_root_count_exact": null,
+        "release_gate_claim": false,
+        "rows": [
+          {
+            "U_cells_exponent": 52,
+            "U_rank": 52,
+            "V_rank": 69,
+            "bounded_partition_admitted": false,
+            "family_constraint_rank": 93,
+            "family_dimension": 73,
+            "family_profile_complete": true,
+            "fixed_U_kernel_dimension": 21,
+            "h": "4208336d0d441df79c400",
+            "joint_U_V_rank": 73,
+            "k": "0"
+          },
+          {
+            "U_cells_exponent": 52,
+            "U_rank": 52,
+            "V_rank": 69,
+            "bounded_partition_admitted": false,
+            "family_constraint_rank": 93,
+            "family_dimension": 73,
+            "family_profile_complete": true,
+            "fixed_U_kernel_dimension": 21,
+            "h": "4208336d0d441df79c400",
+            "joint_U_V_rank": 73,
+            "k": "1"
+          },
+          {
+            "U_cells_exponent": 52,
+            "U_rank": 52,
+            "V_rank": 69,
+            "bounded_partition_admitted": false,
+            "family_constraint_rank": 93,
+            "family_dimension": 73,
+            "family_profile_complete": true,
+            "fixed_U_kernel_dimension": 21,
+            "h": "4208336d0d441df79c401",
+            "joint_U_V_rank": 73,
+            "k": "0"
+          },
+          {
+            "U_cells_exponent": 52,
+            "U_rank": 52,
+            "V_rank": 69,
+            "bounded_partition_admitted": false,
+            "family_constraint_rank": 93,
+            "family_dimension": 73,
+            "family_profile_complete": true,
+            "fixed_U_kernel_dimension": 21,
+            "h": "4208336d0d441df79c401",
+            "joint_U_V_rank": 73,
+            "k": "1"
+          }
+        ],
+        "scope": "four fixed h,k necessary-support families; no root solving or outer enumeration",
+        "support_dimensions": [
+          18,
+          35,
+          52,
+          69,
+          83
+        ],
+        "transfer_erratum": "V includes (h^2+h)*e4; k=0 does not generally imply V=0"
+      },
+      "result_path": "/workspace/generalized_roots/lab/ledger/attempts/native-actual-norm-U-rank-n83-20261017-v1/0001/scientific_result.json",
+      "cold_seconds_diagnostic": 0.43016042099952756
+    },
+    {
+      "id": "native-actual-repeated-Q-root-n83-20261017-v1",
+      "status": "passed",
+      "summary": "Repeated Q-root branch intersected with actual relaxed families and all admitted support candidates checked.",
+      "evidence": {
+        "original_root_count_exact": null,
+        "release_gate_claim": false,
+        "rows": [
+          {
+            "added_pair_constraint_rank": 69,
+            "h": "4208336d0d441df79c400",
+            "k": "0",
+            "original_relaxed_dimension": 73,
+            "pair_branch_complete": true,
+            "pair_consistent": true,
+            "pair_family_dimension": 4,
+            "repeated_x": "0",
+            "support_candidate_count_exact": 0,
+            "support_candidates": [],
+            "tested_parameters": 16
+          },
+          {
+            "branch_empty": "Q root outside source domain",
+            "h": "4208336d0d441df79c400",
+            "k": "1",
+            "pair_branch_complete": true,
+            "support_candidate_count_exact": 0
+          },
+          {
+            "added_pair_constraint_rank": 69,
+            "h": "4208336d0d441df79c401",
+            "k": "0",
+            "original_relaxed_dimension": 73,
+            "pair_branch_complete": true,
+            "pair_consistent": true,
+            "pair_family_dimension": 4,
+            "repeated_x": "0",
+            "support_candidate_count_exact": 0,
+            "support_candidates": [],
+            "tested_parameters": 16
+          },
+          {
+            "branch_empty": "Q root outside source domain",
+            "h": "4208336d0d441df79c401",
+            "k": "1",
+            "pair_branch_complete": true,
+            "support_candidate_count_exact": 0
+          }
+        ],
+        "scope": "four fixed-h,k norm families, Q(x)=P(x)=0 repeated-pair branch only; no original multivariate tuple completion",
+        "source_tuple_reconstruction_complete": false
+      },
+      "result_path": "/workspace/generalized_roots/lab/ledger/attempts/native-actual-repeated-Q-root-n83-20261017-v1/0001/scientific_result.json",
+      "cold_seconds_diagnostic": 0.2649601570001323
+    },
+    {
+      "id": "native-actual-repeated-tangency-n83-20261017-v1",
+      "status": "inconclusive",
+      "summary": "Fixed-h,k repeated tangency branch scanned through exact curve fibers and closed r,s formulas within its budget.",
+      "evidence": {
+        "curve_points_visited": 125614,
+        "original_root_count_exact": null,
+        "release_gate_claim": false,
+        "rows": [
+          {
+            "h": "4208336d0d441df79c400",
+            "k": "0",
+            "relaxed_candidates": 0,
+            "source_domain_size": 262144,
+            "source_elements_visited": 126081,
+            "support_candidate_count_exact": null,
+            "support_candidates": [],
+            "tangency_branch_complete": false,
+            "tangent_parameters_tested": 125614
+          },
+          {
+            "h": "4208336d0d441df79c400",
+            "k": "1",
+            "relaxed_candidates": 0,
+            "source_domain_size": 262144,
+            "source_elements_visited": 126081,
+            "support_candidate_count_exact": null,
+            "support_candidates": [],
+            "tangency_branch_complete": false,
+            "tangent_parameters_tested": 125614
+          },
+          {
+            "h": "4208336d0d441df79c401",
+            "k": "0",
+            "relaxed_candidates": 0,
+            "source_domain_size": 262144,
+            "source_elements_visited": 126081,
+            "support_candidate_count_exact": null,
+            "support_candidates": [],
+            "tangency_branch_complete": false,
+            "tangent_parameters_tested": 125614
+          },
+          {
+            "h": "4208336d0d441df79c401",
+            "k": "1",
+            "relaxed_candidates": 0,
+            "source_domain_size": 262144,
+            "source_elements_visited": 126081,
+            "support_candidate_count_exact": null,
+            "support_candidates": [],
+            "tangency_branch_complete": false,
+            "tangent_parameters_tested": 125614
+          }
+        ],
+        "scope": "nonzero source x, Q(x)!=0, x!=z repeated tangency branch of four fixed norm families; no original tuple or squarefree coverage"
+      },
+      "result_path": "/workspace/generalized_roots/lab/ledger/attempts/native-actual-repeated-tangency-n83-20261017-v1/0001/scientific_result.json",
+      "cold_seconds_diagnostic": 20.07800267499988
+    }
+  ],
+  "source_pr": "https://github.com/aburan28/crypto/pull/2049",
+  "source_head": "88b3f53230d379aef0b3b474045827543ebed345",
+  "transfer_prediction": "refuted: U-rank52 on all four actual profiles, not<=8",
+  "erratum": "../actual_norm_u_rank_20261017_v1/ERRATUM.md",
+  "next_queue": [
+    {
+      "id": "native-repeated-tangency-hoisted-denominators-v2",
+      "seconds": 90,
+      "memory_mib": 4096,
+      "cores": 1,
+      "mechanism": "Hoist (x+z)^-2, x^2,x^3,z^3 and h-dependent constants across both ordinates and four h,k profiles. Count inversions, preserve exact r,s sets and all branch coverage. Do not repeat unchanged partial scan."
+    },
+    {
+      "id": "squarefree-norm-family-variable-U-incidence",
+      "seconds": 90,
+      "memory_mib": 4096,
+      "cores": 1,
+      "mechanism": "U-rank52 rejects <=256-cell splitting; derive variable-U constraints or a complementary squarefree reduction. Do not enumerate2^52 or2^73."
+    },
+    {
+      "id": "prime-interval-exact-native-adapter",
+      "seconds": 90,
+      "memory_mib": 4096,
+      "cores": 1,
+      "mechanism": "Implement/review odd prime interval/lift root extraction with wrapped/repeated/nonrational controls, distinct from extension-field subspaces. Keep cold matching F4/F5/F6 and strongest external comparisons required."
+    }
+  ],
+  "requested_gain": 8,
+  "qualified_gain": null,
+  "goal_complete": false,
+  "original_system_complete": false,
+  "novelty_established": false,
+  "publication": "Source-only PR; reports and raw evidence local pending explicit approval."
+}

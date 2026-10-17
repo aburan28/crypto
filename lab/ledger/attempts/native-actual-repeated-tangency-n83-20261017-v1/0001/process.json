@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-m",
+    "research.actual_norm_tangency_20261017_v1.launch",
+    "native-actual-repeated-tangency-n83-20261017-v1",
+    "research/advance/instances/n83-d18-m5-T001-offset0.json",
+    "research/advance/n83_five_divisor_profile.json"
+  ],
+  "effective_timeout_seconds": 30,
+  "ended_unix": 1792205945.9149115,
+  "exit_code": 0,
+  "measurement_scope": "development diagnostic; isolation must be established separately",
+  "memory_limit_scope": "per-process address space inherited by descendants",
+  "peak_process_rss_kib": 250148,
+  "pid": 3049,
+  "process_group": 3049,
+  "started_unix": 1792205925.836906,
+  "status": "ok",
+  "stderr": "",
+  "stdout": "{\"evidence\":{\"curve_points_visited\":125614,\"original_root_count_exact\":null,\"release_gate_claim\":false,\"rows\":[{\"h\":\"4208336d0d441df79c400\",\"k\":\"0\",\"relaxed_candidates\":0,\"source_domain_size\":262144,\"source_elements_visited\":126081,\"support_candidate_count_exact\":null,\"support_candidates\":[],\"tangency_branch_complete\":false,\"tangent_parameters_tested\":125614},{\"h\":\"4208336d0d441df79c400\",\"k\":\"1\",\"relaxed_candidates\":0,\"source_domain_size\":262144,\"source_elements_visited\":126081,\"support_candidate_count_exact\":null,\"support_candidates\":[],\"tangency_branch_complete\":false,\"tangent_parameters_tested\":125614},{\"h\":\"4208336d0d441df79c401\",\"k\":\"0\",\"relaxed_candidates\":0,\"source_domain_size\":262144,\"source_elements_visited\":126081,\"support_candidate_count_exact\":null,\"support_candidates\":[],\"tangency_branch_complete\":false,\"tangent_parameters_tested\":125614},{\"h\":\"4208336d0d441df79c401\",\"k\":\"1\",\"relaxed_candidates\":0,\"source_domain_size\":262144,\"source_elements_visited\":126081,\"support_candidate_count_exact\":null,\"support_candidates\":[],\"tangency_branch_complete\":false,\"tangent_parameters_tested\":125614}],\"scope\":\"nonzero source x, Q(x)!=0, x!=z repeated tangency branch of four fixed norm families; no original tuple or squarefree coverage\"},\"experiment_id\":\"native-actual-repeated-tangency-n83-20261017-v1\",\"next_actions\":[\"If bounded scan is incomplete, profile charged field inversions and reuse the x-dependent denominator across all h,k/y arms in a new frozen variant.\",\"Combine with repeated Q-root closure and preserve every squarefree/outer/pole branch.\",\"Do not infer all-root Groebner speed or novelty from a completed repeated-root component.\"],\"schema\":\"scientific_result_v1\",\"status\":\"inconclusive\",\"summary\":\"Fixed-h,k repeated tangency branch scanned through exact curve fibers and closed r,s formulas within its budget.\"}\n",
+  "stdout_sha256": "1407d3fa7449ab110f6f53ad4f4359f306b651791f198928e7eac089f81ad69e",
+  "system_seconds": 0.051945,
+  "user_seconds": 20.018435,
+  "wall_seconds": 20.07800267499988
+}

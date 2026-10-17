@@ -1,0 +1,986 @@
+{
+  "actual_attempts": [
+    {
+      "cold_wall_seconds": 1.9487434130005568,
+      "experiment_id": "baseline-contract-v1",
+      "peak_process_rss_kib": 157780,
+      "result_path": "ledger/attempts/baseline-contract-v1/0001/scientific_result.json",
+      "status": "error",
+      "summary": "invalid scientific result: worker result keys must match the scientific result contract exactly"
+    },
+    {
+      "cold_wall_seconds": 0.4991939400006231,
+      "experiment_id": "baseline-contract-v1-r1",
+      "peak_process_rss_kib": 158628,
+      "result_path": "ledger/attempts/baseline-contract-v1-r1/0001/scientific_result.json",
+      "status": "blocked",
+      "summary": "The inspected native interfaces lack a matching full339-variable all-root baseline; independent research remains ready."
+    },
+    {
+      "cold_wall_seconds": 1.0047819950013945,
+      "experiment_id": "binary-cell-cover-v1",
+      "peak_process_rss_kib": 167296,
+      "result_path": "ledger/attempts/binary-cell-cover-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Exact root fibers and two-point K-lines passed independent full toy five-point coverage. Actual n83 sample pairs reduce to16 local candidates; no global search or speed claim."
+    },
+    {
+      "cold_wall_seconds": 1.6174600449994614,
+      "experiment_id": "binary-joint-moments-v1",
+      "peak_process_rss_kib": 167424,
+      "result_path": "ledger/attempts/binary-joint-moments-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Joint Gold spans have ranks [66, 126, 171, 171, 171] versus separate sums [69, 149, 232, 315, 398]. Joint(p1,p3) adds affine-cell information beyond p3 alone. Exact Gram-matrix recovery is demonstrated on valid support controls; global low-rank solving and end-to-end performance remain unestablished."
+    },
+    {
+      "cold_wall_seconds": 0.28952794899669243,
+      "experiment_id": "binary-low-rank-native-main-partial-v2",
+      "peak_process_rss_kib": 536208,
+      "result_path": "ledger/attempts/binary-low-rank-native-main-partial-v2/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Scoped native candidate fiber remains unresolved."
+    },
+    {
+      "cold_wall_seconds": 1.2400271679980506,
+      "experiment_id": "binary-newton-cells-v1",
+      "peak_process_rss_kib": 167296,
+      "result_path": "ledger/attempts/binary-newton-cells-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Exact Gold spans have ranks [51, 80, 83, 83, 83] for powers3,5,9,17,33. The p3 necessary constraint adds whole-cell information. No parameter cells were enumerated and no end-to-end speed was measured."
+    },
+    {
+      "cold_wall_seconds": 0.519809710996924,
+      "experiment_id": "binary-short-relations-v1",
+      "peak_process_rss_kib": 167168,
+      "result_path": "ledger/attempts/binary-short-relations-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The actual two-source root problem has a replayable empty-set certificate."
+    },
+    {
+      "cold_wall_seconds": 12.196175225002662,
+      "experiment_id": "binary-triple-native-v1",
+      "peak_process_rss_kib": 167936,
+      "result_path": "ledger/attempts/binary-triple-native-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Complete native support scan and exact replay certify zero finite rational source-point triples for this target; no five-source or speed claim."
+    },
+    {
+      "cold_wall_seconds": 4.901493969002331,
+      "experiment_id": "binary-triple-native-v2",
+      "peak_process_rss_kib": 167936,
+      "result_path": "ledger/attempts/binary-triple-native-v2/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Complete native support scan and exact replay certify zero finite rational source-point triples for this target; no five-source or speed claim."
+    },
+    {
+      "cold_wall_seconds": 3.3740418660017895,
+      "experiment_id": "binary-triple-native-v3",
+      "peak_process_rss_kib": 167936,
+      "result_path": "ledger/attempts/binary-triple-native-v3/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Complete native support scan and exact replay certify zero finite rational source-point triples for this target; no five-source or speed claim."
+    },
+    {
+      "cold_wall_seconds": 8.729495538995252,
+      "experiment_id": "cms-primary-cdcl-fork-closed-toy-v1",
+      "peak_process_rss_kib": 519864,
+      "result_path": "ledger/attempts/cms-primary-cdcl-fork-closed-toy-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Closed toy primary-input search and literal original-fiber replay completed in its declared scope."
+    },
+    {
+      "cold_wall_seconds": 16.09244630899775,
+      "experiment_id": "cms-primary-cdcl-gauss-closed-toy-v2",
+      "peak_process_rss_kib": 574968,
+      "result_path": "ledger/attempts/cms-primary-cdcl-gauss-closed-toy-v2/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Closed toy primary-input search and literal original-fiber replay completed in its declared scope."
+    },
+    {
+      "cold_wall_seconds": 11.551963077996334,
+      "experiment_id": "cms-primary-cdcl-projected-gauss-closed-toy-v3",
+      "peak_process_rss_kib": 593632,
+      "result_path": "ledger/attempts/cms-primary-cdcl-projected-gauss-closed-toy-v3/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Closed toy primary-input search and literal original-fiber replay completed in its declared scope."
+    },
+    {
+      "cold_wall_seconds": 5.3895425950031495,
+      "experiment_id": "cms-primary-cofactor-closed-toy-v4",
+      "peak_process_rss_kib": 592820,
+      "result_path": "ledger/attempts/cms-primary-cofactor-closed-toy-v4/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Closed toy primary-input search and literal original-fiber replay completed in its declared scope."
+    },
+    {
+      "cold_wall_seconds": 2.5715814200011664,
+      "experiment_id": "cms-primary-cofactor-guard-closed-toy-v5",
+      "peak_process_rss_kib": 648884,
+      "result_path": "ledger/attempts/cms-primary-cofactor-guard-closed-toy-v5/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Closed toy primary-input search and literal original-fiber replay completed in its declared scope."
+    },
+    {
+      "cold_wall_seconds": 13.91022754000005,
+      "experiment_id": "cms-primary-decision-closed-toy-v1",
+      "peak_process_rss_kib": 472436,
+      "result_path": "ledger/attempts/cms-primary-decision-closed-toy-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Closed toy primary-input search and literal original-fiber replay completed in its declared scope."
+    },
+    {
+      "cold_wall_seconds": 60.48186122399784,
+      "experiment_id": "critical-cubic-sieve-v1",
+      "peak_process_rss_kib": 237656,
+      "result_path": "ledger/attempts/critical-cubic-sieve-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Critical-density cubic search is unresolved inside its charged budget; verified roots are exact partial evidence."
+    },
+    {
+      "cold_wall_seconds": 8.152341747000037,
+      "experiment_id": "cubic-gap-no-local-P192-profile-v1",
+      "peak_process_rss_kib": 1897728,
+      "result_path": "ledger/attempts/cubic-gap-no-local-P192-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The complete coefficient-family formula transformed to CNF without any SAT or SMT check."
+    },
+    {
+      "cold_wall_seconds": 2.1247479209996527,
+      "experiment_id": "darboux-main-leading-cell-profile-v2",
+      "peak_process_rss_kib": 534656,
+      "result_path": "ledger/attempts/darboux-main-leading-cell-profile-v2/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "One fixed Darboux/right-class cell compiled within the pre-backend thresholds; global coverage remains open."
+    },
+    {
+      "cold_wall_seconds": 80.58830695199867,
+      "experiment_id": "direct-F4-P192-critical-v1",
+      "peak_process_rss_kib": 3461268,
+      "result_path": "ledger/attempts/direct-F4-P192-critical-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Direct Fp F4 or complete original-root extraction remains unresolved."
+    },
+    {
+      "cold_wall_seconds": 97.62813489399923,
+      "experiment_id": "e2-elimination-factor-v1",
+      "peak_process_rss_kib": 1787092,
+      "result_path": "ledger/attempts/e2-elimination-factor-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The freshly paid ghost prerequisites completed, but global norm-polynomial exhaustion remains unresolved within the combined budget."
+    },
+    {
+      "cold_wall_seconds": 2.666125068000838,
+      "experiment_id": "e2-elimination-profile-v1",
+      "peak_process_rss_kib": 173452,
+      "result_path": "ledger/attempts/e2-elimination-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The exact wire-barrier global circuit compiled within its declared pre-backend storage thresholds."
+    },
+    {
+      "cold_wall_seconds": 77.53413238898793,
+      "experiment_id": "f6-inherited-wide-main-field-allroots-v1",
+      "peak_process_rss_kib": 3911616,
+      "result_path": "ledger/attempts/f6-inherited-wide-main-field-allroots-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Charged complete field-root result was not accepted."
+    },
+    {
+      "cold_wall_seconds": 1.3619259050028631,
+      "experiment_id": "f6-inherited-wide-main-import-preflight-v1",
+      "peak_process_rss_kib": 827348,
+      "result_path": "ledger/attempts/f6-inherited-wide-main-import-preflight-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Import-only preflight accepted; no root-scope completion is certified."
+    },
+    {
+      "cold_wall_seconds": 60.263724233001994,
+      "experiment_id": "finite-place-cell-sat-v1",
+      "peak_process_rss_kib": 169216,
+      "result_path": "ledger/attempts/finite-place-cell-sat-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The preregistered whole-cell finite-place SAT search remains unresolved within its charged budget."
+    },
+    {
+      "cold_wall_seconds": 2.7794644450004853,
+      "experiment_id": "finite-place-cell-v1",
+      "peak_process_rss_kib": 167808,
+      "result_path": "ledger/attempts/finite-place-cell-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Repeated-safe local splitting constraints and whole-cell affine fiber counts were checked exactly; no complete hard-system solve or timing gain is claimed."
+    },
+    {
+      "cold_wall_seconds": 91.29888704300174,
+      "experiment_id": "finite-place-combined-v1",
+      "peak_process_rss_kib": 736784,
+      "result_path": "ledger/attempts/finite-place-combined-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The freshly paid ghost prerequisites completed, but global norm-polynomial exhaustion remains unresolved within the combined budget."
+    },
+    {
+      "cold_wall_seconds": 2.0102756850028527,
+      "experiment_id": "grassmann-main-chart-profile-v1",
+      "peak_process_rss_kib": 386868,
+      "result_path": "ledger/attempts/grassmann-main-chart-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "One exact rank-four source chart compiled within the pre-backend thresholds; all other charts and singular branches remain open."
+    },
+    {
+      "cold_wall_seconds": 3.0167788329999894,
+      "experiment_id": "inversion-calibration-v1",
+      "peak_process_rss_kib": 168320,
+      "result_path": "ledger/attempts/inversion-calibration-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Measured inverse cost was 0.914 multiplication units (previous model assumed 83); the charged arithmetic prediction is inconclusive. Equal-support component result: inconclusive_due_to_spread. All measurements are unqualified development; the hard solver and 2x Groebner gate remain incomplete."
+    },
+    {
+      "cold_wall_seconds": 1.7008251900006144,
+      "experiment_id": "joint-moment-support-v1",
+      "peak_process_rss_kib": 168192,
+      "result_path": "ledger/attempts/joint-moment-support-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The frozen support component exceeds the preregistered twofold threshold with paid moment preparation."
+    },
+    {
+      "cold_wall_seconds": 2.5118442279999726,
+      "experiment_id": "moment-barrier-profile-v1",
+      "peak_process_rss_kib": 169344,
+      "result_path": "ledger/attempts/moment-barrier-profile-v1/0001/scientific_result.json",
+      "status": "blocked",
+      "summary": "The compile-only wire-barrier circuit exceeded a declared pre-backend storage threshold; no SAT backend was constructed."
+    },
+    {
+      "cold_wall_seconds": 96.36685763299829,
+      "experiment_id": "moment-bounded-barrier-factor-v1",
+      "peak_process_rss_kib": 1692600,
+      "result_path": "ledger/attempts/moment-bounded-barrier-factor-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The freshly paid ghost prerequisites completed, but global norm-polynomial exhaustion remains unresolved within the combined budget."
+    },
+    {
+      "cold_wall_seconds": 3.7671991370007163,
+      "experiment_id": "moment-bounded-barrier-profile-v1",
+      "peak_process_rss_kib": 172060,
+      "result_path": "ledger/attempts/moment-bounded-barrier-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The exact wire-barrier global circuit compiled within its declared pre-backend storage thresholds."
+    },
+    {
+      "cold_wall_seconds": 32.97494733399799,
+      "experiment_id": "moment-global-factor-v1",
+      "peak_process_rss_kib": 3571000,
+      "result_path": "ledger/attempts/moment-global-factor-v1/0001/scientific_result.json",
+      "status": "error",
+      "summary": "worker process did not complete successfully"
+    },
+    {
+      "cold_wall_seconds": 81.2829601960002,
+      "experiment_id": "native-F4-critical-cubic-v1",
+      "peak_process_rss_kib": 1480324,
+      "result_path": "ledger/attempts/native-F4-critical-cubic-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Native cap or solver error leaves the exact polynomial root count unresolved."
+    },
+    {
+      "cold_wall_seconds": 80.71417582800132,
+      "experiment_id": "native-F4-m3-v1",
+      "peak_process_rss_kib": 1424876,
+      "result_path": "ledger/attempts/native-F4-m3-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Native cap or solver error leaves the exact polynomial root count unresolved."
+    },
+    {
+      "cold_wall_seconds": 37.57260902499911,
+      "experiment_id": "native-F4-main-m5-v1",
+      "peak_process_rss_kib": 3213972,
+      "result_path": "ledger/attempts/native-F4-main-m5-v1/0001/scientific_result.json",
+      "status": "error",
+      "summary": "Native cap or solver error leaves the exact polynomial root count unresolved."
+    },
+    {
+      "cold_wall_seconds": 82.7632511189986,
+      "experiment_id": "native-F5B-main-m5-v1",
+      "peak_process_rss_kib": 625936,
+      "result_path": "ledger/attempts/native-F5B-main-m5-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Native cap or solver error leaves the exact polynomial root count unresolved."
+    },
+    {
+      "cold_wall_seconds": 3.149319038999238,
+      "experiment_id": "native-m3-complete-v1",
+      "peak_process_rss_kib": 77684,
+      "result_path": "ledger/attempts/native-m3-complete-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Complete original-coordinate scan certifies zero roots of both exported three-source S3 links; no five-source or speed claim."
+    },
+    {
+      "cold_wall_seconds": 3.316123754000728,
+      "experiment_id": "native-m3-complete-v1-r1",
+      "peak_process_rss_kib": 94632,
+      "result_path": "ledger/attempts/native-m3-complete-v1-r1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Complete original-coordinate scan certifies zero roots of both exported three-source S3 links; no five-source or speed claim."
+    },
+    {
+      "cold_wall_seconds": 54.54209254899615,
+      "experiment_id": "nist-Frobenius-strip-P192-profile-v1",
+      "peak_process_rss_kib": 3898780,
+      "result_path": "ledger/attempts/nist-Frobenius-strip-P192-profile-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Compile-only profile exceeded its reporting deadline or was cancelled."
+    },
+    {
+      "cold_wall_seconds": 1.6555221020025783,
+      "experiment_id": "nist-bounded-bv-preflight-v2",
+      "peak_process_rss_kib": 164052,
+      "result_path": "ledger/attempts/nist-bounded-bv-preflight-v2/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "5 requested NIST bounded BV compilers validated against frozen norms, exact field proofs and canonical-width boundaries; no root search was run."
+    },
+    {
+      "cold_wall_seconds": 10.218655345997831,
+      "experiment_id": "nist-bounded-p192-v2",
+      "peak_process_rss_kib": 3434044,
+      "result_path": "ledger/attempts/nist-bounded-p192-v2/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Critical-density NIST interval search is unresolved inside its charged budget; retained roots are exact partial evidence."
+    },
+    {
+      "cold_wall_seconds": 19.046216319999075,
+      "experiment_id": "nist-bv-diagnostic-field-only-v1",
+      "peak_process_rss_kib": 3705040,
+      "result_path": "ledger/attempts/nist-bv-diagnostic-field-only-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Bounded BV component transformation diagnostic completed without any root-search call."
+    },
+    {
+      "cold_wall_seconds": 6.603996973000903,
+      "experiment_id": "nist-bv-diagnostic-local-only-v1",
+      "peak_process_rss_kib": 3309864,
+      "result_path": "ledger/attempts/nist-bv-diagnostic-local-only-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Bounded BV component transformation remains unresolved under its declared resources; no root-search claim is made."
+    },
+    {
+      "cold_wall_seconds": 93.7138466969991,
+      "experiment_id": "nist-coefficient-strip-P192-allroots-v1",
+      "peak_process_rss_kib": 3242656,
+      "result_path": "ledger/attempts/nist-coefficient-strip-P192-allroots-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "All-root completion was not accepted within its charged boundary; verified lower bounds remain retained."
+    },
+    {
+      "cold_wall_seconds": 32.3546384700021,
+      "experiment_id": "nist-coefficient-strip-P192-profile-v1",
+      "peak_process_rss_kib": 3827428,
+      "result_path": "ledger/attempts/nist-coefficient-strip-P192-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The complete coefficient-family formula transformed to CNF without any SAT or SMT check."
+    },
+    {
+      "cold_wall_seconds": 90.2522591550005,
+      "experiment_id": "nist-compact-bv-p192-native-v1",
+      "peak_process_rss_kib": 521420,
+      "result_path": "ledger/attempts/nist-compact-bv-p192-native-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Native QF_BV search is unresolved; retained roots are exact partial evidence."
+    },
+    {
+      "cold_wall_seconds": 91.80924137600232,
+      "experiment_id": "nist-compact-eager-p192-native-v1",
+      "peak_process_rss_kib": 1670384,
+      "result_path": "ledger/attempts/nist-compact-eager-p192-native-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Native QF_BV search is unresolved; retained roots are exact partial evidence."
+    },
+    {
+      "cold_wall_seconds": 1.4002782610004942,
+      "experiment_id": "nist-critical-compiler-preflight-v1",
+      "peak_process_rss_kib": 140120,
+      "result_path": "ledger/attempts/nist-critical-compiler-preflight-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "5 requested NIST critical-interval compilers validated with exact field/group proofs and full-width controls; no root search was run."
+    },
+    {
+      "cold_wall_seconds": 10.957601369998883,
+      "experiment_id": "nist-critical-p192-bv-v1",
+      "peak_process_rss_kib": 3403880,
+      "result_path": "ledger/attempts/nist-critical-p192-bv-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Critical-density NIST interval search is unresolved inside its charged budget; retained roots are exact partial evidence."
+    },
+    {
+      "cold_wall_seconds": 93.83299919399724,
+      "experiment_id": "nist-direct-source-norm-p192-native-v1",
+      "peak_process_rss_kib": 2722788,
+      "result_path": "ledger/attempts/nist-direct-source-norm-p192-native-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The exact three-square source norm search remains unresolved within its charged limits."
+    },
+    {
+      "cold_wall_seconds": 15.681557183997938,
+      "experiment_id": "nist-direct-source-norm-p192-profile-v1",
+      "peak_process_rss_kib": 3745752,
+      "result_path": "ledger/attempts/nist-direct-source-norm-p192-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Three-square source norm representation transformed without root search."
+    },
+    {
+      "cold_wall_seconds": 92.03733581000415,
+      "experiment_id": "nist-direct-source-norm-sparse-p192-native-v4",
+      "peak_process_rss_kib": 2129700,
+      "result_path": "ledger/attempts/nist-direct-source-norm-sparse-p192-native-v4/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Sparse NIST result exceeded its charged reporting deadline."
+    },
+    {
+      "cold_wall_seconds": 17.463262233999558,
+      "experiment_id": "nist-direct-source-norm-sparse-p192-profile-v4",
+      "peak_process_rss_kib": 3740900,
+      "result_path": "ledger/attempts/nist-direct-source-norm-sparse-p192-profile-v4/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Checked sparse-prime source norm transformed without root search."
+    },
+    {
+      "cold_wall_seconds": 14.464166742000089,
+      "experiment_id": "nist-direct-source-norm-x-p192-profile-v2",
+      "peak_process_rss_kib": 3736284,
+      "result_path": "ledger/attempts/nist-direct-source-norm-x-p192-profile-v2/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Two-square/mixed-product source norm transformed without root search."
+    },
+    {
+      "cold_wall_seconds": 93.0546601290007,
+      "experiment_id": "nist-direct-source-s4-p192-native-v2",
+      "peak_process_rss_kib": 3879096,
+      "result_path": "ledger/attempts/nist-direct-source-s4-p192-native-v2/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Direct source S4 interval search remains unresolved under its charged limits."
+    },
+    {
+      "cold_wall_seconds": 25.81849084100031,
+      "experiment_id": "nist-direct-source-s4-profile-v1",
+      "peak_process_rss_kib": 3799264,
+      "result_path": "ledger/attempts/nist-direct-source-s4-profile-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Direct source S4 representation remains unresolved under its profile limits."
+    },
+    {
+      "cold_wall_seconds": 31.374728618000518,
+      "experiment_id": "nist-exact-integer-Taylor-P192-profile-v1",
+      "peak_process_rss_kib": 3689308,
+      "result_path": "ledger/attempts/nist-exact-integer-Taylor-P192-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The complete coefficient-family formula transformed to CNF without any SAT or SMT check."
+    },
+    {
+      "cold_wall_seconds": 95.73585803300375,
+      "experiment_id": "nist-exact-integer-Taylor-allroots-v1",
+      "peak_process_rss_kib": 2276188,
+      "result_path": "ledger/attempts/nist-exact-integer-Taylor-allroots-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "All-root completion was not accepted within its charged boundary; verified lower bounds remain retained."
+    },
+    {
+      "cold_wall_seconds": 0.10809551599959377,
+      "experiment_id": "nist-integer-lift-sieve-v1",
+      "peak_process_rss_kib": 59748,
+      "result_path": "ledger/attempts/nist-integer-lift-sieve-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Signed coefficient lifting and repeated-safe small-prime sieving were checked for all five requested NIST coordinate-modulus sizes; this is a solver component and threshold result."
+    },
+    {
+      "cold_wall_seconds": 91.04943131500477,
+      "experiment_id": "nist-norm-compact-p192-native-v1",
+      "peak_process_rss_kib": 827724,
+      "result_path": "ledger/attempts/nist-norm-compact-p192-native-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Native QF_BV search is unresolved; retained roots are exact partial evidence."
+    },
+    {
+      "cold_wall_seconds": 30.117629272001068,
+      "experiment_id": "nist-pair-lattice-P192-v1",
+      "peak_process_rss_kib": 246516,
+      "result_path": "ledger/attempts/nist-pair-lattice-P192-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The charged thirty-second native-worker deadline expired."
+    },
+    {
+      "cold_wall_seconds": 26.47392081599901,
+      "experiment_id": "nist-pair-lattice-P224-v1",
+      "peak_process_rss_kib": 249964,
+      "result_path": "ledger/attempts/nist-pair-lattice-P224-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The bounded lattice attempt did not establish complete pair closure."
+    },
+    {
+      "cold_wall_seconds": 36.947671663998335,
+      "experiment_id": "nist-pair-lattice-P256-v1",
+      "peak_process_rss_kib": 249964,
+      "result_path": "ledger/attempts/nist-pair-lattice-P256-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The charged thirty-second native-worker deadline expired."
+    },
+    {
+      "cold_wall_seconds": 30.116907512998296,
+      "experiment_id": "nist-pair-lattice-P384-v1",
+      "peak_process_rss_kib": 248956,
+      "result_path": "ledger/attempts/nist-pair-lattice-P384-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The charged thirty-second native-worker deadline expired."
+    },
+    {
+      "cold_wall_seconds": 0.0675586210018082,
+      "experiment_id": "nist-pair-lattice-P521-v1",
+      "peak_process_rss_kib": 248956,
+      "result_path": "ledger/attempts/nist-pair-lattice-P521-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The fixed variant was refused by unchanged resource guards; no LLL ran."
+    },
+    {
+      "cold_wall_seconds": 0.10524826600158121,
+      "experiment_id": "nist-pair-lattice-preflight-v1",
+      "peak_process_rss_kib": 235428,
+      "result_path": "ledger/attempts/nist-pair-lattice-preflight-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "All five fixed public-target ghost-pair inputs were size-profiled without building a matrix."
+    },
+    {
+      "cold_wall_seconds": 30.085449870995944,
+      "experiment_id": "nist-pair-norm-P192-profile-v2",
+      "peak_process_rss_kib": 3840732,
+      "result_path": "ledger/attempts/nist-pair-norm-P192-profile-v2/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Compile-only coefficient profile has no accepted native counts yet."
+    },
+    {
+      "cold_wall_seconds": 9.271064513002784,
+      "experiment_id": "nist-prime-domain-v1",
+      "peak_process_rss_kib": 50196,
+      "result_path": "ledger/attempts/nist-prime-domain-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "5 source-identified NIST prime curves processed with interval size4. Exact prime/order/G/target checks and original S4 verification were charged. Matched Groebner2x qualification and novelty remain unestablished."
+    },
+    {
+      "cold_wall_seconds": 40.69952784799898,
+      "experiment_id": "nist-prime-pipeline-v1",
+      "peak_process_rss_kib": 50992,
+      "result_path": "ledger/attempts/nist-prime-pipeline-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "5 source-identified NIST prime curves processed with interval size128. Exact prime/order/G/target checks and original S4 verification were charged. Matched Groebner2x qualification and novelty remain unestablished."
+    },
+    {
+      "cold_wall_seconds": 46.94256054700236,
+      "experiment_id": "nist-ratio-strip-P192-profile-v1",
+      "peak_process_rss_kib": 3912560,
+      "result_path": "ledger/attempts/nist-ratio-strip-P192-profile-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Compile-only profile exceeded its reporting deadline or was cancelled."
+    },
+    {
+      "cold_wall_seconds": 91.89940436799952,
+      "experiment_id": "nist-recursive-product-p192-allroots-v2",
+      "peak_process_rss_kib": 1680400,
+      "result_path": "ledger/attempts/nist-recursive-product-p192-allroots-v2/0001/scientific_result.json",
+      "status": "error",
+      "summary": "worker process did not complete successfully"
+    },
+    {
+      "cold_wall_seconds": 14.77360245899763,
+      "experiment_id": "nist-recursive-product-p192-profile-v1",
+      "peak_process_rss_kib": 1918340,
+      "result_path": "ledger/attempts/nist-recursive-product-p192-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Recursive integer-product representation transformed without root search."
+    },
+    {
+      "cold_wall_seconds": 19.756051716998627,
+      "experiment_id": "nist-streaming-field-only-v1",
+      "peak_process_rss_kib": 3750020,
+      "result_path": "ledger/attempts/nist-streaming-field-only-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Bounded BV component transformation diagnostic completed without any root-search call."
+    },
+    {
+      "cold_wall_seconds": 15.57058278399927,
+      "experiment_id": "nist-streaming-local-only-v1",
+      "peak_process_rss_kib": 3768664,
+      "result_path": "ledger/attempts/nist-streaming-local-only-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Bounded BV component transformation remains unresolved under its declared resources; no root-search claim is made."
+    },
+    {
+      "cold_wall_seconds": 32.18437619700126,
+      "experiment_id": "nist-weighted-recursive-P192-profile-v1",
+      "peak_process_rss_kib": 3826148,
+      "result_path": "ledger/attempts/nist-weighted-recursive-P192-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The complete coefficient-family formula transformed to CNF without any SAT or SMT check."
+    },
+    {
+      "cold_wall_seconds": 3.0865246780012967,
+      "experiment_id": "odd-domain-family-v1",
+      "peak_process_rss_kib": 16948,
+      "result_path": "ledger/attempts/odd-domain-family-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Exact all-x S4 correctness and2k-degree compact norm construction validated. Registered profiles cover only stated fibers; the hard30-variable source case is preserved as an explicit preflight rejection requiring fast polynomial arithmetic. No2x or novelty claim."
+    },
+    {
+      "cold_wall_seconds": 13.304709804993763,
+      "experiment_id": "rank-one-original-wrapper-main-v1",
+      "peak_process_rss_kib": 496608,
+      "result_path": "ledger/attempts/rank-one-original-wrapper-main-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Only the complete original rank-at-most-one finite-chain component was recovered after freshly paid closure and original ANF replay."
+    },
+    {
+      "cold_wall_seconds": 28.684952599003736,
+      "experiment_id": "rank-two-original-wrapper-main-v1",
+      "peak_process_rss_kib": 569100,
+      "result_path": "ledger/attempts/rank-two-original-wrapper-main-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Only the exact original affine-rank-two component completed after fresh closure and every source/U/ANF replay."
+    },
+    {
+      "cold_wall_seconds": 91.54278115500347,
+      "experiment_id": "scaled-source-norm-combined-v1",
+      "peak_process_rss_kib": 1107644,
+      "result_path": "ledger/attempts/scaled-source-norm-combined-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The scaled-source search remains unresolved; verified original-root lower bounds only."
+    },
+    {
+      "cold_wall_seconds": 1.6841007929979241,
+      "experiment_id": "scaled-source-norm-profile-v1",
+      "peak_process_rss_kib": 183764,
+      "result_path": "ledger/attempts/scaled-source-norm-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The exact 173-coordinate scaled-source norm circuit compiled within its declared pre-backend thresholds."
+    },
+    {
+      "cold_wall_seconds": 2.5315676150057698,
+      "experiment_id": "singular-main-low-chart-profile-v1",
+      "peak_process_rss_kib": 452552,
+      "result_path": "ledger/attempts/singular-main-low-chart-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The fixed singular chart compiled within its pre-backend thresholds."
+    },
+    {
+      "cold_wall_seconds": 90.98253336700145,
+      "experiment_id": "source-four-product-combined-v2",
+      "peak_process_rss_kib": 833144,
+      "result_path": "ledger/attempts/source-four-product-combined-v2/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The four-product source search remains unresolved; verified original-root lower bounds only."
+    },
+    {
+      "cold_wall_seconds": 1.401019933000498,
+      "experiment_id": "source-four-product-profile-v1",
+      "peak_process_rss_kib": 217948,
+      "result_path": "ledger/attempts/source-four-product-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The exact 173-coordinate four-product source norm compiled within its pre-backend thresholds."
+    },
+    {
+      "cold_wall_seconds": 61.88953327499985,
+      "experiment_id": "source-orbit-sat-v1",
+      "peak_process_rss_kib": 739832,
+      "result_path": "ledger/attempts/source-orbit-sat-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "Capped source-orbit search/recovery did not establish the full original root set; verified lower bounds only."
+    },
+    {
+      "cold_wall_seconds": 92.40160545199979,
+      "experiment_id": "source-resultant-eight-combined-v1",
+      "peak_process_rss_kib": 1357124,
+      "result_path": "ledger/attempts/source-resultant-eight-combined-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The source-only projection search remains unresolved; verified original-root lower bounds only."
+    },
+    {
+      "cold_wall_seconds": 1.9153810579991841,
+      "experiment_id": "source-resultant-eight-profile-v1",
+      "peak_process_rss_kib": 317600,
+      "result_path": "ledger/attempts/source-resultant-eight-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The 90-coordinate eight-product projection compiled within its pre-backend thresholds; the exact field filter remains mandatory."
+    },
+    {
+      "cold_wall_seconds": 1.4197230780009704,
+      "experiment_id": "source-zero-profile-v1",
+      "peak_process_rss_kib": 304624,
+      "result_path": "ledger/attempts/source-zero-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The exact72-coordinate zero-source subfamily compiled within its pre-backend thresholds."
+    },
+    {
+      "cold_wall_seconds": 91.73556538000048,
+      "experiment_id": "source-zero-subfamily-combined-v1",
+      "peak_process_rss_kib": 894620,
+      "result_path": "ledger/attempts/source-zero-subfamily-combined-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "The zero-source subfamily remains unresolved; verified original-root lower bounds only."
+    },
+    {
+      "cold_wall_seconds": 2.555414407997887,
+      "experiment_id": "support-discriminant-v1",
+      "peak_process_rss_kib": 168448,
+      "result_path": "ledger/attempts/support-discriminant-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Inversion-free witness exactly matched gcd for 1024 GF4 quintics and 40 full-width controls. All36 fixed support predicates agreed; charged arithmetic cost 24719 versus 28115 for the nilpotent filter. Three component repetitions: development_component_only. The2**73 conditional family remains unsearched."
+    },
+    {
+      "cold_wall_seconds": 3.300348507000308,
+      "experiment_id": "support-filter-v1",
+      "peak_process_rss_kib": 167552,
+      "result_path": "ledger/attempts/support-filter-v1/0001/scientific_result.json",
+      "status": "error",
+      "summary": "invalid scientific result: worker result keys must match the scientific result contract exactly"
+    },
+    {
+      "cold_wall_seconds": 1.3963945590003277,
+      "experiment_id": "support-filter-v1-r1",
+      "peak_process_rss_kib": 168704,
+      "result_path": "ledger/attempts/support-filter-v1-r1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Exact support checks agreed on 3807 controls; the filter rejected 32/32 sampled actual n83 relaxed norms. The fixed-family cardinality remains 2**73; this experiment does not solve that family."
+    },
+    {
+      "cold_wall_seconds": 1.04248329100119,
+      "experiment_id": "support-shortcut-v1",
+      "peak_process_rss_kib": 168832,
+      "result_path": "ledger/attempts/support-shortcut-v1/0001/scientific_result.json",
+      "status": "refuted",
+      "summary": "Squarefree shortcut correctness passed 2048 exhaustive small controls and 36 full-width fixtures. Registered arithmetic cost was 33323 versus 28115; prediction refuted. The 2**73 conditional family remains unsearched."
+    },
+    {
+      "cold_wall_seconds": 1.0124738179999895,
+      "experiment_id": "cubic-critical-gap-coverage-v1",
+      "peak_process_rss_kib": 1010632,
+      "result_path": "ledger/attempts/cubic-critical-gap-coverage-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Exact critical-bracket coverage measured on the preregistered small coefficient boxes."
+    },
+    {
+      "cold_wall_seconds": 91.71912829499996,
+      "experiment_id": "cubic-gap-critical-P192-allroots-v1",
+      "peak_process_rss_kib": 1616216,
+      "result_path": "ledger/attempts/cubic-gap-critical-P192-allroots-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "All-root completion was not accepted within its charged boundary; verified lower bounds remain retained."
+    },
+    {
+      "cold_wall_seconds": 0.2777249089999714,
+      "experiment_id": "binary-newton-cell-component-v1",
+      "peak_process_rss_kib": 1041140,
+      "result_path": "ledger/attempts/binary-newton-cell-component-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Reserved affine Newton cell component evaluated."
+    },
+    {
+      "cold_wall_seconds": 2.5720834730000206,
+      "experiment_id": "binary-shared-jet-same-cells-v1",
+      "peak_process_rss_kib": 1064664,
+      "result_path": "ledger/attempts/binary-shared-jet-same-cells-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Affine split-image cuts improve whole-cell exclusion."
+    },
+    {
+      "cold_wall_seconds": 7.083598527000504,
+      "experiment_id": "prime-parity-bootstrap-P192-profile-20261015-v1",
+      "peak_process_rss_kib": 1910312,
+      "result_path": "ledger/attempts/prime-parity-bootstrap-P192-profile-20261015-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The complete coefficient-family formula transformed to CNF without any SAT or SMT check."
+    },
+    {
+      "cold_wall_seconds": 0.49793788399983896,
+      "experiment_id": "actual-binary-jet-rank-n83-v1",
+      "peak_process_rss_kib": 1096700,
+      "result_path": "ledger/attempts/actual-binary-jet-rank-n83-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Actual fixed-family local and joint jet ranks measured; diagnostic only."
+    },
+    {
+      "cold_wall_seconds": 93.79889429399918,
+      "experiment_id": "prime-parity-P192-allroots-20261015-v1",
+      "peak_process_rss_kib": 1610272,
+      "result_path": "ledger/attempts/prime-parity-P192-allroots-20261015-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "All-root completion was not accepted within its charged boundary; verified lower bounds remain retained."
+    },
+    {
+      "cold_wall_seconds": 7.942898585002695,
+      "experiment_id": "prime-mod4-bootstrap-P192-profile-20261015-v1",
+      "peak_process_rss_kib": 1910972,
+      "result_path": "ledger/attempts/prime-mod4-bootstrap-P192-profile-20261015-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "The complete coefficient-family formula transformed to CNF without any SAT or SMT check."
+    },
+    {
+      "cold_wall_seconds": 0.6171998150020954,
+      "experiment_id": "actual-binary-jet-information-n83-v1",
+      "peak_process_rss_kib": 1165476,
+      "result_path": "ledger/attempts/actual-binary-jet-information-n83-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Exact information retained by two-place local support and all8shared lifts measured."
+    },
+    {
+      "cold_wall_seconds": 96.61981648199799,
+      "experiment_id": "prime-mod4-P192-allroots-20261015-v1",
+      "peak_process_rss_kib": 3033700,
+      "result_path": "ledger/attempts/prime-mod4-P192-allroots-20261015-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "All-root completion was not accepted within its charged boundary; verified lower bounds remain retained."
+    },
+    {
+      "cold_wall_seconds": 1.1118766420040629,
+      "experiment_id": "binary-Walsh-augmented-rank-n83-v1",
+      "peak_process_rss_kib": 1253084,
+      "result_path": "ledger/attempts/binary-Walsh-augmented-rank-n83-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Actual augmented affine rank and exact quotient-branch disjointness replayed; no transform executed."
+    },
+    {
+      "cold_wall_seconds": 2.2922779180007637,
+      "experiment_id": "binary-Walsh-six-place-count-n83-v1",
+      "peak_process_rss_kib": 1298492,
+      "result_path": "ledger/attempts/binary-Walsh-six-place-count-n83-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Exact six-place relaxed parameter count computed by augmented affine Walsh contraction."
+    },
+    {
+      "cold_wall_seconds": 0.1223580750011024,
+      "experiment_id": "prime-shared-square-five-NIST-profile-v1",
+      "peak_process_rss_kib": 1288396,
+      "result_path": "ledger/attempts/prime-shared-square-five-NIST-profile-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Shared-square norm identity verified on five requested prime fields; naive expansion increases varying products."
+    },
+    {
+      "cold_wall_seconds": 0.9972492690067156,
+      "experiment_id": "binary-local-spectrum-singlepass-n83-v1",
+      "peak_process_rss_kib": 1331952,
+      "result_path": "ledger/attempts/binary-local-spectrum-singlepass-n83-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Local-spectrum Gray contraction exactly matches prior six-place count with single family construction and complete translated tables."
+    },
+    {
+      "cold_wall_seconds": 1.6281147229965427,
+      "experiment_id": "curve-portfolio-prime-binary-Koblitz-scale-v1",
+      "peak_process_rss_kib": 1368696,
+      "result_path": "ledger/attempts/curve-portfolio-prime-binary-Koblitz-scale-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Prime, ordinary binary, Koblitz and odd-extension adapters matched small all-root oracles; wide finite fibers certified through571bits."
+    },
+    {
+      "cold_wall_seconds": 10.168491313001141,
+      "experiment_id": "local-spectrum-three-cold-pairs-n83-v1",
+      "peak_process_rss_kib": 1363624,
+      "result_path": "ledger/attempts/local-spectrum-three-cold-pairs-n83-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Three alternating cold process pairs compared exact old/new relaxed counters; no root-solver or Groebner speed qualification."
+    },
+    {
+      "cold_wall_seconds": 20.57871921399783,
+      "experiment_id": "fiber-manyfield-repeat8-coldpairs-5x-v1",
+      "peak_process_rss_kib": 1408736,
+      "result_path": "ledger/attempts/fiber-manyfield-repeat8-coldpairs-5x-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Matched exact finite-fiber panel measured on prime,binary,Koblitz and odd-extension fields; all contexts retained."
+    },
+    {
+      "cold_wall_seconds": 4.001352246996248,
+      "experiment_id": "fiber-manyfield-unique-coldpairs-5x-v1",
+      "peak_process_rss_kib": 1407712,
+      "result_path": "ledger/attempts/fiber-manyfield-unique-coldpairs-5x-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Matched exact finite-fiber panel measured on prime,binary,Koblitz and odd-extension fields; all contexts retained."
+    },
+    {
+      "cold_wall_seconds": 130.10306330298772,
+      "experiment_id": "allroot-chain-sevenfield-batches-5x-v1",
+      "peak_process_rss_kib": 1416816,
+      "result_path": "ledger/attempts/allroot-chain-sevenfield-batches-5x-v1/0001/scientific_result.json",
+      "status": "inconclusive",
+      "summary": "TimeoutExpired: Command '['/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python', '-m', 'research.fast_chain_batches_20261015_v1.child', '--variant', 'old']' timed out after 10.789404588998877 seconds"
+    },
+    {
+      "cold_wall_seconds": 37.08188078299281,
+      "experiment_id": "batch-separator-manyfield-exact-coldpairs-20261016-v1",
+      "result_path": "ledger/attempts/batch-separator-manyfield-exact-coldpairs-20261016-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Shared complete leftseparator and certified-edge joins matched every original root against prior cached separator across the manyfield panel."
+    },
+    {
+      "cold_wall_seconds": 5.783272720000241,
+      "experiment_id": "support-squarefree-cost-manyfields-20261016-v1",
+      "result_path": "ledger/attempts/support-squarefree-cost-manyfields-20261016-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Exact nilpotence and squarefree-shortcut support criteria compared with all repeated roots retained."
+    },
+    {
+      "cold_wall_seconds": 1.472474295005668,
+      "experiment_id": "support-squarefree-cost-actual83-20261016-v1",
+      "result_path": "ledger/attempts/support-squarefree-cost-actual83-20261016-v1/0001/scientific_result.json",
+      "status": "passed",
+      "summary": "Exact nilpotence and squarefree-shortcut support criteria compared with all repeated roots retained."
+    },
+    {
+      "experiment_id": "native-quintic-resultant-calibration-20261016-v1",
+      "status": "passed",
+      "summary": "Native inverse-free squarefree criteria agree with native Euclidean reference across20fields.",
+      "cold_wall_seconds": 0.17584641599978568,
+      "result_path": "ledger/attempts/native-quintic-resultant-calibration-20261016-v1/0001/scientific_result.json"
+    },
+    {
+      "experiment_id": "native-quintic-resultant-confirmation-20261016-v1",
+      "status": "passed",
+      "summary": "Native inverse-free squarefree criteria agree with native Euclidean reference across20fields.",
+      "cold_wall_seconds": 0.15432385099984458,
+      "result_path": "ledger/attempts/native-quintic-resultant-confirmation-20261016-v1/0001/scientific_result.json"
+    }
+  ],
+  "archived_solver_build_unchanged_sha256": "02d6c6b26a0910fc59c6437069796404510e02cca8a4fe19ef093302564fd7db",
+  "combined_test_log": "verification_combined_20261012.log",
+  "combined_tests_passed": 219,
+  "daily_agent_cycle_enabled": true,
+  "journal_records": 489,
+  "lab_tests_note": "Historical70-testlablog retained; combined219-testlab/researchsuitepassed33.612sec before latestprime andbarrier modules.",
+  "lab_tests_passed": 70,
+  "latest_bounded_cycle_report": "research/autolab_cycle_20261016_v2/REPORT.json",
+  "next_preparation": "research/autolab_cycle_20261015_v4/NEXT_PREPARATION.json",
+  "next_priority": [
+    "batch-certified-output-native-arithmetic-followup-20261016",
+    "support-cost-dispatch-20261016",
+    "walsh-six-to-eight-place-rankwidth-20261016",
+    "hard-matched-groebner-5x-panel"
+  ],
+  "pending_registered_experiments": [],
+  "queue_state": "active_result_driven_design",
+  "registered_experiment_count": 118,
+  "release_gate": {
+    "approved": false,
+    "evaluation": "external_gate_required"
+  },
+  "requested_field_targets": [
+    "GF(2^83)",
+    "NIST P-192",
+    "NIST P-224",
+    "NIST P-256",
+    "NIST P-384",
+    "NIST P-521"
+  ],
+  "requested_speed_target": 8,
+  "research_program_state": "active_research",
+  "schema": "rootfinding_lab_cycles_v1",
+  "scientific_outcomes": {
+    "blocked": 2,
+    "error": 5,
+    "inconclusive": 41,
+    "passed": 55,
+    "refuted": 1
+  },
+  "supplemental_test_log": "verification_supplement_20261012.log",
+  "supplemental_tests_passed": 30,
+  "updated_utc": "2026-10-16T16:42:58.374878+00:00"
+}

@@ -1,0 +1,15 @@
+   Compiling actual-norm-repeated-pair v0.1.0 (/workspace/generalized_roots/research/actual_norm_repeated_pair_20261017_v1)
+    Finished `release` profile [optimized] target(s) in 2.23s
+     Running unittests src/main.rs (/workspace/crypto-rootfinding-pr/target/release/deps/actual_norm_repeated_pair-7a5f0c2f733f7a66)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/native_cli.rs (/workspace/crypto-rootfinding-pr/target/release/deps/native_cli-6db1a00ba70f0282)
+
+running 1 test
+test repeated_pair_equivalence_retains_zero_and_nonrational_fibers ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

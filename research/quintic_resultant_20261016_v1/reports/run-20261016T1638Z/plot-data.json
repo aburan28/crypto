@@ -1,0 +1,856 @@
+[
+  {
+    "experiment_id": "native-quintic-resultant-calibration-20261016-v1",
+    "status": "passed",
+    "summary": "Native inverse-free squarefree criteria agree with native Euclidean reference across20fields.",
+    "rows": [
+      {
+        "field": "Fp3",
+        "old_seconds": [
+          0.000013771,
+          0.000008873,
+          0.000008683
+        ],
+        "prs_seconds": [
+          0.000008433,
+          0.000007591,
+          0.000007442
+        ],
+        "specialized_seconds": [
+          0.000007751,
+          0.000007501,
+          0.000007401
+        ],
+        "gain_prs": 1.1688842049795811,
+        "gain_specialized": 1.1829089454739368,
+        "answers_equal": true
+      },
+      {
+        "field": "Fp5",
+        "old_seconds": [
+          0.000011708,
+          0.000074242,
+          0.000010636
+        ],
+        "prs_seconds": [
+          0.000009384,
+          0.000014642,
+          0.000008994
+        ],
+        "specialized_seconds": [
+          0.000008854,
+          0.000008913,
+          0.000008913
+        ],
+        "gain_prs": 1.2476555839727195,
+        "gain_specialized": 1.313586895545832,
+        "answers_equal": true
+      },
+      {
+        "field": "Fp7",
+        "old_seconds": [
+          0.000946091,
+          0.000019459,
+          0.000017737
+        ],
+        "prs_seconds": [
+          0.000014071,
+          0.000592986,
+          0.000012729
+        ],
+        "specialized_seconds": [
+          0.000013271,
+          0.00001315,
+          0.00001289
+        ],
+        "gain_prs": 1.3829152156918485,
+        "gain_specialized": 1.479771863117871,
+        "answers_equal": true
+      },
+      {
+        "field": "Fp11",
+        "old_seconds": [
+          0.000018288,
+          0.000017566,
+          0.000017256
+        ],
+        "prs_seconds": [
+          0.000013891,
+          0.00001301,
+          0.000012999
+        ],
+        "specialized_seconds": [
+          0.00001318,
+          0.0000133,
+          0.00001288
+        ],
+        "gain_prs": 1.3501921598770177,
+        "gain_specialized": 1.3327769347496208,
+        "answers_equal": true
+      },
+      {
+        "field": "P192",
+        "old_seconds": [
+          0.000656894,
+          0.000619687,
+          0.000696182
+        ],
+        "prs_seconds": [
+          0.000078729,
+          0.000109045,
+          0.000076846
+        ],
+        "specialized_seconds": [
+          0.000074032,
+          0.000073902,
+          0.000075464
+        ],
+        "gain_prs": 8.34373610740642,
+        "gain_specialized": 8.873108925869895,
+        "answers_equal": true
+      },
+      {
+        "field": "P224",
+        "old_seconds": [
+          0.000898709,
+          0.000684906,
+          0.000710985
+        ],
+        "prs_seconds": [
+          0.000134684,
+          0.000157268,
+          0.000118409
+        ],
+        "specialized_seconds": [
+          0.000134474,
+          0.000117117,
+          0.000128524
+        ],
+        "gain_prs": 5.2789121202221505,
+        "gain_specialized": 5.531923998630606,
+        "answers_equal": true
+      },
+      {
+        "field": "P256",
+        "old_seconds": [
+          0.001261428,
+          0.001371234,
+          0.001029998
+        ],
+        "prs_seconds": [
+          0.000083676,
+          0.000124879,
+          0.000110507
+        ],
+        "specialized_seconds": [
+          0.000078068,
+          0.000077177,
+          0.000078489
+        ],
+        "gain_prs": 11.414914892269268,
+        "gain_specialized": 16.158067325920992,
+        "answers_equal": true
+      },
+      {
+        "field": "P384",
+        "old_seconds": [
+          0.002809699,
+          0.00118341,
+          0.002513091
+        ],
+        "prs_seconds": [
+          0.000134293,
+          0.000103367,
+          0.000110227
+        ],
+        "specialized_seconds": [
+          0.000107292,
+          0.000103687,
+          0.000108534
+        ],
+        "gain_prs": 22.799232492946373,
+        "gain_specialized": 23.422911307460012,
+        "answers_equal": true
+      },
+      {
+        "field": "P521",
+        "old_seconds": [
+          0.005797478,
+          0.004471163,
+          0.001794804
+        ],
+        "prs_seconds": [
+          0.000230779,
+          0.000546807,
+          0.000203518
+        ],
+        "specialized_seconds": [
+          0.000199191,
+          0.000197799,
+          0.000320525
+        ],
+        "gain_prs": 19.374219491374866,
+        "gain_specialized": 22.446611543694242,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^2",
+        "old_seconds": [
+          0.000007481,
+          0.00000659,
+          0.00000621
+        ],
+        "prs_seconds": [
+          0.00000641,
+          0.000006009,
+          0.000005889
+        ],
+        "specialized_seconds": [
+          0.000002444,
+          0.000002083,
+          0.000001863
+        ],
+        "gain_prs": 1.09668830088201,
+        "gain_specialized": 3.1637061929908787,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^3",
+        "old_seconds": [
+          0.000010826,
+          0.000045048,
+          0.00001972
+        ],
+        "prs_seconds": [
+          0.000009595,
+          0.000009044,
+          0.000017086
+        ],
+        "specialized_seconds": [
+          0.000003004,
+          0.000002574,
+          0.000002714
+        ],
+        "gain_prs": 2.0552371026576344,
+        "gain_specialized": 7.266028002947679,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^4",
+        "old_seconds": [
+          0.000014822,
+          0.00001322,
+          0.00001347
+        ],
+        "prs_seconds": [
+          0.000016415,
+          0.000015683,
+          0.000015443
+        ],
+        "specialized_seconds": [
+          0.000004707,
+          0.000004287,
+          0.000004197
+        ],
+        "gain_prs": 0.858891793661927,
+        "gain_specialized": 3.1420573827851648,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^83",
+        "old_seconds": [
+          0.00033026,
+          0.000446735,
+          0.000334746
+        ],
+        "prs_seconds": [
+          0.000369068,
+          0.000590734,
+          0.000367896
+        ],
+        "specialized_seconds": [
+          0.000114173,
+          0.000112059,
+          0.000114182
+        ],
+        "gain_prs": 0.9070035874147854,
+        "gain_specialized": 2.9319191052175206,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^163",
+        "old_seconds": [
+          0.000685297,
+          0.000632707,
+          0.000596362
+        ],
+        "prs_seconds": [
+          0.000737676,
+          0.000723074,
+          0.00118344
+        ],
+        "specialized_seconds": [
+          0.000216017,
+          0.000214194,
+          0.000214975
+        ],
+        "gain_prs": 0.8577031108508343,
+        "gain_specialized": 2.9431654843586466,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^233",
+        "old_seconds": [
+          0.000910747,
+          0.001604977,
+          0.00124289
+        ],
+        "prs_seconds": [
+          0.001050099,
+          0.001160836,
+          0.001158942
+        ],
+        "specialized_seconds": [
+          0.00046266,
+          0.00035064,
+          0.000404913
+        ],
+        "gain_prs": 1.072435031261271,
+        "gain_specialized": 3.069523576669556,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^283",
+        "old_seconds": [
+          0.001304242,
+          0.001182859,
+          0.001161486
+        ],
+        "prs_seconds": [
+          0.001500349,
+          0.001357193,
+          0.001367778
+        ],
+        "specialized_seconds": [
+          0.001404634,
+          0.00230739,
+          0.000435559
+        ],
+        "gain_prs": 0.8648033525908444,
+        "gain_specialized": 0.842111895340708,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^409",
+        "old_seconds": [
+          0.00312058,
+          0.001779562,
+          0.003933229
+        ],
+        "prs_seconds": [
+          0.002388792,
+          0.004065379,
+          0.002303855
+        ],
+        "specialized_seconds": [
+          0.000815483,
+          0.000696794,
+          0.001157441
+        ],
+        "gain_prs": 1.3063422851382624,
+        "gain_specialized": 3.8266646882890263,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^571",
+        "old_seconds": [
+          0.002931925,
+          0.003179198,
+          0.002945024
+        ],
+        "prs_seconds": [
+          0.004977518,
+          0.003215383,
+          0.0032529
+        ],
+        "specialized_seconds": [
+          0.000926311,
+          0.001014614,
+          0.000976487
+        ],
+        "gain_prs": 0.9053533769866888,
+        "gain_specialized": 3.015937744178878,
+        "answers_equal": true
+      },
+      {
+        "field": "GF3^2",
+        "old_seconds": [
+          0.000010446,
+          0.000009485,
+          0.000009434
+        ],
+        "prs_seconds": [
+          0.000008673,
+          0.000008092,
+          0.000008213
+        ],
+        "specialized_seconds": [
+          0.000008313,
+          0.000008212,
+          0.000008262
+        ],
+        "gain_prs": 1.1548764154389382,
+        "gain_specialized": 1.1480271120793997,
+        "answers_equal": true
+      },
+      {
+        "field": "GF5^2",
+        "old_seconds": [
+          0.000010847,
+          0.000032659,
+          0.000014101
+        ],
+        "prs_seconds": [
+          0.000007311,
+          0.000007121,
+          0.000007792
+        ],
+        "specialized_seconds": [
+          0.000007291,
+          0.000007351,
+          0.000007121
+        ],
+        "gain_prs": 1.9287375188072766,
+        "gain_specialized": 1.9340282540117952,
+        "answers_equal": true
+      }
+    ]
+  },
+  {
+    "experiment_id": "native-quintic-resultant-confirmation-20261016-v1",
+    "status": "passed",
+    "summary": "Native inverse-free squarefree criteria agree with native Euclidean reference across20fields.",
+    "rows": [
+      {
+        "field": "Fp3",
+        "old_seconds": [
+          0.000016124,
+          0.000010436,
+          0.000009995
+        ],
+        "prs_seconds": [
+          0.000012569,
+          0.000008713,
+          0.000008563
+        ],
+        "specialized_seconds": [
+          0.000016154,
+          0.000011548,
+          0.000008674
+        ],
+        "gain_prs": 1.1977504877768852,
+        "gain_specialized": 0.9037062694838933,
+        "answers_equal": true
+      },
+      {
+        "field": "Fp5",
+        "old_seconds": [
+          0.000018107,
+          0.000009104,
+          0.000008864
+        ],
+        "prs_seconds": [
+          0.000008293,
+          0.000007491,
+          0.000007491
+        ],
+        "specialized_seconds": [
+          0.000007551,
+          0.000007652,
+          0.000007331
+        ],
+        "gain_prs": 1.2153250567347482,
+        "gain_specialized": 1.2056681234273605,
+        "answers_equal": true
+      },
+      {
+        "field": "Fp7",
+        "old_seconds": [
+          0.000019209,
+          0.000018178,
+          0.000017907
+        ],
+        "prs_seconds": [
+          0.00001334,
+          0.000012298,
+          0.000012008
+        ],
+        "specialized_seconds": [
+          0.000012509,
+          0.000012309,
+          0.000012389
+        ],
+        "gain_prs": 1.4781265246381528,
+        "gain_specialized": 1.4672693518443782,
+        "answers_equal": true
+      },
+      {
+        "field": "Fp11",
+        "old_seconds": [
+          0.00001982,
+          0.00001951,
+          0.000019159
+        ],
+        "prs_seconds": [
+          0.000015384,
+          0.000014702,
+          0.000014602
+        ],
+        "specialized_seconds": [
+          0.000015082,
+          0.000014822,
+          0.000014542
+        ],
+        "gain_prs": 1.3270303360087066,
+        "gain_specialized": 1.316286600998516,
+        "answers_equal": true
+      },
+      {
+        "field": "P192",
+        "old_seconds": [
+          0.001130359,
+          0.00097867,
+          0.000624344
+        ],
+        "prs_seconds": [
+          0.000342869,
+          0.00007274,
+          0.000134373
+        ],
+        "specialized_seconds": [
+          0.000141514,
+          0.000076396,
+          0.000075384
+        ],
+        "gain_prs": 7.283233983017422,
+        "gain_specialized": 12.810487460076443,
+        "answers_equal": true
+      },
+      {
+        "field": "P224",
+        "old_seconds": [
+          0.000767601,
+          0.000725848,
+          0.000713178
+        ],
+        "prs_seconds": [
+          0.000129175,
+          0.000128434,
+          0.000168796
+        ],
+        "specialized_seconds": [
+          0.000133712,
+          0.000117108,
+          0.000129706
+        ],
+        "gain_prs": 5.619105864137797,
+        "gain_specialized": 5.596101953649022,
+        "answers_equal": true
+      },
+      {
+        "field": "P256",
+        "old_seconds": [
+          0.000992151,
+          0.001567731,
+          0.001073714
+        ],
+        "prs_seconds": [
+          0.000081193,
+          0.000104628,
+          0.000081604
+        ],
+        "specialized_seconds": [
+          0.000078018,
+          0.000117408,
+          0.0000792
+        ],
+        "gain_prs": 13.157614822802802,
+        "gain_specialized": 13.556994949494948,
+        "answers_equal": true
+      },
+      {
+        "field": "P384",
+        "old_seconds": [
+          0.001775665,
+          0.001274407,
+          0.001328209
+        ],
+        "prs_seconds": [
+          0.000222076,
+          0.000103737,
+          0.000107152
+        ],
+        "specialized_seconds": [
+          0.000133662,
+          0.000116086,
+          0.000199051
+        ],
+        "gain_prs": 12.395559578915933,
+        "gain_specialized": 9.937072616001556,
+        "answers_equal": true
+      },
+      {
+        "field": "P521",
+        "old_seconds": [
+          0.001991883,
+          0.002622816,
+          0.002051673
+        ],
+        "prs_seconds": [
+          0.000301376,
+          0.000225852,
+          0.000228736
+        ],
+        "specialized_seconds": [
+          0.00021162,
+          0.000200894,
+          0.000201715
+        ],
+        "gain_prs": 8.969611254896474,
+        "gain_specialized": 10.171147410951095,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^2",
+        "old_seconds": [
+          0.000007722,
+          0.000006891,
+          0.00000651
+        ],
+        "prs_seconds": [
+          0.00000652,
+          0.000005498,
+          0.000005598
+        ],
+        "specialized_seconds": [
+          0.000002063,
+          0.000001713,
+          0.000001633
+        ],
+        "gain_prs": 1.2309753483386925,
+        "gain_specialized": 4.02276707530648,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^3",
+        "old_seconds": [
+          0.00001379,
+          0.000012068,
+          0.000011077
+        ],
+        "prs_seconds": [
+          0.000014021,
+          0.00001324,
+          0.000012219
+        ],
+        "specialized_seconds": [
+          0.000004617,
+          0.000003956,
+          0.000004026
+        ],
+        "gain_prs": 0.9114803625377643,
+        "gain_specialized": 2.9975161450571286,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^4",
+        "old_seconds": [
+          0.000017647,
+          0.000013801,
+          0.000012288
+        ],
+        "prs_seconds": [
+          0.000014502,
+          0.000014432,
+          0.000014112
+        ],
+        "specialized_seconds": [
+          0.000004306,
+          0.000003636,
+          0.000004036
+        ],
+        "gain_prs": 0.9562777161862528,
+        "gain_specialized": 3.419474727452924,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^83",
+        "old_seconds": [
+          0.000337391,
+          0.000416409,
+          0.000500356
+        ],
+        "prs_seconds": [
+          0.000366795,
+          0.000807351,
+          0.000369268
+        ],
+        "specialized_seconds": [
+          0.000111538,
+          0.000117278,
+          0.000128685
+        ],
+        "gain_prs": 1.1276606692158542,
+        "gain_specialized": 3.550614778560344,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^163",
+        "old_seconds": [
+          0.000620449,
+          0.000619497,
+          0.000716033
+        ],
+        "prs_seconds": [
+          0.000799158,
+          0.000994845,
+          0.001088656
+        ],
+        "specialized_seconds": [
+          0.000425864,
+          0.000328637,
+          0.000252633
+        ],
+        "gain_prs": 0.623663987857405,
+        "gain_specialized": 1.8879462750694536,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^233",
+        "old_seconds": [
+          0.001012862,
+          0.000914273,
+          0.001012692
+        ],
+        "prs_seconds": [
+          0.001384794,
+          0.001133494,
+          0.001326847
+        ],
+        "specialized_seconds": [
+          0.000413125,
+          0.000469821,
+          0.000343409
+        ],
+        "gain_prs": 0.7632319325438427,
+        "gain_specialized": 2.4512968229954613,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^283",
+        "old_seconds": [
+          0.001254427,
+          0.001338865,
+          0.001300767
+        ],
+        "prs_seconds": [
+          0.00143483,
+          0.001363442,
+          0.001565317
+        ],
+        "specialized_seconds": [
+          0.000441158,
+          0.000422108,
+          0.000422389
+        ],
+        "gain_prs": 0.906565237693664,
+        "gain_specialized": 3.079547526095613,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^409",
+        "old_seconds": [
+          0.003192769,
+          0.002239867,
+          0.001876628
+        ],
+        "prs_seconds": [
+          0.002513632,
+          0.002233828,
+          0.002521052
+        ],
+        "specialized_seconds": [
+          0.000679258,
+          0.000748933,
+          0.00070752
+        ],
+        "gain_prs": 0.8910878760295858,
+        "gain_specialized": 3.1658002600633197,
+        "answers_equal": true
+      },
+      {
+        "field": "GF2^571",
+        "old_seconds": [
+          0.002625721,
+          0.002643898,
+          0.002945665
+        ],
+        "prs_seconds": [
+          0.00290321,
+          0.003426542,
+          0.003477109
+        ],
+        "specialized_seconds": [
+          0.001102527,
+          0.000981074,
+          0.001116208
+        ],
+        "gain_prs": 0.7715936357995904,
+        "gain_specialized": 2.3980346966559547,
+        "answers_equal": true
+      },
+      {
+        "field": "GF3^2",
+        "old_seconds": [
+          0.000010095,
+          0.000008613,
+          0.000008653
+        ],
+        "prs_seconds": [
+          0.000007792,
+          0.000007241,
+          0.000007481
+        ],
+        "specialized_seconds": [
+          0.000007411,
+          0.000007211,
+          0.000007391
+        ],
+        "gain_prs": 1.156663547654057,
+        "gain_specialized": 1.1707482072791233,
+        "answers_equal": true
+      },
+      {
+        "field": "GF5^2",
+        "old_seconds": [
+          0.000010075,
+          0.000009414,
+          0.000009414
+        ],
+        "prs_seconds": [
+          0.000007211,
+          0.00000686,
+          0.000011638
+        ],
+        "specialized_seconds": [
+          0.00000708,
+          0.00000692,
+          0.000062014
+        ],
+        "gain_prs": 1.305505477742338,
+        "gain_specialized": 1.3296610169491525,
+        "answers_equal": true
+      }
+    ]
+  }
+]
