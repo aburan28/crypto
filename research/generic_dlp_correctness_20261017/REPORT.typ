@@ -43,7 +43,7 @@
 #table(
   columns: 7, stroke: 0.3pt, inset: 3pt,
   [curve], [negation map], [walkers], [DPs before → after], [dead trails before → after], [all DPs verify], [unchanged],
-  ..s.collab.map(r => (r.curve, str(r.negation_map), str(r.walkers),
+  ..s.collab.map(r => (r.curve, if r.negation_map { "yes" } else { "no" }, str(r.walkers),
     str(r.before.dps) + " → " + str(r.after.dps),
     str(r.before.dead_trails) + " → " + str(r.after.dead_trails),
     if r.all_dps_verified { "yes" } else { "NO" }, if r.unchanged { "yes" } else { "no" })).flatten()
