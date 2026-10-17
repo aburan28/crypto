@@ -89,11 +89,11 @@ const BSGS_PINNED: [&str; 6] = [
 ];
 const RHO_PINNED: [&str; 4] = ["log", "verified", "total_steps", "distinguished_points"];
 
-/// The secret behind a one-target `answers_digest` of
+/// The planted logarithm behind a one-target `answers_digest` of
 /// `lit2026_w11_bsgs_time`: the digest is one FNV-1a step
 /// `(0xcbf29ce484222325 ^ k) · 0x100000001b3 mod 2^64`, and the prime is
 /// odd, so it inverts.
-fn secret_of_digest(digest: &str) -> u64 {
+fn planted_log_of_digest(digest: &str) -> u64 {
     let d = u64::from_str_radix(digest, 16).expect("hex digest");
     let prime: u64 = 0x100_0000_01b3;
     // Inverse of an odd number mod 2^64 by Newton iteration.
@@ -111,7 +111,7 @@ fn print_targets(raw: &Path) {
     let mut seen = BTreeMap::new();
     for v in read_jsonl(&raw.join("bsgs1.jsonl")) {
         assert_eq!(v["targets"], json!(1), "one-target samples only");
-        let k = secret_of_digest(v["answers_digest"].as_str().unwrap());
+        let k = planted_log_of_digest(v["answers_digest"].as_str().unwrap());
         // The driver's `bits` is the bit length of `n` (45 for the nominal
         // 44-bit curve); the label and inputs/curves.json use the nominal.
         let bits = u64::from(parse_label(v["label"].as_str().unwrap()).bits);
