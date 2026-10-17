@@ -448,7 +448,7 @@ fn scale(paths: &[String]) {
         secs: Vec<f64>,
     }
     let mut cells: BTreeMap<(u64, u64, u64), Cell> = BTreeMap::new();
-    let (mut sat_draws, mut sat_bad) = (0usize, 0usize);
+    let (mut sat_draws, mut sat_bad, mut sat_unmeasured) = (0usize, 0usize, 0usize);
     for path in paths {
         let name = std::path::Path::new(path)
             .file_name()
@@ -457,6 +457,11 @@ fn scale(paths: &[String]) {
         let text = std::fs::read_to_string(path).unwrap_or_default();
         let line = text.lines().find(|l| !l.trim().is_empty());
         let Some(line) = line else {
+            // A killed control is an unmeasured control, never evidence.
+            if name.starts_with("control-") {
+                sat_unmeasured += 1;
+                continue;
+            }
             // Killed: read the cell from the file name.
             let key = if let Some(rest) = name.strip_prefix("fresh-m") {
                 let p: Vec<u64> = rest
@@ -475,11 +480,9 @@ fn scale(paths: &[String]) {
             } else {
                 panic!("{path}: empty and unnamed");
             };
-            if !name.starts_with("control-") {
-                let c = cells.entry(key).or_default();
-                c.unmeasured += 1;
-                c.degrees.push("killed".into());
-            }
+            let c = cells.entry(key).or_default();
+            c.unmeasured += 1;
+            c.degrees.push("killed".into());
             continue;
         };
         let v: Value = serde_json::from_str(line).expect("json");
@@ -565,7 +568,9 @@ fn scale(paths: &[String]) {
         "Q6: log₂ ops ÷ log₂ cols over {} refuting draws: {lo:.2}–{hi:.2} (registered band 2.0–2.4)",
         all_ratios.len()
     );
-    println!("Soundness control: {sat_draws} satisfiable draws, {sat_bad} refuted");
+    println!(
+        "Soundness control: {sat_draws} satisfiable draws, {sat_bad} refuted, {sat_unmeasured} unmeasured"
+    );
 }
 
 fn main() {
