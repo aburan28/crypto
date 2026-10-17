@@ -22,4 +22,7 @@ TMPDIR="$task_tmp" "$rustc_bin" "${common[@]}" --test \
 "$out_dir/finite-field-k1-tests" --test-threads=1 > "$out_dir/tests.log" 2>&1
 TMPDIR="$task_tmp" "$rustc_bin" "${common[@]}" \
   "$script_dir/finite_field_k1.rs" -o "$out_dir/finite-field-k1"
+TMPDIR="$task_tmp" "$rustc_bin" "${common[@]}" \
+  "$script_dir/local_strata.rs" -o "$out_dir/local-strata"
 sha256sum -- "$out_dir/finite-field-k1" > "$out_dir/binary.sha256"
+sha256sum -- "$out_dir/local-strata" > "$out_dir/local-strata-binary.sha256"
