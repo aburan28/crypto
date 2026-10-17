@@ -26616,7 +26616,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -28648,7 +28648,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -29528,7 +29528,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -29830,7 +29830,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -30710,7 +30710,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -32790,7 +32790,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -33674,7 +33674,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -54107,7 +54107,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -54419,7 +54419,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -54731,7 +54731,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -55043,7 +55043,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -55355,7 +55355,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -160126,7 +160126,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "2437",
@@ -160502,7 +160502,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "2437",
@@ -164206,15 +164206,15 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "6915889423298038776451801",
+        "conductor_divides": "147146583474426356945783",
         "conductor": null,
         "levels": [
           {
             "ell": "47",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "4243",
@@ -212707,7 +212707,7 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "33230699894622896822595176507007187",
+        "conductor_divides": "1145886203262858511123971603689903",
         "conductor": null,
         "levels": [
           {
@@ -212720,16 +212720,16 @@
           {
             "ell": "29",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "149",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "44189",
@@ -213094,7 +213094,7 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "33230699894622896822595176507007187",
+        "conductor_divides": "1145886203262858511123971603689903",
         "conductor": null,
         "levels": [
           {
@@ -213107,16 +213107,16 @@
           {
             "ell": "29",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "149",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "44189",
@@ -213481,7 +213481,7 @@
         "class_number_status": "proved"
       },
       "endomorphism": {
-        "conductor_divides": "33230699894622896822595176507007187",
+        "conductor_divides": "1145886203262858511123971603689903",
         "conductor": null,
         "levels": [
           {
@@ -213494,16 +213494,16 @@
           {
             "ell": "29",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "149",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "44189",
@@ -217336,7 +217336,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "24382431923",
@@ -219210,7 +219210,7 @@
         "class_number_status": "probable"
       },
       "endomorphism": {
-        "conductor_divides": "1938079668771844977015311015268777949",
+        "conductor_divides": "4097420018545126801300868954056613",
         "conductor": null,
         "levels": [
           {
@@ -219223,16 +219223,16 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "43",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "130729",
@@ -219395,12 +219395,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 10,
+            "full_degree": 10,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
@@ -219590,7 +219590,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "6217",
@@ -223105,18 +223105,18 @@
       },
       "endomorphism": {
         "conductor_divides": "11",
-        "conductor": null,
+        "conductor": "11",
         "levels": [
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]"
         ]
@@ -223260,12 +223260,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -223352,7 +223352,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "prime",
         "isogenies": "2:0,3:0,5:0,7:0",
         "jfield": "full",
@@ -223776,14 +223776,14 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "233",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "6209263566433",
@@ -234098,7 +234098,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "10254042011",
@@ -235309,18 +235309,18 @@
       },
       "endomorphism": {
         "conductor_divides": "17",
-        "conductor": null,
+        "conductor": "17",
         "levels": [
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]"
         ]
@@ -235482,12 +235482,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 68,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -235549,7 +235549,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "prime",
         "isogenies": "2:0,3:0,5:1,7:0",
         "jfield": "full",
@@ -246885,21 +246885,21 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "271",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "293",
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           },
           {
             "ell": "3853",
@@ -362080,8 +362080,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "11",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "2",
@@ -362100,13 +362100,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -362251,12 +362251,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 10,
+            "full_degree": 10,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 17,
@@ -362332,7 +362332,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "extension",
         "isogenies": "2:3,3:4,5:2,7:1",
         "jfield": "full",
@@ -362431,8 +362431,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "11",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "2",
@@ -362451,13 +362451,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -362602,12 +362602,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 10,
+            "full_degree": 10,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 17,
@@ -362683,7 +362683,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "extension",
         "isogenies": "2:3,3:4,5:2,7:1",
         "jfield": "full",
@@ -400112,7 +400112,7 @@
       },
       "endomorphism": {
         "conductor_divides": "21",
-        "conductor": null,
+        "conductor": "21",
         "levels": [
           {
             "ell": "2",
@@ -400131,13 +400131,13 @@
           {
             "ell": "7",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -400273,12 +400273,12 @@
           },
           {
             "ell": 7,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 42,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
           },
           {
             "ell": 11,
@@ -400372,9 +400372,9 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
-        "isogenies": "2:3,3:1,5:0,7:?",
+        "isogenies": "2:3,3:1,5:0,7:1",
         "jfield": "full",
         "ordinary": "yes",
         "source": "registry",
@@ -400472,7 +400472,7 @@
       },
       "endomorphism": {
         "conductor_divides": "28",
-        "conductor": null,
+        "conductor": "28",
         "levels": [
           {
             "ell": "2",
@@ -400484,13 +400484,13 @@
           {
             "ell": "7",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -400626,12 +400626,12 @@
           },
           {
             "ell": 7,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 42,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
           },
           {
             "ell": 11,
@@ -400725,9 +400725,9 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
-        "isogenies": "2:3,3:1,5:1,7:?",
+        "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
         "ordinary": "yes",
         "source": "registry",
@@ -400837,9 +400837,9 @@
           {
             "ell": "7",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
         "maximal": null,
@@ -400978,12 +400978,12 @@
           },
           {
             "ell": 7,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 42,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
           },
           {
             "ell": 11,
@@ -401079,7 +401079,7 @@
         "embedding": "large",
         "end_order": "unresolved",
         "family": "extension",
-        "isogenies": "2:3,3:1,5:1,7:?",
+        "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
         "ordinary": "yes",
         "source": "registry",
@@ -412566,7 +412566,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -412935,7 +412935,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -413588,7 +413588,7 @@
       },
       "endomorphism": {
         "conductor_divides": "7",
-        "conductor": null,
+        "conductor": "7",
         "levels": [
           {
             "ell": "2",
@@ -413600,13 +413600,13 @@
           {
             "ell": "7",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -413742,12 +413742,12 @@
           },
           {
             "ell": 7,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 42,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 7,
+            "rational_isogenies": 1
           },
           {
             "ell": 11,
@@ -413841,9 +413841,9 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
-        "isogenies": "2:3,3:0,5:1,7:?",
+        "isogenies": "2:3,3:0,5:1,7:1",
         "jfield": "full",
         "ordinary": "yes",
         "source": "registry",
@@ -424486,7 +424486,7 @@
       },
       "endomorphism": {
         "conductor_divides": "33",
-        "conductor": null,
+        "conductor": "33",
         "levels": [
           {
             "ell": "2",
@@ -424505,13 +424505,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -424656,12 +424656,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 11,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -424746,7 +424746,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -426244,7 +426244,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -431689,7 +431689,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -432053,7 +432053,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -432417,7 +432417,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -436242,9 +436242,9 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
         "maximal": null,
@@ -436410,12 +436410,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 68,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -439997,7 +439997,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -440346,7 +440346,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -445141,7 +445141,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -445153,13 +445153,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -445313,12 +445313,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 78,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -445394,7 +445394,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -445490,7 +445490,7 @@
       },
       "endomorphism": {
         "conductor_divides": "26",
-        "conductor": null,
+        "conductor": "26",
         "levels": [
           {
             "ell": "2",
@@ -445502,13 +445502,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -445662,12 +445662,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 78,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -445743,7 +445743,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -445839,7 +445839,7 @@
       },
       "endomorphism": {
         "conductor_divides": "26",
-        "conductor": null,
+        "conductor": "26",
         "levels": [
           {
             "ell": "2",
@@ -445851,13 +445851,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -446011,12 +446011,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 78,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -446092,7 +446092,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -448272,7 +448272,7 @@
       },
       "endomorphism": {
         "conductor_divides": "88",
-        "conductor": null,
+        "conductor": "88",
         "levels": [
           {
             "ell": "2",
@@ -448284,13 +448284,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -448435,12 +448435,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 22,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -448525,7 +448525,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:1,3:0,5:2,7:0",
         "jfield": "full",
@@ -448641,9 +448641,9 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
         "maximal": null,
@@ -448809,12 +448809,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 68,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -461038,7 +461038,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -461050,13 +461050,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -461210,12 +461210,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 13,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -461291,7 +461291,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -474063,7 +474063,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -475098,7 +475098,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -475455,7 +475455,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -483004,8 +483004,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "429",
-        "conductor": null,
+        "conductor_divides": "39",
+        "conductor": "39",
         "levels": [
           {
             "ell": "2",
@@ -483024,20 +483024,20 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           },
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -483182,21 +483182,21 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 2,
+            "full_degree": 2,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 13,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -483272,7 +483272,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -487778,7 +487778,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -487797,13 +487797,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -487957,12 +487957,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 13,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -488038,7 +488038,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:4,5:0,7:0",
         "jfield": "full",
@@ -492234,7 +492234,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -492590,7 +492590,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -494969,7 +494969,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -513176,9 +513176,9 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
         "maximal": null,
@@ -513335,12 +513335,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -515561,7 +515561,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -515573,13 +515573,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -515733,12 +515733,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -515814,7 +515814,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -518002,7 +518002,7 @@
       },
       "endomorphism": {
         "conductor_divides": "110",
-        "conductor": null,
+        "conductor": "110",
         "levels": [
           {
             "ell": "2",
@@ -518021,13 +518021,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -518172,12 +518172,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 5,
+            "full_degree": 55,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -518262,7 +518262,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -518695,8 +518695,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "11",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "2",
@@ -518708,13 +518708,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -518859,12 +518859,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 5,
+            "full_degree": 5,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
@@ -518949,7 +518949,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -524810,7 +524810,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -524822,13 +524822,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -524982,12 +524982,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -525063,7 +525063,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -529922,7 +529922,7 @@
       },
       "endomorphism": {
         "conductor_divides": "23",
-        "conductor": null,
+        "conductor": "23",
         "levels": [
           {
             "ell": "2",
@@ -529934,13 +529934,13 @@
           {
             "ell": "23",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -530175,7 +530175,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:0",
         "jfield": "full",
@@ -535453,7 +535453,7 @@
       },
       "endomorphism": {
         "conductor_divides": "110",
-        "conductor": null,
+        "conductor": "110",
         "levels": [
           {
             "ell": "2",
@@ -535472,13 +535472,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -535623,12 +535623,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -535706,7 +535706,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -535798,7 +535798,7 @@
       },
       "endomorphism": {
         "conductor_divides": "55",
-        "conductor": null,
+        "conductor": "55",
         "levels": [
           {
             "ell": "2",
@@ -535817,13 +535817,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -535968,12 +535968,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -536051,7 +536051,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -542008,7 +542008,7 @@
       },
       "endomorphism": {
         "conductor_divides": "528",
-        "conductor": null,
+        "conductor": "528",
         "levels": [
           {
             "ell": "2",
@@ -542027,13 +542027,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -542178,12 +542178,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -542261,7 +542261,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -542369,7 +542369,7 @@
       },
       "endomorphism": {
         "conductor_divides": "264",
-        "conductor": null,
+        "conductor": "264",
         "levels": [
           {
             "ell": "2",
@@ -542388,13 +542388,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -542539,12 +542539,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -542622,7 +542622,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -552141,7 +552141,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -552153,13 +552153,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -552313,12 +552313,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 1,
+            "full_degree": 13,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -552394,7 +552394,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -562885,7 +562885,7 @@
       },
       "endomorphism": {
         "conductor_divides": "528",
-        "conductor": null,
+        "conductor": "528",
         "levels": [
           {
             "ell": "2",
@@ -562904,13 +562904,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -563055,12 +563055,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 5,
+            "full_degree": 55,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -563145,7 +563145,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -570148,7 +570148,7 @@
       },
       "endomorphism": {
         "conductor_divides": "34",
-        "conductor": null,
+        "conductor": "34",
         "levels": [
           {
             "ell": "2",
@@ -570160,13 +570160,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -570329,12 +570329,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 16,
+            "full_degree": 272,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -570401,7 +570401,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:0,5:0,7:2",
         "jfield": "full",
@@ -570505,7 +570505,7 @@
       },
       "endomorphism": {
         "conductor_divides": "68",
-        "conductor": null,
+        "conductor": "68",
         "levels": [
           {
             "ell": "2",
@@ -570517,13 +570517,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -570686,12 +570686,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 16,
+            "full_degree": 272,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -570758,7 +570758,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:0,5:0,7:2",
         "jfield": "full",
@@ -578121,7 +578121,7 @@
       },
       "endomorphism": {
         "conductor_divides": "34",
-        "conductor": null,
+        "conductor": "34",
         "levels": [
           {
             "ell": "2",
@@ -578133,13 +578133,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -578302,12 +578302,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -578374,7 +578374,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -578470,7 +578470,7 @@
       },
       "endomorphism": {
         "conductor_divides": "17",
-        "conductor": null,
+        "conductor": "17",
         "levels": [
           {
             "ell": "2",
@@ -578482,13 +578482,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -578651,12 +578651,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -578723,7 +578723,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -578823,7 +578823,7 @@
       },
       "endomorphism": {
         "conductor_divides": "22",
-        "conductor": null,
+        "conductor": "22",
         "levels": [
           {
             "ell": "2",
@@ -578835,13 +578835,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -578986,12 +578986,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -579076,7 +579076,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -579176,7 +579176,7 @@
       },
       "endomorphism": {
         "conductor_divides": "44",
-        "conductor": null,
+        "conductor": "44",
         "levels": [
           {
             "ell": "2",
@@ -579188,13 +579188,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -579339,12 +579339,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -579429,7 +579429,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -582628,7 +582628,7 @@
       },
       "endomorphism": {
         "conductor_divides": "34",
-        "conductor": null,
+        "conductor": "34",
         "levels": [
           {
             "ell": "2",
@@ -582640,13 +582640,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -582809,12 +582809,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -582881,7 +582881,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -582989,7 +582989,7 @@
       },
       "endomorphism": {
         "conductor_divides": "68",
-        "conductor": null,
+        "conductor": "68",
         "levels": [
           {
             "ell": "2",
@@ -583001,13 +583001,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -583170,12 +583170,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -583242,7 +583242,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -590868,7 +590868,7 @@
       },
       "endomorphism": {
         "conductor_divides": "33",
-        "conductor": null,
+        "conductor": "33",
         "levels": [
           {
             "ell": "2",
@@ -590887,13 +590887,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -591038,12 +591038,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 10,
+            "full_degree": 110,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -591128,7 +591128,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -593275,7 +593275,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -598525,7 +598525,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -598537,13 +598537,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -598697,12 +598697,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -598778,7 +598778,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -598874,7 +598874,7 @@
       },
       "endomorphism": {
         "conductor_divides": "39",
-        "conductor": null,
+        "conductor": "39",
         "levels": [
           {
             "ell": "2",
@@ -598893,13 +598893,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -599053,12 +599053,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -599134,7 +599134,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -599230,7 +599230,7 @@
       },
       "endomorphism": {
         "conductor_divides": "34",
-        "conductor": null,
+        "conductor": "34",
         "levels": [
           {
             "ell": "2",
@@ -599242,13 +599242,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -599411,12 +599411,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -599483,7 +599483,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:2",
         "jfield": "full",
@@ -599583,7 +599583,7 @@
       },
       "endomorphism": {
         "conductor_divides": "44",
-        "conductor": null,
+        "conductor": "44",
         "levels": [
           {
             "ell": "2",
@@ -599595,13 +599595,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -599746,12 +599746,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 5,
+            "full_degree": 55,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 11,
+            "rational_isogenies": 1
           },
           {
             "ell": 13,
@@ -599829,7 +599829,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:2",
         "jfield": "full",
@@ -600581,7 +600581,7 @@
       },
       "endomorphism": {
         "conductor_divides": "13",
-        "conductor": null,
+        "conductor": "13",
         "levels": [
           {
             "ell": "2",
@@ -600593,13 +600593,13 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -600753,12 +600753,12 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
@@ -600827,7 +600827,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:0,5:1,7:2",
         "jfield": "full",
@@ -601286,7 +601286,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -605483,7 +605483,7 @@
       },
       "endomorphism": {
         "conductor_divides": "68",
-        "conductor": null,
+        "conductor": "68",
         "levels": [
           {
             "ell": "2",
@@ -605495,13 +605495,13 @@
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -605664,12 +605664,12 @@
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 8,
+            "full_degree": 136,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -605736,7 +605736,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:2",
         "jfield": "full",
@@ -613718,7 +613718,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -614055,7 +614055,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -616117,7 +616117,7 @@
       },
       "endomorphism": {
         "conductor_divides": "3082",
-        "conductor": null,
+        "conductor": "3082",
         "levels": [
           {
             "ell": "2",
@@ -616129,20 +616129,20 @@
           {
             "ell": "23",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           },
           {
             "ell": "67",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -616377,7 +616377,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:0",
         "jfield": "full",
@@ -620665,7 +620665,7 @@
       },
       "endomorphism": {
         "conductor_divides": "19",
-        "conductor": null,
+        "conductor": "19",
         "levels": [
           {
             "ell": "2",
@@ -620677,13 +620677,13 @@
           {
             "ell": "19",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -620855,12 +620855,12 @@
           },
           {
             "ell": 19,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 6,
+            "full_degree": 114,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 19,
+            "rational_isogenies": 1
           }
         ],
         "conductor_ratio": {
@@ -620918,7 +620918,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -630974,7 +630974,7 @@
       },
       "endomorphism": {
         "conductor_divides": "3082",
-        "conductor": null,
+        "conductor": "3082",
         "levels": [
           {
             "ell": "2",
@@ -630986,20 +630986,20 @@
           {
             "ell": "23",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           },
           {
             "ell": "67",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -631234,7 +631234,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:0",
         "jfield": "full",
@@ -631338,7 +631338,7 @@
       },
       "endomorphism": {
         "conductor_divides": "1541",
-        "conductor": null,
+        "conductor": "1541",
         "levels": [
           {
             "ell": "2",
@@ -631350,20 +631350,20 @@
           {
             "ell": "23",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           },
           {
             "ell": "67",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -631598,7 +631598,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:2,7:0",
         "jfield": "full",
@@ -634773,7 +634773,7 @@
       },
       "endomorphism": {
         "conductor_divides": "663",
-        "conductor": null,
+        "conductor": "663",
         "levels": [
           {
             "ell": "2",
@@ -634792,20 +634792,20 @@
           {
             "ell": "13",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           },
           {
             "ell": "17",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "probable",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -634959,21 +634959,21 @@
           },
           {
             "ell": 13,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 4,
+            "full_degree": 52,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 13,
+            "rational_isogenies": 1
           },
           {
             "ell": 17,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 2,
+            "full_degree": 34,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 17,
+            "rational_isogenies": 1
           },
           {
             "ell": 19,
@@ -635040,7 +635040,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:0,7:1",
         "jfield": "full",
@@ -637612,7 +637612,7 @@
       },
       "endomorphism": {
         "conductor_divides": "19",
-        "conductor": null,
+        "conductor": "19",
         "levels": [
           {
             "ell": "2",
@@ -637624,13 +637624,13 @@
           {
             "ell": "19",
             "depth": 1,
-            "level": null,
+            "level": 1,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "the ℓ-part of E(GF(q^k)) is cyclic, k = ord(λ): the floor"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -637802,12 +637802,12 @@
           },
           {
             "ell": 19,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "jordan",
+            "point_degree": 3,
+            "full_degree": 57,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 19,
+            "rational_isogenies": 1
           }
         ],
         "conductor_ratio": {
@@ -637865,7 +637865,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:1",
         "jfield": "full",
@@ -641498,7 +641498,7 @@
             "depth": 1,
             "level": null,
             "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "method": "not tested: beyond the cost limits of the division-polynomial and point tests"
           }
         ],
         "maximal": null,
@@ -655400,8 +655400,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "22",
-        "conductor": null,
+        "conductor_divides": "2",
+        "conductor": "2",
         "levels": [
           {
             "ell": "2",
@@ -655413,13 +655413,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": false,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -655564,12 +655564,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 5,
+            "full_degree": 5,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
@@ -655647,7 +655647,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "non-maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
@@ -655750,8 +655750,8 @@
         "class_number_status": "not_evaluated"
       },
       "endomorphism": {
-        "conductor_divides": "11",
-        "conductor": null,
+        "conductor_divides": "1",
+        "conductor": "1",
         "levels": [
           {
             "ell": "2",
@@ -655763,13 +655763,13 @@
           {
             "ell": "11",
             "depth": 1,
-            "level": null,
-            "level_at_most": 1,
-            "method": "not tested: beyond the scalar test's cost limit"
+            "level": 0,
+            "level_at_most": 0,
+            "method": "E[ℓ] is rational over GF(q^k), k = ord(λ): the crater"
           }
         ],
-        "maximal": null,
-        "status": "bounded",
+        "maximal": true,
+        "status": "proved",
         "contains": [
           "Z[π]",
           "the levels the scalar test on E[ℓ] resolves"
@@ -655914,12 +655914,12 @@
           },
           {
             "ell": 11,
-            "frobenius": null,
-            "point_degree": null,
-            "full_degree": null,
-            "isogeny_degree": null,
-            "all_isogenies_degree": null,
-            "rational_isogenies": null
+            "frobenius": "scalar",
+            "point_degree": 5,
+            "full_degree": 5,
+            "isogeny_degree": 1,
+            "all_isogenies_degree": 1,
+            "rational_isogenies": 12
           },
           {
             "ell": 13,
@@ -655997,7 +655997,7 @@
         "descent": "none",
         "descent_signed": "none",
         "embedding": "large",
-        "end_order": "unresolved",
+        "end_order": "maximal",
         "family": "extension",
         "isogenies": "2:3,3:1,5:1,7:0",
         "jfield": "full",
