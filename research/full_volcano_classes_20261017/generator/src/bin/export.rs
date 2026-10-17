@@ -129,7 +129,13 @@ fn main() {
                     &serde_json::to_value(floor_plan).unwrap(),
                 );
             }
-            strata.push(json!({"conductor":f,"vertices":count,"representative_vertex":id,"representative":format!("{label}/stratum-{f}-representative.json")}));
+            let mut quotient = *f;
+            let mut level3 = 0;
+            while quotient % 3 == 0 {
+                quotient /= 3;
+                level3 += 1;
+            }
+            strata.push(json!({"conductor":f,"level2":f.trailing_zeros(),"level3":level3,"vertices":count,"representative_vertex":id,"representative":format!("{label}/stratum-{f}-representative.json")}));
         }
         save(
             &study.join(format!("evidence/{label}-strata.json")),
