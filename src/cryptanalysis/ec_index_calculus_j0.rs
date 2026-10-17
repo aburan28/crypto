@@ -93,6 +93,7 @@ use crate::cryptanalysis::ec_index_calculus::{
     find_one_relation, gaussian_eliminate_mod_n_particular, semaev_s3, semaev_s3_in_x3, sqrt_mod_p,
     FactorBaseEntry,
 };
+use rayon::prelude::*;
 use crate::ecc::curve::CurveParams;
 use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
@@ -677,10 +678,17 @@ pub fn j0_index_calculus_dlp_staged(
     let mut attempts_exhausted = 0usize;
     let mut trials_per_relation: Vec<usize> = Vec::with_capacity(target_raw_relations);
     let mut trials_total = 0usize;
-    while raw_relations.len() < target_raw_relations {
-        let batch_and_trials = 'attempt: {
+    // Relation searches are independent given the factor base, so they run
+    // in parallel (rayon) with results kept in index order: the relation
+    // sequence, the per-relation trial counts and the `attempts_exhausted`
+    // accounting are exactly those of the sequential loop this replaces.
+    // `RAYON_NUM_THREADS=1` reproduces the sequential behaviour.
+    let found: Vec<Option<(Vec<OrbitRelation>, usize, usize)>> = (0..target_raw_relations)
+        .into_par_iter()
+        .map(|_| {
+            let mut exhausted = 0usize;
             for _ in 0..max_relation_attempts {
-                if let Some(found) = find_relation_with_psi_counted_with_index(
+                if let Some((batch, trials)) = find_relation_with_psi_counted_with_index(
                     curve,
                     g,
                     q,
@@ -690,18 +698,24 @@ pub fn j0_index_calculus_dlp_staged(
                     max_trials_per_relation,
                     &x_to_orbit,
                 ) {
-                    break 'attempt Some(found);
+                    return Some((batch, trials, exhausted));
                 }
-                attempts_exhausted += 1;
+                exhausted += 1;
             }
             None
-        };
-        let (batch, trials) = batch_and_trials?;
+        })
+        .collect();
+    for result in found {
+        let (batch, trials, exhausted_before) = result?;
+        attempts_exhausted += exhausted_before;
         trials_total += trials;
         trials_per_relation.push(trials);
         if let Some(first) = batch.into_iter().next() {
             raw_relations.push(first);
         }
+    }
+    if raw_relations.len() != target_raw_relations {
+        return None;
     }
     let relations_ms = relations_started.elapsed().as_secs_f64() * 1e3;
 
