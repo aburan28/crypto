@@ -12,7 +12,7 @@ import run
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 FILES = ('generate.py', 'arms.py', 'run.py', 'verify.py', 'select.py',
-         'aggregate.py', 'prepare_dispatch.py', 'check_dispatch.py',
+         'aggregate.py', 'materialize.py', 'prepare_dispatch.py', 'check_dispatch.py',
          'test_choice_selector.py',
          '../n83_runner_identity_replay_20261017/jobs.py',
          '../../.github/workflows/n83-final-online-holdout.yml')

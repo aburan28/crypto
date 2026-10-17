@@ -78,3 +78,8 @@ file freezes the exact input hashes and arm choice. Only a push containing
 `dispatch.json` to the dedicated
 holdout branch starts the cloud workflow. Source and test commits before then
 cannot start a measurement.
+
+After both raw archives are bound and independently replayed, `materialize.py`
+assigns each public point a canonical workload ID and each candidate-point
+measurement an `IC1...W...R1` run ID. It preserves timed-out and incomplete
+candidate rows with their recorded status and null measured costs.

@@ -10,7 +10,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 
 
-def main():
+def check():
     path = HERE / 'dispatch.json'
     sealed = json.loads(path.read_text())
     if sealed.get('schema') != 'n83.final-online-holdout-dispatch/v1':
@@ -26,10 +26,15 @@ def main():
         events = run.schedule(half, tuple(tuple(arm) for arm in sealed['ordered_arms']))
         if len(events) != 6 * len(sealed['ordered_arms']) * 4:
             raise ValueError('frozen event count differs')
+    return sealed, len(events)
+
+
+def main():
+    sealed, event_count = check()
     print(json.dumps({'status': 'PASS',
                       'candidate_ids': sealed['choice']['ordered_candidate_ids'],
                       'panel_sha256': sealed['panel_sha256'],
-                      'events_per_host': len(events)}, sort_keys=True))
+                      'events_per_host': event_count}, sort_keys=True))
 
 
 if __name__ == '__main__':
