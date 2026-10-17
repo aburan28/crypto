@@ -1,0 +1,92 @@
+{
+  "created_at_utc": "2026-10-15T17:51:31.653749+00:00",
+  "frozen_source_commit": "2dff01c95e457c5f13d69ff50641602cf5f99539",
+  "log_sha256": {
+    "cargo-ssd-enospc.log": "0d90218cd491160042de0430e6e10c718ed21aa3e0764621fcd8c457b9c973a6",
+    "n83-cairn-focused-20261015.log": "7cb34133375157575d8735495282450ece4a02f17c2d873481ee53bbf2638929",
+    "n83-full-unsandboxed-sequential-20261015.log": "5bab73c57eab0cfaa4a6551b360cff6952278ec8c280f64e0bb02cfb1737bbf8",
+    "n83-guarded-watch-cargo-test-scratch-20261015.log": "b997aab3619e978202da5714147db0e70c82406fe2c8848450e6abdf2e057427",
+    "n83-net-focused-20261015.log": "d4ba8942c2136a11032fd563d755af904fdf1a9ae0f09d1748dc012bed47dcdf",
+    "n83-z3-focused-20261015.log": "4864aaba0b462ee033b7b50207ce14a6e4ff8f3a54f389b241fe3b0153a62da5",
+    "n83-z3-sequential-20261015.log": "e1518fcb3ba67086b41861682939251af4e01bbf96013fc38601795312e86564"
+  },
+  "python_suites": {
+    "guarded_watch": {
+      "failed": 0,
+      "passed": 5
+    },
+    "n83": {
+      "failed": 0,
+      "passed": 63
+    },
+    "paired_protocol": {
+      "failed": 0,
+      "passed": 8
+    }
+  },
+  "release_library": {
+    "all_11_full_run_failures_passed_in_corrected_focused_reruns": true,
+    "focused_outside_sandbox": [
+      {
+        "exit_code": 0,
+        "failed": 0,
+        "filter": "cryptanalysis::pollard_collab::cairn::tests",
+        "log": "n83-cairn-focused-20261015.log",
+        "passed": 13
+      },
+      {
+        "exit_code": 0,
+        "failed": 0,
+        "filter": "cryptanalysis::pollard_collab::net::tests",
+        "log": "n83-net-focused-20261015.log",
+        "passed": 3
+      },
+      {
+        "classification": "SHARED_TEMP_FILENAME_RACE",
+        "exit_code": 101,
+        "failed": 1,
+        "filter": "cryptanalysis::smt_oracle::tests::z3_round_trip",
+        "log": "n83-z3-focused-20261015.log",
+        "passed": 1,
+        "threads": 2
+      },
+      {
+        "exit_code": 0,
+        "failed": 0,
+        "filter": "cryptanalysis::smt_oracle::tests::z3_round_trip",
+        "log": "n83-z3-sequential-20261015.log",
+        "passed": 2,
+        "threads": 1
+      }
+    ],
+    "full_corrected_scratch_sequential": {
+      "exit_code": 0,
+      "failed": 0,
+      "harness_seconds": 2547.13,
+      "ignored": 117,
+      "local_socket_access": true,
+      "log": "n83-full-unsandboxed-sequential-20261015.log",
+      "passed": 4084,
+      "test_threads": 1,
+      "tmpdir": "/private/tmp/n83-rust-test-tmp-20261015"
+    },
+    "full_sandboxed_scratch_target": {
+      "exit_code": 101,
+      "failed": 11,
+      "harness_seconds": 2226.1,
+      "ignored": 117,
+      "log": "n83-guarded-watch-cargo-test-scratch-20261015.log",
+      "passed": 4073,
+      "socket_permission_failures": 9,
+      "ssd_temp_enospc_failures": 2
+    },
+    "original_ssd_target_compile": {
+      "classification": "ENOSPC",
+      "exit_code": 101,
+      "log": "cargo-ssd-enospc.log"
+    },
+    "single_full_suite_pass_this_turn": true
+  },
+  "rust_test_binary_sha256": "0b6f92f59032cd6d9dac01f1e009a77c51f13437c6e47058abf153344e8caa21",
+  "schema": "n83.local-paired-quiet-watch-validation/v1"
+}

@@ -1,0 +1,78 @@
+{
+  "artifact_sha256": {
+    ".gitattributes": "11632214baf1760981e9aab753a629c16abdab52d42aaff0c1d31a812e1c79b9",
+    "REPORT.md": "857bef0a6fa4f9b7f7f6f119a5131863529b3b4b8643a987d090de9fc8cb2420",
+    "lean/AdaptiveBase.lean": "602d2100002ba15d2671293ee8d91232c419e9c30d14edaf96e3f2da82beb4b8",
+    "lean/adaptive-base-axioms-20261015.log": "0cccf0c22bb35a020bbd52a50ad0baa4abbb21a5bdb4e980241d9581ba7bda5b",
+    "lean/adaptive-base-build-20261015.log": "ec511a711b53358b19fd9aa01e98eedd522586b957d211fdf075a418fe403509",
+    "lean/adaptive-base-fresh-20261015.log": "ce208be34c5a7783e814e8d21dd7774fbb92fff7a48ce2f8a5017849576b715e",
+    "lean/lake-manifest.json": "fc1b089030173d9aad95d8dafe3e47168f93fccc14274413e9645acadabbf1b9",
+    "lean/lakefile.toml": "6d182545be621657e9a0ef49ea71a0eeaba843d9847ebeceef01e59c3674285c",
+    "lean/lean-toolchain": "d5edba4e4b8faad9c1baeadb265716d20d03be4d1a2647dc5e35b0c0325bea7b",
+    "native_support/src/bin/adaptive_private_columns.rs": "afc16ab58684481881a094368e9860f721f40f751900ff025d038348a9e73f17",
+    "native_support/src/ec.rs": "776d74d3f5ef53f8427d29e519237a692136322259c23b8ba90b078df93fa382",
+    "native_support_tests_adaptive_20261015.log": "f8af36851c4c3837e340a78e295cbb1cf5a2ce84ae9c6703eef27c177cc0d8fc",
+    "reports/run-20261015T1926Z/REPORT.md": "2d8a819f23cad117c314fcb97a729b3f0262dc857f1cc649aaafcd2c6a949b55",
+    "type_i_adaptive_private_columns.json": "c3b83c7b55872e112cab0cb90b409abea6cafe62af2a7882feef45ddd728e4e9",
+    "type_i_adaptive_private_columns.log": "f3b2428c102ea6767cd19eed60d5cb94ab0c8dce57dcc6cb1a2fbe126247ed95",
+    "type_i_adaptive_private_columns_independent.log": "e6f5135ef46a25abea1d7e3792a67a5426b6c5b37a1644528a98b80cd63c9bb1",
+    "type_i_base_points_legacy_fixture.json": "3984b55b793305b30beaf18918209282bce80d444c96217cd6143c7d9470d409",
+    "type_i_character_density.json": "fd0a47cf4aecf736b1852d133fd384e30d9584114761bac6495f803d4210ca29",
+    "type_i_geom_character_collector.json": "961a9995114189ed1ee86febde46979900317417a2744f34274833390fb5ff49",
+    "type_i_mixed_known_log_support.json": "dbf7575277d016e9201c5de60bbef9662e334284871a7d086a437e10619d827b",
+    "verify_adaptive_private_columns.py": "5007c57dc99a9f50e168f21cbb449d842d1c2167ddfcecfe9c228dac9c942a9e"
+  },
+  "checks": {
+    "independent_exit": 0,
+    "lean_axioms_exit": 0,
+    "lean_build_exit": 0,
+    "lean_fresh_exit": 0,
+    "native_exit": 0,
+    "native_support_tests_exit": 0,
+    "registry_validator_exit": 0
+  },
+  "counts": {
+    "augmented_relation_rank_if_private": 64,
+    "augmented_unknown_columns_if_private": 80,
+    "distinct_new_points": 64,
+    "full_pair_candidate_rows": 8704,
+    "full_pair_distinct_points": 8704,
+    "full_pair_duplicate_points": 0,
+    "full_pair_identity_points": 0,
+    "full_pair_old_unknown_nullity_if_private": 16,
+    "full_pair_points_already_in_old_base": 0,
+    "full_pair_points_with_old_three_sum_decomposition": 0,
+    "full_pair_rank_if_private": 8704,
+    "full_pair_unknown_columns_if_private": 8720,
+    "identity_new_points": 0,
+    "new_point_duplicates": 0,
+    "new_points_already_in_old_base": 0,
+    "new_points_with_old_three_sum_decomposition": 0,
+    "new_relations": 64,
+    "old_unknown_nullity_if_private": 16
+  },
+  "full_pair_keys_sha256": "3d5c30720c9f53340e810fa743aacce20faf4352e1013478992dfe15cfe90f77",
+  "independent_command": "python3 research/p192_extension_cover_20261012/verify_adaptive_private_columns.py BASE.json DENSITY.json GUIDE.json MIXED.json OUTPUT.json",
+  "lean_build_workdir": "/private/tmp/p192-adaptive-lean (byte-identical copied pinned source, toolchain and manifest; package cache kept off workspace volume)",
+  "lean_commands": [
+    "lake build AdaptiveBase",
+    "lake env lean AdaptiveBase.lean",
+    "lake env leanchecker --fresh --verbose AdaptiveBase"
+  ],
+  "native_binary_sha256": "c5e819d1276beca16b81728f63d3e0f23dd829d8c5f5d56bd82f4efce990f3cb",
+  "native_command": "/private/tmp/p192-adaptive-cargo/release/adaptive_private_columns research/p192_extension_cover_20261012/type_i_base_points_legacy_fixture.json research/p192_extension_cover_20261012/type_i_character_density.json research/p192_extension_cover_20261012/type_i_geom_character_collector.json research/p192_extension_cover_20261012/type_i_mixed_known_log_support.json research/p192_extension_cover_20261012/type_i_adaptive_private_columns.json",
+  "new_point_character_cells": {
+    "++": 13,
+    "+-": 19,
+    "-+": 20,
+    "--": 12
+  },
+  "parent_commit": "99954a8350a24287f41805503790b75bfc7c4b24",
+  "scope": "standard P-192 Type I quotient, frozen 160 signed old points and 64 independently accepted known-scalar queries",
+  "status": "verified_adaptive_private_column_and_full_pair_census",
+  "toolchain": {
+    "lean": "4.34.1",
+    "mathlib_revision": "d13f23b723b8a846827a245b89c10fc7d3f11612",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+  }
+}

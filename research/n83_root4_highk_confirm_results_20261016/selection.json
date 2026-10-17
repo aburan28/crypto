@@ -1,0 +1,56 @@
+{
+  "analysis_sha256": "eb212870d61ddeaab1e5e18f6b7a95ffc83d16ee9dafc5c3986ad705d208c6f6",
+  "artifact_id": 12021760871,
+  "artifact_run_id": 38835419672,
+  "artifact_sha256": "4a752ba2910ef52773de7128d933df9c7e8f7aad36c6eda3a561f921041d0a78",
+  "balanced_comparison": {
+    "contiguous_block_size": 25,
+    "pairwise": {
+      "root4k3500std_minus_root4k3596std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.5803397939375,
+          -0.824785638125
+        ],
+        "mean_ms": -2.176875496875
+      },
+      "root4k3596std_minus_root4k3500std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.813280032875,
+          3.56544562175
+        ],
+        "mean_ms": 2.176875496875
+      }
+    },
+    "pipeline_mean_ms": {
+      "root4k3500std": 27.5631829006875,
+      "root4k3596std": 29.7400583975625
+    },
+    "repeatability": {
+      "root4k3500std_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.21026893224999996,
+          -0.1177307469999999
+        ],
+        "mean_ms": -0.16360937537499998
+      },
+      "root4k3596std_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          5.126150608375,
+          7.951186713
+        ],
+        "mean_ms": 6.431868462125
+      }
+    },
+    "selected_pipeline": "root4k3500std"
+  },
+  "candidate_id": "IC1N83Ckb1a1fb581000PDP4rootRCguidedLAgaussTDdirectISO0h61356e9b128d",
+  "candidate_manifest_sha256": "354e1bb265a3476c0c8996289abd48df178dad5f251dc03dcc4fc80e3a79ed51",
+  "descriptive_lowest_pipeline": "root4k3500std",
+  "schema": "n83.root4-highk-confirm-selection/v1",
+  "selected_pipeline": "root4k3500std",
+  "source_base_hash_blake3": "3387d0c40335c49256ad2048542455572980bef501c3735fd8a26f42ac035e67",
+  "source_commit": "adf9ca9b254ac7de8bb777446e74788d25e369a8",
+  "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+  "status": "PANEL_SELECTED",
+  "workload_id": "8b1160a2e08a"
+}

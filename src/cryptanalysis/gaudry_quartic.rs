@@ -843,7 +843,7 @@ unsafe fn axpy_avx2(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
 }
 
 #[inline]
-fn axpy(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
+pub(crate) fn axpy(row: &mut [u16], piv: &[u16], f: u32, p: u32) {
     #[cfg(target_arch = "x86_64")]
     {
         if is_x86_feature_detected!("avx512bw") && is_x86_feature_detected!("avx512vl") {
@@ -906,7 +906,7 @@ fn rref_u16(m: &mut [Vec<u16>], p: u32, muls: &mut u64) -> Vec<usize> {
 /// is a similarity by `I + Σ fᵢ E_{i,j+1}`, whose elementary factors
 /// commute (their products vanish), so its row operations can all run
 /// before its column operations: the same matrix as the interleaved order.
-fn charpoly_u16(a: &[Vec<u64>], p: u32, muls: &mut u64) -> UPoly {
+pub(crate) fn charpoly_u16(a: &[Vec<u64>], p: u32, muls: &mut u64) -> UPoly {
     let n = a.len();
     let mut h: Vec<Vec<u16>> = a
         .iter()
@@ -986,7 +986,12 @@ fn charpoly_u16(a: &[Vec<u64>], p: u32, muls: &mut u64) -> UPoly {
 }
 
 /// As `gaudry_cubic::eigenvectors_mod_p`: a kernel basis of `m − λI`.
-fn eigenvectors_u16(m: &[Vec<u16>], lambda: u64, p: u32, muls: &mut u64) -> Vec<Vec<u64>> {
+pub(crate) fn eigenvectors_u16(
+    m: &[Vec<u16>],
+    lambda: u64,
+    p: u32,
+    muls: &mut u64,
+) -> Vec<Vec<u64>> {
     let n = m.len();
     let mut a: Vec<Vec<u16>> = m.to_vec();
     for (i, row) in a.iter_mut().enumerate() {
@@ -1075,12 +1080,12 @@ impl QuarticSolve {
     }
 }
 
-struct Echelon {
-    rows: Vec<Vec<u16>>,
-    pivot_row: Vec<u32>,
-    zero_rows: usize,
+pub(crate) struct Echelon {
+    pub(crate) rows: Vec<Vec<u16>>,
+    pub(crate) pivot_row: Vec<u32>,
+    pub(crate) zero_rows: usize,
     /// Input rows that reduced to zero (or were zero), by index.
-    zero_ids: Vec<u32>,
+    pub(crate) zero_ids: Vec<u32>,
 }
 
 /// Forward elimination by leading column.  Every unused row has zeros
@@ -1091,17 +1096,11 @@ struct Echelon {
 /// elimination, without scanning rows that are already zero there;
 /// `muls` counts the nonzero entries of each pivot row once per row it is
 /// subtracted from, and once for its normalisation.
-///
-/// With `sparsest`, each column's pivot is instead the row of its bucket
-/// with the fewest nonzero entries (lowest index on a tie), which cuts the
-/// work and the fill; the row space and the pivot columns are the same
-/// either way.
-fn echelon_by_lead_with(
+pub(crate) fn echelon_by_lead(
     mut rows: Vec<Vec<u16>>,
     p: u32,
     muls: &mut u64,
     debug: bool,
-    sparsest: bool,
 ) -> Echelon {
     let ncols = rows.first().map_or(0, |r| r.len());
     let mut buckets: Vec<Vec<u32>> = vec![Vec::new(); ncols];
@@ -1264,20 +1263,20 @@ fn top_up_echelon(
 /// of target columns by one sweep from the right over the pivots they
 /// reach — iteratively, since a chain of pivots can be tens of thousands
 /// deep.
-struct NormalForms4<'a> {
-    ech: &'a Echelon,
-    is_std: Vec<bool>,
-    std_index: Vec<u32>,
-    dim: usize,
-    p: u32,
-    memo: Vec<Option<(Vec<u16>, u64)>>,
-    reached: usize,
+pub(crate) struct NormalForms4<'a> {
+    pub(crate) ech: &'a Echelon,
+    pub(crate) is_std: Vec<bool>,
+    pub(crate) std_index: Vec<u32>,
+    pub(crate) dim: usize,
+    pub(crate) p: u32,
+    pub(crate) memo: Vec<Option<(Vec<u16>, u64)>>,
+    pub(crate) reached: usize,
 }
 
 impl<'a> NormalForms4<'a> {
     /// Make every column in `targets` resolvable.  `Err(c)` names a column
     /// reached that is neither standard nor a pivot.
-    fn ensure(&mut self, targets: &[usize], muls: &mut u64) -> Result<(), usize> {
+    pub(crate) fn ensure(&mut self, targets: &[usize], muls: &mut u64) -> Result<(), usize> {
         let ncols = self.is_std.len();
         let mut need: Vec<usize> = Vec::new();
         let mut seen = vec![false; ncols];
@@ -1360,7 +1359,7 @@ impl<'a> NormalForms4<'a> {
         Ok(())
     }
 
-    fn vector(&self, c: usize) -> Vec<u64> {
+    pub(crate) fn vector(&self, c: usize) -> Vec<u64> {
         if self.is_std[c] {
             let mut v = vec![0u64; self.dim];
             v[self.std_index[c] as usize] = 1;

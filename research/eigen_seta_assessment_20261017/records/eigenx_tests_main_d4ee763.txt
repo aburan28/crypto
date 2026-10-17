@@ -1,0 +1,91 @@
+   Compiling eigen_seta v0.1.0 (/home/user/eigenx)
+    Finished `release` profile [optimized] target(s) in 3m 35s
+     Running unittests src/lib.rs (/tmp/eigenx-target/release/deps/eigen_seta-9712c74ef7bf3c19)
+
+running 14 tests
+test fp::tests::bench_l1_mul_square ... ignored
+test fp::tests::full_width_modulus ... ok
+test kat_nist::tests::l1_claim_is_not_category_1 ... ok
+test kat_nist::tests::l1_entropy_seeds_are_stable_and_not_a_toy ... ok
+test fp::tests::friendly_mul_matches_bigint_including_q_sets ... ok
+test fp::tests::square_matches_mul_including_large_sets ... ok
+test fp::tests::montgomery_constants_match_bigint ... ok
+test kem::tests::rejects_invalid_public_curves_and_basis ... ok
+test kem::tests::scalar_recovery_handles_minus_one_and_zero ... ok
+test security::tests::grover_parallelisation_never_cheaper_than_serial ... ok
+test wire::tests::round_trip_and_rejections ... ok
+test kem::tests::parallel_keygen_jobs_l1 ... ok
+test kem::tests::theta_decaps_round_trips_l1 ... ok
+test kem::tests::l1_recovers_several_kernel_scalars ... ok
+
+test result: ok. 13 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 37.42s
+
+     Running unittests src/bin/eigenx.rs (/tmp/eigenx-target/release/deps/eigenx-69f1c0292e12a1e5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/chain.rs (/tmp/eigenx-target/release/deps/chain-20e82bd0584387a5)
+
+running 1 test
+test chain_matches_direct_endomorphism ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.42s
+
+     Running tests/chain_debug.rs (/tmp/eigenx-target/release/deps/chain_debug-b291690f3b7987e0)
+
+running 1 test
+test chain_stepwise ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.95s
+
+     Running tests/cli.rs (/tmp/eigenx-target/release/deps/cli-cafd113ac28565f8)
+
+running 1 test
+test cli_round_trip_l1 ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.25s
+
+     Running tests/curve_debug.rs (/tmp/eigenx-target/release/deps/curve_debug-8d8c056d4a846f81)
+
+running 1 test
+test debug_curves ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/field.rs (/tmp/eigenx-target/release/deps/field-635005cc3e751d88)
+
+running 6 tests
+test f2 ... ok
+test f1 ... FAILED
+test f3 ... ok
+test fl1 ... ok
+test fq5 ... ok
+test fl5 ... ok
+
+failures:
+
+---- f1 stdout ----
+
+thread 'f1' (13120) panicked at tests/field.rs:122:1:
+assertion `left == right` failed
+  left: 802105966874386821
+ right: 766077169855422853
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+   1: core::panicking::panic_fmt
+   2: core::panicking::assert_failed_inner
+   3: core::panicking::assert_failed::<num_bigint::biguint::BigUint, num_bigint::biguint::BigUint>
+   4: field::f1::{closure#0}
+   5: <field::f1::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+
+failures:
+    f1
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 48.60s
+
+error: test failed, to rerun pass `--test field`
+done

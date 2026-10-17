@@ -1,0 +1,14 @@
+{
+  "calibration_cases": 15,
+  "calibration_zero_disagreements": true,
+  "generic_C_matches_prior_certificate_byte_for_byte": true,
+  "extracted_binary_C_matches_delivery_certificate_byte_for_byte": true,
+  "all_five_generic_certify_commands_succeeded": true,
+  "archive_manifest_checks": "both new extracted archives pass every entry; raw logs retained in /workspace/scratch",
+  "hashes": {
+    "source": "ec4266cecdd9b7d530f0e54dc8fc4442dcfa588a489d2ad72303856346869c96",
+    "binary": "6a83921d7989a2d761711bf1e1a5a1c2df62d6e3599b6b312a1c075a93d8736c"
+  },
+  "root_library": "unchanged in this local patch; earlier serial full-release suite 4236 pass / 0 fail / 117 pre-existing ignored",
+  "scope": "standard volcano theorem reused; not independent arithmetic or formal proof; no new DLP timing"
+}

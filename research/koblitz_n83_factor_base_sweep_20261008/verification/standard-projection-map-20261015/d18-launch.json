@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "/private/tmp/n83-guarded-cargo-target-20261015/release/examples/koblitz_n83_standard_projection_map",
+    "construct",
+    "/private/tmp/n83-standard-projection-map-20261015-01/d18.jsonl",
+    "18"
+  ],
+  "binary_sha256": "d25688592fda9adfb71eb1da545daaecc160fb0cdf9c14fbcd7d80cab31934e0",
+  "child_maxrss_bytes_L0": 671891456,
+  "child_system_seconds_L0": 1.526492,
+  "child_user_seconds_L0": 26.929733,
+  "exit_code": 0,
+  "output_sha256": "ca619a45e15069d99d89b0b6e1534aff25b3d49a71a4e65ae80ce80c518ba71e",
+  "result": {
+    "excluded_source_points": 3,
+    "projected_point_count": 261444,
+    "projected_signed_frobenius_columns": 130460,
+    "source_dimension": 18,
+    "source_point_count": 261447,
+    "status": "PASS_EXACT_SOURCE_TO_PROJECTED_COLUMN_MAP"
+  },
+  "schema": "n83.standard-projection-map-launch/v1",
+  "scratch_free_after_bytes": 4051968000,
+  "scratch_free_before_bytes": 4163588096,
+  "selected_best_total_runtime": null,
+  "source_commit": "440d70424da8b6d93fe4298bcab00afc6491e4fb",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_text": "",
+  "stdout_sha256": "c077c48d35cfdbfe21b4be5da68cbe0c2f0416034bc7c0744d7f9c5da61ca066",
+  "timeout": false,
+  "wall_cap_seconds": 300,
+  "wall_seconds_L0": 46.85506358299972
+}

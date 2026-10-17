@@ -12,6 +12,7 @@
 //! | [`workload`] | curve constructions → ICV1-named single-target workloads |
 //! | [`methods`] | the method registry and the one `solve` every method goes through |
 //! | [`generic`] | counted BSGS (three forms) and the kangaroo on any [`CountedGroup`] |
+//! | [`fp4`] | `E(F_{p⁴})`: the curve, its counted group and `ic.k4_gaudry` (Gaudry `k = 4`) |
 //! | [`claw`] | the four-point signed-Frobenius pair claw (aburan28/cryptanalysis#175) on a Koblitz curve |
 //! | [`conductor_gap`] | CM crater/floor curve pairs with a certified prime endomorphism-conductor gap |
 //! | [`spec`] | the experiment spec and its deterministic expansion |
@@ -22,7 +23,8 @@
 //! | [`signals`] | interruption: the host is restored and no child outlives the runner |
 //! | [`compare`] | paired ratios with bootstrap intervals; wall time gated by level |
 //! | [`resources`] | cold native-work, memory and PMU vectors without invented GAE prices |
-//! | [`gpu`] | bounded CUDA ECC stage runs with a device self-test and raw receipts |
+//! | [`gpu`] | bounded CUDA stage runs and matched-workload GPU receipts with independent replay |
+//! | [`calibration`] | empirical A/A coverage and contention-admission checks |
 //! | [`claim`] | `vs_rho` claims: the IC1 identity, the claim report, the native checker |
 //! | [`audit`] | re-derive a session from its files; replay runs exactly |
 //! | [`db`] | SQL that loads sessions into the schema in `docs/ecbench/schema.sql` |
@@ -34,7 +36,9 @@
 //! [`CountedGroup`]: crate::cryptanalysis::ic_boundary::CountedGroup
 
 pub mod audit;
+pub mod band;
 pub mod bounds;
+pub mod calibration;
 pub mod callgrind;
 pub mod canonical;
 pub mod challenge;
@@ -43,7 +47,9 @@ pub mod claw;
 pub mod compare;
 pub mod conductor_gap;
 pub mod db;
+pub mod fp4;
 pub mod frontier;
+pub mod full_price;
 pub mod generic;
 pub mod gpu;
 pub mod host;
@@ -56,4 +62,5 @@ pub mod runner;
 pub mod signals;
 pub mod spec;
 pub mod stats;
+pub mod trend;
 pub mod workload;

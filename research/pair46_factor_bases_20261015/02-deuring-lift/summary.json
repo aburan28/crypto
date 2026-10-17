@@ -1,0 +1,42 @@
+{
+ "n_primes": 24,
+ "rho_median": {
+  "A2": 1.393222726516654,
+  "NC": 1.2503108317816831,
+  "PC": 0.2899175473177651
+ },
+ "rho_A2_minus_NC_median": [
+  0.1429118947349708,
+  -0.17988858775565975,
+  0.26190114480514026
+ ],
+ "mann_whitney_A2_vs_NC": [
+  321.0,
+  0.6804485315449161,
+  0.4962205004110358
+ ],
+ "PC_all_below_0.5": true,
+ "PC_max": 0.46072995530797417,
+ "cov_A2_minus_NC_mean": [
+  0.0007891505056522446,
+  -0.05179895693437908,
+  0.05614073216176105
+ ],
+ "lifted_relations_total": {
+  "A2": 0,
+  "PC": 48,
+  "A3_xedni": 0,
+  "A3_trials": 96,
+  "A3_all_p_integral": true,
+  "PC_xedni": 24,
+  "PC_xedni_trials": 24
+ },
+ "relations_needed_per_prime": "|F| = 6 (plus 1 for the target)",
+ "twist_rank_census": {
+  "0": 51,
+  "1": 54,
+  "2": 8,
+  "3": 2
+ },
+ "twists_total": 115
+}

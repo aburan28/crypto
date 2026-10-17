@@ -1,0 +1,93 @@
+{
+  "schema": "volcano-census.frozen/v1",
+  "frozen_after": "calibration sessions b=18..26, before any census search or Phase B run",
+  "b": 26,
+  "ic": {
+    "id": "ic-fb64-mitm",
+    "factor_base": "prime-abscissa:size=64",
+    "oracle": "mitm:negation_folded=1",
+    "selection": "lowest mean S among verified IC configs at the largest b whose best IC arm has mean wall <= 0.5 s; rule_table lists every b",
+    "rule_table": [
+      {
+        "b": 18,
+        "best": "ic-fb32-mitm",
+        "mean_S": 16.797767619030967,
+        "mean_wall_s": 0.0007196828333333334,
+        "cv_S_per_solve": 0.1845943415043197,
+        "ok": true
+      },
+      {
+        "b": 20,
+        "best": "ic-fb32-mitm",
+        "mean_S": 29.389174213661292,
+        "mean_wall_s": 0.0014202552916666668,
+        "cv_S_per_solve": 0.23816446407546984,
+        "ok": true
+      },
+      {
+        "b": 22,
+        "best": "ic-fb64-mitm",
+        "mean_S": 27.05107932056561,
+        "mean_wall_s": 0.002252166,
+        "cv_S_per_solve": 0.24188303056014523,
+        "ok": true
+      },
+      {
+        "b": 24,
+        "best": "ic-fb64-mitm",
+        "mean_S": 47.19750634144463,
+        "mean_wall_s": 0.0038653735833333335,
+        "cv_S_per_solve": 0.41040340340654785,
+        "ok": true
+      },
+      {
+        "b": 26,
+        "best": "ic-fb64-mitm",
+        "mean_S": 62.377736257004095,
+        "mean_wall_s": 0.037779087791666666,
+        "cv_S_per_solve": 0.4476936424178924,
+        "ok": true
+      }
+    ]
+  },
+  "cv_estimates_at_b": {
+    "ic_per_solve": 0.4476936424178924,
+    "rho_neg_per_solve": 0.40401924678782275,
+    "bsgs_textbook_per_solve": 0.1630025969124389,
+    "bsgs_negation_per_solve": 0.24981493139539646,
+    "note": "sd/mean of S over the 24 measured records (8 workloads x 3 rounds) of the calibration root at b; PLAN 5 placeholders were rho 0.52, bsgs 0.19, ic 1.0. One root, 24 solves each: wide intervals; ICC not estimated (one curve)."
+  },
+  "n_per_level_for_relative_half_width": {
+    "ic": {
+      "h10": 77,
+      "h5": 308,
+      "h3": 856
+    },
+    "rho_neg": {
+      "h10": 63,
+      "h5": 251,
+      "h3": 697
+    },
+    "bsgs_textbook": {
+      "h10": 11,
+      "h5": 41,
+      "h3": 114
+    },
+    "formula": "n = (1.96 CV / h)^2, ICC = 0 assumed (m solves per curve; true n_eff smaller)",
+    "rho_floor_rule": "PLAN 5: at least 2000 rho solves per level (kept; it exceeds the table)"
+  },
+  "seeds": {
+    "calibration": "calibration/seeds.json",
+    "search": "census/search_plan.json",
+    "census": "census/seeds.json"
+  },
+  "tools": {
+    "cryptanalysis_base": "c7733545f6d76b707e2a617e9e998fb20f72eb59",
+    "cryptanalysis_branch_head": "293cd1a81ef2d7f44be12742dc6963711ccbb113",
+    "cryptanalysis_branch": "claude/volcano-census-export-20261017",
+    "crypto_branch_head_at_freeze": "7e381dbbd6f49006c79c827db56da2ed3d7da00c",
+    "volcano_rho_commit": "445abd489c34e8de8b2c212523571ffff1a44487",
+    "volcano_rho_patch": "volcano-rho-min-n.patch",
+    "ecbench_binary_sha256": "4f19333bfd2929c72c814cb7fbddc6896b11c5845727167ad6d43098cb1169da"
+  }
+}

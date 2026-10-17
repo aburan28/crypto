@@ -1,0 +1,16 @@
+{
+  "schema": "prime61.disk-walk-protocol/v1",
+  "request": "Find a way to execute the horizontal-isogeny experiment despite the original retained-graph memory requirement; publish code by PR and use the authorized Google Drive for checkpoint storage.",
+  "source_revision": "b9f91437db914698d5397dabb7d4e1f86e606bdb",
+  "scope": "Implement a generic native disk-backed frontier for the fixed prime61 maximal-order class, preserving the original exhaustive-class goal. Bounded validation prefixes do not discharge full-class coverage.",
+  "storage": "SQLite native C backend with exact integer j deduplication, durable transactions, disk-backed pending queue, per-edge kernel/map records, transported G/Q, and unique per-curve seeded run rows. Bound SQLite page cache to 8 MiB, disable mmap, keep temporary tables on disk. Do not retain the whole graph or workload roster in process memory. Close or snapshot the database before archiving. Upload immutable named compressed checkpoints to the user's Drive, read metadata back, download and verify hashes.",
+  "field": {"p":2305843009213693951,"r":2305843010818082053,"a":2305843009213693948,"b":111,"g":[1,1796364306280342617],"q":[992726311114892094,558260110083040833],"public_check_scalar":539365399},
+  "degrees": [3,7,11,13,19,23,53,61],
+  "run_policy": {"inverse_pairs":3,"needed_relations":20,"runs_per_curve":12,"seed_start":2026101600,"max_targets":100000},
+  "controls": "Complete small ordinary fundamental-discriminant prime-order components using the same fixed-degree construction versus the existing in-memory walker; compare vertex and kernel-edge sets, with exact small-field point-count controls. Test interrupted transaction recovery, wrong-spec rejection, deterministic interrupted versus uninterrupted output, corruption rejection, stored scalar/relation replay, and the existing degree-61 one-hop roster and collection counters.",
+  "pilot": "Expand 32 source vertices in cumulative checkpoints at 1,8,32; measure the first 64 discovered curves, 12 streams each, with per-run commits. Use an outer 300-second process limit per bounded chunk; retain all failures and permit resume from the last transaction. If a chunk hits its limit, retain it and subdivide rather than weaken per-stream limits.",
+  "coverage": "Report discovered, expanded, pending, failed kernels, measured curves and outstanding runs separately. An empty selected-prime frontier certifies only that reachable component unless full class coverage is separately established. Full class-count certification remains outstanding; do not silently equate the degree-61 generated component with the entire class.",
+  "cost_scope": "Engineering and relation-stage evidence. Record actual process peak RSS and database bytes for capacity diagnostics only, no wall-speed or end-to-end IC/rho gain claim. Unknown full costs remain null.",
+  "execution": "Single native worker on the existing container. No paid remote provisioning, no assumption of unlimited disk or Drive quota, no unrecorded background continuation. Freeze any later expanded experiment separately.",
+  "workflow": "Conductor was attempted and is unavailable. Extend open PR 1977 after incorporating its upstream merge. Preserve all older frozen results. Use the report-evidence, research-visuals and Google Drive workflows."
+}

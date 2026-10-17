@@ -363,6 +363,8 @@ pub fn run_pipeline<G: CountedGroup>(
     let mut matrix: Box<dyn RelationSolver> = matrix_by_name(linalg_name, fb.columns + 1, ctx.r)?;
     let source = match spec.targets {
         Targets::Random => TargetSource::Random,
+        Targets::Stride => TargetSource::Stride,
+        Targets::StrideRenew => TargetSource::StrideRenew,
         Targets::Walk | Targets::Residual => TargetSource::Walk,
         Targets::WalkPrimeFast => TargetSource::WalkPrimeFast,
         Targets::WalkPrimeSerial4 => TargetSource::WalkPrimeLanes {
@@ -722,6 +724,62 @@ mod tests {
         assert!(report.s > 0.0 && report.s.is_finite());
         assert!(report.factor_base.columns > 0);
         assert!(report.decomposition.relations_found >= report.linear_algebra.rank);
+    }
+
+    /// **The stride reaches the walk's answer without the walk's jump
+    /// table.**  Its set-up is `S` and `R₀` (four scalar
+    /// multiplications) where the walk draws sixteen jumps at two each;
+    /// every other target costs one addition under both.
+    #[test]
+    fn the_strides_recover_the_logarithm_without_a_jump_table() {
+        let inst = roster_prime_instance(16).unwrap();
+        let (ctx, planted) = ctx_and_planted(&inst);
+        let base = PrimeAbscissaBase { instance: &inst };
+        let run = |targets| {
+            let mut spec = PipelineSpec {
+                factor_base: "prime-abscissa".into(),
+                oracle: "mitm".into(),
+                targets,
+                max_trials: 2_000_000,
+                seed: 7,
+                ..Default::default()
+            };
+            spec.factor_base_params.set("size", "24");
+            spec.oracle_params.set("negation_folded", "1");
+            let mut oracle = MitmOracle::new(2);
+            run_pipeline(
+                &ctx,
+                &spec,
+                &base,
+                &mut oracle,
+                planted,
+                &Calibration::default(),
+                None,
+            )
+            .expect("the configuration should run")
+        };
+        let (walk, stride) = (run(Targets::Walk), run(Targets::Stride));
+        let renew = run(Targets::StrideRenew);
+        assert!(walk.verified && stride.verified && renew.verified);
+        assert_eq!(renew.recovered, Some(planted));
+        // One renewal a relation-bearing target, and set-up of S, T, R₀.
+        let rn = &renew.decomposition.cost;
+        assert!(rn.native.get("stride_renewals").copied().unwrap_or(0) >= 1);
+        assert!(rn.group_ops.scalar_mults >= 6 && rn.group_ops.scalar_mults < 32);
+        assert_eq!(stride.recovered, Some(planted));
+        let rel = &stride.decomposition.cost;
+        assert_eq!(rel.native.get("stride_restarts"), Some(&1));
+        assert!(rel.group_ops.scalar_mults <= 4, "{:?}", rel.group_ops);
+        assert!(walk.decomposition.cost.group_ops.scalar_mults >= 32);
+        assert_eq!(
+            rel.native.get("stride_steps").copied().unwrap_or(0) + 1,
+            stride.decomposition.targets_tried
+                + rel
+                    .native
+                    .get("direct_relations_skipped")
+                    .copied()
+                    .unwrap_or(0)
+        );
     }
 
     /// **Two oracles on the same base must agree on the answer and

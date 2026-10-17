@@ -72,6 +72,9 @@ class BuildTests(unittest.TestCase):
             "status/walk-forest-gf2-23.json",
             "status/walk-forest.js",
             "status/how.html",
+            "status/challenges.html",
+            "status/challenges.js",
+            "status/challenges.json",
             "status/rho-toy.js",
             "status/status.json",
             "status/history.json",
@@ -818,10 +821,37 @@ class BuildTests(unittest.TestCase):
 
     def test_sitemap_and_robots_point_at_the_published_urls(self):
         sitemap = read(os.path.join(self.out, "sitemap.xml"))
-        for path in ("/", "/browser/", "/scoreboard/", "/status/", "/status/how.html"):
+        for path in ("/", "/browser/", "/scoreboard/", "/status/", "/status/how.html", "/status/challenges.html"):
             self.assertIn("<loc>%s%s</loc>" % (BASE_URL, path), sitemap)
         self.assertIn("<lastmod>2026-01-01</lastmod>", sitemap)
         self.assertIn("Sitemap: %s/sitemap.xml" % BASE_URL, read(os.path.join(self.out, "robots.txt")))
+
+    def test_challenge_roster_keeps_one_live_store(self):
+        import json
+
+        page = read(os.path.join(self.out, "status", "challenges.html"))
+        script = read(os.path.join(self.out, "status", "challenges.js"))
+        roster = json.loads(read(os.path.join(self.out, "status", "challenges.json")))
+        self.assertNotIn("innerHTML", page)
+        self.assertNotIn("innerHTML", script)
+        self.assertEqual(roster["schema_version"], 1)
+        ids = []
+        live = []
+        for group in roster["groups"]:
+            self.assertIn("id", group)
+            for challenge in group["challenges"]:
+                self.assertIn(challenge["collection"], ("live", "local", "catalog", "none"))
+                self.assertTrue(challenge["id"] and challenge["name"] and challenge["field"] and challenge["join"])
+                ids.append(challenge["id"])
+                if challenge["collection"] == "live":
+                    live.append(challenge["id"])
+                    self.assertEqual(challenge["status_href"], "./")
+        self.assertEqual(live, ["ecc2k-130"])
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertIn("ECC2K-130", page)
+        self.assertIn("./challenges.json", page)
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn("./challenges.html", dashboard)
 
     def test_lab_browser_index_is_current_and_self_consistent(self):
         # AGENTS.md §7c: docs/browser/data.json is generated from the curve
@@ -858,6 +888,10 @@ class BuildTests(unittest.TestCase):
                 self.assertIn(t["round"], rounds, c["slug"])
         for f in data["factor_bases"]:
             self.assertTrue(f["curve"] is None or f["curve"] in slugs, f["fb_id"])
+            if f.get("recorded_curve"):
+                self.assertIsNone(f["curve"], f["fb_id"])
+                self.assertNotIn(f["recorded_curve"], slugs, f["fb_id"])
+                self.assertEqual(f["registration_status"], "pending")
             self.assertRegex(f["points_sha256"] or "", r"^[a-f0-9]{64}$", f["fb_id"])
         for k in data["candidates"]:
             self.assertTrue(k["slug"] is None or k["slug"] in slugs, k["candidate_id"])

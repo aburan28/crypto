@@ -1,0 +1,80 @@
+{
+  "ok": true,
+  "records_sha256": "02fd27c17b8e6595b5f912471b40b776fdb41f38b3cb4dcbfb36a489c2bf2fee",
+  "replayer_binary_sha256": "8ec9d8a87d7926fcb3fd1e301540508ba2585505456ca438659f58ea86cad3ae",
+  "replays": [
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hd38fb8939299",
+      "reproduced": true,
+      "seq": 3
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h5c89ee416f7e",
+      "reproduced": true,
+      "seq": 4
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hc3099d471102",
+      "reproduced": true,
+      "seq": 5
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hf760a7f20b65",
+      "reproduced": true,
+      "seq": 6
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h0e76c6f8cffc",
+      "reproduced": true,
+      "seq": 7
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hdc8e659d1c0c",
+      "reproduced": true,
+      "seq": 11
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hd41647ee2f90",
+      "reproduced": true,
+      "seq": 12
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h473f36678e1f",
+      "reproduced": true,
+      "seq": 13
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1hdb1188eb37ee",
+      "reproduced": true,
+      "seq": 14
+    },
+    {
+      "differences": [],
+      "error": null,
+      "record_id": "ECR1h391c27505ce4",
+      "reproduced": true,
+      "seq": 15
+    }
+  ],
+  "schema": "volcano-exhaustion-replay/v1",
+  "scope": "Measured deterministic exhausted records; successful records replayed by ecbench verify; timeouts have no deterministic final report.",
+  "session": "/workspace/volcano_ic_survey_20261017/sessions/three-v7-attempt-001"
+}

@@ -1,0 +1,3 @@
+# Preserve raw build/validation output and rendered media byte-for-byte.
+evidence/*.log -whitespace
+reports/**/*.pdf binary

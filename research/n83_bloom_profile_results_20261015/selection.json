@@ -1,0 +1,99 @@
+{
+  "analysis_sha256": "f15dc07f8b816038d824ef56962caf46e062a568e1ca998134cfd08f4f2119b6",
+  "arm_order": [
+    "standard_a",
+    "wide3_a",
+    "wide5_a",
+    "wide5_b",
+    "wide3_b",
+    "standard_b"
+  ],
+  "artifact_sha256": "d4f7c9f0b773eaa05e0f18043c8d11503a456d5aa7a5a426e4e891bd9959c43d",
+  "balanced_comparison": {
+    "contiguous_block_size": 50,
+    "pairwise": {
+      "standard_minus_wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          1.825686996125,
+          1.9905470725
+        ],
+        "mean_ms": 1.905995706125
+      },
+      "standard_minus_wide5": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.5382753895000001,
+          0.6411482713750001
+        ],
+        "mean_ms": 0.5876168708750001
+      },
+      "wide3_minus_standard": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -1.98968463375,
+          -1.8250400085
+        ],
+        "mean_ms": -1.905995706125
+      },
+      "wide3_minus_wide5": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -1.37199069675,
+          -1.2667869428749998
+        ],
+        "mean_ms": -1.3183788352499999
+      },
+      "wide5_minus_standard": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.6409939288750002,
+          -0.5365057506250002
+        ],
+        "mean_ms": -0.5876168708750001
+      },
+      "wide5_minus_wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          1.265166058125,
+          1.3726304057499998
+        ],
+        "mean_ms": 1.3183788352499999
+      }
+    },
+    "profile_mean_ms": {
+      "standard": 32.28083853525,
+      "wide3": 30.374842829125,
+      "wide5": 31.693221664375
+    },
+    "repeatability": {
+      "standard_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.24020786025000015,
+          0.35593629575000013
+        ],
+        "mean_ms": 0.2983141500000001
+      },
+      "wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.12724296925000006,
+          -0.02764359200000001
+        ],
+        "mean_ms": -0.07794673375000004
+      },
+      "wide5_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.053253815,
+          0.1785619725
+        ],
+        "mean_ms": 0.11521045475000001
+      }
+    },
+    "selected_profile": "wide3"
+  },
+  "candidate_id": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0h3f9a50861cad",
+  "candidate_manifest_sha256": "2cf3b6ba7e7ae61a4a0a8d6ccfa9fcb6cbcc046e764178cd2dc05ccb113e8423",
+  "mean_online_ms_exploratory": 30.374842829125,
+  "schema": "n83.bloom-profile-selection/v1",
+  "selected_arm": "wide3_a",
+  "selected_profile": "wide3",
+  "source_base_hash_blake3": "a4ba33098d2776520b98a326585a2301f8ccd5bc005df7c1a70fbe8496c61d8b",
+  "source_commit": "42fc71945cd7087f78464abc65c4bae7c52a93e8",
+  "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+  "status": "BALANCED_WIDE3_SELECTED",
+  "workload_id": "6b6dbf5cebff"
+}

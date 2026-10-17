@@ -1,0 +1,202 @@
+{
+  "checks_failed": 0,
+  "committed_reference": {
+    "c_second": 73000000.0,
+    "log2_n_star": 233,
+    "source": "research/notes/index-calculus/RESEARCH_K5_TORSION_JOUX_VITSE.md §3"
+  },
+  "cost": [
+    {
+      "base_points": 57,
+      "checks_failed": 0,
+      "factor_max": 1.7695720810183622,
+      "factor_mean": 1.743912378917119,
+      "factor_min": 1.0,
+      "file": "cost_p271_s1.jsonl",
+      "full_max": 58701820.0,
+      "full_mean": 58527592.5,
+      "full_min": 58484513.0,
+      "p": 271,
+      "replay_max": 58701820.0,
+      "replay_mean": 33902344.5,
+      "replay_min": 33050088.0,
+      "replay_mismatches": 0,
+      "residuals": 32,
+      "seed": 1
+    },
+    {
+      "base_points": 66,
+      "checks_failed": 0,
+      "factor_max": 1.7688500103609421,
+      "factor_mean": 1.7679083667353956,
+      "factor_min": 1.766962793259731,
+      "file": "cost_p271_s2.jsonl",
+      "full_max": 58574016.0,
+      "full_mean": 58523712.71875,
+      "full_min": 58493141.0,
+      "p": 271,
+      "replay_max": 33131380.0,
+      "replay_mean": 33103366.21875,
+      "replay_min": 33074155.0,
+      "replay_mismatches": 0,
+      "residuals": 32,
+      "seed": 2
+    },
+    {
+      "base_points": 114,
+      "checks_failed": 0,
+      "factor_max": 1.769379428019207,
+      "factor_mean": 1.7439297371030051,
+      "factor_min": 1.0,
+      "file": "cost_p521_s1.jsonl",
+      "full_max": 58792217.0,
+      "full_mean": 58632064.375,
+      "full_min": 58589461.0,
+      "p": 521,
+      "replay_max": 58792217.0,
+      "replay_mean": 33962337.75,
+      "replay_min": 33113000.0,
+      "replay_mismatches": 0,
+      "residuals": 32,
+      "seed": 1
+    },
+    {
+      "base_points": 123,
+      "checks_failed": 0,
+      "factor_max": 1.7687509566849273,
+      "factor_mean": 1.7678219811120905,
+      "factor_min": 1.7638964360650016,
+      "file": "cost_p521_s2.jsonl",
+      "full_max": 58651978.0,
+      "full_mean": 58620031.40625,
+      "full_min": 58448497.0,
+      "p": 521,
+      "replay_max": 33178237.0,
+      "replay_mean": 33159465.09375,
+      "replay_min": 33136014.0,
+      "replay_mismatches": 0,
+      "residuals": 32,
+      "seed": 2
+    }
+  ],
+  "dlp": [
+    {
+      "agg": {
+        "consistent": 3195,
+        "e_solutions": 3351,
+        "f4_muls": 5926174181373,
+        "not_split": 3254,
+        "replay_mismatch": 3197,
+        "resolve_group_ops": 236,
+        "roots_muls": 1032776,
+        "target_gen_muls": 3195427108,
+        "undetermined": 0,
+        "weil_muls": 1521378048
+      },
+      "base_points": 7.0,
+      "c_trial": 56300236.615061134,
+      "census_trials_per_relation": 25567.667857142857,
+      "complete": true,
+      "file": "dlp_p31_s1.jsonl",
+      "log2_n": 22.77131596832236,
+      "n": "7158947",
+      "online_muls": 5930892126382,
+      "oracle_disagree": 0,
+      "p": 31,
+      "ratio_online_ic_over_expected_rho_walk": 3912884.9450509716,
+      "ratio_online_ic_over_rho": 3392306.814240512,
+      "relations": 8,
+      "rho_expected_walk_ops": 3353.3934531037876,
+      "rho_fp_muls": 1748336,
+      "rho_group_ops": 3868,
+      "rho_verified": true,
+      "seed": 1,
+      "trials": 105344.0,
+      "trials_per_relation": 13168.0,
+      "trials_per_relation_over_census": 0.515025463940437,
+      "trials_per_relation_over_census_95": [
+        0.2613813520835835,
+        1.1929368598917656
+      ],
+      "unknowns": 8,
+      "verified": true
+    },
+    {
+      "base_points": 6.0,
+      "census_trials_per_relation": 241332.69166666668,
+      "complete": false,
+      "file": "dlp_p41_s1.jsonl",
+      "n": "28959923",
+      "p": 41,
+      "relations_recorded": 1.0,
+      "rho_group_ops": 12832,
+      "rho_verified": true,
+      "seed": 1
+    },
+    {
+      "base_points": 14.0,
+      "census_trials_per_relation": 26368.54408091908,
+      "complete": false,
+      "file": "dlp_p61_s1.jsonl",
+      "n": "211159301",
+      "p": 61,
+      "relations_recorded": 11.0,
+      "rho_group_ops": 30071,
+      "rho_verified": true,
+      "seed": 1
+    }
+  ],
+  "model_extrapolation": {
+    "c_add": 452.0,
+    "c_trial_replay": 33531878.390625,
+    "label": "extrapolation: IC = (p/4)·192p·C_trial (relations |F|+1 ≈ p/4 at the census rate 1/(192p), verified to three digits in RESEARCH_K5 §3), rho = √(πn/4)·c_add with the negation map, n = p⁵/4; C_trial the mean replayed trial over the cost runs. Sensitivity: the same at the measured trials-per-relation ratio",
+    "log2_n_star": 227.38065440147614,
+    "log2_n_star_at_measured_ratio": 217.80781109191844,
+    "log2_p_star": 45.87613088029523,
+    "measured_ratio_to_census": 0.515025463940437,
+    "p_star": 64579024424238.89,
+    "rows": [
+      {
+        "ic_over_rho": 502256.72136586,
+        "log2_n": 38.0,
+        "log2_p": 8.0
+      },
+      {
+        "ic_over_rho": 251128.36068293,
+        "log2_n": 48.0,
+        "log2_p": 10.0
+      },
+      {
+        "ic_over_rho": 31391.04508536625,
+        "log2_n": 78.0,
+        "log2_p": 16.0
+      },
+      {
+        "ic_over_rho": 7847.761271341563,
+        "log2_n": 98.0,
+        "log2_p": 20.0
+      },
+      {
+        "ic_over_rho": 245.24253972942384,
+        "log2_n": 148.0,
+        "log2_p": 30.0
+      },
+      {
+        "ic_over_rho": 7.663829366544495,
+        "log2_n": 198.0,
+        "log2_p": 40.0
+      },
+      {
+        "ic_over_rho": 1.3547864287350537,
+        "log2_n": 223.0,
+        "log2_p": 45.0
+      },
+      {
+        "ic_over_rho": 0.23949466770451547,
+        "log2_n": 248.0,
+        "log2_p": 50.0
+      }
+    ]
+  },
+  "protocol": "research/joux_vitse_n1_20261015/PROTOCOL_EDWARDS.md"
+}

@@ -1,0 +1,96 @@
+{
+  "auto_degrees": [
+    3
+  ],
+  "conductor_factors": [
+    [
+      3,
+      8
+    ]
+  ],
+  "degrees": [
+    3
+  ],
+  "discriminant": -473513931,
+  "expected_vertices": 6561,
+  "frobenius_conductor": 6561,
+  "fundamental_discriminant": -11,
+  "input": {
+    "a": 28655819626602497,
+    "b": 66385351484448529,
+    "order": 72057602477805795,
+    "p": 72057601940934853
+  },
+  "maximal_class_number": 1,
+  "order": 72057602477805795,
+  "order_evidence": {
+    "certified": true,
+    "divisor": "72057602477805795",
+    "exact_small_field_enumeration": null,
+    "factor_primality": "native deterministic u64 Miller-Rabin rechecked for discriminant; order certificate uses isogeny_algos certificate backend",
+    "order_method": "Given",
+    "point_samples": [
+      [
+        "57081269627944850",
+        "17121769358226939"
+      ]
+    ],
+    "twist_divisor": "72057601404063913",
+    "via_twist": false
+  },
+  "schema": "ordinary-isogeny-class/v1",
+  "source_code_sha256": "d3c77f50dc2e737de38561203ce3693f7899fe3db502b8e863c7ac69e5818bed",
+  "source_identity": {
+    "curve_uid": null,
+    "ec1": null,
+    "ec1_status": "no subgroup/generator selected for this graph vertex; not a cross-method comparison",
+    "icv1": "ICV1:fp-72057601940934853:-536870941:72057602477805795:44919162374585067:unk:unk:r:8ba9239b1887",
+    "model_json": "{\"a\":\"28655819626602497\",\"b\":\"66385351484448529\",\"field\":\"fp-72057601940934853\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"72057601940934853\",\"v\":\"1\"}",
+    "slug": "icv1-fp57-tm536870941-8ba9239b"
+  },
+  "storage": {
+    "bounded_ram": "SQLite pages and one vertex's outgoing kernels; no whole-class HashMap",
+    "fixed_u64_vertex_payload_bytes": 157464,
+    "layout_includes": "a,b,j only (3 u64); excludes indexes, maps, journals, free space and DLP evidence; compressed or generative encodings can be smaller",
+    "sqlite_bytes": "not predicted; depends on degree set and SQLite layout"
+  },
+  "strata": [
+    {
+      "conductor": 1,
+      "expected_vertices": 1
+    },
+    {
+      "conductor": 3,
+      "expected_vertices": 2
+    },
+    {
+      "conductor": 9,
+      "expected_vertices": 6
+    },
+    {
+      "conductor": 27,
+      "expected_vertices": 18
+    },
+    {
+      "conductor": 81,
+      "expected_vertices": 54
+    },
+    {
+      "conductor": 243,
+      "expected_vertices": 162
+    },
+    {
+      "conductor": 729,
+      "expected_vertices": 486
+    },
+    {
+      "conductor": 2187,
+      "expected_vertices": 1458
+    },
+    {
+      "conductor": 6561,
+      "expected_vertices": 4374
+    }
+  ],
+  "trace": -536870941
+}

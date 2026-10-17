@@ -1,0 +1,23 @@
+clock    no detected effect   2
+fp64     no detected effect   8
+fp64cm   candidate faster     2
+fp64cm   no detected effect   6
+kernel   candidate faster     21
+kernel   no detected effect   19
+mem      no detected effect   20
+pf64     candidate slower     1
+pf64     no detected effect   7
+pfrho    candidate faster     1
+scaling  candidate faster     6
+scaling  no detected effect   6
+w1       candidate faster     1
+w1       no detected effect   7
+P1 PASS: 0.4363 (threshold 0.85) max(r1, r2) over 6 arms kernel.fp64.* (batch ≥ 4096)
+P1pf PASS: 0.4655 (threshold 0.85) max(r1, r2) over 6 arms kernel.pf64.* (batch ≥ 4096)
+P4 PASS: 0.7212 (threshold 0.95) max(r1, r2) over 1 arms pfrho.44* (batch ≥ 0)
+P2a PASS: 1.0010 (threshold 1.1) max(r1, r2) over 1 arms fp64.mul.latency* (batch ≥ 0)
+P2b PASS: 0.9968 (threshold 1.1) max(r1, r2) over 1 arms fp64.sqr.latency* (batch ≥ 0)
+P2c PASS: 1.0184 (threshold 1.1) max(r1, r2) over 1 arms pf64.mul.latency* (batch ≥ 0)
+P2d PASS: 0.9978 (threshold 1.1) max(r1, r2) over 1 arms pf64.sqr.latency* (batch ≥ 0)
+C1a PASS: 0.0247 (threshold 0.1) max |r_k − 1| over 6 arms kernel.fp64cm.* (batch ≥ 4096)
+C1b PASS: 0.0299 (threshold 0.1) max |r_k − 1| over 6 arms kernel.w1.* (batch ≥ 4096)

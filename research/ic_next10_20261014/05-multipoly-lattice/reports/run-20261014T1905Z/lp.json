@@ -1,0 +1,1230 @@
+{
+  "part": "lp",
+  "records": [
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.09,
+      "den": "100",
+      "dim": 25,
+      "ell": 1,
+      "ext": [
+        6
+      ],
+      "group_max": [
+        4
+      ],
+      "is_box": true,
+      "iters": 4,
+      "ms": 0,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 28,
+      "num": "9",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 9,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.11607142857142858,
+      "den": "112",
+      "dim": 64,
+      "ell": 2,
+      "ext": [
+        8
+      ],
+      "group_max": [
+        7
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 0,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 45,
+      "num": "13",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 52,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.1288888888888889,
+      "den": "225",
+      "dim": 100,
+      "ell": 3,
+      "ext": [
+        10
+      ],
+      "group_max": [
+        9
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 0,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 66,
+      "num": "29",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 116,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.13636363636363635,
+      "den": "22",
+      "dim": 144,
+      "ell": 4,
+      "ext": [
+        12
+      ],
+      "group_max": [
+        11
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 0,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 91,
+      "num": "3",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 216,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.141287284144427,
+      "den": "637",
+      "dim": 196,
+      "ell": 5,
+      "ext": [
+        14
+      ],
+      "group_max": [
+        13
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 0,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 120,
+      "num": "90",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 360,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.1448961937716263,
+      "den": "2312",
+      "dim": 289,
+      "ell": 6,
+      "ext": [
+        18
+      ],
+      "group_max": [
+        16
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 0,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 190,
+      "num": "335",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 670,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.14758387196060327,
+      "den": "6498",
+      "dim": 361,
+      "ell": 7,
+      "ext": [
+        20
+      ],
+      "group_max": [
+        18
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 17,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 231,
+      "num": "959",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 959,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.14965986394557823,
+      "den": "147",
+      "dim": 441,
+      "ell": 8,
+      "ext": [
+        22
+      ],
+      "group_max": [
+        20
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 1,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 276,
+      "num": "22",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 1320,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.15131465887609555,
+      "den": "11638",
+      "dim": 529,
+      "ell": 9,
+      "ext": [
+        24
+      ],
+      "group_max": [
+        22
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 1,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 325,
+      "num": "1761",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 1761,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.15266666666666667,
+      "den": "1500",
+      "dim": 625,
+      "ell": 10,
+      "ext": [
+        26
+      ],
+      "group_max": [
+        24
+      ],
+      "is_box": true,
+      "iters": 4,
+      "ms": 18,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 378,
+      "num": "229",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 2290,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.15381708238851097,
+      "den": "2646",
+      "dim": 784,
+      "ell": 11,
+      "ext": [
+        28
+      ],
+      "group_max": [
+        27
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 18,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 435,
+      "num": "407",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 3256,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.15478927203065135,
+      "den": "1305",
+      "dim": 900,
+      "ell": 12,
+      "ext": [
+        30
+      ],
+      "group_max": [
+        29
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 15,
+      "n_large": 0,
+      "n_small": 2,
+      "nodes": 496,
+      "num": "202",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 4040,
+      "system": "C1 S3"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.08333333333333333,
+      "delta": 0.018779541446208112,
+      "den": "70875",
+      "dim": 3375,
+      "ell": 1,
+      "ext": [
+        16
+      ],
+      "group_max": [
+        14
+      ],
+      "is_box": true,
+      "iters": 4,
+      "ms": 39,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 969,
+      "num": "1331",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 1331,
+      "system": "C1 S4"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.08333333333333333,
+      "delta": 0.02559118885649498,
+      "den": "3087",
+      "dim": 9261,
+      "ell": 2,
+      "ext": [
+        22
+      ],
+      "group_max": [
+        20
+      ],
+      "is_box": true,
+      "iters": 3,
+      "ms": 110,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 2300,
+      "num": "79",
+      "part": "lp",
+      "r": 1,
+      "sum_k": 7110,
+      "system": "C1 S4"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.09,
+      "den": "100",
+      "dim": 49,
+      "ell": 1,
+      "ext": [
+        6,
+        6
+      ],
+      "group_max": [
+        4,
+        4
+      ],
+      "is_box": false,
+      "iters": 8,
+      "ms": 1,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 784,
+      "num": "9",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 18,
+      "system": "N1 S3 x S3 disjoint"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.11607142857142858,
+      "den": "112",
+      "dim": 127,
+      "ell": 2,
+      "ext": [
+        10,
+        10
+      ],
+      "group_max": [
+        7,
+        7
+      ],
+      "is_box": false,
+      "iters": 8,
+      "ms": 138,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 4356,
+      "num": "13",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 104,
+      "system": "N1 S3 x S3 disjoint"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.1288888888888889,
+      "den": "225",
+      "dim": 199,
+      "ell": 3,
+      "ext": [
+        14,
+        14
+      ],
+      "group_max": [
+        9,
+        9
+      ],
+      "is_box": false,
+      "iters": 8,
+      "ms": 356,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 14400,
+      "num": "29",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 232,
+      "system": "N1 S3 x S3 disjoint"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.13636363636363635,
+      "den": "22",
+      "dim": 287,
+      "ell": 4,
+      "ext": [
+        18,
+        18
+      ],
+      "group_max": [
+        11,
+        11
+      ],
+      "is_box": false,
+      "iters": 11,
+      "ms": 1080,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 36100,
+      "num": "3",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 432,
+      "system": "N1 S3 x S3 disjoint"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.141287284144427,
+      "den": "637",
+      "dim": 391,
+      "ell": 5,
+      "ext": [
+        22,
+        22
+      ],
+      "group_max": [
+        13,
+        13
+      ],
+      "is_box": false,
+      "iters": 11,
+      "ms": 2363,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 76176,
+      "num": "90",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 720,
+      "system": "N1 S3 x S3 disjoint"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.1448961937716263,
+      "den": "2312",
+      "dim": 577,
+      "ell": 6,
+      "ext": [
+        26,
+        26
+      ],
+      "group_max": [
+        16,
+        16
+      ],
+      "is_box": false,
+      "iters": 10,
+      "ms": 5452,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 142884,
+      "num": "335",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 1340,
+      "system": "N1 S3 x S3 disjoint"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.09473684210526316,
+      "den": "95",
+      "dim": 45,
+      "ell": 1,
+      "ext": [
+        6,
+        6
+      ],
+      "group_max": [
+        4,
+        4
+      ],
+      "is_box": false,
+      "iters": 6,
+      "ms": 0,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 196,
+      "num": "9",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 18,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.12380952380952381,
+      "den": "105",
+      "dim": 224,
+      "ell": 2,
+      "ext": [
+        10,
+        10
+      ],
+      "group_max": [
+        7,
+        6
+      ],
+      "is_box": false,
+      "iters": 6,
+      "ms": 2,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 726,
+      "num": "13",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 208,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.13785310734463277,
+      "den": "885",
+      "dim": 450,
+      "ell": 3,
+      "ext": [
+        14,
+        14
+      ],
+      "group_max": [
+        9,
+        8
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 19,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 1800,
+      "num": "122",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 610,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.1464850938535149,
+      "den": "2717",
+      "dim": 858,
+      "ell": 4,
+      "ext": [
+        18,
+        18
+      ],
+      "group_max": [
+        12,
+        10
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 80,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 3610,
+      "num": "398",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 1592,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.15213675213675212,
+      "den": "585",
+      "dim": 1365,
+      "ell": 5,
+      "ext": [
+        22,
+        22
+      ],
+      "group_max": [
+        14,
+        12
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 104,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 6348,
+      "num": "89",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 3115,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.1561786085150571,
+      "den": "4815",
+      "dim": 2160,
+      "ell": 6,
+      "ext": [
+        26,
+        26
+      ],
+      "group_max": [
+        17,
+        14
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 195,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 10206,
+      "num": "752",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 6016,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.15926535087719298,
+      "den": "3648",
+      "dim": 3591,
+      "ell": 7,
+      "ext": [
+        30,
+        30
+      ],
+      "group_max": [
+        20,
+        17
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 388,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 15376,
+      "num": "581",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 12201,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.16166564605021433,
+      "den": "1633",
+      "dim": 4830,
+      "ell": 8,
+      "ext": [
+        34,
+        34
+      ],
+      "group_max": [
+        22,
+        19
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 514,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 22050,
+      "num": "264",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 18480,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.16356408152962706,
+      "den": "15847",
+      "dim": 6578,
+      "ell": 9,
+      "ext": [
+        38,
+        38
+      ],
+      "group_max": [
+        25,
+        21
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 694,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 30420,
+      "num": "2592",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 28512,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.16515276630883569,
+      "den": "1211",
+      "dim": 8400,
+      "ell": 10,
+      "ext": [
+        42,
+        42
+      ],
+      "group_max": [
+        27,
+        23
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 1046,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 40678,
+      "num": "200",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 40000,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.1664488017429194,
+      "den": "2295",
+      "dim": 10530,
+      "ell": 11,
+      "ext": [
+        46,
+        46
+      ],
+      "group_max": [
+        29,
+        25
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 1554,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 53016,
+      "num": "382",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 54626,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.16755793226381463,
+      "den": "561",
+      "dim": 13398,
+      "ell": 12,
+      "ext": [
+        50,
+        50
+      ],
+      "group_max": [
+        32,
+        27
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 2206,
+      "n_large": 0,
+      "n_small": 3,
+      "nodes": 67626,
+      "num": "94",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 76328,
+      "system": "V3 S3 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.09642857142857143,
+      "den": "280",
+      "dim": 65,
+      "ell": 1,
+      "ext": [
+        6,
+        6
+      ],
+      "group_max": [
+        4,
+        4
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 1,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 588,
+      "num": "27",
+      "part": "lp",
+      "r": 3,
+      "sum_k": 27,
+      "system": "V3 S3 triple s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.12525150905432594,
+      "den": "1988",
+      "dim": 512,
+      "ell": 2,
+      "ext": [
+        10,
+        10
+      ],
+      "group_max": [
+        7,
+        6
+      ],
+      "is_box": false,
+      "iters": 7,
+      "ms": 20,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 3146,
+      "num": "249",
+      "part": "lp",
+      "r": 3,
+      "sum_k": 498,
+      "system": "V3 S3 triple s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.13954584741101594,
+      "den": "12727",
+      "dim": 1199,
+      "ell": 3,
+      "ext": [
+        14,
+        14
+      ],
+      "group_max": [
+        10,
+        8
+      ],
+      "is_box": false,
+      "iters": 8,
+      "ms": 94,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 10200,
+      "num": "1776",
+      "part": "lp",
+      "r": 3,
+      "sum_k": 1776,
+      "system": "V3 S3 triple s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.14805278403604763,
+      "den": "3107",
+      "dim": 2158,
+      "ell": 4,
+      "ext": [
+        18,
+        18
+      ],
+      "group_max": [
+        12,
+        10
+      ],
+      "is_box": false,
+      "iters": 9,
+      "ms": 341,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 25270,
+      "num": "460",
+      "part": "lp",
+      "r": 3,
+      "sum_k": 4140,
+      "system": "V3 S3 triple s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.15396270396270395,
+      "den": "8580",
+      "dim": 7280,
+      "ell": 5,
+      "ext": [
+        22,
+        22
+      ],
+      "group_max": [
+        15,
+        12
+      ],
+      "is_box": false,
+      "iters": 8,
+      "ms": 927,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 52900,
+      "num": "1321",
+      "part": "lp",
+      "r": 3,
+      "sum_k": 18494,
+      "system": "V3 S3 triple s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.25,
+      "delta": 0.15832341033579422,
+      "den": "20995",
+      "dim": 12920,
+      "ell": 6,
+      "ext": [
+        26,
+        26
+      ],
+      "group_max": [
+        18,
+        14
+      ],
+      "is_box": false,
+      "iters": 9,
+      "ms": 2575,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 98658,
+      "num": "3324",
+      "part": "lp",
+      "r": 3,
+      "sum_k": 39888,
+      "system": "V3 S3 triple s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.08333333333333333,
+      "delta": 0.018793462529563345,
+      "den": "141645",
+      "dim": 6735,
+      "ell": 1,
+      "ext": [
+        16,
+        16,
+        16
+      ],
+      "group_max": [
+        14,
+        14,
+        14
+      ],
+      "is_box": false,
+      "iters": 8,
+      "ms": 80881,
+      "n_large": 0,
+      "n_small": 5,
+      "nodes": 397953,
+      "num": "2662",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 2662,
+      "system": "V3 S4 pair s=1"
+    },
+    {
+      "bounded": true,
+      "ceiling": 0.08333333333333333,
+      "delta": 0.025600864164191196,
+      "den": "18515",
+      "dim": 18501,
+      "ell": 2,
+      "ext": [
+        20,
+        20,
+        20
+      ],
+      "group_max": [
+        20,
+        20,
+        20
+      ],
+      "is_box": false,
+      "iters": 6,
+      "ms": 272560,
+      "n_large": 0,
+      "n_small": 5,
+      "nodes": 1120581,
+      "num": "474",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 14220,
+      "system": "V3 S4 pair s=1"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.08333333333333333,
+      "delta": 0.020156473960821788,
+      "den": "33488",
+      "dim": 23296,
+      "ell": 1,
+      "ext": [
+        16,
+        14
+      ],
+      "group_max": [
+        15,
+        12
+      ],
+      "is_box": false,
+      "iters": 5,
+      "ms": 892,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 18360,
+      "num": "675",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 10800,
+      "system": "V3 S4 pair s=2"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.08333333333333333,
+      "delta": 0.027775411093124307,
+      "den": "11737",
+      "dim": 82764,
+      "ell": 2,
+      "ext": [
+        22,
+        18
+      ],
+      "group_max": [
+        21,
+        17
+      ],
+      "is_box": false,
+      "iters": 5,
+      "ms": 4555,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 52440,
+      "num": "326",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 74328,
+      "system": "V3 S4 pair s=2"
+    },
+    {
+      "bounded": false,
+      "ceiling": 0.08333333333333333,
+      "delta": 0.03183673469387755,
+      "den": "1225",
+      "dim": 216384,
+      "ell": 3,
+      "ext": [
+        28,
+        26
+      ],
+      "group_max": [
+        27,
+        22
+      ],
+      "is_box": false,
+      "iters": 5,
+      "ms": 20450,
+      "n_large": 0,
+      "n_small": 4,
+      "nodes": 164430,
+      "num": "39",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 287040,
+      "system": "V3 S4 pair s=2"
+    },
+    {
+      "bounded": false,
+      "ceiling": null,
+      "delta": 0.0,
+      "den": "1",
+      "dim": 0,
+      "ell": 1,
+      "ext": [
+        6,
+        6,
+        6
+      ],
+      "group_max": [
+        0,
+        0,
+        0
+      ],
+      "is_box": false,
+      "iters": 1,
+      "ms": 4,
+      "n_large": 1,
+      "n_small": 3,
+      "nodes": 1372,
+      "num": "0",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 0,
+      "system": "V2 S4 chain (t large)"
+    },
+    {
+      "bounded": false,
+      "ceiling": null,
+      "delta": 0.0,
+      "den": "1",
+      "dim": 0,
+      "ell": 2,
+      "ext": [
+        10,
+        10,
+        10
+      ],
+      "group_max": [
+        0,
+        0,
+        0
+      ],
+      "is_box": false,
+      "iters": 1,
+      "ms": 19,
+      "n_large": 1,
+      "n_small": 3,
+      "nodes": 7986,
+      "num": "0",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 0,
+      "system": "V2 S4 chain (t large)"
+    },
+    {
+      "bounded": false,
+      "ceiling": null,
+      "delta": 0.0,
+      "den": "1",
+      "dim": 0,
+      "ell": 3,
+      "ext": [
+        14,
+        14,
+        14
+      ],
+      "group_max": [
+        0,
+        0,
+        0
+      ],
+      "is_box": false,
+      "iters": 1,
+      "ms": 30,
+      "n_large": 1,
+      "n_small": 3,
+      "nodes": 27000,
+      "num": "0",
+      "part": "lp",
+      "r": 2,
+      "sum_k": 0,
+      "system": "V2 S4 chain (t large)"
+    }
+  ],
+  "schema": "ic-next10-05/v1"
+}

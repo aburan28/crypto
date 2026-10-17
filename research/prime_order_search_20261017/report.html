@@ -1,0 +1,47 @@
+<!doctype html><meta charset="utf-8"><title>Prime-order curve search</title>
+<style>body{font-family:sans-serif;max-width:720px;margin:24px auto;color:#222}td,th{padding:3px 10px;text-align:right}</style>
+<h1>Prime-order curve search: O(p) → O(√p)</h1>
+<p>Wall time of <code>ecbench plan</code> on a one-curve <code>prime_search</code> spec (seed 59297), median of 3 runs (one run for main at 26 bits). The plan is dominated by <code>find_prime_order_curve</code>.</p>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" font-family="sans-serif" font-size="12">
+<rect width="640" height="400" fill="#fff"/>
+<line x1="70" x2="490" y1="350.0" y2="350.0" stroke="#ddd"/>
+<text x="62" y="354.0" text-anchor="end" fill="#555">0.01 s</text>
+<line x1="70" x2="490" y1="286.0" y2="286.0" stroke="#ddd"/>
+<text x="62" y="290.0" text-anchor="end" fill="#555">0.1 s</text>
+<line x1="70" x2="490" y1="222.0" y2="222.0" stroke="#ddd"/>
+<text x="62" y="226.0" text-anchor="end" fill="#555">1 s</text>
+<line x1="70" x2="490" y1="158.0" y2="158.0" stroke="#ddd"/>
+<text x="62" y="162.0" text-anchor="end" fill="#555">10 s</text>
+<line x1="70" x2="490" y1="94.0" y2="94.0" stroke="#ddd"/>
+<text x="62" y="98.0" text-anchor="end" fill="#555">100 s</text>
+<line x1="70" x2="490" y1="30.0" y2="30.0" stroke="#ddd"/>
+<text x="62" y="34.0" text-anchor="end" fill="#555">1000 s</text>
+<text x="70.0" y="368" text-anchor="middle" fill="#555">16</text>
+<text x="154.0" y="368" text-anchor="middle" fill="#555">18</text>
+<text x="238.0" y="368" text-anchor="middle" fill="#555">20</text>
+<text x="322.0" y="368" text-anchor="middle" fill="#555">22</text>
+<text x="406.0" y="368" text-anchor="middle" fill="#555">24</text>
+<text x="490.0" y="368" text-anchor="middle" fill="#555">26</text>
+<text x="280.0" y="388" text-anchor="middle" fill="#333">prime_search curve size (bits)</text>
+<text x="18" y="190.0" transform="rotate(-90 18 190.0)" text-anchor="middle" fill="#333">ecbench plan wall time (median)</text>
+<polyline points="70.0,265.1 154.0,242.2 238.0,222.1 322.0,168.3 406.0,155.5 490.0,72.4" fill="none" stroke="#c0392b" stroke-width="2"/>
+<circle cx="70.0" cy="265.1" r="3.5" fill="#c0392b"/>
+<circle cx="154.0" cy="242.2" r="3.5" fill="#c0392b"/>
+<circle cx="238.0" cy="222.1" r="3.5" fill="#c0392b"/>
+<circle cx="322.0" cy="168.3" r="3.5" fill="#c0392b"/>
+<circle cx="406.0" cy="155.5" r="3.5" fill="#c0392b"/>
+<circle cx="490.0" cy="72.4" r="3.5" fill="#c0392b"/>
+<text x="498.0" y="76.4" fill="#c0392b">main: point_count, O(p)</text>
+<polyline points="70.0,311.7 154.0,310.6 238.0,314.4 322.0,298.6 406.0,307.7 490.0,277.3" fill="none" stroke="#2471a3" stroke-width="2"/>
+<circle cx="70.0" cy="311.7" r="3.5" fill="#2471a3"/>
+<circle cx="154.0" cy="310.6" r="3.5" fill="#2471a3"/>
+<circle cx="238.0" cy="314.4" r="3.5" fill="#2471a3"/>
+<circle cx="322.0" cy="298.6" r="3.5" fill="#2471a3"/>
+<circle cx="406.0" cy="307.7" r="3.5" fill="#2471a3"/>
+<circle cx="490.0" cy="277.3" r="3.5" fill="#2471a3"/>
+<text x="498.0" y="281.3" fill="#2471a3">prime_order, O(√p)</text>
+</svg>
+
+<table><tr><th>bits</th><th>main (s)</th><th>this change (s)</th><th>speedup</th></tr><tr><td>16</td><td>0.212</td><td>0.040</td><td>5×</td></tr><tr><td>18</td><td>0.484</td><td>0.041</td><td>12×</td></tr><tr><td>20</td><td>0.997</td><td>0.036</td><td>28×</td></tr><tr><td>22</td><td>6.901</td><td>0.064</td><td>109×</td></tr><tr><td>24</td><td>10.956</td><td>0.046</td><td>239×</td></tr><tr><td>26</td><td>217.607</td><td>0.137</td><td>1592×</td></tr></table>
+<p>Correctness: the search draws the same random numbers and accepts the same curves. All 21 committed <code>prime_search</code> sessions on main re-plan to their recorded workload IDs (288 workloads, <code>replan-check.txt</code>); <code>prime_order</code> equals point_count + primality on 400 random curves, and the search equals the naive search at 8–16 bits for three seeds (unit test <code>prime_order_matches_the_naive_count</code>).</p>
+<p>Host: Intel Xeon @ 2.10 GHz, 4 vCPU cloud container, shared, unpinned, L0 wall. Engineering change to setup time; no solve, cost unit or measured result changes.</p>

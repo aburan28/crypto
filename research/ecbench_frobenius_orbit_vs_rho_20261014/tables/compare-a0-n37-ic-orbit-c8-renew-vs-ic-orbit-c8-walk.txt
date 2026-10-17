@@ -1,0 +1,25 @@
+ops (ok): ic-orbit-c8-renew / ic-orbit-c8-walk = 1.0291 [0.903, 1.176] (cluster) over 48 pairs on 16 workloads, 1 curve(s); wall: admitted median 1.0429 [0.980, 1.131]
+measurement quality: 0 / 100; paired attempts 48, verified 48, admitted 0; levels {"L0": 48}; p95 foreign busy unknown%, p95 run queue 14.14%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-orbit-c8-renew / ic-orbit-c8-walk | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m37-tm534059-32aad96b | 27.78 | 16 | 1.0291 | [0.9030, 1.1758] | cluster |
+
+| workload | curve | log2 r | ic-orbit-c8-walk mean S | ic-orbit-c8-renew mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W171c2a81d7aa | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.2589 | 1.2290 | 0.9762 |
+| W2666587522b9 | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.5500 | 1.1559 | 0.7457 |
+| W335fe5d86868 | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.4247 | 1.5368 | 1.0787 |
+| W4a7bcb0c2acf | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.0648 | 1.2282 | 1.1534 |
+| W4c880ccec714 | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.2095 | 1.0107 | 0.8356 |
+| W4daeeda73fbf | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.0969 | 1.2336 | 1.1246 |
+| W57ebd29ebf9c | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.4976 | 1.5419 | 1.0296 |
+| W656173cfb23a | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.0721 | 1.4392 | 1.3424 |
+| W916a9d29d857 | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.4119 | 1.5323 | 1.0852 |
+| Wa37db4ea49fd | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.2032 | 1.2499 | 1.0389 |
+| Waa118ed43482 | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.1130 | 1.0248 | 0.9208 |
+| Wacf84098a1b5 | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.0298 | 1.6035 | 1.5571 |
+| Wbd66ff4d3b2a | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.3323 | 1.0731 | 0.8054 |
+| Wd04a57c5d7bc | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.3350 | 1.0401 | 0.7791 |
+| Wfb29edc2ce80 | icv1-f2m37-tm534059-32aad96b | 27.78 | 0.9551 | 1.3251 | 1.3875 |
+| Wfb35aa20cd45 | icv1-f2m37-tm534059-32aad96b | 27.78 | 1.2658 | 1.1730 | 0.9267 |

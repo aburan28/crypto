@@ -7,6 +7,8 @@ accepts explicit K_0 curve parameters and points through degree 131, with durabl
 pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETERS.md).
 The older inspection command uses imported points for mathematical validation.
 
+**Factor-base encyclopedia:** [factor-base-encyclopedia/README.md](factor-base-encyclopedia/README.md) describes every factor base tried here and in crypto-autoresearcher (definition, existence, build cost, oracle, measured results, verdict), starting with the PKM Kummer-coset (P-224 shape) and isogeny-chain (P-192 shape) towers; PDF in the same directory.
+
 **Technique inventory:** [ECDLP_RESEARCH_TECHNIQUES.md](ECDLP_RESEARCH_TECHNIQUES.md) maps factor-base, relation, filtering, sparse-linear-algebra, and individual-logarithm research techniques to their native modules and labels each as integrated, experimental, component, or backlog.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in
@@ -350,6 +352,16 @@ sparse in exactly the way a number-field-sieve matrix is. By default
    contract in `gpu/spmv`; set `IC_SPMV_WORKER` to the host, CUDA, or cluster
    launcher executable. Worker failure emits a warning and falls back to the
    serial CPU product.
+
+The filter before the Krylov solve is selected with `--filter-strategy`:
+`cado` (the default) runs CADO-NFS's filter as ported into
+`koblitz_sparse_la` (`FilterOptions::cado()`: whole-clique purge under
+Bouvier's Ω₃₁ weight over up to 50 steps, then Markowitz-ordered merges along
+minimum spanning trees up to an average row weight of 100); `legacy` runs the
+historical filter described above. On synthetic m = 3 systems of 262,144
+columns the `cado` filter's whole solve is about 10× faster than `legacy` and
+about 1.9× faster than CADO-NFS's own pipeline; below about 4,096 columns it is
+slower by milliseconds (`research/la_engines_20261014`).
 
 The sparse path never attempts a solve before every column occurs in
 some row, and the solution is checked against every relation before
@@ -1152,6 +1164,33 @@ unsuccessful candidate costs remain visible. A selected candidate is a
 bounded observation, not a global optimum, scaling claim, or challenge result.
 
 ## Reports and resource accounting
+
+Use `ic --verbose` (or `ic -v`) for a live, line-by-line trace:
+
+```sh
+ic run --degree 9 --solver enumerate --verbose
+ic workflow --params params.json --dir run-directory --verbose
+ic logs --degree 9 --database logs.json --verbose
+ic solve --degree 9 --logs logs.json --known-log 53 --verbose
+```
+
+Verbose `run` output includes elapsed time, factor-base and pair-table
+construction, batch starts, every trial's outcome (including unsuccessful
+attempts), relation counts, matrix dimensions and rank, and scalar
+verification. Parallel `run` batches report their outcomes in trial order
+after the batch completes; use `--batch 1` for one attempt at a time.
+Workflow collection reports each probe as its worker finishes, so probe IDs
+can appear out of order. Workflow descent and `solve` report each completed
+decomposition attempt; a found decomposition is verified before a target
+is reported solved. `logs` reports collection batches, coefficient rank,
+and the start and completion of linear algebra and column verification.
+Each trace line is flushed immediately, including when piped to `tee`.
+Verbose logging adds I/O work; use ordinary or JSON output for measurements.
+
+The flag is global and can appear before or after the subcommand. `--json`
+takes precedence over `--verbose` and suppresses the trace. Progress text
+does not enter saved reports or change the query stream, solver limits,
+or verification gates.
 
 Add --json for machine-readable output or --out PATH to save the JSON
 report while retaining the human progress display. Output files are

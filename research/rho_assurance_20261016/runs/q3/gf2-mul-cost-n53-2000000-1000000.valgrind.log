@@ -1,0 +1,11 @@
+==5418== Callgrind, a call-graph generating cache profiler
+==5418== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==5418== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==5418== Command: target/release/examples/gf2_mul_cost 53 2000000 1000000
+==5418== 
+==5418== For interactive control, run 'callgrind_control -h'.
+==5418== 
+==5418== Events    : Ir
+==5418== Collected : 63401498
+==5418== 
+==5418== I   refs:      63,401,498

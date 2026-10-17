@@ -1,0 +1,37 @@
+[1] exp_zprime2_generalized_lemma.py enumeration: l in {3,5,7}, 5 <= p < 500, all j=0 curves
+  l=3  ordinary      hypothesis l∤#E^t    5250
+  l=3  supersingular excluded   l|#E^t   10938
+  l=5  ordinary      hypothesis l∤#E^t     315
+  l=5  supersingular excluded   l|#E^t    3096
+  l=7  ordinary      excluded   l|#E^t     578
+  l=7  ordinary      hypothesis l∤#E^t    2591
+  l=7  supersingular excluded   l|#E^t    1708
+  total instances                        24476
+    ordinary (p = 1 mod 3)                8734
+    supersingular (p = 2 mod 3)          15742
+  in lemma hypothesis class (r != l-1)    8156  (ordinary 8156, supersingular 0)
+    violations (l | #E^t)                    0
+  in excluded class r = l-1              16320  (l | #E^t in 16320)
+
+[2] exp_zdoubleprime_lemma_extended.py enumeration: l in {11,13}, 5 <= p < 500, p = 1 mod 3
+  l=11 ordinary      hypothesis l∤#E^t     198
+  l=13 ordinary      excluded   l|#E^t      94
+  l=13 ordinary      hypothesis l∤#E^t    1510
+  total instances                         1802
+    ordinary (p = 1 mod 3)                1802
+    supersingular (p = 2 mod 3)              0
+  in lemma hypothesis class (r != l-1)    1708  (ordinary 1708, supersingular 0)
+    violations (l | #E^t)                    0
+  in excluded class r = l-1                 94  (l | #E^t in 94)
+
+[3] combined l in {3,5,7,11,13}
+  total instances                        26278
+  ordinary instances                     10536
+  ordinary, in lemma hypothesis class     9864
+  violations in hypothesis class             0
+
+[4] thread12_cm73_sweep.gp loop: forprime(p=7,5000) with p % 6 == 1
+  primes visited by forprime               666
+  primes p = 1 mod 6 processed             330  (first 7, last 4999)
+  all primes p <= 5000                     669
+exit=0

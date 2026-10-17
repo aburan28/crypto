@@ -1,0 +1,134 @@
+{
+  "K": 700,
+  "autolab_run_id": "gha-38822588626-1",
+  "beat_id": "koblitz.compact_orbit.n61_panel",
+  "claim_boundary": "Known-answer shared-log DLP on public synthetic a=0 n=61 fixtures, L=65536 per batch; every recovered log checked as [d]G = Q in-process and by the pure-Python replay.",
+  "claim_boundary_non_claims": [
+    "public synthetic known-answer fixtures only",
+    "no key recovery",
+    "no asymptotic sub-rho claim; both arms scale as sqrt(L*r/n) at optimal K",
+    "multi-target L=65536 batch: diagnostic, not the one-target primary comparison",
+    "comparator is the frozen KS v2 batched rho (koblitz_rho_batch_ks_v2_n61), superseded by strong rho R3 and not listed in measurement_schema.vs_rho.rho_reference_minimum",
+    "same-host replay; independent-host validation still required"
+  ],
+  "executable_or_source_hash": {
+    "git_head": "700f7d311f05d5a5507041d4eb1238801c91c68c",
+    "ic_binary_sha256": "5c463202d3c10f17eb075e89c9ca4ca0cc3dd7a12205b2495440ae2d601bbde9",
+    "koblitz_orbit_dlp_fast.rs_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+    "koblitz_rho_batch_ks_v2_n61.rs_sha256": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "rho_binary_sha256": "b4fb59041e6f53b5f031d0f789025d2cd2397369d49b09d7c55c74af83ac5b53",
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)"
+  },
+  "fixture_hash": {
+    "base_hash": "ea937fd33073c3c855cd171817ca016684dec9d175df3e52891faaffdcd7c626",
+    "disjoint": true,
+    "eval": {
+      "name": "n61-ks-growing-65536-v1",
+      "scalars_sha256": "162ddce8f5eb35a0b9eccca4cdfa4cafeacdf12720325f182da6298fa6bfe052",
+      "targets": 65536
+    },
+    "tune": {
+      "name": "n61-ks-growing-tune-65536-v1",
+      "scalars_sha256": "aba453fce93696de66822b5cdfd83dab8776af1fe04feb0673ddb466b48ffca6",
+      "targets": 65536
+    }
+  },
+  "host_id": {
+    "cpu": "x86_64",
+    "cpu_count": 4,
+    "machine": "x86_64",
+    "node": "runnervm8k3b6",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "independent_replay_pointer": [
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-38822588626-1/artifacts/replay_ic.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-38822588626-1/artifacts/replay_rho_b0.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-38822588626-1/artifacts/replay_rho_b1.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-38822588626-1/artifacts/replay_rho_b2.json"
+  ],
+  "n_or_bits": {
+    "a": 0,
+    "n": 61,
+    "subgroup_order_bits": 47.21
+  },
+  "recovered_d_verified": {
+    "blocks": 3,
+    "ic_all_verified": true,
+    "ic_replay": {
+      "fail": 0,
+      "pass": 196608,
+      "records": 196608
+    },
+    "ic_replay_all_pass": true,
+    "rho_all_verified": true,
+    "rho_replay": {
+      "fail": 0,
+      "pass": 196608,
+      "records": 196608
+    },
+    "rho_replay_all_pass": true,
+    "same_target_points_all_blocks": true,
+    "scalars_match_corpus": true,
+    "targets_per_block": 65536,
+    "untimed_records_identical_across_blocks": {
+      "ic": true,
+      "rho": true
+    }
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "isolation": "children pinned to CPU 3 with taskset; wrap this command in tools/isolated_bench.py reserve for section-10 evidence",
+    "memory": "no cap; K candidates skipped when the estimated IC RSS exceeded available memory",
+    "threads": 1
+  },
+  "result_class": "multi_target_batch_diagnostic",
+  "schema_version": 2,
+  "seeds": {
+    "batch_seed": 531310,
+    "ic_rank_seed": 7,
+    "rho_env": {
+      "KIC_RHO_DP_BITS": "4"
+    }
+  },
+  "stage": "end_to_end_dlp",
+  "stage_timers": {
+    "b0": {
+      "base_load": 23.743638,
+      "index_build": 17183.988951,
+      "linear_algebra": 1.034262,
+      "normal_basis_and_selftest": 2.043269,
+      "process_total": 805230.670404,
+      "rank_stage": 8536.961358999999,
+      "setup_total": 17209.77639,
+      "target_median": 8.073044,
+      "targets_total": 779480.4643539999
+    },
+    "b1": {
+      "base_load": 24.416286,
+      "index_build": 17081.160834,
+      "linear_algebra": 1.055201,
+      "normal_basis_and_selftest": 2.054689,
+      "process_total": 798052.3044970001,
+      "rank_stage": 8463.798848,
+      "setup_total": 17107.63233,
+      "target_median": 8.008185,
+      "targets_total": 772477.361633
+    },
+    "b2": {
+      "base_load": 23.936794000000003,
+      "index_build": 17053.322688,
+      "linear_algebra": 1.063544,
+      "normal_basis_and_selftest": 2.050162,
+      "process_total": 794128.799066,
+      "rank_stage": 8399.547084,
+      "setup_total": 17079.310266,
+      "target_median": 7.9610970000000005,
+      "targets_total": 768646.3959090001
+    }
+  },
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "targets_per_block": 65536,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "verdict": "DRAFT_PENDING_INDEPENDENT_VALIDATION"
+}

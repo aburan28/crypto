@@ -42,8 +42,8 @@
 //! - [`format_visualization`] — Markdown report showing per-prime
 //!   discovered `d_i` and the CRT reconstruction.
 
-use crate::cryptanalysis::j0_twists::factorise_small;
 use crate::ecc::curve::CurveParams;
+use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
 use crate::utils::mod_inverse;
 use crate::visualize::color::{paint, FG_BRIGHT_GREEN, FG_BRIGHT_RED, FG_BRIGHT_YELLOW};
@@ -61,8 +61,9 @@ pub struct PohligHellmanReport {
     pub residues: Vec<(BigUint, BigUint)>,
     /// Wall-clock time in milliseconds.
     pub elapsed_ms: u128,
-    /// Total baby-step iterations across all prime-power solves
-    /// (= cost summary).
+    /// Group points produced or compared by the per-prime baby-step
+    /// giant-step searches (each prime's `⌈√q⌉`-point table plus every giant
+    /// point), summed over the primes recovered: the cost summary.
     pub total_steps: u64,
 }
 
@@ -82,7 +83,7 @@ pub fn pohlig_hellman_curve(
     smoothness_bound: u64,
 ) -> PohligHellmanReport {
     let t0 = std::time::Instant::now();
-    let factors = factorise_small(order_of_g);
+    let factors = factorise_up_to(order_of_g, smoothness_bound);
     let bound = BigUint::from(smoothness_bound);
     let a_fe = curve.a_fe();
     let mut residues: Vec<(BigUint, BigUint)> = Vec::new();
@@ -107,10 +108,16 @@ pub fn pohlig_hellman_curve(
             }
         }
     }
-    let recovered_d = if all_factors_recovered && !residues.is_empty() {
-        crt_combine(&residues)
-    } else {
+    // Every answer is checked in the group: a mis-stated order can make the
+    // residues consistent with each other and still wrong.
+    let recovered_d = if !all_factors_recovered {
         None
+    } else if order_of_g.is_one() {
+        (*q == Point::Infinity).then(BigUint::zero)
+    } else if residues.is_empty() {
+        None
+    } else {
+        crt_combine(&residues).filter(|d| g.scalar_mul_vartime(d, &a_fe) == *q)
     };
     PohligHellmanReport {
         recovered_d,
@@ -121,16 +128,109 @@ pub fn pohlig_hellman_curve(
     }
 }
 
+/// Factor `n` by trial division with divisors `d ≤ bound`.
+///
+/// Every prime factor up to `bound` is found with its exponent, as
+/// [`factorise_small`](crate::cryptanalysis::j0_twists::factorise_small)
+/// finds it.  What remains is one more entry,
+/// `(rest, 1)`: a prime whenever the division stopped because
+/// `d² > rest`, and otherwise a cofactor whose prime factors all exceed
+/// `bound`, which Pohlig–Hellman cannot use either way.  Stopping at the
+/// bound is what keeps an order with a large prime factor (a `curve.n` of
+/// cryptographic size) from running trial division to its square root.
+fn factorise_up_to(n: &BigUint, bound: u64) -> Vec<(BigUint, u32)> {
+    if n.is_zero() || n.is_one() {
+        return Vec::new();
+    }
+    let mut out = Vec::new();
+    let mut rest = n.clone();
+    let mut d = 2u64;
+    while d <= bound && BigUint::from(d) * d <= rest {
+        let mut e = 0u32;
+        while (&rest % d).is_zero() {
+            rest /= d;
+            e += 1;
+        }
+        if e > 0 {
+            out.push((BigUint::from(d), e));
+        }
+        d += if d == 2 { 1 } else { 2 };
+    }
+    if !rest.is_one() {
+        out.push((rest, 1));
+    }
+    out
+}
+
+/// A point as a hashable key: its affine coordinates, `None` for `O`.
+fn point_key(p: &Point) -> Option<(BigUint, BigUint)> {
+    match p {
+        Point::Infinity => None,
+        Point::Affine { x, y } => Some((x.value.clone(), y.value.clone())),
+    }
+}
+
+/// The baby-step table of one prime: `j·G'` for `0 ≤ j < m`,
+/// `m = ⌈√q⌉`, keeping the smallest `j` of a repeated point.
+struct BabySteps {
+    m: u64,
+    table: std::collections::HashMap<Option<(BigUint, BigUint)>, u64>,
+    /// `−m·G'`, the giant stride.
+    neg_stride: Point,
+}
+
+impl BabySteps {
+    fn build(g_prime: &Point, q: u64, a_fe: &FieldElement) -> Self {
+        let mut m = (q as f64).sqrt() as u64;
+        while m.saturating_mul(m) < q {
+            m += 1;
+        }
+        let m = m.max(1);
+        let mut table = std::collections::HashMap::with_capacity(m as usize);
+        let mut p = Point::Infinity;
+        for j in 0..m {
+            table.entry(point_key(&p)).or_insert(j);
+            if j + 1 < m {
+                p = p.add_vartime(g_prime, a_fe);
+            }
+        }
+        let neg_stride = g_prime.scalar_mul_vartime(&BigUint::from(m), a_fe).neg();
+        Self {
+            m,
+            table,
+            neg_stride,
+        }
+    }
+
+    /// The smallest `k < q` with `k·G' = target`, and the giant steps
+    /// spent: the search covers `[0, m²) ⊇ [0, q)` in increasing blocks
+    /// of `m`, so the first hit is the smallest solution, which is the
+    /// answer the linear search over `[0, q)` gives, `None` included.
+    fn solve(&self, target: &Point, q: u64, a_fe: &FieldElement) -> (Option<u64>, u64) {
+        let mut cur = target.clone();
+        for i in 0..self.m {
+            if let Some(&j) = self.table.get(&point_key(&cur)) {
+                let k = i * self.m + j;
+                return ((k < q).then_some(k), i + 1);
+            }
+            cur = cur.add_vartime(&self.neg_stride, a_fe);
+        }
+        (None, self.m)
+    }
+}
+
 /// Solve `Q = d·G` when `ord(G) = q^e` is a prime power.
-/// Returns `(d mod q^e, baby_step_count)` or `None` on failure.
+/// Returns `(d mod q^e, step_count)` or `None` on failure.
 ///
 /// Strategy: write `d = d_0 + q·d_1 + q²·d_2 + … + q^{e-1}·d_{e-1}`.
-/// Each `d_j ∈ [0, q)` is recovered by computing the right multiple
-/// in the `q`-order subgroup and brute-forcing.  The brute force is
-/// [`Point::linear_dlog_vartime`], which keeps the running multiple
-/// projective: a step is a mixed addition and a cross-multiplied
-/// compare, where an affine step paid a field inversion.  The baby-step
-/// count is unchanged, one per multiple compared.
+/// Each `d_j ∈ [0, q)` is recovered by baby-step giant-step in the
+/// `q`-order subgroup generated by `G' = q^{e−1}·G`: one table of the
+/// `m = ⌈√q⌉` multiples `j·G'` serves all `e` digits, and a digit costs
+/// at most `m` giant steps, so a prime costs `O((e + 1)√q)` group
+/// operations where the linear search cost `O(e·q)`.  The step count is
+/// the `m` table points plus every giant point compared.  Each digit is
+/// the smallest solution below `q`, the same one the linear search
+/// ([`Point::linear_dlog_vartime`]) returns.
 pub fn recover_in_prime_power_subgroup(
     curve: &CurveParams,
     g: &Point,
@@ -141,25 +241,23 @@ pub fn recover_in_prime_power_subgroup(
     let a_fe = curve.a_fe();
     let mut d = BigUint::zero();
     let mut accumulator = BigUint::one();
-    let mut total_steps = 0u64;
     // Precompute G' = q^(e-1) · G, the generator of the q-order subgroup.
     let q_pow_e_minus_1 = prime.pow(exponent - 1);
     let g_prime = g.scalar_mul_vartime(&q_pow_e_minus_1, &a_fe);
     let q_u64 = prime.to_u64_digits().first().copied().unwrap_or(0);
+    let baby = BabySteps::build(&g_prime, q_u64, &a_fe);
+    let mut total_steps = baby.m;
     for j in 0..exponent {
         // Compute Q_j = q^(e-1-j) · (Q - d·G)
         let neg_dg = g.scalar_mul_vartime(&d, &a_fe).neg();
         let q_minus_dg = q.add_vartime(&neg_dg, &a_fe);
         let exp = prime.pow(exponent - 1 - j);
         let q_j = q_minus_dg.scalar_mul_vartime(&exp, &a_fe);
-        // Brute-force d_j in [0, prime) such that d_j · G' = Q_j: the
-        // multiples 0·G', 1·G', …, d_j·G' are d_j + 1 baby steps.
-        let d_j = g_prime.linear_dlog_vartime(&q_j, q_u64, &a_fe)?;
-        total_steps += d_j + 1;
-        let d_j = BigUint::from(d_j);
+        let (d_j, giant) = baby.solve(&q_j, q_u64, &a_fe);
+        total_steps += giant;
+        let d_j = BigUint::from(d_j?);
         d += &d_j * &accumulator;
         accumulator *= prime;
-        let _ = j;
     }
     Some((d, total_steps))
 }
@@ -397,6 +495,63 @@ mod tests {
     /// prime-power part of random curves over small primes (counted by
     /// brute force), for targets inside the subgroup and outside it, and
     /// for a mis-stated exponent or prime.
+    /// An order with a prime factor far beyond the bound (a 256-bit prime
+    /// `n`) is not trial-divided to its square root: the factorisation
+    /// stops at the bound, reports the cofactor, and recovers nothing.
+    #[test]
+    fn large_prime_order_stops_at_the_bound() {
+        let curve = CurveParams::secp256k1();
+        let g = curve.generator();
+        let q = g.scalar_mul_vartime(&BigUint::from(12_345u32), &curve.a_fe());
+        let r = pohlig_hellman_curve(&curve, &g, &q, &curve.n, 1 << 16);
+        assert_eq!(r.factors, vec![(curve.n.clone(), 1)]);
+        assert!(r.recovered_d.is_none() && r.residues.is_empty());
+        // A smooth part times the large prime: the small primes are found
+        // with their exponents and the rest is one entry.
+        let order = &curve.n * BigUint::from(2u32 * 2 * 3 * 13171);
+        let f = factorise_up_to(&order, 1 << 16);
+        assert_eq!(
+            f,
+            vec![
+                (BigUint::from(2u32), 2),
+                (BigUint::from(3u32), 1),
+                (BigUint::from(13_171u32), 1),
+                (curve.n.clone(), 1)
+            ]
+        );
+    }
+
+    /// The answer is checked in the group: a mis-stated order whose
+    /// residues combine to a wrong logarithm reports nothing, and order 1
+    /// is solved by `d = 0`.
+    #[test]
+    fn answers_are_verified_in_the_group() {
+        let curve = small_prime_curve();
+        let g = curve.generator();
+        let a_fe = curve.a_fe();
+        let q = g.scalar_mul(&BigUint::from(77u32), &a_fe);
+        let r = pohlig_hellman_curve(&curve, &g, &q, &curve.n, 1 << 10);
+        assert_eq!(r.recovered_d, Some(BigUint::from(77u32)));
+        // Claim order 3·199 with a bound that admits only 3: unrecoverable.
+        let r = pohlig_hellman_curve(&curve, &g, &q, &(&curve.n * 3u32), 3);
+        assert!(r.recovered_d.is_none());
+        let r = pohlig_hellman_curve(
+            &curve,
+            &Point::Infinity,
+            &Point::Infinity,
+            &BigUint::one(),
+            10,
+        );
+        assert_eq!(r.recovered_d, Some(BigUint::zero()));
+        for (claimed, d) in [(BigUint::from(198u32), 5u32), (BigUint::from(200u32), 150)] {
+            let q = g.scalar_mul(&BigUint::from(d), &a_fe);
+            let r = pohlig_hellman_curve(&curve, &g, &q, &claimed, 1 << 10);
+            if let Some(x) = &r.recovered_d {
+                assert_eq!(g.scalar_mul(x, &a_fe), q, "claimed order {claimed}");
+            }
+        }
+    }
+
     #[test]
     fn prime_power_recovery_matches_affine_search() {
         use num_bigint::RandBigInt;
@@ -470,11 +625,23 @@ mod tests {
                             if ex == 0 {
                                 continue;
                             }
+                            // The digits (or the failure) are the affine
+                            // search's; the step count is baby-step
+                            // giant-step's own, at most ⌈√q⌉ per digit
+                            // plus the ⌈√q⌉-point table, where the affine
+                            // search's was up to q per digit.
+                            let got = recover_in_prime_power_subgroup(&curve, &g_i, &t_i, pr, ex);
+                            let want = recover_reference(&curve, &g_i, &t_i, pr, ex);
                             assert_eq!(
-                                recover_in_prime_power_subgroup(&curve, &g_i, &t_i, pr, ex),
-                                recover_reference(&curve, &g_i, &t_i, pr, ex),
+                                got.as_ref().map(|(d, _)| d),
+                                want.as_ref().map(|(d, _)| d),
                                 "p={p} a={a} b={b} #E={count} q={pr}^{ex} g={g_i:?} t={t_i:?}"
                             );
+                            if let Some((_, steps)) = got {
+                                let qq = pr.to_u64_digits()[0];
+                                let m = (1..).find(|m: &u64| m * m >= qq).unwrap();
+                                assert!(steps <= m * (ex as u64 + 1), "q={qq} steps={steps}");
+                            }
                         }
                     }
                 }

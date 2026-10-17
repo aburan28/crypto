@@ -99,6 +99,7 @@ use crate::ecc::point::Point;
 use crate::utils::{mod_inverse, random::random_scalar};
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
+use rayon::prelude::*;
 use std::collections::HashMap;
 
 // ── j=0 curve detection and ζ extraction ─────────────────────────────
@@ -280,6 +281,20 @@ pub struct OrbitRelation {
     pub entries: Vec<(usize, i64)>,
 }
 
+/// Shared orbit-index map: every ζ-shifted abscissa of every factor-base
+/// orbit entry mapped to its orbit index.  Built once per factor base by the
+/// staged driver and reused across relations instead of being rebuilt per
+/// relation call.
+pub fn orbit_index_map(fb: &[OrbitEntry]) -> HashMap<BigUint, usize> {
+    let mut x_to_orbit: HashMap<BigUint, usize> = HashMap::new();
+    for (idx, entry) in fb.iter().enumerate() {
+        for shifted in &entry.orbit_x {
+            x_to_orbit.insert(shifted.clone(), idx);
+        }
+    }
+    x_to_orbit
+}
+
 /// Find a single sieve relation, then expand to 3 ψ-related rows.
 pub fn find_relation_with_psi(
     curve: &CurveParams,
@@ -290,14 +305,24 @@ pub fn find_relation_with_psi(
     lambda: &BigUint,
     max_trials: usize,
 ) -> Option<Vec<OrbitRelation>> {
+    let x_to_orbit = orbit_index_map(fb);
+    find_relation_with_psi_with_index(curve, g, q, fb, zeta, lambda, max_trials, &x_to_orbit)
+}
+
+/// [`find_relation_with_psi`] with a prebuilt [`orbit_index_map`], so
+/// drivers collecting many relations build the map once.
+pub fn find_relation_with_psi_with_index(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    fb: &[OrbitEntry],
+    zeta: &FieldElement,
+    lambda: &BigUint,
+    max_trials: usize,
+    x_to_orbit: &HashMap<BigUint, usize>,
+) -> Option<Vec<OrbitRelation>> {
     let a_fe = curve.a_fe();
     let b_fe = curve.fe(curve.b.clone());
-    let mut x_to_orbit: HashMap<BigUint, usize> = HashMap::new();
-    for (idx, entry) in fb.iter().enumerate() {
-        for shifted in &entry.orbit_x {
-            x_to_orbit.insert(shifted.clone(), idx);
-        }
-    }
     for _ in 0..max_trials {
         let alpha = random_scalar(&curve.n);
         let beta = random_scalar(&curve.n);
@@ -502,14 +527,32 @@ pub fn find_relation_with_psi_counted(
     lambda: &BigUint,
     max_trials: usize,
 ) -> Option<(Vec<OrbitRelation>, usize)> {
+    let x_to_orbit = orbit_index_map(fb);
+    find_relation_with_psi_counted_with_index(
+        curve,
+        g,
+        q,
+        fb,
+        zeta,
+        lambda,
+        max_trials,
+        &x_to_orbit,
+    )
+}
+
+/// Counted twin of [`find_relation_with_psi_with_index`].
+pub fn find_relation_with_psi_counted_with_index(
+    curve: &CurveParams,
+    g: &Point,
+    q: &Point,
+    fb: &[OrbitEntry],
+    zeta: &FieldElement,
+    lambda: &BigUint,
+    max_trials: usize,
+    x_to_orbit: &HashMap<BigUint, usize>,
+) -> Option<(Vec<OrbitRelation>, usize)> {
     let a_fe = curve.a_fe();
     let b_fe = curve.fe(curve.b.clone());
-    let mut x_to_orbit: HashMap<BigUint, usize> = HashMap::new();
-    for (idx, entry) in fb.iter().enumerate() {
-        for shifted in &entry.orbit_x {
-            x_to_orbit.insert(shifted.clone(), idx);
-        }
-    }
     for trial in 1..=max_trials {
         let alpha = random_scalar(&curve.n);
         let beta = random_scalar(&curve.n);
@@ -628,16 +671,23 @@ pub fn j0_index_calculus_dlp_staged(
     }
     let m = fb.len();
     let target_raw_relations = m + extra_relations;
+    let x_to_orbit = orbit_index_map(&fb);
 
     let relations_started = Instant::now();
     let mut raw_relations: Vec<OrbitRelation> = Vec::with_capacity(target_raw_relations);
     let mut attempts_exhausted = 0usize;
     let mut trials_per_relation: Vec<usize> = Vec::with_capacity(target_raw_relations);
     let mut trials_total = 0usize;
-    while raw_relations.len() < target_raw_relations {
-        let batch_and_trials = 'attempt: {
-            for _ in 0..max_relation_attempts {
-                if let Some(found) = find_relation_with_psi_counted(
+    // Relation searches are independent given the factor base, so they run
+    // in parallel (rayon) with results kept in index order: the relation
+    // sequence, the per-relation trial counts and the `attempts_exhausted`
+    // accounting are exactly those of the sequential loop this replaces.
+    // `RAYON_NUM_THREADS=1` reproduces the sequential behaviour.
+    let found: Vec<Option<(Vec<OrbitRelation>, usize, usize)>> = (0..target_raw_relations)
+        .into_par_iter()
+        .map(|_| {
+            for (exhausted, _) in (0..max_relation_attempts).enumerate() {
+                if let Some((batch, trials)) = find_relation_with_psi_counted_with_index(
                     curve,
                     g,
                     q,
@@ -645,19 +695,25 @@ pub fn j0_index_calculus_dlp_staged(
                     &zeta,
                     &lambda,
                     max_trials_per_relation,
+                    &x_to_orbit,
                 ) {
-                    break 'attempt Some(found);
+                    return Some((batch, trials, exhausted));
                 }
-                attempts_exhausted += 1;
             }
             None
-        };
-        let (batch, trials) = batch_and_trials?;
+        })
+        .collect();
+    for result in found {
+        let (batch, trials, exhausted_before) = result?;
+        attempts_exhausted += exhausted_before;
         trials_total += trials;
         trials_per_relation.push(trials);
         if let Some(first) = batch.into_iter().next() {
             raw_relations.push(first);
         }
+    }
+    if raw_relations.len() != target_raw_relations {
+        return None;
     }
     let relations_ms = relations_started.elapsed().as_secs_f64() * 1e3;
 

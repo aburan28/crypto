@@ -1,0 +1,22 @@
+{
+  "analysis_sha256": "2976f932e8eb2fd2d285b1f40f065c43dd6573fb6879845bd915f9b7ee675a6a",
+  "artifact_sha256": "098c1ea1383c3ddaf78aaf1ac28bc32c80cb2caa5c69ccfb155bb060f5d2bda2",
+  "candidate_id": "IC1N83Ckb1a1fb547800PDP4rootRCguidedLAgaussTDdirectISO0hc3b6db4ff8c0",
+  "paired_difference": {
+    "bootstrap_95pct_ms": [
+      -3.616688263,
+      -3.265622039
+    ],
+    "confirmed_faster": true,
+    "contiguous_block_size": 50,
+    "definition": "bloom_on_minus_bloom_off_online_ms",
+    "mean_ms": -3.441489878,
+    "resamples": 10000,
+    "seed": 2026101507
+  },
+  "schema": "n83.root11-bloom-selection/v1",
+  "selected_arm": "bloom_on",
+  "source_commit": "a9b44ee1454beb2bbe8614b681714df07fd11f3c",
+  "status": "BLOOM_CONFIRMED_IN_REUSED_PANEL",
+  "workload_id": "0d7b05d9fca6"
+}

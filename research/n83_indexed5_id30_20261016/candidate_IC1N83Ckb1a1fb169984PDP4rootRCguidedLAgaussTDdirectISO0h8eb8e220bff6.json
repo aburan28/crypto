@@ -1,0 +1,130 @@
+{
+  "candidate_id": "IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0h8eb8e220bff6",
+  "curve": {
+    "G": [
+      "6614244651398184860292015",
+      "8868260410029249391539529"
+    ],
+    "coefficients": {
+      "a1": 1,
+      "a2": 1,
+      "a3": 0,
+      "a4": 0,
+      "a6": 1
+    },
+    "cofactor": 1128547018,
+    "curve_id": "EC1N83Ckb1a1haacb69ee9f37",
+    "curve_order": 9671406556910881928556062,
+    "model": "y^2+x*y=x^3+x^2+1",
+    "r": 8569786107849059,
+    "target_group": "prime_order_r_subgroup",
+    "trace": 6151469093347
+  },
+  "endomorphism": {
+    "endomorphism_order_conductor": null,
+    "frobenius_order_conductor": null,
+    "status": "unproved_not_used",
+    "volcano_levels": null
+  },
+  "factor_base": {
+    "actual_usable_points": 169984,
+    "effective_columns": 1024,
+    "enumerated_set_sha256": "db8e8469f6525bfadabb93c145d0cffa909e6e6aadb201e8f967c8347bc077a7",
+    "nominal_dimension": null,
+    "ordered_base_dump_sha256": "6ae95097b960d2a0e5972c2f5a8931cbfd6bd5051f08f8206ead5d9abb0d79cd",
+    "quotient_rule": "sign and all 83 Frobenius powers; 166 usable points per column",
+    "raw_x_start": 1,
+    "recipe": "scan polynomial x from one; rational lifts; cofactor projection; first K distinct signed-Frobenius orbits",
+    "source_base_hash_blake3": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+    "subgroup_filter": "cofactor_1128547018_projection; discard_identity",
+    "subspace": null
+  },
+  "field": {
+    "basis": "polynomial",
+    "defining_polynomial_int": 9671406556917033397649557,
+    "element_encoding": "decimal strings of polynomial coefficient bitmasks",
+    "n": 83,
+    "p": 2
+  },
+  "implementation": {
+    "algorithm_flags": {
+      "compact_state26": false,
+      "compact_state28": false,
+      "dense_request": false,
+      "indexed4_fixed31_request": false,
+      "indexed5_fixed30_request": false,
+      "indexed5_id30": false,
+      "indexed5_load75_request": true,
+      "indexed_root4": false,
+      "indexed_root5": true,
+      "load75_request": false,
+      "packed_root_table": true,
+      "rank_threads": 4,
+      "root_bloom": false,
+      "root_only11": true,
+      "root_only21": false,
+      "root_only22": false,
+      "sparse_canonical": true,
+      "symmetric_s3_states": true,
+      "target_threads": 1
+    },
+    "release_profile": "cargo_release_locked",
+    "source_commit": null,
+    "source_sha256": {
+      "cargo_lock": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+      "ic": "f14d9747cd24627d39d7cae4c9bef69ed2819544125ef15f31306ce5d75f3fc7"
+    }
+  },
+  "isogeny": "none",
+  "point_decomposition": {
+    "canonical_root_selector": "sparse_linear_map_exact",
+    "equation_order": "none",
+    "family": "root",
+    "index_cache_policy": "reusable_target_independent",
+    "internal_matrix_kernel": "none",
+    "m": 4,
+    "monomial_order": "none",
+    "query_stop": "scan_finite_root_index_once_until_verified_relation",
+    "root_slot": {
+      "allocated_bytes": 671088640,
+      "bytes": 5,
+      "duplicate_policy": "first_inserted_exact_root_wins",
+      "empty_marker": "zero_slot",
+      "fingerprint_bits": 10,
+      "lookup_equality": "full_canonical_root_from_retained_state",
+      "request_entries": 58021888,
+      "request_rule": "ceil_four_times_retained_states_over_three_then_round_twice_request_to_power_of_two",
+      "root_selector_bits": 1,
+      "state_id_bits": 29
+    },
+    "solver_source_sha256": "f14d9747cd24627d39d7cae4c9bef69ed2819544125ef15f31306ce5d75f3fc7",
+    "summation_chain": "two indexed leaves and two query leaves via S3 root lookup",
+    "variant": "S3_pair_root_index_four_summand_first_verified_witness_indexed83_5byte_exact_slot_symmetric_state_quotient_root_only11_reconstruct_second_root_fixed30_dynamic_load75_state_id29_fingerprint10",
+    "weil_descent_encoding": "none"
+  },
+  "relation_collection": {
+    "duplicate_policy": "echelon_rank_gain",
+    "query_distribution": "guided_scalar_times_G_minus_first_pivotless_base_rep",
+    "source_digest": "f14d9747cd24627d39d7cae4c9bef69ed2819544125ef15f31306ce5d75f3fc7",
+    "stop_criterion": "rank_1024",
+    "verification": "curve_group_sum_and_folded_row"
+  },
+  "relation_linear_algebra": {
+    "block_parameters": "none",
+    "columns": 1024,
+    "implementation": "incremental_echelon",
+    "modulus": 8569786107849059,
+    "orbit_quotient": "sign_and_frobenius",
+    "preconditioner": "none",
+    "rank_criterion": 1024,
+    "row_rule": "signed_frobenius_coefficients_mod_r",
+    "solver": "gauss",
+    "source_digest": "f14d9747cd24627d39d7cae4c9bef69ed2819544125ef15f31306ce5d75f3fc7"
+  },
+  "schema_version": 1,
+  "target_descent": {
+    "policy": "direct_four_summand_target_relation_after_factor_logs",
+    "source_digest": "f14d9747cd24627d39d7cae4c9bef69ed2819544125ef15f31306ce5d75f3fc7",
+    "success": "independent_scalar_replay"
+  }
+}

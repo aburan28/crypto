@@ -1,0 +1,25 @@
+ops (ok): ic-cyc-w2 / rho-frob = 18.2926 [15.448, 21.779] (cluster) over 32 pairs on 16 workloads, 1 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: admitted median 0.2187 [0.155, 0.336]
+measurement quality: 0 / 100; paired attempts 32, verified 32, admitted 0; levels {"L0": 32}; p95 foreign busy unknown%, p95 run queue 1318.14%
+quality notes: A/A bonus unavailable: the spec permits wall runs below L2; contention telemetry is incomplete
+| curve | log2 r | workloads | ic-cyc-w2 / rho-frob | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-f2m23-t5197-69e76b73 | 21.00 | 16 | 18.2926 | [15.4480, 21.7790] | cluster |
+
+| workload | curve | log2 r | rho-frob mean S | ic-cyc-w2 mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W097b65939e60 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3305 | 7.0896 | 21.4497 |
+| W0bc4e6f44014 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3267 | 7.0338 | 21.5283 |
+| W15ea8df31c09 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3727 | 7.0321 | 18.8700 |
+| W35ad8d7bf3d7 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.4224 | 7.0203 | 16.6204 |
+| W3e97957c8e9f | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3557 | 7.0339 | 19.7729 |
+| W41938b93e0cf | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.5405 | 7.0177 | 12.9836 |
+| W5bb695f1b263 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3937 | 7.0236 | 17.8387 |
+| W60fb480f9b28 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3785 | 7.0576 | 18.6448 |
+| W7121566cb80a | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3986 | 7.0473 | 17.6818 |
+| W7650b3c238de | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.1962 | 7.0510 | 35.9430 |
+| W81578276046d | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3105 | 7.0600 | 22.7381 |
+| W890bdd5f1fae | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.6303 | 7.0665 | 11.2112 |
+| Wa173c2f6f884 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3436 | 7.0556 | 20.5314 |
+| Waead5d5232aa | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3264 | 7.0317 | 21.5448 |
+| Wba0795d4edb3 | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.3233 | 7.0412 | 21.7812 |
+| Wc5dd28fadbba | icv1-f2m23-t5197-69e76b73 | 21.00 | 0.5101 | 7.0160 | 13.7537 |

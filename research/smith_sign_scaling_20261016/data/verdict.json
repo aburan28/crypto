@@ -1,0 +1,29 @@
+{
+  "gamma": 0.01857504606778603,
+  "gamma_ci": [
+    -0.014071692561792956,
+    0.05122178469736502
+  ],
+  "gamma_se": 0.016656499300805608,
+  "h1prime_beta_ci_contains_1": [
+    [
+      101,
+      true
+    ],
+    [
+      1009,
+      false
+    ],
+    [
+      10007,
+      true
+    ]
+  ],
+  "h3": "bias shrinks like 1/√p (β bounded)",
+  "primes": [
+    101,
+    1009,
+    10007
+  ],
+  "valid": true
+}

@@ -1,0 +1,13 @@
+
+=== Gröbner stage: frozen decomposition ladder (default) ===
+
+| instance | m | ℓ | targets | decomposed | word XORs | F4 calls | build ms | reduce ms | read ms | wall s |
+|:---------|--:|--:|--------:|-----------:|----------:|---------:|---------:|----------:|--------:|-------:|
+| `K_0/2^19` | 2 | 18 | 12 | 12 | 37896163 | 216 | 75.1 | 0.6 | 0.0 | 0.08 |
+| `K_1/2^17` | 2 | 8 | 24 | 10 | 3518804 | 2376 | 47.9 | 1.0 | 0.0 | 0.06 |
+
+Unit: 64-bit word XORs in the Macaulay eliminations; wall time is the whole
+stage including building and reading back every matrix.  Per AGENTS.md §8 this
+is a solver-stage diagnostic, not an end-to-end ECDLP measurement.
+
+Wrote research/pdp_shape_replay_20261015/raw/holdout-default/stage.json

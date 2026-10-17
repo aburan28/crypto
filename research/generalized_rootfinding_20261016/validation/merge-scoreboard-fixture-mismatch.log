@@ -1,0 +1,5 @@
+test_scoreboard_panels_close_and_sit_at_the_top_level executed
+test_every_scoreboard_panel_has_a_summary_and_the_index_cites_them_all executed
+test_progress_chart_data_file_is_canonical_and_fully_plotted executed
+(<test_build.BuildTests testMethod=test_progress_chart_data_file_is_canonical_and_fully_plotted>, 'Traceback (most recent call last):\n  File "/workspace/crypto-rootfinding-pr/scripts/site/test_build.py", line 138, in test_progress_chart_data_file_is_canonical_and_fully_plotted\n    self.assertEqual(json.loads(embedded.group(1)), timeline, "embedded progress chart data differs from docs/ic/progress-timeline.json")\nAssertionError: {\'sch[56 chars]-10-16\', \'question\': "Verified index-calculus [60479 chars]}]}]} != {\'sch[56 chars]-10-15\', \'question\': "Verified index-calculus [58599 chars]}]}]}\nDiff is 109412 characters long. Set self.maxDiff to None to see it. : embedded progress chart data differs from docs/ic/progress-timeline.json\n')
+testsRun= 3 failures= 1 errors= 0
