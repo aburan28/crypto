@@ -11,6 +11,7 @@ Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
+| [Primary N83 prebuilt-base quality for two to four summands](n83-prebuilt-base-quality-m2-m4.md) | open | measured selection of a signed-Frobenius or structured base at m=2, 3 or 4 on the 81-bit subgroup | full-width native relation/rank comparison of retained bases, then complete matched cost with independent replay |
 | [Generalized GPU rho workers for nine Certicom binary challenges](certicom-binary-gpu-rho-integration.md) | open | persistent, independently replayable GPU rho and qualified fastest-arithmetic choices for all nine exact challenges | exact CPU bindings, per-curve GPU replay and durable DP/collision path, then matched device performance gates |
 | [p61 selected-class census and adjacency completion](p61-full-isogeny-class-census.md) | investigating | complete selected-class graph and its use as an admitted large-field corpus | exact 358,094,304-vertex ledger, verified selected-degree adjacency, and adequate durable storage |
 | [cairn certificate checkers are Python-only](cairn-certificate-checker-python-only.md) | open | objective mode for backlog cards with native checkers (the upgrade path of `XP-20261015-p192-isogeny-aux-search-t48`, which runs as lab tasks meanwhile) | cairn accepting a pinned native checker, or the `workspace` verifier running a zero-dependency Rust checker under its jail |

@@ -1462,6 +1462,9 @@ mod tests {
         let mut opts = KoblitzIcOptions::default();
         opts.max_trials = 0;
         opts.allow_direct_relation = false;
+        // The default pair table packs keys into u64 and cannot represent
+        // this degree-83 base. The preflight itself makes no query.
+        opts.strategy = DecompositionStrategy::Enumerate;
         let report = koblitz_index_calculus_dlp_with_factor_base(
             &base.curve,
             base.curve.generator(),

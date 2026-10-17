@@ -1,0 +1,30 @@
+    Finished `release` profile [optimized] target(s) in 1.14s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-e89b2f0dbc9b5389)
+
+running 4333 tests
+test asymmetric::ec_elgamal::tests::checked_encrypt_rejects_invalid_public_key_and_plaintext_collision ... ok
+test asymmetric::ec_elgamal::tests::decrypt_large_message_bounded ... ignored, slow: 1M-entry BSGS table; run with --ignored
+test asymmetric::ec_elgamal::tests::decrypt_out_of_range_fails ... ok
+test asymmetric::ec_elgamal::tests::decrypt_rejects_invalid_ciphertext_points ... ok
+test asymmetric::ec_elgamal::tests::decrypt_with_wrong_key_fails ... ok
+test asymmetric::ec_elgamal::tests::encrypt_decrypt_roundtrip_one ... ok
+test asymmetric::ec_elgamal::tests::encrypt_decrypt_roundtrip_small ... ignored, slow: 5 × P-256 affine scalar mul + 5 × BSGS; run with --ignored
+test asymmetric::ec_elgamal::tests::encrypt_is_probabilistic ... ignored, slow: two P-256 encrypts + two BSGS decrypts; run with --ignored
+test asymmetric::ec_elgamal::tests::encrypted_vote_tally ... ignored, slow: 10 P-256 ballots + tally + BSGS decrypt; run with --ignored
+test asymmetric::ec_elgamal::tests::homomorphic_add_plain ... ignored, slow: P-256 affine scalar mul; run with --ignored
+test asymmetric::ec_elgamal::tests::homomorphic_add_two_ciphertexts ... ignored, slow: P-256 affine scalar mul; run with --ignored
+test asymmetric::ec_elgamal::tests::homomorphic_scalar_multiply ... ignored, slow: P-256 affine scalar mul; run with --ignored
+test asymmetric::ec_elgamal::tests::integer_sqrt_ceil_matches_small_cases ... ok
+test asymmetric::ec_elgamal::tests::keygen_produces_valid_keypair ... ok
+test asymmetric::elgamal::tests::decrypt_with_wrong_key_fails ... ok
+test asymmetric::elgamal::tests::encrypt_decrypt_roundtrip ... ok
+test asymmetric::elgamal::tests::encrypt_is_probabilistic ... ok
+test asymmetric::elgamal::tests::encrypt_rejects_zero_and_oversize ... ok
+test asymmetric::elgamal::tests::homomorphic_chained_product ... ok
+test asymmetric::elgamal::tests::homomorphic_exponentiate ... ok
+test asymmetric::elgamal::tests::homomorphic_multiply_by_plain ... ok
+test asymmetric::elgamal::tests::homomorphic_multiply_two_ciphertexts ... ok
+test asymmetric::elgamal::tests::keygen_produces_consistent_keypair ... ok
+test asymmetric::elgamal::tests::rerandomise_preserves_plaintext ... ok
+test asymmetric::elgamal::tests::rfc3526_group_14_is_2048_bit_safe_prime ... ok
+test asymmetric::paillier::tests::decrypt_with_wrong_key_fails ... 

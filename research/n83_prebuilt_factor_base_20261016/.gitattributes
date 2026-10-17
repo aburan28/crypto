@@ -1,0 +1,7 @@
+*.pdf binary
+*.png binary
+*.svg -diff -whitespace
+reports/**/*.pdf binary
+reports/**/*.png binary
+reports/**/*.svg -diff -whitespace
+*.log -whitespace

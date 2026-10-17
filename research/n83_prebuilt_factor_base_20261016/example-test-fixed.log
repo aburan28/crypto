@@ -1,0 +1,27 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990-2/.codex/worktrees/ec70/crypto)
+    Finished `release` profile [optimized] target(s) in 17.55s
+     Running unittests examples/koblitz_n83_factor_base_export.rs (target/release/examples/koblitz_n83_factor_base_export-f2ff3e2f2d89fadd)
+
+running 19 tests
+test compact_cold::wide::wide_json_tests::wide_point_coordinates_round_trip_as_decimal_strings ... ok
+test compact_cold::pinned_public_diagnostic_curve_has_exact_group_and_generator ... ok
+test compact_cold::wide::wide_json_tests::wide_point_list_preserves_infinity_entries ... ok
+test compact_cold::wide::wide_json_tests::wide_point_parser_accepts_small_legacy_numeric_words ... ok
+test tests::degree_83_cyclotomic_block_order_is_82 ... ok
+test tests::gray_order_visits_the_same_complete_subspace ... ok
+test compact_cold::wide::unordered_pair_index_retains_every_ordered_canonical_root_key ... ok
+test tests::invalid_point_and_out_of_range_case_fail_closed ... ok
+test primary_adapter::tests::wide_enumerator_matches_generic_witness_order_on_primary_curve ... ok
+test tests::point_only_oracle_finds_a_verified_relation_and_retains_censoring ... ok
+test tests::subgroup_moduli_are_kept_separate ... ok
+test tests::v2_object_gate_matches_the_frozen_size_receipt ... ok
+test primary_adapter::tests::public_target_and_post_solver_validation_bind_the_same_fixture ... ok
+test primary_adapter::tests::v2_primary_selection_requires_replay_and_s3_receipts_before_object_import ... ok
+test primary_adapter::tests::supervised_source_snapshot_rejects_a_changed_compiled_file ... ok
+test primary_adapter::tests::small_primary_export_maps_to_generic_orbits_and_zero_trial_preflight ... ok
+test tests::small_export_replays_with_generic_arithmetic ... ok
+test compact_cold::wide::wide_compact_extractor_lifts_public_four_sums_on_small_curve ... ok
+test tests::finite_grid_is_addressable_and_accounts_for_every_tuple ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.89s
+
