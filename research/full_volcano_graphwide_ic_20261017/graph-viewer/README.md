@@ -1,11 +1,11 @@
 # Complete graph explorer
 
-[Download the self-contained HTML](https://drive.google.com/file/d/13AQHFuLnePIfbbS9XbaXNueJY-JMyKCE/view).
+[Download the latest self-contained HTML](https://drive.google.com/file/d/1JT72Pxe6cwJwlr7WBfvbu5eC4Q1fNp7E/view).
 It contains all 24,823 vertices, 51 conductor strata and 69,300 directed
 degree-2/3 kernel maps of the three additional graphs. Download and open it in
 a browser; Drive's preview does not execute the application. No external data
 or JavaScript dependency is fetched. Graph enumeration is separate from the
-99-vertex dev-build measurement checkpoint, whose vertices have orange rings.
+frozen 2,935-vertex repaired-release checkpoint, whose audited vertices have orange rings. An audited capsule can include exhausted or timed-out attempts; this is not a solved-vertex label. The earlier [99-vertex dev overlay](https://drive.google.com/file/d/13AQHFuLnePIfbbS9XbaXNueJY-JMyKCE/view) is retained separately and never pooled.
 
 Choose a class, filter a conductor, inspect a vertex ID, pan or zoom. The side
 panel retains every outgoing kernel map, including parallel maps and self-loops;
@@ -57,3 +57,5 @@ Build/export output and the delivery hash are in `evidence/export.json` and
 [`delivery.json`](delivery.json). Remote name, size and parent were checked;
 remote whole-file hashing was not performed. The frozen measurement archives
 were not rewritten to include this supplemental viewer.
+
+Latest export/readback, UI and Chromium checks, and all three inspected desktop/floor/mobile captures are in [`repaired-2935/`](repaired-2935/). The template now derives coverage labels from the inventory, keeps unaudited coverage explicit and centers conductor labels to fit mobile. The older `evidence/` and `delivery.json` remain historical dev99 records. The associated [checkpoint PDF](../reports/run-20261017T1450Z-repaired-2935/report.pdf) describes the measurement scope.

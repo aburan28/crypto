@@ -29,6 +29,7 @@ get('graph-data').textContent=encoded;
 const document={getElementById:get,createElement:()=>new Element(),documentElement:{dataset:{}}};
 vm.runInNewContext(code,{document,window:{devicePixelRatio:1,addEventListener(){}},location:{search:'?graph=2&vertex=10069&conductor=1728'},URLSearchParams,console});
 assert.equal(document.documentElement.dataset.ready,'true');
+assert.equal(get('audited-label').textContent,'Mark '+data.checkpoint_inventory.vertices_audited.toLocaleString()+' audited vertices');
 assert.match(get('selection').textContent,/Vertex 10069/);
 assert.equal(get('strata').value,'1728');
 for(let i=0;i<data.graphs.length;i++){
@@ -44,6 +45,8 @@ for(let i=0;i<data.graphs.length;i++){
     const maps=g.edges.filter(e=>e[0]===id);assert.equal(get('neighbors').children.length,maps.length);
     if(maps.length){get('neighbors').children[0].events.click();const m=JSON.parse(get('map').textContent);assert.equal(m.kernel_json,maps[0][4]);assert.equal(m.scaling_u,maps[0][3]);assert.equal(typeof m.scaling_u,'string');}
   }
+  const unseen=g.nodes.find(n=>!data.checkpoint_inventory.capsules.some(c=>c.graph===g.name&&c.vertex===n[0]));
+  if(unseen){get('vertex').value=String(unseen[0]);get('go').events.click();assert.match(get('coverage').textContent,/No audited measurements in this frozen/);}
   get('vertex').value=String(g.nodes.length);get('go').events.click();assert.match(get('selection').textContent,/out of range/);
   get('vertex').value='0';get('go').events.click();assert.match(get('coverage').textContent,/Audited/);
 }

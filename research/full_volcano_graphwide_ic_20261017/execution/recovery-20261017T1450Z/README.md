@@ -29,3 +29,17 @@ with the original 24-hour / 2-GiB guard. New runtime epochs remain identifiable
 in their capsules and recovery/launch notes; timing is unqualified and must
 not be promoted or silently pooled across environments. The original full
 matrix, original A–E generation and other finite-field backends remain open.
+
+## Example native distributions: projected size-64 MITM
+
+These are graph/arm/outcome rows copied from the native summary (conductor=0, meaning all sampled strata). They are attempt distributions, not a common success probability or matched speed comparison. Cold GAE is a lower bound where work is unpriced.
+
+| Graph fixture | Outcome | n | Relations/actual call min / mean / max | Cold GAE min / mean / max |
+| --- | --- | ---: | --- | --- |
+| mixed | verified | 1978 | 0.770335 / 0.862323 / 0.947917 | 19,723.000 / 20,200.217 / 21,445.000 |
+| three | exhausted | 1940 | 0.000000 / 0.000000 / 0.000000 | 20,198.000 / 20,275.106 / 20,342.000 |
+| two | verified | 1952 | 0.091597 / 0.125473 / 0.175347 | 18,691.000 / 19,857.774 / 22,854.000 |
+
+Zero observed relations for the three fixture is bounded by the fixed 4,096-trial attempt budget. It does not prove no relations exist. All other arms, stratum rows, missing values and per-metric n remain in the [all-arm CSV](https://drive.google.com/file/d/1AK_WDN-qMx_2FGkDkgfIqH5PyP6gjUus/view).
+
+Software validation of the combined upstream source is in [validation.json](validation.json). The initial full library run retains nine loopback permission failures; all nine pass in the 37-test network-enabled retry. The initial site run retains one stale generated-index failure; regeneration and its exact retry pass. CLI, paths, dashboard, native export, UI and Chromium checks pass. No test or audit assertion was weakened. The final three viewer screenshots were inspected, including the mobile conductor-label alignment fix.

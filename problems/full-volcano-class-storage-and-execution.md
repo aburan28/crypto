@@ -92,9 +92,11 @@ The repository also has a reports-to-S3 workflow for reports merged to main; it 
 needed to use that target. An object archive alone does not supply random-access
 storage for the current SQLite enumerator. A validated external-memory backend
 could change that requirement but is not implemented by an S3 upload command.
-At the 14:50 UTC recovery checkpoint, the workspace has approximately 2.9 GiB
-free after retaining checkpoint and delivery verification copies. This is not
-enough for the original remaining full SQLite classes. The normal SDK probe
+During recovery delivery verification the workspace reached approximately
+2.9 GiB free. Removing only reproducible staging/extraction copies restored
+approximately 4.3 GiB; both final archives, the native checkpoint, live campaign,
+certificates and verification logs are retained. This remains insufficient
+for the original full SQLite classes. The normal SDK probe
 still finds no S3 identity; see the [new access receipt](../research/full_volcano_graphwide_ic_20261017/execution/recovery-20261017T1450Z/volcano-resume-s3-access.json).
 
 The [native original-input inventory](../research/full_volcano_graphwide_ic_20261017/evidence/original-applicability.json)
