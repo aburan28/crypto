@@ -26,8 +26,9 @@ volcano-floor rho} reduces ECDLP cost below sqrt(r / |Aut(E)|)
 (plain Pollard rho with full automorphism folding). The theorem
 says nothing about algorithms outside this family.
 
-The theorem is proven by case analysis over seven structural blocks
-under standing assumptions: Tate's isogeny theorem, Howe's gluing
+The theorem is argued by case analysis over seven structural blocks
+(proof sketches in Section 8, not yet independently reviewed) under
+standing assumptions: Tate's isogeny theorem, Howe's gluing
 theorem, Gaudry's and Diem-Thome's complexity bounds for
 hyperelliptic index calculus, and the assumption that prime-field
 hyperelliptic DLP is not sub-exponentially solvable. The empirical
