@@ -42,7 +42,7 @@ base with all 43,200 frozen solver-axis combinations. This makes 57,024,000
 addressable design tuples, of which 11,664,000 are new and unexecuted. An
 ordered source-availability rule assigns exactly one disposition to every
 tuple. It identifies the branch's wide large-prime row adapter while marking
-its missing partial producer; a disposition never means an arm ran. The
+the partial producer missing when this design was frozen; a disposition never means an arm ran. A later [mixed-orbit worker](WIDE_LP_ADAPTER.md) covers only the exact nested K=1,182/K=2,048 primary pair, with at least three small summands and one or two residual summands in five- or six-summand equations under bounded SAT search. The v2 grid has no paired-base or residual-suffix axis, so its historical dispositions cannot be read as a current capability test for that worker. Its [import gate](verification/mixed-orbit-import-900s-20261012/RESULT.md) exercised no relation search. The
 `--case` command decodes any ordinal without generating all tuples:
 
     python3 research/koblitz_n83_factor_base_sweep_20261008/size_frontier_v2.py --case 45360000

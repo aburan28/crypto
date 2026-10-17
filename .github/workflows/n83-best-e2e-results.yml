@@ -1,0 +1,97 @@
+name: N83 direct factor-base sealed result replay
+
+on:
+  push:
+    branches: [codex/n83-final-tournament-20261015]
+    paths:
+      - .github/workflows/n83-best-e2e-results.yml
+      - research/n83_best_e2e_results_20261015/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: n83-best-e2e-results-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  six-arm-sealed-replay:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore the exact executed source and regenerate public points
+        shell: bash
+        run: |
+          set -euo pipefail
+          frozen=ae6a10b641e17629bd282d8205787ede129dbf98
+          git fetch --no-tags --depth=1 origin "$frozen"
+          test "$(git rev-parse FETCH_HEAD)" = "$frozen"
+          git worktree add --detach "$RUNNER_TEMP/n83-frozen-source" "$frozen"
+          cd "$RUNNER_TEMP/n83-frozen-source"
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k3350_sparse_fresh_20261015/generate.py > /dev/null
+          python3 research/n83_k_abba_20261015/generate.py > /dev/null
+          python3 research/n83_root4_highk_20261015/generate.py > /dev/null
+          python3 research/n83_best_e2e_20261015/generate.py > \
+            "$RUNNER_TEMP/n83-best-e2e-fixture.json"
+          test "$(sha256sum research/n83_best_e2e_20261015/targets.jsonl | cut -d' ' -f1)" = \
+            bbb3a2fffdcb51db6105d00f12f9dc58450520a5bae646bd3dfb08d8dc72eab4
+          test "$(sha256sum research/n83_best_e2e_20261015/answers.jsonl | cut -d' ' -f1)" = \
+            3bc11ae82d81c86b6ba15491e96cdbefb874b7da6eb63de04f5b745e7bfd432c
+          cp research/n83_best_e2e_20261015/targets.jsonl \
+            "$GITHUB_WORKSPACE/research/n83_best_e2e_20261015/targets.jsonl"
+          cp research/n83_best_e2e_20261015/answers.jsonl \
+            "$GITHUB_WORKSPACE/research/n83_best_e2e_20261015/answers.jsonl"
+
+      - name: Download and hash the exact completed artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-best-e2e-sealed"
+          gh api repos/aburan28/crypto/actions/artifacts/11997750150/zip > \
+            "$RUNNER_TEMP/n83-best-e2e-sealed/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-best-e2e-sealed/raw.zip" | cut -d' ' -f1)" = \
+            b77c196d6c2fcc3227cf3d0a1e0cacb893210fb53e95d23a2dbd01b398a54851
+          unzip -q "$RUNNER_TEMP/n83-best-e2e-sealed/raw.zip" -d \
+            "$RUNNER_TEMP/n83-best-e2e-sealed/raw"
+          test "$(sha256sum "$RUNNER_TEMP/n83-best-e2e-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            59e2a1cd6bf404ed46a4e82694d5ecde61f191f5e97142ad27282948cae568a7
+
+      - name: Independently replay six bases and all 24000 target records
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 "$RUNNER_TEMP/n83-frozen-source/research/n83_best_e2e_20261015/verify.py" \
+            "$RUNNER_TEMP/n83-best-e2e-sealed/raw/results" > \
+            "$RUNNER_TEMP/n83-best-e2e-sealed/local-replay.json"
+          test "$(sha256sum "$RUNNER_TEMP/n83-best-e2e-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            59e2a1cd6bf404ed46a4e82694d5ecde61f191f5e97142ad27282948cae568a7
+
+      - name: Reproduce current-head candidate and measurement records
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_best_e2e_results_20261015/materialize.py \
+            --artifact-zip "$RUNNER_TEMP/n83-best-e2e-sealed/raw.zip" \
+            "$RUNNER_TEMP/n83-best-e2e-sealed/raw/results"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Preserve replay output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-best-e2e-sealed-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-best-e2e-sealed/local-replay.json
+          if-no-files-found: ignore
+          retention-days: 14

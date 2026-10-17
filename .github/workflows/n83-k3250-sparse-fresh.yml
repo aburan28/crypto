@@ -1,0 +1,95 @@
+name: N83 sparse K3250 versus K3300 fresh sealed replay
+
+on:
+  push:
+    branches: [codex/n83-k3250-sparse-fresh-20261015]
+    paths:
+      - .github/workflows/n83-k3250-sparse-fresh.yml
+      - research/n83_k3250_sparse_fresh_20261015/**
+      - research/n83_k3250_sparse_fresh_results_20261015/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: n83-k3250-sparse-fresh-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  two-arm-fresh-sealed-replay:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch the executed source snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          frozen=402c3142fb3f1cfe70b9de58d54e51e50b2a40c5
+          git fetch --no-tags --depth=1 origin "$frozen"
+          test "$(git rev-parse FETCH_HEAD)" = "$frozen"
+          mkdir -p "$RUNNER_TEMP/n83-k3250-frozen-source"
+          git archive "$frozen" Cargo.lock \
+            examples/koblitz_orbit_dlp_fast.rs \
+            examples/n83_rho_optimization_eval.rs \
+            research/n83_dense_root_20261013 \
+            research/n83_indexed5_20261013 \
+            research/n83_root4_20261014 \
+            research/n83_factor_base_refine_20261014 \
+            research/n83_k3250_sparse_fresh_20261015 \
+            | tar -xf - -C "$RUNNER_TEMP/n83-k3250-frozen-source"
+          test "$(sha256sum "$RUNNER_TEMP/n83-k3250-frozen-source/examples/koblitz_orbit_dlp_fast.rs" | cut -d' ' -f1)" = \
+            c9824acebda0360416c3c507594bb07c17ca798c32cbf8f84bba95ca2c44d5b1
+
+      - name: Download the exact completed raw artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-k3250-sealed"
+          gh api repos/aburan28/crypto/actions/artifacts/11950815524/zip > \
+            "$RUNNER_TEMP/n83-k3250-sealed/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-k3250-sealed/raw.zip" | cut -d' ' -f1)" = \
+            9de603c3e7c40b88bee0705bc548de3d2f4e52cd78552a80aaa1d7757758dfec
+          unzip -q "$RUNNER_TEMP/n83-k3250-sealed/raw.zip" -d \
+            "$RUNNER_TEMP/n83-k3250-sealed/raw"
+          test "$(sha256sum "$RUNNER_TEMP/n83-k3250-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            dd66bf98224b22058f55fe1273e16566aec34ecef2da958259cf0376bee9354f
+
+      - name: Independently replay both bases and all 40000 answers
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 "$RUNNER_TEMP/n83-k3250-frozen-source/research/n83_k3250_sparse_fresh_20261015/verify.py" \
+            "$RUNNER_TEMP/n83-k3250-sealed/raw/results" > \
+            "$RUNNER_TEMP/n83-k3250-sealed/local-replay.log"
+          test "$(sha256sum "$RUNNER_TEMP/n83-k3250-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            dd66bf98224b22058f55fe1273e16566aec34ecef2da958259cf0376bee9354f
+
+      - name: Reproduce the canonical current-head result records
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_k3250_sparse_fresh_results_20261015/materialize.py \
+            --artifact-zip "$RUNNER_TEMP/n83-k3250-sealed/raw.zip" \
+            --artifact-sha256 9de603c3e7c40b88bee0705bc548de3d2f4e52cd78552a80aaa1d7757758dfec \
+            --analysis-sha256 dd66bf98224b22058f55fe1273e16566aec34ecef2da958259cf0376bee9354f \
+            "$RUNNER_TEMP/n83-k3250-sealed/raw/results"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Preserve current-head replay receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-k3250-sparse-fresh-sealed-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-k3250-sealed/local-replay.log
+          if-no-files-found: ignore
+          retention-days: 14

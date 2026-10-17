@@ -1,0 +1,140 @@
+{
+  "analysis_sha256": "15b47de167f99e004bccada699f739ff7d0d7e7f7e7960239d63b4b00183e547",
+  "artifact_sha256": "8687a0ad20ec1a0525a437f172801278a1a931771e88bef404c3559c77ed7626",
+  "balanced_comparison": {
+    "contiguous_block_size": 25,
+    "pairwise": {
+      "root11k3300wide3_minus_root4k3350std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -1.8299714975,
+          3.7983220820000003
+        ],
+        "mean_ms": 0.9996806090000001
+      },
+      "root11k3300wide3_minus_root4k3400std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.1260363615,
+          3.634039553
+        ],
+        "mean_ms": 0.21413256550000018
+      },
+      "root11k3300wide3_minus_root4k3425std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -1.6198209674999997,
+          4.788680855
+        ],
+        "mean_ms": 1.6583751125
+      },
+      "root4k3350std_minus_root11k3300wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.8618298005000002,
+          1.8046472885
+        ],
+        "mean_ms": -0.9996806090000001
+      },
+      "root4k3350std_minus_root4k3400std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.982984435,
+          2.265401006
+        ],
+        "mean_ms": -0.7855480435000001
+      },
+      "root4k3350std_minus_root4k3425std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -2.410845065,
+          3.733368229
+        ],
+        "mean_ms": 0.6586945034999999
+      },
+      "root4k3400std_minus_root11k3300wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.5880054680000004,
+          3.0430539124999996
+        ],
+        "mean_ms": -0.21413256550000018
+      },
+      "root4k3400std_minus_root4k3350std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -2.1851015335000006,
+          3.9494817135
+        ],
+        "mean_ms": 0.7855480435000001
+      },
+      "root4k3400std_minus_root4k3425std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -1.0475540970000001,
+          3.915211351
+        ],
+        "mean_ms": 1.444242547
+      },
+      "root4k3425std_minus_root11k3300wide3": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -4.7210120280000005,
+          1.600322311
+        ],
+        "mean_ms": -1.6583751125
+      },
+      "root4k3425std_minus_root4k3350std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.7324371725,
+          2.5131976775000004
+        ],
+        "mean_ms": -0.6586945034999999
+      },
+      "root4k3425std_minus_root4k3400std": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -3.9103319214999996,
+          1.084154891
+        ],
+        "mean_ms": -1.444242547
+      }
+    },
+    "pipeline_mean_ms": {
+      "root11k3300wide3": 27.876985484,
+      "root4k3350std": 26.877304875,
+      "root4k3400std": 27.6628529185,
+      "root4k3425std": 26.2186103715
+    },
+    "repeatability": {
+      "root11k3300wide3_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.14556863899999992,
+          -0.063902691
+        ],
+        "mean_ms": -0.10281297199999996
+      },
+      "root4k3350std_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.047672492000000066,
+          0.03132714199999991
+        ],
+        "mean_ms": -0.008454777999999958
+      },
+      "root4k3400std_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          -0.73599502,
+          -0.21623993800000005
+        ],
+        "mean_ms": -0.364929081
+      },
+      "root4k3425std_a_minus_b": {
+        "contiguous_block_bootstrap_99pct_ms": [
+          0.3029076030000001,
+          0.3681536770000002
+        ],
+        "mean_ms": 0.335633985
+      }
+    },
+    "selected_pipeline": null
+  },
+  "candidate_id": null,
+  "candidate_manifest_sha256": null,
+  "descriptive_lowest_pipeline": "root4k3425std",
+  "schema": "n83.root4-bloom-selection/v1",
+  "selected_pipeline": null,
+  "source_base_hash_blake3": null,
+  "source_commit": "afea7179c40c9e00f8701a32c596e47cd8129f62",
+  "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+  "status": "BOUNDED_UNKNOWN",
+  "workload_id": "971059096c09"
+}

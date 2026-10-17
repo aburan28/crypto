@@ -149,7 +149,7 @@ training range 16..21 above b = 16 and an extrapolation below it.
 
 ## Amendment B1 (2026-10-15 06:20, training complete, before any `sched` test data and before any test result was read)
 
-Training ([results/train/train.md](results/train/train.md), curves 5-7, all 66 jobs correct; the b = 20 `lpsgewd@8`
+Training ([results/train/train.md](results/train/train.md), curves 5-7, all 60 jobs correct (the original text said 66, a miscount, corrected 08:40); the b = 20 `lpsgewd@8`
 records at kappa 1.41 and 2 equal item 01's `tune2` records, 6/6). The b = 21 jobs at kappa 2 on curves 6 and 7 were
 killed by a session time limit of the orchestration shell and rerun unchanged. The frozen rules give:
 

@@ -1,0 +1,199 @@
+Factor-base designs, Amendment 2 (F1–F4): rows from research/factor_base_designs_20261015/runs
+(D = solving_degree_max of f4_fp grevlex; a cell is completed when both of its planted systems are `ok`;
+ a cell's D is the mean over its systems, and so is its max_cols (Amendment 2 does not say how a cell's
+ width is formed; the mean mirrors the D rule). σ and Δlog₂ max_cols/Δb are least-squares slopes on b
+ over completed cells. Groups: p1 = the committed rows of the first run; F1–F4 = files F1-*, …, F4-*.)
+
+════ F1: replication on p2 = 2013265921 (A0, A11; m = 2, 3)
+
+── F1 A0 m = 2 p2
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  4      5      [4, 4]        37,37                0.0,0.0               ok,ok
+  3   3.000  6      7      [4, 4]        127,127              0.0,0.0               ok,ok
+  4   4.000  8      9      [4, 4]        280,280              0.0,0.0               ok,ok
+  5   5.000  10     11     [4, 4]        606,606              0.1,0.1               ok,ok
+  6   6.000  12     13     [5, 5]        2451,2451            0.4,0.4               ok,ok
+  7   7.000  14     15     [5, 5]        5031,5031            2.3,2.4               ok,ok
+  8   8.000  16     17     [5, 5]        9119,9119            15.5,16.0             ok,ok
+  9   9.000  18     19     [5, 5]        14922,14922          98.1,94.2             ok,ok
+  10  10.000 20     21     []            61361,61361          302.3,305.7           timeout,timeout
+  completed cells 8: σ = 0.1905  →  candidate (σ ≤ 0.25 on ≥ 3 cells);  Δlog₂ max_cols/Δb = 1.261 (secondary, descriptive)
+
+── F1 A11 m = 2 p2
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  9      10     [3, 3]        31,31                0.0,0.0               ok,ok
+  3   3.000  12     13     [3, 3]        78,78                0.0,0.0               ok,ok
+  4   4.000  15     16     [3, 3]        208,208              0.0,0.0               ok,ok
+  5   5.000  18     19     [4, 4]        1431,1431            0.1,0.1               ok,ok
+  6   6.000  21     22     [4, 4]        2673,2673            1.0,1.0               ok,ok
+  7   7.000  24     25     [4, 4]        5282,5282            3.9,4.3               ok,ok
+  8   8.000  27     28     [4, 4]        8763,8763            17.8,17.4             ok,ok
+  9   9.000  30     31     [4, 4]        13579,13579          94.6,91.5             ok,ok
+  10  10.000 33     34     []            22118,22118          305.5,312.7           timeout,timeout
+  completed cells 8: σ = 0.1786  →  candidate (σ ≤ 0.25 on ≥ 3 cells);  Δlog₂ max_cols/Δb = 1.314 (secondary, descriptive)
+
+── F1 A0 m = 3 p2
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  7      8      [5, 5]        368,368              0.0,0.0               ok,ok
+  3   3.000  10     11     [6, 6]        3285,3285            0.6,0.7               ok,ok
+  4   4.000  13     14     [6, 6]        12314,12314          16.9,16.5             ok,ok
+  5   5.000  16     17     []            97456,97456          305.4,305.6           timeout,timeout
+  completed cells 3: σ = 0.5000  →  no middle ground at this arity (σ ≥ 0.5);  Δlog₂ max_cols/Δb = 2.532 (secondary, descriptive)
+
+── F1 A11 m = 3 p2
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  15     16     [4, 4]        62,62                0.0,0.0               ok,ok
+  3   3.000  20     21     [4, 4]        781,781              0.1,0.1               ok,ok
+  4   4.000  25     26     [4, 4]        3096,3096            1.9,1.8               ok,ok
+  5   5.000  30     31     []            40486,40486          301.0,301.0           timeout,timeout
+  completed cells 3: σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells);  Δlog₂ max_cols/Δb = 2.821 (secondary, descriptive)
+
+════ F2: the A11-shape null N11 on p1 (m = 2, 3); A11 p1 rows (committed) beside it
+
+── F2 N11 m = 2 p1
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  9      10     [3, 3]        31,31                0.0,0.0               ok,ok
+  3   3.000  12     13     [3, 3]        78,78                0.0,0.0               ok,ok
+  4   4.000  15     16     [3, 3]        208,208              0.0,0.0               ok,ok
+  5   5.000  18     19     [4, 4]        1431,1431            0.1,0.1               ok,ok
+  6   6.000  21     22     [4, 4]        2673,2673            0.8,0.7               ok,ok
+  7   7.000  24     25     [4, 4]        5282,5282            3.8,3.8               ok,ok
+  8   8.000  27     28     [4, 4]        8763,8763            16.1,17.1             ok,ok
+  9   9.000  30     31     [4, 4]        13579,13579          92.3,89.5             ok,ok
+  10  10.000 33     34     []            22118,22118          305.8,301.1           timeout,timeout
+  completed cells 8: σ = 0.1786  →  candidate (σ ≤ 0.25 on ≥ 3 cells);  Δlog₂ max_cols/Δb = 1.314 (secondary, descriptive)
+
+── A11 m = 2 p1 (committed, for the rule)
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  9      10     [3, 3]        31,31                0.0,0.0               ok,ok
+  3   3.000  12     13     [3, 3]        78,78                0.0,0.0               ok,ok
+  4   4.000  15     16     [3, 3]        208,208              0.0,0.0               ok,ok
+  5   5.000  18     19     [4, 4]        1431,1431            0.1,0.1               ok,ok
+  6   6.000  21     22     [4, 4]        2673,2673            1.0,0.9               ok,ok
+  7   7.000  24     25     [4, 4]        5282,5282            3.7,3.6               ok,ok
+  8   8.000  27     28     [4, 4]        8763,8763            15.6,14.8             ok,ok
+  9   9.000  30     31     [4, 4]        13579,13579          83.0,78.8             ok,ok
+  10  10.000 33     34     []            22118,22118          301.0,301.0           timeout,timeout
+  completed cells 8: σ = 0.1786  →  candidate (σ ≤ 0.25 on ≥ 3 cells);  Δlog₂ max_cols/Δb = 1.314 (secondary, descriptive)
+
+── F2 N11 m = 3 p1
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  15     16     [4, 4]        62,62                0.0,0.0               ok,ok
+  3   3.000  20     21     [4, 4]        745,745              0.1,0.1               ok,ok
+  4   4.000  25     26     [4, 4]        3300,3300            1.9,1.9               ok,ok
+  5   5.000  30     31     []            36472,36472          301.1,301.1           timeout,timeout
+  completed cells 3: σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells);  Δlog₂ max_cols/Δb = 2.867 (secondary, descriptive)
+
+── A11 m = 3 p1 (committed, for the rule)
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  15     16     [4, 4]        62,62                0.0,0.0               ok,ok
+  3   3.000  20     21     [4, 4]        781,781              0.1,0.1               ok,ok
+  4   4.000  25     26     [4, 4]        3096,3096            1.8,1.8               ok,ok
+  5   5.000  30     31     []            40486,40486          300.8,300.8           timeout,timeout
+  completed cells 3: σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells);  Δlog₂ max_cols/Δb = 2.821 (secondary, descriptive)
+
+════ F3: the m = 3, t = 5 cell on p1, F4 budget 3600 s, hard kill 3900 s
+
+── F3 A0 m = 3 t = 5 p1
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  5   5.000  16     17     []            -,-                  1542.3,1548.6         aborted,aborted
+  completed cells 0: σ = -  →  inconclusive (fewer than 3 completed cells);  Δlog₂ max_cols/Δb = - (secondary, descriptive)
+
+── F3 A11 m = 3 t = 5 p1
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  5   5.000  30     31     [5, 5]        40486,40486          564.7,571.2           ok,ok
+  completed cells 1: σ = -  →  inconclusive (fewer than 3 completed cells);  Δlog₂ max_cols/Δb = - (secondary, descriptive)
+
+════ F4: m = 4 on p1 (A0, A11)
+
+── F4 A0 m = 4 p1
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  10     11     [6, 6]        1911,1911            0.3,0.3               ok,ok
+  3   3.000  14     15     [7, 7]        21619,21619          96.4,93.8             ok,ok
+  4   4.000  18     19     []            102516,102516        317.7,319.0           timeout,timeout
+  completed cells 2: σ = 1.0000  →  inconclusive (fewer than 3 completed cells);  Δlog₂ max_cols/Δb = 3.500 (secondary, descriptive)
+
+── F4 A11 m = 4 p1
+  t   b      n_vars n_eqs  D per system  max_cols per system   time per system (s)   status
+  2   2.000  21     22     [3, 3]        34,34                0.0,0.0               ok,ok
+  3   3.000  28     29     [5, 5]        2159,2159            0.3,0.3               ok,ok
+  4   4.000  35     36     []            88740,88740          303.5,302.0           timeout,timeout
+  completed cells 2: σ = 2.0000  →  inconclusive (fewer than 3 completed cells);  Δlog₂ max_cols/Δb = 5.989 (secondary, descriptive)
+  A11 m = 4 excess n_eqs − n_vars = 1 on every built row (6 rows): yes
+
+════ Decision rules (PREREGISTRATION.md, Amendment 2)
+
+F1. A11 replicates on p2 at m = 3?  Replicates: D(A11) ≤ D(A0) − 1 and max_cols(A11) < max_cols(A0) at every
+    shared completed t, with ≥ 3 shared completed cells. Fails: any shared completed cell with D(A11) ≥ D(A0).
+  t   D A0   D A11   max_cols A0   max_cols A11   D ≤ A0 − 1   cols lower
+  2   5.0    4.0     368           62             true         true
+  3   6.0    4.0     3285          781            true         true
+  4   6.0    4.0     12314         3096           true         true
+  shared completed cells: 3  →  A11 REPLICATES
+  (descriptive, no rule: the same comparison at m = 2 on p2)
+    m=2 t=2  D A0 4.0  D A11 3.0  max_cols A0 37  A11 31
+    m=2 t=3  D A0 4.0  D A11 3.0  max_cols A0 127  A11 78
+    m=2 t=4  D A0 4.0  D A11 3.0  max_cols A0 280  A11 208
+    m=2 t=5  D A0 4.0  D A11 4.0  max_cols A0 606  A11 1431
+    m=2 t=6  D A0 5.0  D A11 4.0  max_cols A0 2451  A11 2673
+    m=2 t=7  D A0 5.0  D A11 4.0  max_cols A0 5031  A11 5282
+    m=2 t=8  D A0 5.0  D A11 4.0  max_cols A0 9119  A11 8763
+    m=2 t=9  D A0 5.0  D A11 4.0  max_cols A0 14922  A11 13579
+
+F2. Shape or structure?  Shape, not structure: D(N11) = D(A11) in every completed cell of F2.
+    Structure beyond shape: D(N11) ≥ D(A11) + 1 in at least 2 completed cells. Otherwise mixed, cell by cell.
+    (A11 = the committed p1 rows; a cell enters when it is completed in both series.)
+  m=2 t=2  D N11 3.0  D A11 3.0  N11 − A11 +0.0   max_cols N11 31  A11 31
+  m=2 t=3  D N11 3.0  D A11 3.0  N11 − A11 +0.0   max_cols N11 78  A11 78
+  m=2 t=4  D N11 3.0  D A11 3.0  N11 − A11 +0.0   max_cols N11 208  A11 208
+  m=2 t=5  D N11 4.0  D A11 4.0  N11 − A11 +0.0   max_cols N11 1431  A11 1431
+  m=2 t=6  D N11 4.0  D A11 4.0  N11 − A11 +0.0   max_cols N11 2673  A11 2673
+  m=2 t=7  D N11 4.0  D A11 4.0  N11 − A11 +0.0   max_cols N11 5282  A11 5282
+  m=2 t=8  D N11 4.0  D A11 4.0  N11 − A11 +0.0   max_cols N11 8763  A11 8763
+  m=2 t=9  D N11 4.0  D A11 4.0  N11 − A11 +0.0   max_cols N11 13579  A11 13579
+  m=3 t=2  D N11 4.0  D A11 4.0  N11 − A11 +0.0   max_cols N11 62  A11 62
+  m=3 t=3  D N11 4.0  D A11 4.0  N11 − A11 +0.0   max_cols N11 745  A11 781
+  m=3 t=4  D N11 4.0  D A11 4.0  N11 − A11 +0.0   max_cols N11 3300  A11 3096
+  completed N11 cells 11, compared 11, N11 above A11 by ≥ 1 in 0  →  SHAPE, NOT STRUCTURE
+
+F3. The m = 3, t = 5 cell on p1, reported as recorded; it joins the m = 3 p1 σ fit only if both systems complete.
+  A0: D [], max_cols [None, None], time [1542.348954653, 1548.606296034] s, status ["aborted", "aborted"]
+    m = 3 p1 fit without F3 (t ≠ 5):   completed cells 3: σ = 0.5000  →  no middle ground at this arity (σ ≥ 0.5);  Δlog₂ max_cols/Δb = 2.532 (secondary, descriptive)
+    the F3 cell is not completed: it does not join the fit
+  A11: D [5, 5], max_cols [Some(40486), Some(40486)], time [564.658656861, 571.171157009] s, status ["ok", "ok"]
+    m = 3 p1 fit without F3 (t ≠ 5):   completed cells 3: σ = 0.0000  →  candidate (σ ≤ 0.25 on ≥ 3 cells);  Δlog₂ max_cols/Δb = 2.821 (secondary, descriptive)
+    m = 3 p1 fit with the F3 cell as a fourth point:   completed cells 4: σ = 0.3000  →  weak (0.25 < σ < 0.5);  Δlog₂ max_cols/Δb = 3.004 (secondary, descriptive)
+
+F4. σ verdicts at m = 4 on p1 (thresholds of §1, derived at m = 4)
+  A0 m = 4:   completed cells 2: σ = 1.0000  →  inconclusive (fewer than 3 completed cells);  Δlog₂ max_cols/Δb = 3.500 (secondary, descriptive)
+  A11 m = 4:   completed cells 2: σ = 2.0000  →  inconclusive (fewer than 3 completed cells);  Δlog₂ max_cols/Δb = 5.989 (secondary, descriptive)
+
+════ Secondary (descriptive, not a verdict): Δlog₂ max_cols/Δb per (arm, m, prime), completed cells
+  series                       cells  Δlog₂ max_cols/Δb   σ
+  A0 m=2 p1 (committed)        8      1.261               0.1905
+  A0 m=2 p2                    8      1.261               0.1905
+  A0 m=3 p1 (committed)        3      2.532               0.5000
+  A0 m=3 p2                    3      2.532               0.5000
+  A0 m=4 p1                    2      3.500               1.0000
+  A11 m=2 p1 (committed)       8      1.314               0.1786
+  A11 m=2 p2                   8      1.314               0.1786
+  A11 m=3 p1 (committed)       3      2.821               0.0000
+  A11 m=3 p2                   3      2.821               0.0000
+  A11 m=4 p1                   2      5.989               2.0000
+  A1g m=2 p1 (committed)       5      2.307               0.0000
+  A1g m=3 p1 (committed)       3      3.340               0.0000
+  A1z m=2 p1 (committed)       5      2.431               0.0000
+  A1z m=3 p1 (committed)       3      3.305               0.0000
+  A4 m=2 p1 (committed)        6      1.722               0.2286
+  A4 m=3 p1 (committed)        3      2.991               0.5000
+  N m=2 p1 (committed)         8      1.261               0.1905
+  N m=3 p1 (committed)         3      2.539               0.5000
+  N11 m=2 p1                   8      1.314               0.1786
+  N11 m=3 p1                   3      2.867               0.0000
+
+════ Predictions scorecard (Amendment 2)
+  F1: A11 replicates                          observed: REPLICATES                         held
+  F2: shape, not structure                    observed: SHAPE, NOT STRUCTURE               held
+  F3: both A11 systems complete within 3600 s observed: A11 both complete = true          held  (A0 both complete = false; "A0's may not" is not scored)
+  F4: A0's σ ≥ 0.5 at m = 4                   observed: σ = 1.0000 on 2 cells               not decided
+  F4: A11 at m = 4, no prediction              observed: σ = 2.0000 on 2 cells, inconclusive (fewer than 3 completed cells)

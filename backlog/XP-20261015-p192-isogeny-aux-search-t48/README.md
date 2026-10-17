@@ -44,7 +44,38 @@ wrong way: `D` rises at `m = 2, N = 20`. So:
 
 The solver's flags in `card.json` are provisional; the builder lane fixes them.
 
-## Expected cost (derived; nothing ran at this size)
+## Measured cost (2026-10-15)
+
+Study: [`research/pkm_isogeny_tower_p192_20261015/`](../../research/pkm_isogeny_tower_p192_20261015/README.md)
+(pre-registered protocol, branch `claude/isogeny-tower-p192`). The solver
+`pkm-aux-search` is built there (`src/bin/pkm_aux_search.rs`; library
+`src/cryptanalysis/two_sylow_search.rs`).
+
+- **Per draw (measured).** 10.06 µs on the `z2xz8` family (`X₁(2, 8)`,
+  `b ≥ 3` forced), 13.89 µs on `z2xz2`. Median of 7 × 65,536 draws, one core
+  of a shared 4-core host. The baseline implementation took 30.83 µs.
+- **Success probability (measured, consistent with the model).** `2^28`
+  `z2xz8` draws and `2^25` `z2xz2` draws give `P(b ≥ t)` within the
+  pre-registered 99.9 % bands of `2^(3−t)` and `3·2^(−t)` at every tested `t`.
+  (`b` is the exponent of the cyclic factor of the 2-Sylow `Z/2 × Z/2^b`.)
+  Because `v₂(p − 1) = 1`, `Z/2 × Z/8` forces
+  `k = 3` bits toward a point of order `2^t`, not 4.
+- **`t = 48` (derived).** About `2^45` `z2xz8` draws × 10.06 µs gives
+  **98,352 core-hours ≈ 11.2 core-years**, or 95,617–99,624 core-hours over
+  the timing spread. Each `2^32`-draw shard takes about 12 core-hours. With
+  `z2xz2`, `2^48/3` draws take 362,005 core-hours. The table below (the
+  placeholder 2–20 µs) is superseded.
+- **Found.** In 45.6 minutes of one core: an ordinary curve with `b = 38`
+  (seed 196253408). The checker accepts it at `t = 38`.
+- **Shortcut (measured).** Over this prime, `y² = x³ + x` is supersingular,
+  with `#E = p + 1` and a cyclic 2-Sylow of order `2^64`.
+  `pkm-aux-search --family supersingular-j1728 --t 48` returns a point of
+  order `2^48` in one draw (7 ms), and `backlog_check_aux2t --expect-t 48`
+  accepts it (also `t = 64`). That answers the card's construction question
+  without the search. Whether a supersingular `E'` is acceptable to PKM's
+  relation phase is not tested.
+
+## Expected cost (derived before the measurement; superseded above)
 
 **Draws.** PR #1889 measured the number of curves tried before one had a point
 of order `2^t` at `C·2^t`, pooled `C = 1.05` over 224 builds at `t = 8…14`
@@ -121,3 +152,41 @@ the search.
   at the first; to pay once for the first curve, post it without piecework,
   so it settles on its first accepted claim. The validator's
   `funding ≥ piecework.units` rule applies to the piecework form.
+
+## Is the search needed? A supersingular `E'` tested (2026-10-15, Lane H)
+
+Study: [`research/pkm_supersingular_aux_20261015/`](../../research/pkm_supersingular_aux_20261015/README.md)
+(pre-registered protocol, branch `claude/pkm-supersingular-aux`). It answers
+the blocker this card records: may the PKM relation phase use the
+supersingular `y² = x³ + x`, which over the P-192 prime gives a point of order
+`2^48` in one draw?
+
+- **Structure (exact, small primes).** The supersingular tower set
+  `x(R' + ⟨Q⟩)` on `y² = x³ + x` is *not* the Dickson torus set under any
+  Möbius change of `x` (no match in 6,507 sets at `t = 3…5` over 103 primes;
+  one isolated match for the twist `y² = x³ − x`). It is a Vélu tower like the
+  searched curve's, so it does not inherit the torus family's behaviour.
+- **F4 solving degree (measured, `p < 2^31`, `N ≤ 20`).** The supersingular
+  tower gives exactly the ordinary isogeny tower's `D` (and width and step
+  count to within one column) in every cell, for `y² = x³ ± x`, `y² = x³ + 1`
+  and its twist; both differ from the Dickson torus (5 against 4 at
+  `m = 2, N = 4…10`).
+- **Relation phase (measured, ecbench, 20–24-bit P-192-shape curves).** With
+  `prime-isogeny:t=T,aux=supersingular` the auxiliary cost falls from 10–27 %
+  of `S` (the charged search) to 0.9–1.9 % (the build alone), the relation
+  yield is unchanged, and `S` is within 2.2 % of a plain base of the same size
+  with unpriced work uncharged; under the AGENTS.md §5a pricing band (0, 0.1, 1
+  GAE per unpriced operation) that comparison is unresolved on two curves and
+  1–7 % dearer on the third, while the supersingular arm stays cheaper than the
+  searched ordinary arm on the two larger curves at every weight.
+
+**What it means for this card (derived).** Nothing measured distinguishes a
+supersingular `E'` from an ordinary one except the cost of finding it, so the
+~11-core-year ordinary search is not needed to supply the relation phase's
+input: `pkm-aux-search --family supersingular-j1728 --t 48` already does, in
+one draw. The card stays `blocked` (its status is not changed here): running
+it would now only measure a construction constant for ordinary curves, and
+the decision whether a reason outside these experiments (none is known) should
+require an ordinary curve rests with the coordinator. Lead 1 (whether `D`
+stays bounded as `N` grows) is untouched and remains the gate for any use of
+the tower at P-192.

@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/private/tmp/n83-guarded-cargo-target-20261015/release/examples/koblitz_n83_standard_projection_map",
+    "construct",
+    "/private/tmp/n83-standard-projection-map-20261015-01/d12.jsonl",
+    "12"
+  ],
+  "binary_sha256": "d25688592fda9adfb71eb1da545daaecc160fb0cdf9c14fbcd7d80cab31934e0",
+  "exit_code": 0,
+  "output_sha256": "5cfa21ee5b21076bd02f78f4d565e581771d1ea3bdadc92be3e906974f9b9150",
+  "result": {
+    "excluded_source_points": 3,
+    "projected_point_count": 4054,
+    "projected_signed_frobenius_columns": 2001,
+    "source_dimension": 12,
+    "source_point_count": 4057,
+    "status": "PASS_EXACT_SOURCE_TO_PROJECTED_COLUMN_MAP"
+  },
+  "schema": "n83.standard-projection-map-d12-launch/v1",
+  "source_commit": "440d70424da8b6d93fe4298bcab00afc6491e4fb",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_text": "",
+  "stdout_sha256": "8ea0f19d8cd103ee3baf0deb0f6f45a95c67ae450896281c97c9cab1b453b4b7",
+  "timeout": false,
+  "wall_seconds_L0": 1.7925053330000082
+}

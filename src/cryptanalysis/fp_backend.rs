@@ -1133,6 +1133,16 @@ impl Fp64 {
         self.p
     }
 
+    /// `u mod p` for `u < 2p`.  A select, not a branch: on field data the
+    /// comparison is a coin flip a branch predictor cannot learn, and the
+    /// mispredictions cost the rho kernel about half its time
+    /// (`research/hwcost_round2_20261016`, addendum 1).
+    #[inline(always)]
+    fn csub(&self, u: u64) -> u64 {
+        let (d, borrow) = u.overflowing_sub(self.p);
+        std::hint::select_unpredictable(borrow, u, d)
+    }
+
     /// Montgomery reduction of `t < p·2⁶⁴`: `t·R⁻¹ mod p`, fully reduced.
     #[inline(always)]
     pub fn redc(&self, t: u128) -> u64 {
@@ -1141,11 +1151,7 @@ impl Fp64 {
         let mp = u128::from(m) * u128::from(self.p);
         // lo + (mp as u64) ≡ 0 mod 2⁶⁴, carrying exactly when lo ≠ 0.
         let u = ((t >> 64) as u64) + ((mp >> 64) as u64) + u64::from(lo != 0);
-        if u >= self.p {
-            u - self.p
-        } else {
-            u
-        }
+        self.csub(u)
     }
 
     /// Montgomery form of a canonical `a < p`.
@@ -1196,23 +1202,17 @@ impl PrimeField for Fp64 {
     }
     #[inline(always)]
     fn add(&self, a: u64, b: u64) -> u64 {
-        let s = a + b;
-        if s >= self.p {
-            s - self.p
-        } else {
-            s
-        }
+        // a + b < 2p < 2⁶⁴.
+        self.csub(a + b)
     }
     #[inline(always)]
     fn sub(&self, a: u64, b: u64) -> u64 {
-        if a >= b {
-            a - b
-        } else {
-            a + self.p - b
-        }
+        let (d, borrow) = a.overflowing_sub(b);
+        std::hint::select_unpredictable(borrow, d.wrapping_add(self.p), d)
     }
     #[inline(always)]
     fn neg(&self, a: u64) -> u64 {
+        // a == 0 is rare on data, so this branch predicts: kept.
         if a == 0 {
             0
         } else {
@@ -2138,6 +2138,30 @@ impl FpP192 {
         }
         t
     }
+
+    /// `a²` as six words: three cross products, doubled, plus three squares.
+    #[inline(always)]
+    fn sqr_wide(a: &[u64; 3]) -> [u64; 6] {
+        let (w1, c) = mac(0, a[0], a[1], 0);
+        let (w2, c) = mac(0, a[0], a[2], c);
+        let (w3, w4) = mac(c, a[1], a[2], 0);
+        // Double the cross terms (they sit at words 1..=4).
+        let w5 = w4 >> 63;
+        let w4 = (w4 << 1) | (w3 >> 63);
+        let w3 = (w3 << 1) | (w2 >> 63);
+        let w2 = (w2 << 1) | (w1 >> 63);
+        let w1 = w1 << 1;
+        let (s0, s1) = mac(0, a[0], a[0], 0);
+        let (s2, s3) = mac(0, a[1], a[1], 0);
+        let (s4, s5) = mac(0, a[2], a[2], 0);
+        let (r1, k) = adc(w1, s1, 0);
+        let (r2, k) = adc(w2, s2, k);
+        let (r3, k) = adc(w3, s3, k);
+        let (r4, k) = adc(w4, s4, k);
+        let (r5, k) = adc(w5, s5, k);
+        debug_assert_eq!(k, 0);
+        [s0, r1, r2, r3, r4, r5]
+    }
 }
 
 impl PrimeField for FpP192 {
@@ -2197,6 +2221,11 @@ impl PrimeField for FpP192 {
     #[inline(always)]
     fn mul(&self, a: [u64; 3], b: [u64; 3]) -> [u64; 3] {
         let t = Self::mul_wide(&a, &b);
+        Self::reduce7(&[t[0], t[1], t[2], t[3], t[4], t[5], 0])
+    }
+    #[inline(always)]
+    fn sqr(&self, a: [u64; 3]) -> [u64; 3] {
+        let t = Self::sqr_wide(&a);
         Self::reduce7(&[t[0], t[1], t[2], t[3], t[4], t[5], 0])
     }
     fn inv(&self, a: [u64; 3]) -> Option<[u64; 3]> {
@@ -2551,6 +2580,53 @@ mod tests {
         for &p in SMALL.iter().chain(&P32).chain(&P64) {
             assert!(crate::cryptanalysis::residual_walk::is_prime_u64(p), "{p}");
             check_field(&Fp64::new(p), p, 120);
+        }
+    }
+
+    /// The branch-free selections of `Fp64` (`redc`, `add`, `sub`) against
+    /// the branchy formulas they replaced, bit for bit, on every pair of an
+    /// edge set and on random pairs of Montgomery values.
+    #[test]
+    fn fp64_selects_match_branchy_formulas() {
+        for &p in SMALL.iter().chain(&P32).chain(&P64) {
+            let f = Fp64::new(p);
+            let redc = |t: u128| {
+                let lo = t as u64;
+                let m = lo.wrapping_mul(f.n_inv);
+                let mp = u128::from(m) * u128::from(p);
+                let u = ((t >> 64) as u64) + ((mp >> 64) as u64) + u64::from(lo != 0);
+                if u >= p {
+                    u - p
+                } else {
+                    u
+                }
+            };
+            let add = |a: u64, b: u64| if a + b >= p { a + b - p } else { a + b };
+            let sub = |a: u64, b: u64| if a >= b { a - b } else { a + p - b };
+            let check = |a: u64, b: u64| {
+                let t = u128::from(a) * u128::from(b);
+                assert_eq!(f.redc(t), redc(t), "redc p={p} a={a} b={b}");
+                assert_eq!(f.mul(a, b), redc(t), "mul p={p} a={a} b={b}");
+                assert_eq!(f.sqr(a), redc(u128::from(a) * u128::from(a)), "sqr p={p}");
+                assert_eq!(f.add(a, b), add(a, b), "add p={p} a={a} b={b}");
+                assert_eq!(f.double(a), add(a, a), "double p={p} a={a}");
+                assert_eq!(f.sub(a, b), sub(a, b), "sub p={p} a={a} b={b}");
+            };
+            let edges = [0, 1, 2.min(p - 1), p - 2, p - 1, p / 2, p / 2 + 1];
+            for &a in &edges {
+                for &b in &edges {
+                    check(a, b);
+                }
+            }
+            let mut rng = StdRng::seed_from_u64(p);
+            for _ in 0..20_000 {
+                check(rng.gen_range(0..p), rng.gen_range(0..p));
+            }
+            // redc's whole input range, t < p·2⁶⁴, not only products.
+            for _ in 0..20_000 {
+                let t = rng.gen_range(0..u128::from(p) << 64);
+                assert_eq!(f.redc(t), redc(t), "redc p={p} t={t}");
+            }
         }
     }
 

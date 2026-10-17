@@ -1,0 +1,75 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "IC frontier campaign Phase 0 step 3: prime base-size check, 28-bit a=-3 curve",
+ "description": "Train panel checking the size rule N = ceil((2r)^(1/3)) for the two-summand prime pair-table arm (PROTOCOL.md Amendment A4) against half and double. max_trials = 40 r / N + 1e5. Not a measurement.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "prime_explicit",
+    "p": 268435399,
+    "a": 268435396,
+    "b": 3,
+    "group_order": 268407199,
+    "r": 268407199,
+    "gx": 1,
+    "gy": 1
+   }
+  ],
+  "targets_per_curve": 4,
+  "target_seed": 20261015100,
+  "target_kind": "public"
+ },
+ "arms": [
+  {
+   "name": "rho-neg",
+   "role": "reference",
+   "method": {
+    "id": "rho.negation"
+   }
+  },
+  {
+   "name": "pair-N407",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=407",
+     "oracle": "mitm:negation_folded=1",
+     "max_trials": "26479085"
+    }
+   }
+  },
+  {
+   "name": "pair-N813",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=813",
+     "oracle": "mitm:negation_folded=1",
+     "max_trials": "13305766"
+    }
+   }
+  },
+  {
+   "name": "pair-N1626",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=1626",
+     "oracle": "mitm:negation_folded=1",
+     "max_trials": "6702883"
+    }
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 1,
+  "warmup": 0,
+  "order": "alternate",
+  "seed": 20261015104,
+  "isolation_required": "L0",
+  "timeout_seconds": 1800
+ }
+}

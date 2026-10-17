@@ -1,0 +1,96 @@
+name: N83 Bloom-on K3300 Tier 1 sealed paired IC versus rho
+
+on:
+  push:
+    branches: [codex/n83-tier1-bloom-20261015]
+    paths:
+      - .github/workflows/n83-tier1-bloom-reserve.yml
+      - research/n83_tier1_bloom_reserve_20261015/**
+      - research/n83_tier1_bloom_reserve_results_20261015/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: n83-tier1-bloom-reserve-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  five-fresh-pairs:
+    if: github.repository == 'aburan28/crypto'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch the executed source snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          frozen=b70a2611fb8bc130c708ac91f26981592b2c1f78
+          git fetch --no-tags --depth=1 origin "$frozen"
+          test "$(git rev-parse FETCH_HEAD)" = "$frozen"
+          mkdir -p "$RUNNER_TEMP/n83-frozen-source"
+          git archive "$frozen" Cargo.lock \
+            examples/koblitz_orbit_dlp_fast.rs \
+            examples/n83_rho_optimization_eval.rs \
+            research/n83_dense_root_20261013 \
+            research/n83_indexed5_20261013 \
+            research/n83_root4_20261014 \
+            research/n83_factor_base_refine_20261014 \
+            research/n83_root11_bloom_results_20261015 \
+            research/n83_tier1_bloom_reserve_20261015 \
+            | tar -xf - -C "$RUNNER_TEMP/n83-frozen-source"
+          test "$(sha256sum "$RUNNER_TEMP/n83-frozen-source/examples/koblitz_orbit_dlp_fast.rs" | cut -d' ' -f1)" = \
+            814afa03ae1c386e62e518be3c7a55fb108b09c41b05bef64ca1371787466c39
+
+      - name: Download the exact completed raw artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-tier1-sealed"
+          gh api repos/aburan28/crypto/actions/artifacts/11949772579/zip > \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw.zip"
+          test "$(sha256sum "$RUNNER_TEMP/n83-tier1-sealed/raw.zip" | cut -d' ' -f1)" = \
+            82be7c3f51faf55fc5d7d35ac63052b485f981267721e70650d46fae7ad9c097
+          unzip -q "$RUNNER_TEMP/n83-tier1-sealed/raw.zip" -d \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw"
+          test "$(sha256sum "$RUNNER_TEMP/n83-tier1-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            80850576f40572195c169b6f94126b190194c5e2aac10ad1f88d6110c28ef740
+
+      - name: Independently replay all five frozen same-point pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 "$RUNNER_TEMP/n83-frozen-source/research/n83_tier1_bloom_reserve_20261015/verify.py" \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw/results" > \
+            "$RUNNER_TEMP/n83-tier1-sealed/local-replay.log"
+          test "$(sha256sum "$RUNNER_TEMP/n83-tier1-sealed/raw/results/analysis.json" | cut -d' ' -f1)" = \
+            80850576f40572195c169b6f94126b190194c5e2aac10ad1f88d6110c28ef740
+
+      - name: Reproduce the canonical current-head result rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 research/n83_tier1_bloom_reserve_results_20261015/materialize.py \
+            --artifact-zip "$RUNNER_TEMP/n83-tier1-sealed/raw.zip" \
+            --artifact-sha256 82be7c3f51faf55fc5d7d35ac63052b485f981267721e70650d46fae7ad9c097 \
+            --analysis-sha256 80850576f40572195c169b6f94126b190194c5e2aac10ad1f88d6110c28ef740 \
+            "$RUNNER_TEMP/n83-tier1-sealed/raw/results"
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Preserve current-head replay receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-tier1-bloom-sealed-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-tier1-sealed/local-replay.log
+          if-no-files-found: ignore
+          retention-days: 14

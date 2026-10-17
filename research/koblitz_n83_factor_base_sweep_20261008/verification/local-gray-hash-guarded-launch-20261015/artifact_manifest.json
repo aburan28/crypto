@@ -1,0 +1,73 @@
+{
+  "files": {
+    "RESULT.md": {
+      "bytes": 4636,
+      "sha256": "49a3080d1befee4f88b81fd5116a7d8cc6597b999b5bfa799af279f0432d7a65"
+    },
+    "audit.json": {
+      "bytes": 831,
+      "sha256": "6f32c6e57c33d361e1c3ab93e041854f16a0e69ef261e629dafa7aee9dd6af1c"
+    },
+    "audit.py": {
+      "bytes": 5814,
+      "sha256": "09d6c10301abfc046f77b35b277f8dca0a5580857a1b9a9572486d048a951ebb"
+    },
+    "cargo-ssd-enospc.log": {
+      "bytes": 280,
+      "sha256": "0d90218cd491160042de0430e6e10c718ed21aa3e0764621fcd8c457b9c973a6"
+    },
+    "config.json": {
+      "bytes": 3227,
+      "sha256": "bd43a0d378d7ccc679d32912d206261da17ca7374a1f609b4acf13a1a679c068"
+    },
+    "n83-cairn-focused-20261015.log": {
+      "bytes": 1596,
+      "sha256": "7cb34133375157575d8735495282450ece4a02f17c2d873481ee53bbf2638929"
+    },
+    "n83-full-unsandboxed-sequential-20261015.log": {
+      "bytes": 4841,
+      "sha256": "5bab73c57eab0cfaa4a6551b360cff6952278ec8c280f64e0bb02cfb1737bbf8"
+    },
+    "n83-guarded-watch-cargo-test-scratch-20261015.log": {
+      "bytes": 12800,
+      "sha256": "b997aab3619e978202da5714147db0e70c82406fe2c8848450e6abdf2e057427"
+    },
+    "n83-net-focused-20261015.log": {
+      "bytes": 355,
+      "sha256": "d4ba8942c2136a11032fd563d755af904fdf1a9ae0f09d1748dc012bed47dcdf"
+    },
+    "n83-z3-focused-20261015.log": {
+      "bytes": 683,
+      "sha256": "4864aaba0b462ee033b7b50207ce14a6e4ff8f3a54f389b241fe3b0153a62da5"
+    },
+    "n83-z3-sequential-20261015.log": {
+      "bytes": 245,
+      "sha256": "e1518fcb3ba67086b41861682939251af4e01bbf96013fc38601795312e86564"
+    },
+    "result.json": {
+      "bytes": 325,
+      "sha256": "7235e2e7f8412e8aac1f01a45349f68f276c8305a3beb0bfb7ae7c10d4200778"
+    },
+    "samples.jsonl": {
+      "bytes": 23949,
+      "sha256": "ff5290c59a1b99ab30f3dbf2c9e15c82607624e139f58cac12045f5081402cc1"
+    },
+    "test_audit.py": {
+      "bytes": 1612,
+      "sha256": "5303ef41fcdef4fae5551a9f3223f65b86d44281488c2d57f32c7ee774b08e96"
+    },
+    "test_watch.py": {
+      "bytes": 1372,
+      "sha256": "9584bc3185ff23f6fa3aac887e0a37c8725802f594aeec2cbcc02a9ce3f71097"
+    },
+    "validation.json": {
+      "bytes": 3151,
+      "sha256": "7564bd8b3b53879d3d4d4f0bfa797a64460a641faa351fdad4f5b6f576815920"
+    },
+    "watch.py": {
+      "bytes": 10665,
+      "sha256": "d43325356a2ff6c62f9f65b5e1995ef9d3af66482217b8ebcac1aa2e867bac58"
+    }
+  },
+  "schema": "n83.local-paired-quiet-watch-artifact-manifest/v1"
+}

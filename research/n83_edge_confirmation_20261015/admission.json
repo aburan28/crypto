@@ -1,0 +1,61 @@
+{
+  "answer_sidecar_sha256": "e1207d1be9a7689c42209ed50f048325812436d5f7e6f313b5e5e8a04a5730b1",
+  "candidate_order": [
+    {
+      "actual_usable_points": 568550,
+      "arm_names": [
+        "root4k3425std_a",
+        "root4k3425std_b"
+      ],
+      "base_hash": "47e4eb7a1ef7e596f3505e9a1997b60dab56f9f306ad6b969f5c452923f772c6",
+      "bloom_profile": "standard",
+      "candidate_id": "IC1N83Ckb1a1fb568550PDP4rootRCguidedLAgaussTDdirectISO0ha1124f2f2b09",
+      "candidate_manifest_sha256": "50a5b8d96ca627f9cdadc24f50ddf48aff124648226e1207796bd9b140243cf8",
+      "k": 3425,
+      "origin": "root4_bloom",
+      "pipeline": "root4k3425std",
+      "position": 0,
+      "root_table_entries": 973622246,
+      "screen_mean_online_ms": 26.2186103715,
+      "screen_peak_rss_bytes": 15488450560,
+      "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+      "variant": "root4"
+    },
+    {
+      "actual_usable_points": 572700,
+      "arm_names": [
+        "root11k3450wide3_a",
+        "root11k3450wide3_b"
+      ],
+      "base_hash": "ae75c86565f5fa12fb6f30a5539f6f4638bcf1ca8b347a5cefa20f5073a9f572",
+      "bloom_profile": "wide3",
+      "candidate_id": "IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h7ecaf3f009df",
+      "candidate_manifest_sha256": "b5ad19e27592364a50888ba2b2c4b78d295101e0317e6723d79ffa3f55b8e242",
+      "k": 3450,
+      "origin": "root11_highk",
+      "pipeline": "root11k3450wide3",
+      "position": 1,
+      "root_table_entries": 987887478,
+      "screen_mean_online_ms": 33.304923231,
+      "screen_peak_rss_bytes": 12351021056,
+      "source_sha256": "f2745227d95e36ef45c73c5104a23ada6cebb0794405368581d2be17044845dc",
+      "variant": "root11"
+    }
+  ],
+  "edge_challenger": null,
+  "mirrored_arm_order": [
+    "root4k3425std",
+    "root11k3450wide3",
+    "root11k3450wide3",
+    "root4k3425std"
+  ],
+  "schema": "n83.edge-confirmation-admission/v1",
+  "source_descriptive_leader": "root4k3425std",
+  "source_edge_artifact_id": 12005586706,
+  "source_edge_selection_sha256": "b969f5dce03eab9eebda48a87e1e30a7d2063b0646b72f1ae09a6c8a66c656f0",
+  "source_tournament_admission_sha256": "91ef9ffbb4515576bae01b08177a7ce0bd2fc58e08a745990668e9163c74964d",
+  "source_tournament_artifact_id": 12006958284,
+  "source_tournament_selection_sha256": "61d8ab9ebcb8fbe1239b18f785cdb4daea906b5f7047f136de527039622dd397",
+  "status": "FROZEN_ADMISSION",
+  "target_sha256": "66c4683e252f1cd321b4b6c7c9d06744c82140222ddce160faa4e7a0e0984b7e"
+}

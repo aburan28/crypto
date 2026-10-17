@@ -49,7 +49,13 @@ fn load(dir: &str) -> Data {
             let mut r = r.clone();
             r["q"] = rec["q"].clone();
             r["ell"] = rec["ell"].clone();
-            let arm = r["arm"].as_str().unwrap().to_string();
+            let mut arm = r["arm"].as_str().unwrap().to_string();
+            // the schedule arm's cx is a step function of b: one arm name over all sizes
+            if arm.starts_with("sched:") {
+                if let Some((base, _)) = arm.split_once('@') {
+                    arm = base.to_string();
+                }
+            }
             d.insert((arm, b, c), r);
         }
     }

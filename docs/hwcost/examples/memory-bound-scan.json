@@ -1,0 +1,29 @@
+{
+  "schema": "hwcost.workload.v1",
+  "name": "scan 64 GiB of 64-bit field elements: load from disk, one modular addition per element",
+  "phases": [
+    {
+      "name": "addition scan",
+      "iterations": {"log2": 33.0},
+      "ops_per_iteration": {"w1.add": 1.0},
+      "bytes_per_iteration": 8.0,
+      "working_set_bytes_per_core": 17179869184.0,
+      "parallel_fraction": 0.95
+    }
+  ],
+  "transfers": [
+    {
+      "name": "load from disk",
+      "channel": "disk",
+      "bytes": {"log2": 36.0},
+      "messages": {"log2": 16.0},
+      "overlaps_compute": false
+    }
+  ],
+  "storage": [
+    {"name": "input", "bytes": {"log2": 36.0}, "months": 1.0}
+  ],
+  "notes": [
+    "hand-written example: a memory-bound phase (DRAM-resident working set, cheap operation), an Amdahl serial fraction and a blocking transfer"
+  ]
+}

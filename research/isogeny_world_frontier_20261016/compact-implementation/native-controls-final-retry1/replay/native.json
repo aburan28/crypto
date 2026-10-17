@@ -1,0 +1,147 @@
+{
+  "record": {
+    "checks": {
+      "beta_lambda_pairing": "PASS",
+      "cornacchia": "PASS",
+      "domain": "PASS_TRUSTED_SEC2_PARAMETERS",
+      "evaluated_identity_supplement": "PASS",
+      "exact_integer_identity": "PASS",
+      "exponent_primality": "PASS",
+      "generator_and_hasse_order": "PASS",
+      "independent_point_replay": "PASS",
+      "lucas_lehmer": "PASS",
+      "p_n_primality": "TRUSTED_STANDARD_NOT_SELF_CONTAINED_CERTIFICATES",
+      "separability": "PASS",
+      "subgroup_invertibility": "PASS",
+      "unreduced_norm": "PASS"
+    },
+    "degree_bits": 3,
+    "differential": "111189151296659785738170805967605665488771904429376448443557023963485213164511",
+    "elapsed_ms_operational_only": 11,
+    "expanded_map_challenge_score": null,
+    "geometric_prime_degree": "7",
+    "identity_id": "IDC1hf56b3716b0a7eb8b",
+    "input_sha256": "bddc40ae554c344e9d9ee91c15d93fa0a721ae0f036926598567136c7a63e87d",
+    "public_point_checks": [
+      {
+        "dual_compositions": "PASS",
+        "group_law": "PASS",
+        "independent_replay": "PASS",
+        "input": null,
+        "output": null,
+        "subgroup_action": "PASS"
+      },
+      {
+        "dual_compositions": "PASS",
+        "group_law": "PASS",
+        "independent_replay": "PASS",
+        "input": [
+          "55066263022277343669578718895168534326250603453777594175500187360389116729240",
+          "32670510020758816978083085130507043184471273380659243275938904335757337482424"
+        ],
+        "output": [
+          "3155323759306684090138108341098460077861070180342573821556967004029660011134",
+          "13140583876789409473184257647663258834864294243885060289354948176275548913829"
+        ],
+        "subgroup_action": "PASS"
+      },
+      {
+        "dual_compositions": "PASS",
+        "group_law": "PASS",
+        "independent_replay": "PASS",
+        "input": [
+          "55066263022277343669578718895168534326250603453777594175500187360389116729240",
+          "83121579216557378445487899878180864668798711284981320763518679672151497189239"
+        ],
+        "output": [
+          "3155323759306684090138108341098460077861070180342573821556967004029660011134",
+          "102651505360526785950386727361024649018405690421755503750102635831633285757834"
+        ],
+        "subgroup_action": "PASS"
+      },
+      {
+        "dual_compositions": "PASS",
+        "group_law": "PASS",
+        "independent_replay": "PASS",
+        "input": [
+          "89565891926547004231252920425935692360644145829622209833684329913297188986597",
+          "12158399299693830322967808612713398636155367887041628176798871954788371653930"
+        ],
+        "output": [
+          "77053578761559628171854319290511641021721404914774261197171163838288067719256",
+          "98304048627800327807733470628493002699416041569732919013364981391242551563591"
+        ],
+        "subgroup_action": "PASS"
+      },
+      {
+        "dual_compositions": "PASS",
+        "group_law": "PASS",
+        "independent_replay": "PASS",
+        "input": [
+          "112711660439710606056748659173929673102114977341539408544630613555209775888121",
+          "25583027980570883691656905877401976406448868254816295069919888960541586679410"
+        ],
+        "output": [
+          "55042928022080574753609407383612026832251039113385589383581629908361447714514",
+          "49028209446964568210050156453475082744789586175004783040444403908321332241618"
+        ],
+        "subgroup_action": "PASS"
+      },
+      {
+        "dual_compositions": "PASS",
+        "group_law": "PASS",
+        "independent_replay": "PASS",
+        "input": [
+          "100862081773581120499222301212791081193994281440454033593790618293887747050036",
+          "29883864782608871580821802176208615141762369223249393426421538275393411672951"
+        ],
+        "output": [
+          "65570652737360908900334672444429973904492342245824915699700048959775338693689",
+          "111137471145141550292107495653911712759857035417708311738337631930537781255039"
+        ],
+        "subgroup_action": "PASS"
+      },
+      {
+        "dual_compositions": "PASS",
+        "group_law": "PASS",
+        "independent_replay": "PASS",
+        "input": [
+          "22192605861032339923219300220952640740143957092649363892436849832160947841459",
+          "46523550145918266838590957012521308010601656596758343153930544136769822884724"
+        ],
+        "output": [
+          "49291986325747086243353796591564914257522608023341871259935020696963462221411",
+          "106011642184779208867757389627745864982554014254447098279055411383281874056078"
+        ],
+        "subgroup_action": "PASS"
+      },
+      {
+        "dual_compositions": "PASS",
+        "group_law": "PASS",
+        "independent_replay": "PASS",
+        "input": [
+          "15918057334216069380007851406267302620904875230138054041416128150917396916342",
+          "114501073437582511822942718348520153285084189980109520961805885006106925312113"
+        ],
+        "output": [
+          "99542081976923061950853316241262657024687401781553606418374963943449129741740",
+          "54483492991014464068655272391009510476049822784097891397967263085552205631692"
+        ],
+        "subgroup_action": "PASS"
+      }
+    ],
+    "representation": "compact known-endomorphism self-map",
+    "schema": "compact-cm-verification/v1",
+    "scientific_promotion": false,
+    "source_icv1": "icv1-fp256-t432420386565659656852420866390673177327-76dadd18",
+    "status": "VERIFIED_COMPACT",
+    "tool": {
+      "git_commit": "1231b79a390d3774df1ee930886bd779baa8586a",
+      "git_dirty": "true",
+      "name": "isogeny",
+      "standards_sha256": "22b2ffef99720f2b2c7396a267412d2241a868e038a835c4fb1fd12209b102bf",
+      "version": "0.1.0"
+    }
+  },
+  "status": "PASS"
+}

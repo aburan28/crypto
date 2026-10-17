@@ -1,0 +1,299 @@
+//! XL against MutantXL closure on committed refutation-degree draws.
+//!
+//! Every refutation degree the ladder studies record is XL's: the first
+//! degree whose plain Macaulay row space contains `1`.  This replays the
+//! committed unsatisfiable draws (same subspace basis, same `x(R)`, same
+//! field) and scans each degree twice, plain and saturated under
+//! MutantXL's fixed-degree step ([`closure_refutation_scan`]).
+//!
+//! ```sh
+//! cargo run --release --example dreg_closure -- --max-cols 70000 \
+//!     research/dreg_m4_chain_20261006/runs/cell-5-2-8.jsonl ...
+//! ```
+//!
+//! One JSON line per unsatisfiable draw on stdout.  The scan runs from
+//! degree 3 up to the draw's committed XL degree (its resolved degree, or
+//! the degree its `≥D` bound was measured to), stops early once the closure
+//! refutes, and builds no degree whose matrix could have more than
+//! `--max-cols` columns (`C(N,≤D)`): the dense basis costs about the cube
+//! of that.  Degrees not built are unmeasured, never refutations.
+//!
+//! `--satisfiable` is the soundness control: it replays the committed
+//! *satisfiable* draws instead, builds every degree from 3 to 5 that fits
+//! the cap, and records whether XL or the closure ever refutes.  Either
+//! refuting a system with a solution is an instrument failure.
+
+use crypto_lib::binary_ecc::F2mElement;
+use crypto_lib::cryptanalysis::koblitz_bench::{
+    closure_refutation_scan, sparse_closure_refutes, ClosureDegree,
+};
+use crypto_lib::cryptanalysis::koblitz_groebner::{build_decomposition_system, FieldStructure};
+use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+use crypto_lib::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
+use num_bigint::BigUint;
+use serde_json::Value;
+
+fn monomials_up_to(n_vars: u64, d: u32) -> f64 {
+    let (mut total, mut binom) = (0f64, 1f64);
+    for i in 0..=d as u64 {
+        if i > n_vars {
+            break;
+        }
+        total += binom;
+        binom = binom * (n_vars - i) as f64 / (i + 1) as f64;
+    }
+    total
+}
+
+fn degree_json(d: &ClosureDegree) -> String {
+    format!(
+        r#"{{"degree":{},"xl_refuted":{},"closure_refuted":{},"saturated":{},"xl_rank":{},"closure_rank":{},"columns":{},"closure_products":{},"closure_word_ops":{},"secs":{:.3}}}"#,
+        d.degree,
+        d.xl_refuted,
+        d.closure_refuted,
+        d.saturated,
+        d.xl_rank,
+        d.closure_rank,
+        d.columns,
+        d.closure_products,
+        d.closure_word_ops,
+        d.secs
+    )
+}
+
+/// `p` with each `(v, b)` substituted: a term containing `v` vanishes when
+/// `b = 0` and loses `v` when `b = 1`; equal terms then cancel in pairs.
+fn specialise(p: &F2BoolPoly, fixes: &[(usize, bool)]) -> F2BoolPoly {
+    let mut masks: Vec<u64> = Vec::new();
+    'term: for t in &p.terms {
+        let mut m = t.mask;
+        for &(v, b) in fixes {
+            if m >> v & 1 == 1 {
+                if !b {
+                    continue 'term;
+                }
+                m &= !(1u64 << v);
+            }
+        }
+        masks.push(m);
+    }
+    masks.sort_unstable();
+    let mut kept: Vec<u64> = Vec::new();
+    for m in masks {
+        if kept.last() == Some(&m) {
+            kept.pop();
+        } else {
+            kept.push(m);
+        }
+    }
+    F2BoolPoly {
+        terms: kept.into_iter().map(|mask| F2BoolMono { mask }).collect(),
+        n_vars: p.n_vars,
+    }
+}
+
+fn main() {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let flag = |name: &str| {
+        args.iter()
+            .position(|a| a == name)
+            .and_then(|i| args.get(i + 1))
+            .cloned()
+    };
+    let max_cols: f64 = flag("--max-cols").map_or(70_000.0, |v| v.parse().expect("--max-cols"));
+    let satisfiable = args.iter().any(|a| a == "--satisfiable");
+    // `--to D`: scan to degree D whatever the committed outcome, for fresh
+    // draws whose committed XL outcome is only a cheap lower bound.
+    let to: Option<u32> = flag("--to").map(|v| v.parse().expect("--to D"));
+    // `--draw K`: only the draw numbered K, so each draw can run in its own
+    // process under its own memory and time limits.
+    let only_draw: Option<u64> = flag("--draw").map(|v| v.parse().expect("--draw K"));
+    // `--sparse D`: the closure at degree D alone on the sparse engine
+    // ([`sparse_closure_refutes`]), capped at `--max-entries` stored
+    // nonzeros.  No XL basis is built and no column cap applies; a capped
+    // run prints `"capped":true` and is unmeasured.
+    let sparse: Option<u32> = flag("--sparse").map(|v| v.parse().expect("--sparse D"));
+    let max_entries: usize =
+        flag("--max-entries").map_or(1_500_000_000, |v| v.parse().expect("--max-entries"));
+    // `--fix v=b,…`: substitute the constant b into variable v before the
+    // scan (one branch of a guess).  Summand i's subspace coordinates are
+    // variables i·ℓ … i·ℓ+ℓ−1; the intermediate points follow from m·ℓ.
+    // A specialised system is a different system, so the committed XL
+    // outcome no longer applies and the XL identity check is skipped.
+    let fixes: Vec<(usize, bool)> = flag("--fix").map_or(Vec::new(), |v| {
+        v.split(',')
+            .map(|kv| {
+                let (k, b) = kv.split_once('=').expect("--fix v=b");
+                (k.parse().expect("variable"), b == "1")
+            })
+            .collect()
+    });
+    let valued = [
+        "--max-cols",
+        "--to",
+        "--draw",
+        "--sparse",
+        "--max-entries",
+        "--fix",
+    ];
+    let files: Vec<&String> = args
+        .iter()
+        .enumerate()
+        .filter(|(i, a)| {
+            !valued.contains(&a.as_str())
+                && a.as_str() != "--satisfiable"
+                && !(*i > 0 && valued.contains(&args[i - 1].as_str()))
+        })
+        .map(|(_, a)| a)
+        .collect();
+    for file in files {
+        let text = std::fs::read_to_string(file).unwrap_or_else(|e| panic!("{file}: {e}"));
+        for line in text.lines().filter(|l| !l.trim().is_empty()) {
+            let v: Value = serde_json::from_str(line).expect("json");
+            let sat = v["outcome"]["kind"] == "satisfiable";
+            if v.get("control").is_some() || sat != satisfiable {
+                continue;
+            }
+            if only_draw.is_some_and(|k| v["draw"].as_u64() != Some(k)) {
+                continue;
+            }
+            let m = v.get("m").and_then(Value::as_u64).unwrap_or(3) as usize;
+            let n = v["n"].as_u64().expect("n") as u32;
+            let ell = v["ell"].as_u64().expect("ell") as usize;
+            let irr = find_irreducible_sparse(n).expect("field");
+            let st = FieldStructure::new(n, &irr);
+            let b = F2mElement::one(n);
+            let basis: Vec<F2mElement> = v["v_basis"]
+                .as_array()
+                .expect("v_basis")
+                .iter()
+                .map(|w| F2mElement::from_biguint(&BigUint::from(w.as_u64().unwrap()), n))
+                .collect();
+            let x_r = F2mElement::from_biguint(&BigUint::from(v["x_r"].as_u64().unwrap()), n);
+            assert_eq!(basis.len(), ell);
+            let mut sys = build_decomposition_system(&basis, &x_r, &b, m, &st).expect("system");
+            assert_eq!(
+                sys.n_vars as u64,
+                v["n_vars"].as_u64().unwrap(),
+                "{file}: rebuilt shape"
+            );
+            if !fixes.is_empty() {
+                sys.equations = sys
+                    .equations
+                    .iter()
+                    .map(|p| specialise(p, &fixes))
+                    .filter(|p| !p.terms.is_empty())
+                    .collect();
+            }
+            let fixed_json = format!(
+                "[{}]",
+                fixes
+                    .iter()
+                    .map(|(v, b)| format!("[{v},{}]", *b as u8))
+                    .collect::<Vec<_>>()
+                    .join(",")
+            );
+            if let Some(d) = sparse {
+                let started = std::time::Instant::now();
+                let got = sparse_closure_refutes(&sys.equations, sys.n_vars, d, max_entries);
+                let secs = started.elapsed().as_secs_f64();
+                let body = match &got {
+                    Some(c) => format!(
+                        r#""capped":false,"closure_refuted":{},"saturated":{},"rank":{},"falls":{},"products":{},"max_weight":{}"#,
+                        c.refuted, c.saturated, c.rank, c.falls, c.products, c.max_weight
+                    ),
+                    None => r#""capped":true"#.to_string(),
+                };
+                println!(
+                    r#"{{"source":"{file}","cell":"{}","m":{m},"n":{n},"ell":{ell},"draw":{},"n_vars":{},"committed_outcome":{},"engine":"sparse","degree":{d},"max_entries":{max_entries},{body},"secs":{secs:.3}}}"#,
+                    v["cell"].as_str().unwrap_or(""),
+                    v["draw"],
+                    sys.n_vars,
+                    v["outcome"],
+                );
+                eprintln!(
+                    "m={m} ({n},{ell}) draw {} degree {d}: {body} ({secs:.1}s)",
+                    v["draw"]
+                );
+                continue;
+            }
+            if satisfiable {
+                let mut scan = Vec::new();
+                for d in (3..=to.unwrap_or(5))
+                    .take_while(|&d| monomials_up_to(sys.n_vars as u64, d) <= max_cols)
+                {
+                    scan.extend(closure_refutation_scan(&sys.equations, sys.n_vars, d, d));
+                }
+                let unsound = scan.iter().any(|d| d.xl_refuted || d.closure_refuted);
+                println!(
+                    r#"{{"source":"{file}","cell":"{}","m":{m},"n":{n},"ell":{ell},"draw":{},"n_vars":{},"committed_outcome":{},"solutions":{},"refuted_satisfiable":{unsound},"measured_to":{},"max_cols":{max_cols},"scan":[{}]}}"#,
+                    v["cell"].as_str().unwrap_or(""),
+                    v["draw"],
+                    sys.n_vars,
+                    v["outcome"],
+                    v["solutions"],
+                    scan.last().map(|d| d.degree).unwrap_or(2),
+                    scan.iter().map(degree_json).collect::<Vec<_>>().join(",")
+                );
+                continue;
+            }
+            // The committed XL degree: resolved at `D`, or `≥D` (built to D−1).
+            let committed = v["outcome"]["degree"].as_u64().expect("committed degree") as u32;
+            let xl_known = v["outcome"]["kind"] == "resolved";
+            let ceiling = to.unwrap_or(if xl_known { committed } else { committed - 1 });
+            let top = (3..=ceiling)
+                .take_while(|&d| monomials_up_to(sys.n_vars as u64, d) <= max_cols)
+                .last()
+                .unwrap_or(2);
+            let mut scan = Vec::new();
+            for d in 3..=top {
+                let one = closure_refutation_scan(&sys.equations, sys.n_vars, d, d);
+                let Some(step) = one.into_iter().next() else {
+                    break;
+                };
+                // XL identity: the plain basis refutes exactly at the
+                // committed degree, never below it.  Past a `≥D` bound the
+                // committed record says nothing, and XL is a new reading.
+                if fixes.is_empty() && (d < committed || xl_known) {
+                    assert_eq!(
+                        step.xl_refuted,
+                        xl_known && d >= committed,
+                        "{file} draw {}: XL at degree {d} disagrees with the committed outcome",
+                        v["draw"]
+                    );
+                }
+                let done = step.closure_refuted;
+                scan.push(step);
+                if done {
+                    break;
+                }
+            }
+            let first =
+                |f: fn(&ClosureDegree) -> bool| scan.iter().find(|d| f(d)).map(|d| d.degree);
+            let show = |x: Option<u32>| x.map_or("null".to_string(), |d| d.to_string());
+            let measured_to = scan.last().map(|d| d.degree).unwrap_or(2);
+            println!(
+                r#"{{"source":"{file}","cell":"{}","m":{m},"n":{n},"ell":{ell},"draw":{},"n_vars":{},"committed_outcome":{},"fixed":{fixed_json},"xl_degree":{},"closure_degree":{},"measured_to":{measured_to},"max_cols":{max_cols},"scan":[{}]}}"#,
+                v["cell"].as_str().unwrap_or(""),
+                v["draw"],
+                sys.n_vars,
+                v["outcome"],
+                show(first(|d| d.xl_refuted)),
+                show(first(|d| d.closure_refuted)),
+                scan.iter().map(degree_json).collect::<Vec<_>>().join(",")
+            );
+            eprintln!(
+                "m={m} ({n},{ell}) draw {}: committed {} | XL {} closure {} (measured to {measured_to})",
+                v["draw"],
+                v["outcome"],
+                show(first(|d| d.xl_refuted)),
+                show(first(|d| d.closure_refuted))
+            );
+        }
+    }
+    if let Ok(status) = std::fs::read_to_string("/proc/self/status") {
+        if let Some(l) = status.lines().find(|l| l.starts_with("VmHWM:")) {
+            eprintln!("peak {l}");
+        }
+    }
+}

@@ -1,0 +1,136 @@
+[
+  {
+    "curve": "P-224",
+    "n_minus_1": {
+      "factors": [
+        {
+          "prime": "2",
+          "exponent": 2,
+          "bits": 1.0,
+          "certainty": "proved"
+        },
+        {
+          "prime": "3",
+          "exponent": 6,
+          "bits": 1.584962500721156,
+          "certainty": "proved"
+        },
+        {
+          "prime": "5",
+          "exponent": 1,
+          "bits": 2.321928094887362,
+          "certainty": "proved"
+        },
+        {
+          "prime": "17",
+          "exponent": 1,
+          "bits": 4.087462841250339,
+          "certainty": "proved"
+        },
+        {
+          "prime": "2153",
+          "exponent": 1,
+          "bits": 11.072132604167233,
+          "certainty": "proved"
+        },
+        {
+          "prime": "50520606258875818707470860153287666700917696099933389351507",
+          "exponent": 1,
+          "bits": 195.0087014553681,
+          "certainty": "probable"
+        }
+      ],
+      "unfactored": [],
+      "complete": true,
+      "rho_iterations": 0
+    },
+    "k": "8986648889050213264889005029006541980152602571474797240560907456020",
+    "index": "3",
+    "k_bits": 222.41503749927884
+  },
+  {
+    "curve": "P-256",
+    "n_minus_1": {
+      "factors": [
+        {
+          "prime": "2",
+          "exponent": 4,
+          "bits": 1.0,
+          "certainty": "proved"
+        },
+        {
+          "prime": "3",
+          "exponent": 1,
+          "bits": 1.584962500721156,
+          "certainty": "proved"
+        },
+        {
+          "prime": "71",
+          "exponent": 1,
+          "bits": 6.149747119504682,
+          "certainty": "proved"
+        },
+        {
+          "prime": "131",
+          "exponent": 1,
+          "bits": 7.03342300153745,
+          "certainty": "proved"
+        },
+        {
+          "prime": "373",
+          "exponent": 1,
+          "bits": 8.543031820255237,
+          "certainty": "proved"
+        },
+        {
+          "prime": "3407",
+          "exponent": 1,
+          "bits": 11.734286232096347,
+          "certainty": "proved"
+        },
+        {
+          "prime": "17449",
+          "exponent": 1,
+          "bits": 14.090856737681774,
+          "certainty": "proved"
+        },
+        {
+          "prime": "38189",
+          "exponent": 1,
+          "bits": 15.220869522240182,
+          "certainty": "proved"
+        },
+        {
+          "prime": "187019741",
+          "exponent": 1,
+          "bits": 27.47861532193707,
+          "certainty": "proved"
+        },
+        {
+          "prime": "622491383",
+          "exponent": 1,
+          "bits": 29.213478625533895,
+          "certainty": "proved"
+        },
+        {
+          "prime": "1002328039319",
+          "exponent": 1,
+          "bits": 39.86649188595045,
+          "certainty": "proved"
+        },
+        {
+          "prime": "2624747550333869278416773953",
+          "exponent": 1,
+          "bits": 91.08423723220585,
+          "certainty": "probable"
+        }
+      ],
+      "unfactored": [],
+      "complete": true,
+      "rho_iterations": 1816186
+    },
+    "k": "38597363070118749587565815649802524509998985074711920114140753020356170681456",
+    "index": "3",
+    "k_bits": 254.41503749894295
+  }
+]
