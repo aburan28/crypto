@@ -116,6 +116,22 @@ class BrokenStore:
         raise RuntimeError("store unreachable")
 
 
+class RejectingStore:
+    """The upload path is reachable, but the immutable bytes are invalid."""
+
+    def __init__(self, inner):
+        self.inner = inner
+
+    def exists(self, key):
+        return False
+
+    def get(self, key, dest):
+        return self.inner.get(key, dest)
+
+    def put(self, src, key):
+        raise worker.PermanentUploadRejection("validator says no")
+
+
 class CountingStore:
     """A healthy store that remembers which keys were written through it."""
 
@@ -376,6 +392,37 @@ class AlreadyUploaded(SpoolCase):
         self.assertEqual(int(w.state["dpOffset"]), 5 * RECORD_BYTES)
         self.assertEqual(sorted(storedRecords(self.storeRoot)),
                          sorted(record(i) for i in range(5)))
+
+
+class PermanentlyRejected(SpoolCase):
+    def test_rejected_bytes_are_dropped_once_without_being_counted_as_uploaded(self):
+        w, slot = self.claimed()
+        self.appendDp(w, 5)
+        self.failedCycle(w, slot)
+        w.store = RejectingStore(w.store)
+        out, err = quiet(w.drainSpool, slot)
+        self.assertIsNone(err, out)
+        self.assertFalse(w.spoolPending())
+        self.assertIn("permanently rejected", out)
+        self.assertEqual(int(w.state["spoolDropped"]), 5)
+        self.assertEqual(int(w.state["dpUploaded"]), 0)
+        self.assertEqual(int(w.state["dpOffset"]), 5 * RECORD_BYTES)
+
+
+class BrokerValidationWait(unittest.TestCase):
+    def test_in_flight_validation_returns_to_heartbeat_processing(self):
+        store = worker.ApiStore("https://broker.invalid", "t" * 48, "worker-a")
+        store.owner = "owner-a"
+        with tempfile.NamedTemporaryFile() as payload:
+            payload.write(record(1))
+            payload.flush()
+            with mock.patch.object(store, "_request", return_value={
+                    "status": "VALIDATING", "ticketId": "ticket-a"}) as request:
+                with self.assertRaisesRegex(RuntimeError, "still pending"):
+                    store.putValidated(payload.name,
+                                       "dp/slot-00001/%s-0-%s.bin"
+                                       % ("a" * 32, sha256File(payload.name)))
+        self.assertEqual(request.call_count, 1)
 
 
 class Budget(SpoolCase):

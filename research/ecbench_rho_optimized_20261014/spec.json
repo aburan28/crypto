@@ -1,0 +1,43 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "strong signed-Frobenius rho implementation optimization on six registered one-word Koblitz curves",
+  "description": "PROTOCOL.md. Interleaved legacy and optimized implementations of the same rho.signed_frobenius_strong trajectory, plus an optimized A/A control. Counts must match exactly; wall time needs L2 and the A/A gate.",
+  "workloads": {
+    "curves": [
+      {"kind": "koblitz", "a": 1, "n": 43},
+      {"kind": "koblitz", "a": 1, "n": 47},
+      {"kind": "koblitz", "a": 0, "n": 41},
+      {"kind": "koblitz", "a": 0, "n": 53},
+      {"kind": "koblitz", "a": 1, "n": 59},
+      {"kind": "koblitz", "a": 0, "n": 61}
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 2026101401,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-legacy",
+      "role": "baseline",
+      "method": {"id": "rho.signed_frobenius_strong_legacy"}
+    },
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {"id": "rho.signed_frobenius_strong"}
+    },
+    {
+      "name": "rho-strong-aa",
+      "role": "control",
+      "method": {"id": "rho.signed_frobenius_strong"}
+    }
+  ],
+  "measurement": {
+    "rounds": 5,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 2026101402,
+    "isolation_required": "L2",
+    "timeout_seconds": 600
+  }
+}

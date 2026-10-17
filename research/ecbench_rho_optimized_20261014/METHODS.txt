@@ -1,0 +1,61 @@
+rho.frozen_reference   rho       the frozen r-adding walk every ledger row was priced against through §17 (A = 1); the historical "before" mark
+    cap_multiple           default "64"       step budget as a multiple of √r before the run counts as exhausted
+rho.plain              rho       tuned r-adding walk on points (A = 1), distinguished points, stride starts
+    cap_multiple           default "64"       step budget as a multiple of √r before the run counts as exhausted
+rho.negation           rho       tuned walk on {P, −P} (A = 2) with Wiener–Zuccherato look-ahead and cycle escape
+    cap_multiple           default "64"       step budget as a multiple of √r before the run counts as exhausted
+rho.cubic              rho       tuned walk on {±ζ₃^i(P)} (A = 6), the rational order-3 automorphism of a j = 0 curve with p ≡ 1 (mod 3) and 3 | r − 1; Wiener–Zuccherato look-ahead and cycle escape; refuses any curve without the structure
+    cap_multiple           default "64"       step budget as a multiple of √r before the run counts as exhausted
+rho.quartic            rho       tuned walk on {±ι^i(P)} (A = 4), the rational order-4 automorphism of a j = 1728 curve with p ≡ 1 (mod 4) and 4 | r − 1; Wiener–Zuccherato look-ahead and cycle escape; refuses any curve without the structure
+    cap_multiple           default "64"       step budget as a multiple of √r before the run counts as exhausted
+rho.signed_frobenius   rho       tuned walk on signed Frobenius orbits {±φ^t P} (A = 2n), Koblitz curves only
+    cap_multiple           default "64"       step budget as a multiple of √r before the run counts as exhausted
+rho.signed_frobenius_strong rho       the strong single-target reference of the IC measurement rules (docs/ic/boundary_targets.json, since 2026-10-01): lockstep walks with batched inversion on signed Frobenius orbits (A = 2n), Koblitz curves only
+    lanes                  default "32"       walks advanced in lockstep (batch-inversion width); the reference measured 32
+    dp_bits                default "4"        distinguished-point bits; the reference measured 4
+    step_cap_factor        default "2000"     give up after this multiple of the ideal step count
+rho.signed_frobenius_strong_legacy rho       the literal pre-2026-10-14 implementation of the strong single-target reference, retained only as a trajectory-identical within-binary performance control
+    lanes                  default "32"       walks advanced in lockstep (batch-inversion width); the reference measured 32
+    dp_bits                default "4"        distinguished-point bits; the reference measured 4
+    step_cap_factor        default "2000"     give up after this multiple of the ideal step count
+rho.signed_frobenius_strong_escape rho       the strong reference with fruitless cycles escaped by doubling instead of abandoned: identical walks until a cycle, so long distinguished-point walks (the large dp_bits a table at m = 83 needs) survive; A = 2n, Koblitz curves only
+    lanes                  default "32"       walks advanced in lockstep (batch-inversion width)
+    dp_bits                default "4"        distinguished-point bits; the table holds about steps / 2^dp_bits entries
+    step_cap_factor        default "2000"     give up after this multiple of the ideal step count
+bsgs.textbook          bsgs      baby table of m = ⌈√r⌉ steps first, then giant steps; worst 2√r, mean 1.5√r
+bsgs.interleaved       bsgs      Pollard's interleaved baby and giant steps, two tables; mean (4/3)√r
+bsgs.negation          bsgs      baby table keyed by {P, −P}, giant stride 2m + 1; mean about √r
+kangaroo.vow           kangaroo  van Oorschot–Wiener tame/wild kangaroo on [0, r), distinguished points; mean about 2√r
+    cap_multiple           default "64"       step budget as a multiple of √r before the run counts as exhausted
+claw.pair_table        claw      four-point signed-Frobenius pair claw of aburan28/cryptanalysis#175: known-log orbit base, target-independent quotient pair table of M = c·√(r/n) classes, unique query pairs Q − (F_k + F_l); generic, mean S ≈ (c + 1/c)/√n, Koblitz curves only
+    base_scale             REQUIRED           seed orbits S = ⌈base_scale · r^(1/4) · n^(−3/4)⌉; the PR's n=83 base is ≈ 1.06
+    table_scale            REQUIRED           table classes M = ⌈table_scale · √(r/n)⌉; 1 minimises additions, the PR's n=83 tables are ≈ 1/32
+    cap_multiple           default "64"       charged-addition budget as a multiple of √r before the run counts as exhausted
+ic.pipeline            ic        index calculus through ic_framework::run_pipeline: factor base, oracle set-up, relations, linear algebra, verification, all charged
+    factor_base            REQUIRED           plug-in spec: prime-abscissa:size=N, glv-orbit:size=N, binary-subspace:dimension=D, koblitz-orbit:divisor=1;2, compact-orbit-scan:columns=N,raw_x_cap=M, cyclotomic:w=W[,columns=N], koblitz-standard-subspace:dimension=D
+    oracle                 REQUIRED           subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; rootfind-subtract:m=2|3 (prime curves: prime_fast's direct-subtraction root finding, one batched inversion a target); the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N and pdp3-koblitz:m=2|3,engine=rootfind (the pair-sum table of DecompositionStrategy::PairTable) on koblitz-standard-subspace
+    solver                 default ""         descent-algebraic and descent-algebraic-fiber only: f4-f2, buchberger-f2, sat-cdcl, exhaustive (with :k=v options)
+    linalg                 default "incremental-gauss" incremental-gauss (stop at target pin), incremental-gauss-full-rank (all columns independent), incremental-gauss-full-rank-checked (also point-check each base column), or structured-gauss
+    targets                default "walk"     random ([a]G+[b]Q per trial) or walk (one addition per trial)
+    max_trials             default "100000000" relation trials before the run counts as exhausted
+    solver_budget_seconds  default "0"        per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic
+ic.pipeline_counted    ic        index calculus with solver wall pricing excluded by deterministic phase recomputation; unpriced solver work remains explicit
+    factor_base            REQUIRED           factor-base plug-in spec
+    oracle                 REQUIRED           decomposition oracle plug-in spec
+    solver                 default ""         algebraic solver plug-in spec
+    linalg                 default "incremental-gauss" linear algebra plug-in
+    targets                default "walk"     random or walk
+    max_trials             default "100000000" relation trial cap
+    solver_budget_seconds  default "0"        per-call solver wall budget
+ic.large_prime         ic        bounded exact m-summand binary index calculus with zero, single, or double large primes and exact modular elimination
+    small_dimension        REQUIRED           dimension of the nested small x-coordinate subspace
+    envelope_dimension     REQUIRED           dimension of the full x-coordinate factor-base envelope
+    summands               REQUIRED           exact summand count, or n-1 (never silently downscaled)
+    large_primes           REQUIRED           maximum accepted large-prime columns: 0, 1, or 2
+    max_trials             REQUIRED           relation trials before an exhausted result
+    max_states             REQUIRED           hard cap on exact meet-in-the-middle combination states
+ic.shared_rank         ic        target-blind full-rank Koblitz relation log followed by point-only signed-Frobenius m3 target descent; native work remains visible and unpriced
+    factor_base            REQUIRED           compact-orbit-scan:columns=N,raw_x_cap=M; exact base construction
+    rank_seed              REQUIRED           seed of the target-blind relation search
+    rank_max_trials        REQUIRED           target-blind relation trial cap
+    target_max_attempts    REQUIRED           direct Q query followed by at most this many total residual attempts
