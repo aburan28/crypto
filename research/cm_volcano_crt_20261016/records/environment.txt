@@ -1,0 +1,9 @@
+Base repository revision: 086dfd7934952ae1ff38c4f54230993f6c3a5db6
+Branch: codex/cm-volcano-modpoly-crt
+Rust: rustc 1.99.1 (58cf8f9c3 2026-10-13)
+Host: Linux 6.18.44 x86_64 GNU/Linux, shared execution environment
+Isolation: no benchmark isolation requested or claimed
+Conductor: binary and .conductor control plane absent; docs/CONDUCTOR.md specifies warning-only behavior when unavailable
+Initial root library build: failed to discover OpenSSL without pkg-config
+Second root library build: used OPENSSL_LIB_DIR and OPENSSL_INCLUDE_DIR; execution transport disconnected while compiling; no completed result
+Third root library build: same OpenSSL paths, CARGO_BUILD_JOBS=1; pending at PR preparation, no completed result claimed

@@ -1,0 +1,56 @@
+{
+  "arms": [
+    {
+      "actual_factor_base_points": 169984,
+      "arm": "legacy_id29",
+      "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+      "cold_wall_seconds_exploratory": 226.7856019589999,
+      "online_ms_exploratory": 56.979957999999996,
+      "online_phases_ms": {
+        "target_descent_ms": 0.000959,
+        "target_pdp_ms": 56.756291999999995,
+        "target_query_ms": 0.0,
+        "target_recovery_check_ms": 0.15725,
+        "target_relation_check_ms": 0.065125
+      },
+      "point_indices": [
+        25135,
+        120536,
+        27047,
+        45109
+      ],
+      "recovered_scalar": 3640978018804724,
+      "root_table_entries": 87028652,
+      "status": "PASS_INDEPENDENT_REPLAY"
+    },
+    {
+      "actual_factor_base_points": 169984,
+      "arm": "opt_in_id30",
+      "base_hash": "f3bb5adfd099df1be8e90edf56c9a764028e060d7e0c3a97759e9b699c423629",
+      "cold_wall_seconds_exploratory": 127.69323250000161,
+      "online_ms_exploratory": 65.05570800000001,
+      "online_phases_ms": {
+        "target_descent_ms": 0.001041,
+        "target_pdp_ms": 64.916958,
+        "target_query_ms": 4.2e-05,
+        "target_recovery_check_ms": 0.105208,
+        "target_relation_check_ms": 0.03225
+      },
+      "point_indices": [
+        25135,
+        120536,
+        27047,
+        45109
+      ],
+      "recovered_scalar": 3640978018804724,
+      "root_table_entries": 87028652,
+      "status": "PASS_INDEPENDENT_REPLAY"
+    }
+  ],
+  "hardware_tier": "local_correctness_control",
+  "performance_claim": null,
+  "same_base_index_and_scalar": true,
+  "schema": "n83.id30-control-analysis/v1",
+  "selected_factor_base": null,
+  "status": "PASS_EXACT_PARITY"
+}

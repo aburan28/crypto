@@ -1,0 +1,14 @@
+{
+  "args": [
+    "challenge",
+    "judge",
+    "--input",
+    "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/bad-inflated-degree",
+    "--out",
+    "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/inflated-degree-on"
+  ],
+  "exit_code": 1,
+  "stderr": "verification: FAIL (35 ms)\n",
+  "stdout": "{\n  \"reason\": \"FAIL\",\n  \"schema\": \"isogeny-challenge-entry/v1\",\n  \"score\": null,\n  \"season\": \"ff4f7c405146fbd26faa63cb6fb9d1513eada31d15f3998368005fd5f05db3e0\",\n  \"status\": \"REJECTED\",\n  \"verification\": {\n    \"command\": [\n      \"/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/isogeny\",\n      \"challenge\",\n      \"__judge\",\n      \"--input\",\n      \"/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/inflated-degree-on/artifact\",\n      \"--rss-ready\",\n      \"/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/inflated-degree-on/resources-ready\"\n    ],\n    \"elapsed_ms_operational_only\": 35,\n    \"exit_code\": 2,\n    \"map_count\": null,\n    \"memory_monitor_grace_ms\": 100,\n    \"memory_sampling_interval_ms\": 25,\n    \"resident_memory_limit_bytes\": \"8589934592\",\n    \"sampled_peak_resident_bytes\": \"32768\",\n    \"status\": \"FAIL\",\n    \"stderr_sha256\": \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\n    \"stdout\": \"verification.json\",\n    \"stdout_sha256\": \"4d18d9cce17e3d69acc71a85c9093b54a45499bd8413f7c22c749229941fcc35\",\n    \"unavailable_memory_samples\": 0\n  }\n}\n",
+  "trace": "/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/research/isogeny_world_frontier_20261016/replay-profiling/trace-controls-final-v1/inflated-degree.jsonl"
+}

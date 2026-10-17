@@ -1,0 +1,42 @@
+   Compiling cfg-if v1.0.5
+   Compiling typenum v1.20.1
+   Compiling libc v0.2.190
+   Compiling zerocopy v0.8.62
+   Compiling serde_core v1.0.229
+   Compiling num-traits v0.2.19
+   Compiling zmij v1.0.23
+   Compiling arrayvec v0.7.8
+   Compiling itoa v1.0.18
+   Compiling constant_time_eq v0.4.2
+   Compiling memchr v2.8.3
+   Compiling subtle v2.6.1
+   Compiling hex v0.4.3
+   Compiling isogeny_algos v0.1.0 (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/isogeny_algos)
+   Compiling blake3 v1.8.7
+   Compiling num-integer v0.1.47
+   Compiling getrandom v0.2.17
+   Compiling cpufeatures v0.3.1
+   Compiling rand_core v0.6.4
+   Compiling hybrid-array v0.4.14
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling serde_json v1.0.151
+   Compiling serde v1.0.229
+   Compiling digest v0.11.3
+   Compiling sha2 v0.11.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling rand_chacha v0.3.1
+   Compiling rand v0.8.8
+   Compiling num-bigint v0.4.8
+   Compiling isogeny-cli v0.1.0 (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-20261015/tools/isogeny-cli)
+    Finished `release` profile [optimized] target(s) in 4m 35s
+     Running unittests src/main.rs (/Volumes/SSD990-2/crypto/isogeny-degree-challenge-builds-20261015/compact-implementation/release/deps/isogeny-8734bd11e3dad22d)
+
+running 4 tests
+test compact_cm_verify::tests::exact_integer_checker_catches_modulus_sized_error_that_evaluated_idc_accepts ... ok
+test compact_cm_verify::tests::signed_zero_and_negative_geometric_expressions_replay_independently ... ok
+test compact_cm_verify::tests::complete_control_and_other_primitive_root_are_accepted_but_wrong_pairing_is_rejected ... ok
+test compact_cm_verify::tests::adding_subgroup_order_preserves_points_and_changes_geometric_degree ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 75 filtered out; finished in 0.05s
+
