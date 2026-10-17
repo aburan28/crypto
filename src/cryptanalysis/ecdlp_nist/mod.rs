@@ -32,6 +32,10 @@
 //! curve is refused as infeasible unless forced, and then runs only to its
 //! iteration budget.  Costs are stated as expected group additions, never
 //! as security claims about deployed parameters.
+//!
+//! Certicom binary challenge parameters and their published targets are also
+//! accepted. Persistent GPU campaign support for the full set is tracked in
+//! `problems/certicom-binary-gpu-rho-integration.md`.
 
 use num_bigint::{BigInt, BigUint};
 use num_traits::{One, Zero};
@@ -113,6 +117,20 @@ pub const NIST_CURVES: &[(&str, &str, Family)] = &[
     ("B-283", "sect283r1", Family::BinaryRandom),
     ("B-409", "sect409r1", Family::BinaryRandom),
     ("B-571", "sect571r1", Family::BinaryRandom),
+];
+
+/// Published Certicom binary-field challenge groups. The display suffix is
+/// the subgroup bit size; it is not always the field degree.
+pub const CERTICOM_CURVES: &[(&str, &str, Family)] = &[
+    ("ECC2K-130", "ecc2k-130", Family::Koblitz),
+    ("ECC2-131", "ecc2-131", Family::BinaryRandom),
+    ("ECC2K-163", "ecc2k-163", Family::Koblitz),
+    ("ECC2-163", "ecc2-163", Family::BinaryRandom),
+    ("ECC2-191", "ecc2-191", Family::BinaryRandom),
+    ("ECC2K-238", "ecc2k-238", Family::Koblitz),
+    ("ECC2-238", "ecc2-238", Family::BinaryRandom),
+    ("ECC2K-358", "ecc2k-358", Family::Koblitz),
+    ("ECC2-353", "ecc2-353", Family::BinaryRandom),
 ];
 
 /// The concrete group behind a [`Curve`].
@@ -341,9 +359,19 @@ pub fn nist_curves() -> Vec<Curve> {
         .collect()
 }
 
+pub fn certicom_curves() -> Vec<Curve> {
+    CERTICOM_CURVES
+        .iter()
+        .map(|(name, cat, fam)| {
+            Curve::from_catalog(name, cat, *fam).unwrap_or_else(|e| panic!("{name}: {e}"))
+        })
+        .collect()
+}
+
 /// Every name [`curve_by_name`] accepts, for listings.
 pub fn curve_names() -> Vec<String> {
     let mut v: Vec<String> = NIST_CURVES.iter().map(|(n, _, _)| n.to_string()).collect();
+    v.extend(CERTICOM_CURVES.iter().map(|(n, _, _)| n.to_string()));
     v.extend(toy::toy_names().into_iter().map(String::from));
     v.push("anomalous-<bits>[-<seed>]".to_string());
     v
@@ -356,7 +384,7 @@ pub fn curve_by_name(name: &str) -> Result<Curve, String> {
     let q = name.trim().to_ascii_lowercase().replace('_', "-");
     // NIST spellings: "p-256", "p256", "nistp256", "k-163", "b163".
     let compact = q.replace('-', "");
-    for (nist, cat, fam) in NIST_CURVES {
+    for (nist, cat, fam) in NIST_CURVES.iter().chain(CERTICOM_CURVES.iter()) {
         let nist_l = nist.to_ascii_lowercase();
         if q == nist_l
             || compact == nist_l.replace('-', "")
@@ -368,7 +396,11 @@ pub fn curve_by_name(name: &str) -> Result<Curve, String> {
     }
     // Catalog aliases (secp256r1, prime256v1, …) that map onto a NIST curve.
     if let Some(entry) = curve_catalog::by_name(&q) {
-        if let Some((nist, cat, fam)) = NIST_CURVES.iter().find(|(_, c, _)| *c == entry.name) {
+        if let Some((nist, cat, fam)) = NIST_CURVES
+            .iter()
+            .chain(CERTICOM_CURVES.iter())
+            .find(|(_, c, _)| *c == entry.name)
+        {
             return Curve::from_catalog(nist, cat, *fam);
         }
         return Err(format!(

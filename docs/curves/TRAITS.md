@@ -34,7 +34,7 @@ bound `|t| ≤ 2√q` before any trace is classified. The implementation is
 
 | Field | Meaning | How |
 |:--|:--|:--|
-| `order_check` | how well `#E` itself is established | exhaustive count for supported models with `q ≤ 2^22`; for a binary curve defined over `GF(2^k)`, `k ≤ 16`, a count over `GF(2^k)` lifted by `t_n = V_{n/k}(t_k, 2^k)`; otherwise a generator certificate when the model's group law is implemented (`G` on the curve, `[r]G = O`, `r` prime and `r > 4√q`, so one multiple of `r` lies in the Hasse interval) |
+| `order_check` | how well `#E` itself is established | exhaustive count for supported models with `q ≤ 2^22`; for a binary curve defined over `GF(2^k)`, `k ≤ 16`, a count over `GF(2^k)` lifted by `t_n = V_{n/k}(t_k, 2^k)`; otherwise a generator certificate when the model's group law is implemented (`G` on the curve, `[r]G = O`, `r` prime and `r > 4√q`, so one multiple of `r` lies in the Hasse interval); over `GF(p^k)` with no usable generator, a point-order certificate (see below) |
 | `trace_ratio` | `t / 2√q ∈ [−1, 1]` | size-free |
 | `frobenius.disc` | `Δ = t² − 4q`, its primes and any unfactored composites | trial division to 2¹⁶, perfect powers, Brent's rho with a fixed iteration budget |
 | `frobenius.cm_disc` | `d_K`, the fundamental discriminant of `Q(π)` | `Δ = v²·d_K` |
@@ -51,11 +51,23 @@ bound `|t| ≤ 2√q` before any trace is classified. The implementation is
 | `dissect` | the DiSSECT trait families this module can define exactly (see "DiSSECT families") | |
 | `keys` | the grouping keys below | |
 
-Montgomery, Edwards, and prime-extension registry equations retain their
-exact model JSON, characteristic, degree, field size, trace, and order
-identity. Their point-count and generator checks are `not_evaluated` until
-the corresponding group laws are implemented; the parser does not apply
-short-Weierstrass formulas to those coordinates.
+Montgomery and Edwards registry equations over `GF(p)` are mapped to short
+Weierstrass form for every check; other catalogue models retain their exact
+model JSON, characteristic, degree, field size, trace, and order identity,
+and their checks are `not_evaluated`.
+
+**Curves over `GF(p^k)`, `k > 1`** (`y² = x³ + ax + b` in the registry's
+polynomial basis, `3 < p < 2^63`) have Jacobian group arithmetic
+([`torsion.rs`](../../src/cryptanalysis/curve_traits/torsion.rs), `FpK`).
+A recorded generator certifies the order as above. Without one, the
+**point-order certificate** takes points at fixed pseudo-random
+x-coordinates, checks `[N]P = O` for the recorded order `N`, and computes
+each point's exact order from the factorisation of `N`; once the lcm `L` of
+those orders exceeds `4√q`, `N` is the only multiple of `L` in the Hasse
+interval, so it is `#E`, as strong as the primes of `N`. A point `N` does
+not kill stops the build; a lcm that stays below `4√q` gives `bounded`.
+Exhaustive counting over `GF(p^k)` is not implemented, so a curve whose
+order does not factor stays `not_evaluated`.
 
 **Subfields.** `E_{a,b} : y² + xy = x³ + ax² + b` over `GF(2^n)` is the base
 change of a curve over `GF(2^k)` exactly when `b ∈ GF(2^k)` and either `n/k`
@@ -94,10 +106,31 @@ secp256k1.
   `ℓ | [End(E) : Z[π]]`, i.e. above the floor. With `k` the order of `λ`
   mod `ℓ`, the scalar case is `x^{q^k} ≡ x (mod ψ_ℓ)`; a Jordan block
   fails it. Not scalar fixes the level at the depth; scalar at depth 1
-  fixes it at 0; scalar at greater depth only bounds it by `depth − 1`.
-  The test runs for `ℓ ≤ 1000` within a fixed cost budget
-  (`SCALAR_TEST_COST`), and is compared with a brute-force count of
-  rational `ℓ`-torsion over small prime and binary fields in the tests.
+  fixes it at 0.
+- at greater depth, the **prime-power test** (`scalar_on_power`) goes up
+  the tower: Frobenius is a scalar on `E[ℓ^j]` exactly when
+  `j ≤ v_ℓ([End(E) : Z[π]]) = depth − level`, so the level is the depth
+  minus the largest such `j`. A scalar `λ` on `E[n]`, `n = ℓ^j`, has
+  `2λ ≡ t (mod n)` (one candidate for odd `ℓ`, two for `ℓ = 2`), and the
+  test is `x^q ≡ x([λ]P) (mod f_n)`: it says `πP = ±λP` for every `P` of
+  `E[n]` outside `E[2]`, which on a basis and its sum forces `π = ±λ`.
+  It runs for `ℓ^j ≤ 64` within the same cost budget; where it stops
+  early the level keeps the bound it reached.
+- at depth 1 with `ψ_ℓ` too large, the **point test**
+  ([`points.rs`](../../src/cryptanalysis/curve_traits/points.rs)): the
+  scalar case is exactly `E[ℓ] ⊆ E(GF(q^k))`, `k = ord(λ)`, i.e. an
+  `ℓ`-part of rank 2 in a group of known order
+  `N = q^k + 1 − V_k(t, q)`. Seeded random points over `GF(q^k)` (built
+  as `F[w]/(m)` with `m` certified irreducible by Rabin's test) find a
+  certificate either way: a point whose `ℓ`-part has order `ℓ^{v_ℓ(N)}`
+  (cyclic, the floor) or two independent points of order `ℓ` (rank 2,
+  the crater). The search is bounded by `POINT_TEST_COST` scalar-
+  multiplication work, `ℓ ≤ 1000` and `k ≤ 64`; a test agrees with the
+  division-polynomial test on every small curve where both run.
+  The test runs over `GF(p)`, `GF(2^n)` and `GF(p^k)` for `ℓ ≤ 1000`
+  within a fixed cost budget (`SCALAR_TEST_COST`), and is compared with a
+  brute-force count of rational `ℓ`-torsion over small prime, binary and
+  `GF(p^k)` fields in the tests.
 
 When every prime is resolved, `conductor` is exact and `end_order` is
 `maximal` or `non-maximal`; otherwise `End(E)` stays `bounded` between
@@ -123,7 +156,7 @@ of one curve under different moduli stay two records, as ICV1 requires.
 | `probable` | exact if every probable prime under it is prime |
 | `bounded` | only a bound is known: `conductor` is then a lower bound and `cm_disc` is absent |
 | `unknown` | attempted and not determined within the factoring budget |
-| `not_evaluated` | skipped by a declared limit (`h(d_K)` above `|d_K| = 10^7`, a subfield above degree 40) or by an unimplemented registered group law |
+| `not_evaluated` | skipped by a declared limit (`h(d_K)` above `|d_K| = 10^7`, a subfield above degree 40), by an unimplemented group law, or (over `GF(p^k)`) by an order with no generator that did not factor |
 | `not_applicable` | does not apply (no proper subfield of definition, a prime field's subfields) |
 
 An unfactored composite of even multiplicity still fixes `d_K`. Every
@@ -186,14 +219,19 @@ certify its coordinates or group order.
 
 In the current file (2112 registry curves and 176 from the sources: 175
 walked curves of the P-256 and P-224 isogeny classes and the ECC2K-130
-degree-263 descendant), `End(E)` is established for 716 curves (542
-maximal, 174 non-maximal) and unresolved for 1537; 35 have a `Δ` that did
-not factor. Of the unresolved, 1321 are curves over `GF(p^k)`, `k > 1`,
-for which the scalar test has no field arithmetic yet; most of the rest
-have a prime of `v` beyond its reach. The volcano levels behind it: 373
-decided by the scalar test, 13 walker certificates (each agreeing with the
-test), 111 from a certified `End(E)`, 228 where `f₀` is already prime to
-`ℓ`. P-256's `Δ` factors with
+degree-263 descendant), `End(E)` is established for 1983 curves (878
+maximal, 1105 non-maximal) and unresolved for 270; 35 have a `Δ` that did
+not factor. Of the 1324 curves over `GF(p^k)`, `k > 1`, 1319 have a
+certified order (9 by generator, 1310 by point orders: 484 proved, 826
+probable). The levels behind it: 1246 decided by the scalar test on `E[ℓ]`
+(730 floors, 516 craters at depth 1), 982 by the prime-power test (459 one
+above the floor, 319 craters, 204 in between), 64 by the point test (52
+floors, 12 craters), 13 walker certificates (each agreeing with the test),
+111 from a certified `End(E)`, 228 where `f₀` is already prime to `ℓ`.
+What stays open: 202 levels the tests only bound (beyond the cost limit or
+`ℓ^j > 64`), 44 depth-1 primes beyond both tests' budgets (large `k`, or
+binary curves, which the point test does not cover), and 72 primes of `v`
+above the test's range. P-256's `Δ` factors with
 the committed hints as `−3·5·456597257999·p81·p136` (squarefree), so
 `v = 1`, `d_K = Δ` and `End(E) = O_K`, probable through its 136-bit prime
 (the 81-bit one is below the Miller–Rabin proof bound); every walked curve

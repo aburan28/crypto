@@ -677,6 +677,30 @@ fn binary_curves(v: &mut Vec<CatalogCurve>) {
             object: CurveObject::Binary(Box::new(ctor())),
         });
     }
+    for name in [
+        "ecc2k-130",
+        "ecc2-131",
+        "ecc2k-163",
+        "ecc2-163",
+        "ecc2-191",
+        "ecc2k-238",
+        "ecc2-238",
+        "ecc2k-358",
+        "ecc2-353",
+    ] {
+        let (curve, _) = BinaryCurve::certicom_challenge(name).expect("Certicom curve record");
+        v.push(CatalogCurve {
+            name,
+            aliases: &[],
+            family: if name.starts_with("ecc2k") {
+                Family::Koblitz
+            } else {
+                Family::BinaryRandom
+            },
+            standard: "Certicom ECC Challenge",
+            object: CurveObject::Binary(Box::new(curve)),
+        });
+    }
 }
 
 /// A hardcoded characteristic-three catalog curve, as coefficient vectors over
