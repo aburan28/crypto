@@ -1,6 +1,6 @@
 {
   "schema_version": "ic-progress-timeline/1",
-  "updated": "2026-10-16",
+  "updated": "2026-10-17",
   "question": "Verified index-calculus cost over matched Pollard rho (IC / rho), by date landed on main. Below 1 means index calculus is cheaper. The barrier is rho's own cost, 1.",
   "unit_note": "Each point is quoted from the frozen result it links, in that result's own unit (Valgrind Ir, S, counted operations, online wall time, or isolated CPU time where marked). Direction against 1 is meaningful only for fully priced ratios; a quotient of incomplete lower bounds is diagnostic even when paired. No value on this page is computed from another.",
   "series": [
@@ -146,6 +146,17 @@
           "class": "engineering",
           "anchor": "#n83-tier1-cold-20261016",
           "source": "https://github.com/aburan28/crypto/blob/main/research/n83_e2e_holdout_20261016/RESULT.md"
+        },
+        {
+          "date": "2026-10-17",
+          "value": 47.061156446677266,
+          "reference": "matched",
+          "unit": "Tier 1 cloud-instance cold IC / same-point rho online wall",
+          "label": "n83 K1107/root11 sixteen-point cold factor-base frontier",
+          "detail": "Across sixteen sealed public points on two admitted Tier 1 hosts, K1107/root11 mean cold process 104.826 s divided by mean paired rho online 2.227432 s gives 47.061. It saves 3.949 s [3.404, 4.494] against same-source K1120/root11 on the matched points (exact sign-flip p=0.000030518). Both K1107 root layouts beat every other tested K in cold paired mean, while the exact eight-configuration selection remains BOUNDED_UNKNOWN because those layouts tie.",
+          "class": "engineering",
+          "anchor": "#n83-tier1-finalist-20261017",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_e2e_finalist_results_20261017/RESULT.md"
         }
       ]
     },
@@ -651,6 +662,17 @@
           "class": "accounting",
           "anchor": "#ic-tool-programme-20261001",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
+        },
+        {
+          "date": "2026-10-17",
+          "value": 0.04508348816596248,
+          "reference": "matched",
+          "unit": "Tier 1 cloud-instance online wall",
+          "label": "n83 K1120/root11 sixteen-point same-point rho online reference",
+          "detail": "Median of sixteen paired IC/rho online wall ratios 0.045083; the median paired rho/IC is 22.355. K1120/root11 solved all sixteen previously unseen public points faster online than independently verified same-point rho. The online interval excludes reusable base, index and log preparation; K1120/root11 mean cold process was 108.775 s. Both Tier 1 host strata passed before/after rho calibration and independent replay. The eight-configuration online selector is BOUNDED_UNKNOWN.",
+          "class": "engineering",
+          "anchor": "#n83-tier1-finalist-20261017",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/n83_e2e_finalist_results_20261017/RESULT.md"
         }
       ]
     },

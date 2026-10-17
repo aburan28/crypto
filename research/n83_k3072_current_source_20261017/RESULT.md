@@ -1,0 +1,138 @@
+# N83 K3072 and K3450/root11 work on the current IC source
+
+The current finalist source, SHA-256
+`8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12`,
+completed one K3072/root11 fresh process on the previously exposed N83
+single-point fixture. Independent arithmetic replay checked all 509,952
+distinct factor-base points, the four-point relation, the recovered scalar,
+full rank 3,072, and the five exclusive target-online phases. The exact
+current-source candidate is
+`IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a`.
+
+| Source commit | Base hash | Root entries | Local cold process | Target online | Replay |
+| --- | --- | ---: | ---: | ---: | --- |
+| `416489e09c3d8885b6c12f262935e6ba29373460` | `c5511247735bc183359d5425c4dd794aaad49ad38d2ca964799e1caa76afaa08` | 783,270,873 | 678.111 s | 31.908 ms | `PASS_INDEPENDENT_ARITHMETIC_REPLAY` |
+
+The Rust release binary SHA-256 was
+`d71a9662c9d4e2dde58443bfc646a05737c6b9ca6b3d5e831b632ce09384c906`.
+The producer ran under a 900-second child cap on an Apple M4 Pro with 48 GB
+RAM. Local process scheduling was shared; these wall times are feasibility
+diagnostics. The base hash and root-entry count match the earlier verified
+K3072/root11 Tier 1 candidate, while the exact IC1 identity changes with
+the executed source commit and content hashes. The [candidate manifest](candidate_IC1N83Ckb1a1fb509952PDP4rootRCguidedLAgaussTDdirectISO0hec7ae07d8b9a.json),
+[producer receipt](receipt.json), and [replay summary](replay.json) retain the
+identity and stage outputs.
+
+The complete raw run, including the 40 MB base dump, target record, build
+log, and exact local replay scripts, is archived at
+`/Volumes/SSD990/crypto/artifacts/n83_k3072_current_source_20261017/raw.tar.gz`,
+SHA-256 `ba747b054d24af88abfb6df66acbd2efb407b5c92fb96092b6f2f0b4aa7f65d1`.
+An earlier archive with an inherited source-commit field is retained beside
+it as `pre_identity_correction.tar.gz`, SHA-256
+`e472296e93d626c30e753c3b73d17ae57b03baf259df8f320bd12fa6d8850048`;
+the current manifest uses the actual executed repository commit above.
+After extracting the archive, the versioned `verify_archive.py` checks its
+SHA-256, the source and input hashes, the full base, relation, scalar, phase
+accounting, and candidate manifest. It passed against the archived files:
+
+```sh
+tar -xzf /Volumes/SSD990/crypto/artifacts/n83_k3072_current_source_20261017/raw.tar.gz -C /path/to/extracted
+python3 research/n83_k3072_current_source_20261017/verify_archive.py /Volumes/SSD990/crypto/artifacts/n83_k3072_current_source_20261017/raw.tar.gz /path/to/extracted
+```
+
+The same binary completed a K3450/root11 dynamic process on that exposed
+point under a 1,200-second cap. It enumerated **572,700** usable base points,
+reached rank **3,450**, and built **987,887,478** packed root entries.
+Independent arithmetic replay checked the full base, four-point witness,
+scalar, and target phase sum, then reproduced exact candidate
+`IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h1b83e4f732b2`.
+
+| Current-source K3450 control | Value |
+| --- | ---: |
+| Base hash | `ae75c86565f5fa12fb6f30a5539f6f4638bcf1ca8b347a5cefa20f5073a9f572` |
+| Local cold process | 813.551 s |
+| One-target online | 57.333 ms |
+| Packed root allocation | 10,737,418,240 bytes |
+| Replay | `PASS_INDEPENDENT_ARITHMETIC_REPLAY` |
+
+The prior K3450 high-K result used a fixed-capacity wide3 Bloom layout;
+this dynamic-index layout is a new exact candidate with the same factor-base
+size. The [candidate manifest](candidate_IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0h1b83e4f732b2.json)
+is versioned here. The raw archive at
+`/Volumes/SSD990/crypto/artifacts/n83_k3450_current_source_20261017/raw.tar.gz`
+has SHA-256
+`9f9cd7fc6a02ceb2a4728791bf06ab0f230771135d4f1c2005893ed6a2d5c039`.
+The [K3450 archive verifier](verify_k3450_archive.py) checked that digest,
+the archived source receipt, base, witness, scalar, phase accounting, and
+candidate identity against the current source. Its [producer receipt](receipt_K3450.json)
+and [replay summary](replay_K3450.json) are also versioned and checked against
+the archive. Both exposed-point local
+timings are feasibility diagnostics.
+
+Two more current-source high-K layouts completed on the same public point
+and passed full independent arithmetic replay. The K3450/root11 wide3 Bloom
+index uses the same **572,700** usable points and **3,450** effective columns
+as the dynamic layout. It stores **987,887,478** root entries in a 5-byte
+packed table with a 1 GiB Bloom filter. K3500/root4 uses **581,000** usable
+points and **3,500** effective columns; its 4-byte packed table stores
+**1,016,729,255** root entries with a 1 GiB Bloom filter. Both runs recovered
+the exposed scalar from a four-point relation. The independent checker
+recomputed every base point, the witness sum, scalar replay, candidate ID,
+source and binary hashes, and the five exclusive online phases.
+
+| Current-source layout | Exact candidate ID | Packed table allocation | Local cold process | One-target online | Replay |
+| --- | --- | ---: | ---: | ---: | --- |
+| K3450/root11 wide3 Bloom | `IC1N83Ckb1a1fb572700PDP4rootRCguidedLAgaussTDdirectISO0hbde4a785a36e` | 5,368,709,120 bytes | 854.241 s | 43.380 ms | `PASS_INDEPENDENT_ARITHMETIC_REPLAY` |
+| K3500/root4 standard Bloom | `IC1N83Ckb1a1fb581000PDP4rootRCguidedLAgaussTDdirectISO0hb3a616c4e22f` | 8,589,934,592 bytes | 924.785 s | 36.898 ms | `PASS_INDEPENDENT_ARITHMETIC_REPLAY` |
+
+The wide3 table allocation is half the dynamic K3450 allocation on this
+input. Its observed online interval is 24.3% shorter, while its cold process
+is 40.690 seconds longer. K3500/root4 has the shortest online interval of
+these three high-K local controls, with the longest cold process. The point
+was already exposed and the host was shared, so these measured differences
+prioritize fresh same-point Tier 1 comparisons without selecting a winner.
+
+The raw wide3 archive is
+`/Volumes/SSD990/crypto/artifacts/n83_k3450_wide3_current_source_20261017/raw.tar.gz`,
+SHA-256 `1495f924ed125d4ea7aef000f2265b60f750126053ebb537b73c0f90735aff19`.
+The raw K3500/root4 archive is
+`/Volumes/SSD990/crypto/artifacts/n83_k3500_root4_current_source_20261017/raw.tar.gz`,
+SHA-256 `1f278f491e20e0780be9d225a7ce62e4345e9777763a7f7bf73377ac100ac3f5`.
+The versioned [high-K archive verifier](verify_highk_archives.py), producer
+receipts, replay summaries, and exact candidate manifests bind both archives
+to the current source. With each archive already extracted to its sibling
+artifact directory, replay them with:
+
+```sh
+python3 research/n83_k3072_current_source_20261017/verify_highk_archives.py wide3 /Volumes/SSD990/crypto/artifacts/n83_k3450_wide3_current_source_20261017/raw.tar.gz /Volumes/SSD990/crypto/artifacts/n83_k3450_wide3_current_source_20261017
+python3 research/n83_k3072_current_source_20261017/verify_highk_archives.py root4 /Volumes/SSD990/crypto/artifacts/n83_k3500_root4_current_source_20261017/raw.tar.gz /Volumes/SSD990/crypto/artifacts/n83_k3500_root4_current_source_20261017
+```
+
+The next comparison pairs both current-source high-K candidates with the
+winner of the frozen K1104–K1120 finalist panel on fresh public points,
+with each IC arm paired to a same-point strong rho run and per-pair Tier 1
+calibration. The exposed control point has no role in that selection.
+
+Ten new public points for that followup are sealed before the finalist result
+is inspected. `generate.py --verify-sealed` replays the earlier exclusion sets
+and all ten scalar/subgroup certificates. Their public-point SHA-256 is
+`9bf9bfca72d4e82a5780759d52ac000b812ca25e831af04238983c8b72d2d777`;
+the answer sidecar SHA-256 is
+`3f7a75dc0134f883a77fa2b87eb6839b6df804c53950d8dc77e7f29b2500284c`.
+An independent read-only inventory scanned 490 `research/n83*/**/*.jsonl`
+files containing 32,366 earlier two-string point rows and found no overlap
+with these ten points.
+The answer sidecar is for independent replay, not a producer input. A run
+protocol chooses its third candidate by the preregistered finalist
+online selection output. If that selection is null or the panel is
+unadmitted, the fixed fallback is K1120/root11
+(`IC1N83Ckb1a1fb185920PDP4rootRCguidedLAgaussTDdirectISO0hc922b499a234`),
+chosen from the earlier exposed-point screen before the ten points above
+are used. The fallback does not turn a null finalist result into a selected
+winner. Use two Tier 1 host strata of five public points and fifteen
+same-point IC/rho pairs per stratum. The versioned runner, independent
+verifier, three-pair online and cold selectors,
+provider-archive binder, IC1 row materializer and cloud workflow implement
+that preregistered next step. The workflow waits for a later `dispatch.json`
+bound to the independently replayed finalist result; the ten-point fixture
+has not been dispatched.
