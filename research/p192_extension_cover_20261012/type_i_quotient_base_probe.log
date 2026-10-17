@@ -1,0 +1,203 @@
+constructing native F_(p^6) and quartic generator point
+{
+  "boundary": "elliptic quotient coordinate map only; genus-three Jacobian conorm and norm remain unimplemented",
+  "cleared_quartic_identity_verified": true,
+  "conjugate_quartic_rhs_square_over_Fp6": [
+    true,
+    true
+  ],
+  "elliptic_root_assignment_Fp3": [
+    [
+      "0",
+      "1"
+    ],
+    [
+      "5379329309169822858095324704890017497689533679363080256926",
+      "61093507738149796090974284332527227239152174053195053925",
+      "3587437080801769334788127070762657667239141860708784832816"
+    ],
+    [
+      "897772426216857905740464718317648918394375021027244704353",
+      "6216008227648530967744815138875139188844756526337129907353",
+      "2689664654584911429047662352445008748844766839681540128463"
+    ]
+  ],
+  "generator_quartic_X_Fp6": "1466025388247399056090932428678278972211003425396634073847*k^5 + 6216812045859230809190733133499267190912282108086088262426*k^4 + 6216812045859230809190733133499267190912282108086088262426*k^3 + 1466025388247399056090932428678278972211003425396634073847*k^2 + 1798766687331237959365118667589426155896190438506569955535",
+  "generator_quartic_Y_Fp6": "2644747628054511612362662128877882627650744399345925779854*k^5 + 587083002427738878326310362827130078847561804764634441024*k^4 + 587083002427738878326310362827130078847561804764634441024*k^3 + 2644747628054511612362662128877882627650744399345925779854*k^2 + 1290720780097531465770401953704952889135639622968463636330",
+  "generator_quartic_equation_verified": true,
+  "infinity_root_Fp3": [
+    "0",
+    "1"
+  ],
+  "inverse_generator_replay_verified": true,
+  "kappa_Fp6": "5312104573522375744080597291703252532897525754385013773912*k^5 + 2656793945320609144122676352718541030844366227065374195529*k^4 + 2656793945320609144122676352718541030844366227065374195529*k^3 + 5312104573522375744080597291703252532897525754385013773912*k^2 + 1283030364104431776322456765213671003374502770597175369849",
+  "kappa_squared_Fp6": "105224761814413175140247364031573860684447601115370522505*k^5 + 1369893259101746801787911335610834687497627012800826044765*k^4 + 1369893259101746801787911335610834687497627012800826044765*k^3 + 105224761814413175140247364031573860684447601115370522505*k^2 + 5135429902842557095913795449466988138750736879814419018620",
+  "mobius_C_Fp3": [
+    "756428815275971909735165916674226904144662252814236341564",
+    "985232718155019496333530151346343215608312224435244292497",
+    "5556151663426207545460493145915776773182769476121402103469"
+  ],
+  "mobius_D_Fp3": [
+    "2589731280963160040528480293729015732725622623413752825099",
+    "5591630406741706236820362785298114034426292504666715587223",
+    "3929051235071475032126763220238849535316737884208314123006"
+  ],
+  "mobius_models_found": 4,
+  "source_sha256": "c0f68c219797fdc185286e9418b7961084d2b87cc261589696032416ffbb7a4b",
+  "status": "verified_type_i_quartic_generator_coordinates",
+  "type_i_source_sha256": "a0e4449cbc7db61dfd10c37801b23784b25bec992ec4dca88790bf8016d4529f"
+}
+building two rational fibers and six Frobenius pairs
+{
+  "all_fiber_points_on_descended_model": true,
+  "boundary": "exact point-level conorm and nonzero r-torsion deduction; genus-three Jacobian reduction and nonzero Frobenius-norm class still need separate checks",
+  "conorm_order_deduction": "pullback of -G is nonzero and r-torsion by push-pull=[2] and r odd prime; the genus-three class is not reduced",
+  "conorm_pushforward_equals_minus_2G": true,
+  "conorm_pushforward_nonzero_and_r_torsion": true,
+  "fiber_cardinality_each": 2,
+  "fiber_sha256": "b6767c53b19a1300839aa21ba6a5cb881d7e7bec6c150c9fbf0ef0679247d9b5",
+  "formal_conorm": "Pplus(G)+Pminus(G)-Pplus(2G)-Pminus(2G)",
+  "formal_norm_to_Fp2": "sum of q^i-Frobenius translates of the formal conorm for i=0,1,2; q=p^2",
+  "frobenius_q_orbits_return_after_three_steps": true,
+  "generator_map_source_sha256": "c0f68c219797fdc185286e9418b7961084d2b87cc261589696032416ffbb7a4b",
+  "group_relation": "G - 2G = -G, order r on P-192",
+  "quotient_image_of_each_fiber_checked": true,
+  "r_prime_and_odd_checked": true,
+  "source_sha256": "62f7025733aaeeee3467f466191aa32b172223a4d1af1df73453c41caff221d7",
+  "status": "verified_type_i_point_level_conorm_norm"
+}
+base 1/16, pilot index 1
+base 2/16, pilot index 2
+base 3/16, pilot index 3
+base 4/16, pilot index 4
+base 5/16, pilot index 5
+base 6/16, pilot index 6
+base 7/16, pilot index 7
+base 8/16, pilot index 8
+base 9/16, pilot index 9
+base 10/16, pilot index 10
+base 11/16, pilot index 11
+base 12/16, pilot index 12
+base 13/16, pilot index 13
+base 14/16, pilot index 14
+base 15/16, pilot index 15
+base 16/16, pilot index 16
+checked 8/64 known-scalar quotient queries
+checked 16/64 known-scalar quotient queries
+checked 24/64 known-scalar quotient queries
+checked 32/64 known-scalar quotient queries
+checked 40/64 known-scalar quotient queries
+checked 48/64 known-scalar quotient queries
+checked 56/64 known-scalar quotient queries
+checked 64/64 known-scalar quotient queries
+{
+  "anchor_pilot_index": 0,
+  "base_build_ns": 14715636291,
+  "base_classes": 16,
+  "base_policy": "first 16 distinct nonzero projected three-quotient vectors from frozen Fp abscissae after index 0 anchor",
+  "base_selection": [
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 1,
+      "x": "3023090459538386391679230627198675483834442503044198607558"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 2,
+      "x": "4383344137869928975221878887017728716219751560808529366635"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 3,
+      "x": "1825363779422581587965910568887979575556453963012226355195"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 4,
+      "x": "3270537725108556797015933371649693850248460079814716748105"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 5,
+      "x": "3608294016987137749334374555804287824578011711267418295133"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 6,
+      "x": "2745730504627126646153502732552926388164526093729298769717"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 7,
+      "x": "1484419086221559792106849892432948497593910732262857431651"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 8,
+      "x": "337876792547769837593931589608352465854579398845618500877"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 9,
+      "x": "5735245117803594385119252025130553339933909041182013711764"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 10,
+      "x": "4704365478102111220588183000165625960478266714338342753651"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 11,
+      "x": "3817873407907441435204834474784434229488730525518386074079"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 12,
+      "x": "1200564273369307856462374458056818967439174882258450227315"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 13,
+      "x": "2402736274819212906041936166496709750959500454632167703094"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 14,
+      "x": "5347657285597863608793720609703610288829994357086087989144"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 15,
+      "x": "3386460235058964835942702531997179993905916943441083416408"
+    },
+    {
+      "diagonal_after_projection": true,
+      "pilot_index": 16,
+      "x": "472013027996600188037127089067214446282085378163424743736"
+    }
+  ],
+  "boundary": "exact elliptic quotient-coordinate r-vectors; generic genus-three Jacobian representative, inverse-isogeny, and complete relation collector remain separate",
+  "candidate_cofactor": "9745314011399999080353382387924259374680358052274105047343790102210948785313621242842357105607587396653353823515292585640417051742014748800772927851507971775934426802951755139147189236582634345051735952092818586369948498241481992249433898803432562525942393045320537614777930915594708057584",
+  "candidate_id": null,
+  "diagonal_projected_classes": 16,
+  "divisor_transfer_source_sha256": "62f7025733aaeeee3467f466191aa32b172223a4d1af1df73453c41caff221d7",
+  "extension_elliptic_order": "61172327492847069472032393719205726808057197862523409505499342572377882961446976258061263843348278208115180404813203339823021016717952646091476672378580879277744554214321662883325192473804254142663503464936681270423385682685646213060668122121010994817767128340796000118909362775729330068952001311650391066116345343137623001029987852157033434520304",
+  "ordinary_known_scalar_queries": 64,
+  "p": "6277101735386680763835789423207666416083908700390324961279",
+  "pair_index_entries": 136,
+  "pair_index_ns": 56510792,
+  "pilot_seed": 1727116218387,
+  "pilot_x_sha256_decimal_csv": "92166e6477a7738fdae1381531c864499523d404f0ac6e3ba3cadb0cdc8cfaf8",
+  "proposal_id": "Q-P192-TypeI-Fp-quotient-16",
+  "query_and_match_ns": 1328644792,
+  "query_policy": "64 independent frozen uniform nonzero scalars times the checked Type I three-step norm quotient vector (-2G,-2G,-2G)",
+  "query_scalar_sha256_decimal_csv": "fc88b1eb5d514240d1b7968176fae3ac6d8a43f4c8a80593141f08947e986865",
+  "query_seed": 1727116218393,
+  "quotient_incidence_rank": 0,
+  "r": "6277101735386680763835789423176059013767194773182842284081",
+  "relation_witnesses": [],
+  "source_sha256": "7c010edc765a04593c4a62e984fa0f5e0a26fcf1f6660be89f946dc357211f48",
+  "status": "bounded_type_i_quotient_coordinate_base_probe",
+  "verified_quotient_three_sum_matches": 0
+}

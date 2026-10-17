@@ -1,0 +1,171 @@
+{
+ "schema": "isogeny-class-trio/curves/v1",
+ "what": "Curve records of the isogeny-class trio picks (copied from data/pick-*.json, produced by selector/). Harvested by scripts/build_curve_registry.py.",
+ "curves": [
+  {
+   "name": "isogeny-class-trio B-47",
+   "role": "reference (41/47-bit trio)",
+   "slug": "icv1-f2m47-t4276051-826c5755",
+   "field": {
+    "kind": "binary",
+    "degree": 47,
+    "polynomial_low_terms": [
+     5,
+     0
+    ]
+   },
+   "a": 1,
+   "b": "0x52e3db551eb3",
+   "order": "140737484079278",
+   "subgroup_order": "70368742039639",
+   "cofactor": 2,
+   "generator": [
+    "0xd6dc0d063d1",
+    "0x23397c1623ca"
+   ],
+   "seed": "isogeny-class-trio/2026-10-17/B-47/b/28948"
+  },
+  {
+   "name": "isogeny-class-trio B-61",
+   "role": "primary",
+   "slug": "icv1-f2m61-tm2657393969-b9ff0fb0",
+   "field": {
+    "kind": "binary",
+    "degree": 61,
+    "polynomial_low_terms": [
+     5,
+     2,
+     1,
+     0
+    ]
+   },
+   "a": 1,
+   "b": "0x9c60f836d06fc8",
+   "order": "2305843011871087922",
+   "subgroup_order": "1152921505935543961",
+   "cofactor": 2,
+   "generator": [
+    "0xc17a1d9ae3996ee",
+    "0x9bcf1bc6ebcb05"
+   ],
+   "seed": "isogeny-class-trio/2026-10-17/B-61/b/12079"
+  },
+  {
+   "name": "isogeny-class-trio P-47",
+   "role": "reference (41/47-bit trio)",
+   "slug": "icv1-fp47-tm8785349-43e36ce5",
+   "p": "140737488355213",
+   "a": "-3",
+   "b": "0xda8a554f2ba",
+   "order": "140737497140563",
+   "subgroup_order": "140737497140563",
+   "cofactor": 1,
+   "generator": [
+    "0x4548698c68b3",
+    "0x2b74b4fbfbc3"
+   ],
+   "seed": "isogeny-class-trio/2026-10-17/P-47/b/117828"
+  },
+  {
+   "name": "isogeny-class-trio P-61",
+   "role": "primary",
+   "slug": "icv1-fp61-tm813574577-a3b71255",
+   "p": "2305843009213693951",
+   "a": "-3",
+   "b": "0x54aa66b458b77ec",
+   "order": "2305843010027268529",
+   "subgroup_order": "2305843010027268529",
+   "cofactor": 1,
+   "generator": [
+    "0x112c917afe3d4fd3",
+    "0xef721929b08bfaa"
+   ],
+   "seed": "isogeny-class-trio/2026-10-17/P-61/b/11526"
+  },
+  {
+   "name": "isogeny-class-trio gap d-3",
+   "role": "prime-conductor-gap set (featured)",
+   "slug": "icv1-fp61-t205-983ecb51",
+   "p": "2305842958741183033",
+   "a": "0",
+   "b": "5",
+   "order": "2305842958741182829",
+   "subgroup_order": "2305842958741182829",
+   "cofactor": 1,
+   "generator": [
+    "0x1162eb46b028b5bb",
+    "0x1c0feaafb129334"
+   ],
+   "cm_discriminant": -3,
+   "conductor_gap_l": "1753413037"
+  },
+  {
+   "name": "isogeny-class-trio gap d-19",
+   "role": "prime-conductor-gap set (featured)",
+   "slug": "icv1-fp61-t7175-7e38f752",
+   "p": "2305842959800795691",
+   "a": "2305842959800795688",
+   "b": "1507406867695792627",
+   "order": "2305842959800788517",
+   "subgroup_order": "2305842959800788517",
+   "cofactor": 1,
+   "generator": [
+    "0x15533b5049121832",
+    "0x219b345ec1e4f22"
+   ],
+   "cm_discriminant": -19,
+   "conductor_gap_l": "696735691"
+  },
+  {
+   "name": "isogeny-class-trio gap d-43",
+   "role": "prime-conductor-gap set",
+   "slug": "icv1-fp61-t727-ddf032b6",
+   "p": "2305842677174433443",
+   "a": "2305842677174433440",
+   "b": "1126842748974135980",
+   "order": "2305842677174432717",
+   "subgroup_order": "2305842677174432717",
+   "cofactor": 1,
+   "generator": [
+    "0x1de66bccecef3931",
+    "0xea1930def591581"
+   ],
+   "cm_discriminant": -43,
+   "conductor_gap_l": "463138201"
+  },
+  {
+   "name": "isogeny-class-trio gap d-67",
+   "role": "prime-conductor-gap set",
+   "slug": "icv1-fp61-t2279-df6b5e41",
+   "p": "2305842976999134887",
+   "a": "2305842976999134884",
+   "b": "399914583043124681",
+   "order": "2305842976999132609",
+   "subgroup_order": "2305842976999132609",
+   "cofactor": 1,
+   "generator": [
+    "0xd64da31b5a5f83b",
+    "0x1ce38b555f2cf801"
+   ],
+   "cm_discriminant": -67,
+   "conductor_gap_l": "371028661"
+  },
+  {
+   "name": "isogeny-class-trio gap d-163",
+   "role": "prime-conductor-gap set",
+   "slug": "icv1-fp61-t95-4d1bb712",
+   "p": "2305842838172865227",
+   "a": "2305842838172865224",
+   "b": "1873033291747189733",
+   "order": "2305842838172865133",
+   "subgroup_order": "2305842838172865133",
+   "cofactor": 1,
+   "generator": [
+    "0x9134193e56f7dd1",
+    "0x16b69eead2c2d9cc"
+   ],
+   "cm_discriminant": -163,
+   "conductor_gap_l": "237876229"
+  }
+ ]
+}

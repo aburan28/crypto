@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="430" viewBox="0 0 1040 430" role="img" aria-label="WeakCurves source-lock dependency diagram">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#455a64"/></marker></defs>
+<rect width="1040" height="430" rx="18" fill="#f8fbfd"/>
+<text x="40" y="43" font-family="Arial,sans-serif" font-size="25" font-weight="bold" fill="#18324b">WeakCurves source-lock boundary</text>
+<text x="40" y="70" font-family="Arial,sans-serif" font-size="15" fill="#506575">run-20261015T0950Z · exact current-main bytes feed derived exports</text>
+<g font-family="Arial,sans-serif" font-size="17" text-anchor="middle">
+<rect x="45" y="115" width="250" height="67" rx="10" fill="#dceaf3" stroke="#386b8f"/><text x="170" y="143" fill="#18324b">curve registry</text><text x="170" y="166" font-size="13" fill="#44677e">SHA 85300a415cfa…</text>
+<rect x="45" y="206" width="250" height="67" rx="10" fill="#dceaf3" stroke="#386b8f"/><text x="170" y="234" fill="#18324b">transfer registry</text><text x="170" y="257" font-size="13" fill="#44677e">SHA ddc14e19741f…</text>
+<rect x="45" y="297" width="250" height="67" rx="10" fill="#e4f2df" stroke="#5b8750"/><text x="170" y="325" fill="#244b28">covers inventory</text><text x="170" y="348" font-size="13" fill="#52764b">SHA 7d2f8c5c90b0…</text>
+<rect x="395" y="159" width="250" height="76" rx="10" fill="#fff0d7" stroke="#af7a31"/><text x="520" y="190" fill="#5c401d">catalog snapshot</text><text x="520" y="213" font-size="13" fill="#8e642b">922 curve identities</text>
+<rect x="395" y="293" width="250" height="76" rx="10" fill="#fff0d7" stroke="#af7a31"/><text x="520" y="324" fill="#5c401d">decomposition index</text><text x="520" y="347" font-size="13" fill="#8e642b">13 property filters</text>
+<rect x="740" y="293" width="250" height="76" rx="10" fill="#e8e4f5" stroke="#75629a"/><text x="865" y="324" fill="#40335f">site data copy</text><text x="865" y="347" font-size="13" fill="#6e5b91">byte-equal validator</text>
+</g>
+<g stroke="#455a64" stroke-width="2.4" fill="none" marker-end="url(#arrow)"><path d="M295 148 L395 183"/><path d="M295 239 L395 210"/><path d="M520 235 L520 293"/><path d="M295 330 L395 330"/><path d="M645 331 L740 331"/></g>
+<text x="46" y="407" font-family="Arial,sans-serif" font-size="14" fill="#536b7a">Source hashes and export/site parity are checked separately from geometric and attack witnesses.</text>
+</svg>

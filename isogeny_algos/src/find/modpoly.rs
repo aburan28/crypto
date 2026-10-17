@@ -183,13 +183,42 @@ impl<F: Field> Phi<F> {
             f.characteristic_exceeds(ell as u64 + 1) || f.char() == 0,
             "characteristic must exceed l + 1"
         );
+        let s = s_series(f, Self::hecke_len(ell));
+        Self::compute_hecke_from(f, ell, &s)
+    }
+
+    /// Coefficients of S(q) = q j(q) that `compute_hecke` reads for Phi_l.
+    fn hecke_len(ell: usize) -> usize {
+        // indices of S^m needed: n + m with n <= l (prec - 1), m <= l + 1, prec = l + 1
+        ell * (ell + 1) + ell + 3
+    }
+
+    /// Phi_l for each l in `ells` (each prime, char F > l + 1), the q-expansion S(q) = q j(q)
+    /// computed once at the largest length and shared (its prefixes are the shorter expansions,
+    /// so each result equals `compute_hecke`).
+    pub fn compute_many(f: &F, ells: &[usize]) -> Vec<Phi<F>> {
+        let Some(&lmax) = ells.iter().max() else {
+            return vec![];
+        };
+        assert!(
+            f.characteristic_exceeds(lmax as u64 + 1) || f.char() == 0,
+            "characteristic must exceed l + 1"
+        );
+        let s = s_series(f, Self::hecke_len(lmax));
+        ells.iter()
+            .map(|&l| Self::compute_hecke_from(f, l, &s))
+            .collect()
+    }
+
+    /// `compute_hecke` given S(q) to at least `hecke_len(ell)` coefficients.
+    fn compute_hecke_from(f: &F, ell: usize, s_full: &[F::E]) -> Phi<F> {
         let l = ell;
         let l1 = l + 1;
         let prec = l + 1; // non-negative powers q^0 .. q^l of the e_k(j_r)
-        let len = l * prec + l1 + 2; // indices of S^m needed: n + m with n <= l (prec - 1), m <= l + 1
+        let len = Self::hecke_len(l);
         let start = std::time::Instant::now();
         stage_trace("hecke_begin", Some(l), len, start);
-        let s = s_series(f, len);
+        let s = &s_full[..len];
         let one_series = || {
             let mut v = vec![f.zero(); len];
             v[0] = f.one();
@@ -209,10 +238,10 @@ impl<F: Field> Phi<F> {
         let bsz = ((l1 as f64).sqrt().ceil() as usize).max(1);
         let mut baby: Vec<Vec<F::E>> = vec![one_series()];
         for a in 1..bsz {
-            let next = series::mul(f, &baby[a - 1], &s, len);
+            let next = series::mul(f, &baby[a - 1], s, len);
             baby.push(next);
         }
-        let step = series::mul(f, &baby[bsz - 1], &s, len); // S^bsz
+        let step = series::mul(f, &baby[bsz - 1], s, len); // S^bsz
         let mut giant: Vec<Vec<F::E>> = vec![one_series()];
         for _ in 1..=l / bsz {
             let next = series::mul(f, giant.last().unwrap(), &step, len);

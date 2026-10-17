@@ -21,7 +21,7 @@
 //! total also reports the process CPU time the arm used (`cpu_ms`, user and
 //! system, all repetitions), the Macaulay rows generated, the stage units
 //! charged to root eliminations, and the nodes and specialisations the
-//! gate-first order (`KIC_F6_GATE_FIRST=1`) skipped.
+//! gate-first order (default; `KIC_F6_GATE_FIRST=0` turns it off) skipped.
 
 use crypto_lib::cryptanalysis::inherited_f4::{
     f4_root_elimination_thread, f4_rows_generated_thread,

@@ -358,3 +358,11 @@ BENCH_OUT=research/semaev_rootfind_e2e_20261012 \
 E2E_SKIP_BINARY=1 E2E_FULL_BUDGET_S=300 BENCH_OUT=research/semaev_rootfind_e2e_20261012/run2 \
   cargo run --release --example semaev_rootfind_e2e_bench
 ```
+
+## Faster e2e loop (2026-10-15)
+
+Engineering on `feature/rootfind-faster-e2e-20261015` (PR #1909): single-hash
+PairSumTable probes (~3× miss path), multi-target amortization (3–8× vs cold×N),
+m=2 hit-path key reuse. ecbench smoke n=13: complete negfold / rho-strong ≈ 1.69
+(hard stop); negfold / XOR-priced F4 ≈ 0.059. Evidence
+`research/rootfind_faster_e2e_20261015/`. No security claim.

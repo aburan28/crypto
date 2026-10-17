@@ -400,6 +400,35 @@ verifiers, replay tools, and research result generation.
   do not grant an exception. Preserve their mathematical contracts, fixtures,
   and accounting requirements in the native replacement.
 
+## Model tiers
+
+Owner rule, 2026-10-17: one model-tier topology across the owner's
+repositories. The reference design is
+[`docs/model-tiers.md`](https://github.com/aburan28/crypto-autoresearcher/blob/main/docs/model-tiers.md)
+in aburan28/crypto-autoresearcher.
+
+| tier | does here | Anthropic |
+| --- | --- | --- |
+| frontier | design, interpretation, claims, breakthrough review | Mythos (`claude-mythos-5`), Fable 5.1 (`claude-fable-5-1`) |
+| core | the same when frontier is not needed; coordination and review | Opus 5.5 (`claude-opus-5-5`); OpenAI, GLM 5.3 and Qwen equivalents |
+| director | compiles a decided experiment into a frozen command card, then assesses the run | Sonnet 5.5 (`claude-sonnet-5-5`), [`experiment-director`](.claude/agents/experiment-director.md) |
+| mechanical | runs the card, relays tool output verbatim, computes nothing, refuses anything underspecified | Haiku 5.5 (`claude-haiku-5-5`, effort low), [`executor-mechanical`](.claude/agents/executor-mechanical.md) |
+
+- **Frontier and core keep the reasoning**: the spec and preregistration,
+  analysis (`ecbench compare` and `table` read-outs), the §5a pricing band and
+  every cross-method ranking, success-criterion classification, claims, and
+  every PR decision (open, fix, merge).
+- **The relay.** Subagents do not nest in Claude Code, so the main session
+  does every dispatch: it dispatches `experiment-director` in compile mode,
+  relays the card it returns to `executor-mechanical` verbatim (adding
+  nothing), then dispatches `experiment-director` again in assess mode with
+  the executor's returned text. A card with a `specification_error` is not
+  relayed; the reasoning tier fixes the spec.
+- **The mechanical tier's output is an observation, never a result claim.**
+  The director's assessment says only whether the run executed as specified
+  and the relay was verbatim. What the numbers mean is decided by the
+  frontier or core tier under the measurement rules below.
+
 ## Default workflow: open the PR, check in, and land it
 
 The repository owner's standing preference (owner, 2026-10-14) is that the
@@ -1013,6 +1042,37 @@ existing EC2 key-pair name **`meow34`** when launching the instance.
   key is unavailable in their environment. If `meow34.pem` is not mounted or
   accessible, report that access blocker and continue with non-SSH work where
   possible.
+
+### 9a. Experiments that do not run locally go through `ephemeral`
+
+When an experiment, benchmark or build is to run in the cloud rather than on
+the local machine, run it with the ephemeral runner
+([`taskq/deploy/ephemeral/`](taskq/deploy/ephemeral/README.md)). Do not
+launch EC2 instances by hand for it. `conductor/deploy/aws/launch.py`, in the
+Conductor repository, starts the Conductor control plane, not experiments.
+
+```sh
+cargo build --release --manifest-path taskq/deploy/ephemeral/cli/Cargo.toml   # once
+E=taskq/deploy/ephemeral/cli/target/release/ephemeral   # or the bash CLI: taskq/deploy/ephemeral/ephemeral
+$E run --detach --type c7i.4xlarge --ttl 4h -- 'cargo run --release -- ... --out "$EPHEMERAL_OUT"'
+$E status last; $E logs -f last; $E fetch last
+```
+
+- The two CLIs are interchangeable: same flags, S3 layout and runner, and
+  either one can follow, fetch or kill the other's jobs.
+- Agents use `--detach` and check back with `status` or `logs -f` at the
+  check-in cadence of the default workflow, rather than holding a foreground
+  session open on a long job.
+- Each job is a paid instance. Start the jobs the request asks for and no
+  more. Pick the smallest instance type and `--ttl` that fit, and `kill` any
+  `--keep` instance once you are done with it. The runner, the deadline timer
+  and the reaper terminate everything else.
+- Runners use Session Manager (`ephemeral shell`), not SSH. Section 9 applies
+  to hosts launched by hand.
+- A result that lands in the repository still follows section 10, the
+  `benchmarks/` rule and the research-visuals rule. Its provenance is the
+  fetched `job.json`, `host.txt` and `rusage.txt` in
+  `~/.cache/ephemeral/runs/<id>/`.
 
 ### 10. Performance work starts from a clean, recorded baseline
 

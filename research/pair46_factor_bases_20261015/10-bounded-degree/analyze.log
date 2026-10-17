@@ -1,0 +1,30 @@
+{
+ "checks": {
+  "LB_all_ok": true,
+  "LB_rows_checked": 168,
+  "ZD_UB_all_ok": true,
+  "ZD_max_F": 4,
+  "controls_ok": true,
+  "ext_valid": true,
+  "fields_ok": true,
+  "squarefree_rows": 168,
+  "alg_rows": 168
+ },
+ "headline": {
+  "min_exponent_algebraic": 0.838802,
+  "max_exponent_ext_control": 0.504977,
+  "exponent_gap": 0.33382500000000004,
+  "min_rho_algebraic": 0.167335,
+  "min_rho_row": {
+   "family": "PW",
+   "k": 16,
+   "d": 6,
+   "rho": 0.167335
+  },
+  "RF_rho_mean_ci": [
+   0.6326537777777779,
+   0.6318729906560692,
+   0.6334345648994866
+  ]
+ }
+}

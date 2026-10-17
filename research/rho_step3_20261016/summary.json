@@ -1,0 +1,79 @@
+{
+  "instructions": {
+    "arms": [
+      {
+        "arm": "baseline",
+        "ir": 2369297848,
+        "walk_steps": 3034474,
+        "ir_per_step": 780.7935899269528,
+        "output_digest": "50acd17588d6deba"
+      },
+      {
+        "arm": "change1",
+        "ir": 2323045147,
+        "walk_steps": 3034474,
+        "ir_per_step": 765.5511785568108,
+        "output_digest": "50acd17588d6deba"
+      },
+      {
+        "arm": "final",
+        "ir": 2178454252,
+        "walk_steps": 3034474,
+        "ir_per_step": 717.9017688073782,
+        "output_digest": "50acd17588d6deba"
+      }
+    ],
+    "identical": true,
+    "baseline_over_final": 1.0876050510699455
+  },
+  "native_time": {
+    "cells": [
+      {
+        "slug": "icv1-f2m53-tm56619371-dac20a85",
+        "aa_spread": 0.056194014715096996,
+        "baseline_ns": {
+          "median": 106.7879635811676,
+          "min": 105.52153948262533,
+          "max": 107.03302516350445,
+          "n": 3
+        },
+        "candidate_ns": {
+          "median": 105.91513652778043,
+          "min": 104.28959252905116,
+          "max": 116.2790697827696,
+          "n": 5
+        },
+        "identical": true,
+        "ratio": 1.0082408150713966
+      },
+      {
+        "slug": "icv1-f2m61-t158598901-ab42b6c5",
+        "aa_spread": 0.02425826475932591,
+        "baseline_ns": {
+          "median": 114.95674607621098,
+          "min": 111.64867473438662,
+          "max": 128.74014737623668,
+          "n": 5
+        },
+        "candidate_ns": {
+          "median": 112.13140378100803,
+          "min": 103.41246076776896,
+          "max": 113.90273604136179,
+          "n": 5
+        },
+        "identical": true,
+        "ratio": 1.025196708503898
+      }
+    ],
+    "isolation": {
+      "runs": 32,
+      "contended": [
+        "time/aa/icv1-f2m61-t158598901-ab42b6c5-baseline-r5",
+        "time/aa/icv1-f2m61-t158598901-ab42b6c5-baseline-r6",
+        "time/ab/icv1-f2m53-tm56619371-dac20a85-baseline-r4",
+        "time/ab/icv1-f2m53-tm56619371-dac20a85-baseline-r5"
+      ],
+      "nonzero_exit": 0
+    }
+  }
+}

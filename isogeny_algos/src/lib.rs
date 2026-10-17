@@ -7,6 +7,7 @@ pub mod adx_gen;
 pub mod api;
 pub mod bigint;
 pub mod binary;
+pub mod binary_volcano;
 pub mod cm;
 pub mod curve;
 /// Research-only Eigen-Séta design helpers.  This module is deliberately not
@@ -34,6 +35,7 @@ pub mod kernel;
 pub mod lattice;
 /// Multivariate integer polynomials and resultants.
 pub mod mpoly;
+pub mod ntt;
 pub mod path;
 pub mod poly;
 pub mod quat;

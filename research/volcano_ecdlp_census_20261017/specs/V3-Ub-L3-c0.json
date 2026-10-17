@@ -1,0 +1,108 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "volcano census V3 Ub level 3 chunk 0",
+  "description": "Volcano ECDLP census Phase B (research/volcano_ecdlp_census_20261017/PLAN.md). Known-answer synthetic curves, planted_shared targets; no security claim.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "prime_explicit",
+        "p": 49922809,
+        "a": 18825839,
+        "b": 46351624,
+        "group_order": 49929808,
+        "r": 3120613,
+        "gx": 32278124,
+        "gy": 8533812
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 49922809,
+        "a": 26892488,
+        "b": 35090176,
+        "group_order": 49929808,
+        "r": 3120613,
+        "gx": 1549820,
+        "gy": 6061039
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 49922809,
+        "a": 43209795,
+        "b": 3433880,
+        "group_order": 49929808,
+        "r": 3120613,
+        "gx": 6092333,
+        "gy": 18888929
+      },
+      {
+        "kind": "prime_explicit",
+        "p": 49922809,
+        "a": 36225998,
+        "b": 31348643,
+        "group_order": 49929808,
+        "r": 3120613,
+        "gx": 19129959,
+        "gy": 13467247
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261111,
+    "target_kind": "planted_shared"
+  },
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "rho-plain",
+      "role": "baseline",
+      "method": {
+        "id": "rho.plain"
+      }
+    },
+    {
+      "name": "bsgs",
+      "role": "candidate",
+      "method": {
+        "id": "bsgs.textbook"
+      }
+    },
+    {
+      "name": "bsgs-neg",
+      "role": "candidate",
+      "method": {
+        "id": "bsgs.negation"
+      }
+    },
+    {
+      "name": "ic",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=64",
+          "oracle": "mitm:negation_folded=1"
+        }
+      }
+    },
+    {
+      "name": "rho-neg-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.negation"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 16,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 20261017,
+    "isolation_required": "L2",
+    "timeout_seconds": 600
+  }
+}
