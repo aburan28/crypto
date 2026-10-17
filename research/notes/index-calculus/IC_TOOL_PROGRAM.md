@@ -790,6 +790,24 @@ filter slot hashed once a block, instead of once to prefetch it and once to test
 - **Next:** the filter's memory access itself, or the build's 30% at
   `2^44.3`–`2^44.5`.
 
+**A16 and A17: the filter on huge pages gains where it outgrows the TLB
+(2026-10-17).** The host's THP setting is `madvise`, and the tool had never
+advised, so the filter and the table sat on 4 KiB pages.
+- **A16 collapsed the scan's arrays after the build** (`MADV_COLLAPSE`).
+  - *The filter alone:* 1.046 [1.026, 1.067] cold at `2^47.2`, inconclusive
+    at the two `2^44` sizes.
+  - *Every array:* no gain; the build pays for collapsing the stored keys
+    ([record](../../ic_tool_program/explorations/A16-huge-pages-20261017/README.md)).
+- **A17 puts the whole filter on huge pages from its first touch:** a fresh 2 MiB-aligned mapping, advised before it is written.
+  - *v8 over the candidate:* 1.047, 0.976 and **1.051** [1.029, 1.075] at the three target sizes.
+  - *The copy costs nothing measurable.*
+  - *The probes:* the filter stage falls from 6.43 to 5.32 ns at `2^47.2`, with no consistent change at `2^44`.
+  - *A hypothesis, since the VM has no counters:* the 8 MiB filter spans as many base pages (2,048) as the core's second-level TLB holds; the 4 MiB filters span half that
+    ([record](../../ic_tool_program/explorations/A17-filter-huge-pages-20261017/README.md)).
+- **No round is declared.** At `2^44.5` the candidate cannot clear the
+  round's 1.03. The lever should grow with the table, beyond `2^47.2`, where the
+  distance to rho is largest. It is kept to pair with the next lever.
+
 ## 9. Track B: generality and robustness
 
 **Where the tool stands (at `0bf67f16`).**
