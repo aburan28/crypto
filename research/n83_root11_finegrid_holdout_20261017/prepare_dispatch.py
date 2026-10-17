@@ -12,7 +12,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 FILES = (
     'generate.py', 'manifest.json', 'targets.jsonl', 'answers.jsonl',
-    'seal.json', 'PROTOCOL.md', 'arms.py', 'select_local.py',
+    'seal.json', 'PROTOCOL.md', 'RESULT.md', 'arms.py', 'select_local.py',
     'test_select_local.py', 'test_choice.py', 'selection_code_receipt.json',
     'local_batch_plan.json', 'local_verify_plan.json',
     'local_selection_plan.json',
