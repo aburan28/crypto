@@ -1,0 +1,39 @@
+     Locking 15 packages to highest compatible versions
+      Adding num-bigint v0.4.8 (available: v0.5.1)
+   Compiling hybrid-norm-xor v0.1.0 (/workspace/generalized_roots/research/hybrid_norm_xor_20261017_v1)
+warning: function `forms` is never used
+  --> src/main.rs:38:4
+   |
+38 | fn forms(a:&A,keep:&[bool])->(Vec<N>,Vec<Option<usize>>,usize){let mut out=vec![N::zero();a.nodes.len()];out[1]=N::one();let mut ato...
+   |    ^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `UF` is never constructed
+  --> src/main.rs:40:8
+   |
+40 | struct UF{p:Vec<usize>,n:Vec<usize>}
+   |        ^^
+
+warning: associated items `new`, `root`, and `join` are never used
+  --> src/main.rs:41:12
+   |
+41 | impl UF{fn new(n:usize)->Self{Self{p:(0..n).collect(),n:vec![1;n]}}fn root(&mut self,mut i:usize)->usize{while self.p[i]!=i{self.p[i]=self.p[self.p[i]];i=self.p[i];}i}fn join(&m...
+   | -------    ^^^                                                        ^^^^                                                                                                ^^^^
+   | |
+   | associated items in this implementation
+
+warning: function `components` is never used
+  --> src/main.rs:42:4
+   |
+42 | fn components(n:usize,rows:&[Vec<usize>])->(usize,usize){let mut uf=UF::new(n);let mut live=vec![false;n];for row in rows{if let Som...
+   |    ^^^^^^^^^^
+
+warning: function `profile` is never used
+  --> src/main.rs:43:4
+   |
+43 | fn profile(a:&A,eq:&[u32])->Value{let keep=active(a,eq);let(fs,_,nonlinear)=forms(a,&keep);let mut defs=std::collections::BTreeSet::...
+   |    ^^^^^^^
+
+warning: `hybrid-norm-xor` (bin "hybrid-norm-xor") generated 5 warnings
+    Finished `release` profile [optimized] target(s) in 1.76s

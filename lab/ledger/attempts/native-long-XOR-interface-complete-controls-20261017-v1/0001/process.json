@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-m",
+    "research.native_long_xor_interface_20261017_v1.launch",
+    "native-long-XOR-interface-complete-controls-20261017-v1",
+    "research/native_long_xor_interface_20261017_v1/native.so"
+  ],
+  "effective_timeout_seconds": 30,
+  "ended_unix": 1792212570.3517056,
+  "exit_code": 0,
+  "measurement_scope": "development diagnostic; isolation must be established separately",
+  "memory_limit_scope": "per-process address space inherited by descendants",
+  "peak_process_rss_kib": 249608,
+  "pid": 5969,
+  "process_group": 5969,
+  "started_unix": 1792212570.292127,
+  "status": "ok",
+  "stderr": "",
+  "stdout": "{\"evidence\":{\"controls\":{\"all_declared_coordinates_replayed\":true,\"complete_primary_models\":128,\"empty_true_parity_rejected\":true,\"independent_oracle_assignments\":256,\"long_xor_row_arity\":265,\"native_stats\":[184,951,75954,951,0,8632,128,265,396,396,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,16384,32768,3,2,1,500000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],\"scope\":\"interface acceptance and exact small model-set oracle; not the actual compressed norm circuit or a speed comparison\",\"status\":\"passed\"},\"novelty_claim\":false,\"original_root_count_exact\":null,\"release_gate_claim\":false},\"experiment_id\":\"native-long-XOR-interface-complete-controls-20261017-v1\",\"next_actions\":[\"Encode the exact affine-cone norm representation with this independently tested interface, verify all tiny norm models and freeze a new bounded hard plan.\",\"Keep original S3 ghost/auxiliary coverage and genuine matched F4/F5/F6 performance gates open.\"],\"schema\":\"scientific_result_v1\",\"status\":\"passed\",\"summary\":\"Long-XOR functional-primary native interface matched an independent complete small model-set oracle.\"}\n",
+  "stdout_sha256": "e22ce3816360b02ff19bc3431460e062095fbdc9c94b9eef7b16503c62394fde",
+  "system_seconds": 0.012856,
+  "user_seconds": 0.033292999999999996,
+  "wall_seconds": 0.059577297999567236
+}

@@ -1,0 +1,100 @@
+\section{Limitations, corrections, and the next falsifiable step}
+\subsection{Completeness and certification obligations}
+A generalized replacement must cover the input system, not just this norm
+chart. The remaining bridge includes original summation-chain auxiliary
+fibers, exceptional maps, $z=0$, rational lifts versus conjugate or
+ghost norm configurations, and all branch multiplicities. Each branch
+needs an exact original-system validator and a coverage argument. Testing
+a supplied $H$ or rejecting sampled relaxed norms cannot close the
+coefficient-search problem: the recorded divisor relaxation still has
+$2^{73}$ candidates at fixed parameters \ev{E1}.
+
+Theorem~\ref{thm:support} is valid over every finite field.
+Theorem~\ref{thm:chart} is explicitly characteristic two. Koblitz curves are
+a structured binary subclass, not a third field characteristic. Applicable
+binary formulas still require a field representation, valid curve parameters,
+and the theorem's target hypotheses. Prime curves require an odd-characteristic
+chart and an appropriate domain representation. Large-prime supplied-quintic
+validation is useful infrastructure, but does not fill that gap.
+No statement here establishes an efficient universal algorithm at arbitrary
+sizes.
+
+All theorems have readable proofs in this manuscript, but no checked Lean
+formalization is supplied. The local commands \texttt{lean} and
+\texttt{conductor} are unavailable in the manuscript environment; that is a
+specific tooling limitation, not a proof or a reservation. The central
+formalization obligation is the coefficient identity together with its
+finite-field square-root and Artin--Schreier hypotheses. The separate existing
+Lean proof in the earlier decomposition manuscript is not a proof of these
+theorems. Appendix~\ref{app:artifacts} maps the outstanding obligations.
+
+The repository's current \texttt{identity.certificate/v1} checker evaluates
+unconditional identities modulo $2^{61}-1$. It cannot faithfully certify the
+characteristic-two identities or conditional implications here by merely
+changing a label. We therefore attach source-hashed native evidence pointers
+and the written proofs, with this certificate-format gap stated explicitly.
+No such certificate or formal verification is claimed.
+
+\subsection{Preserved erratum}
+A prior transfer-only proof omitted a term. The correction \ev{E6} is
+\[
+ \begin{split}
+ V=e_5+e_1e_4
+   &=(h^2+h)e_4\\
+   &\quad+k(zs+z^2r+ky_T+z^3+hz y_T).
+ \end{split}
+\]
+Thus $k=0$ does not generally imply $V=0$.
+Over $\F_4$ with $\omega^2=\omega+1$, take $a=0,b=1$, target
+$(z,y_T)=(1,0)$, and $h=\omega,k=r=s=0$. Literal division gives
+$H=X^5+X+1$, so $e_1=0$ and $e_4=e_5=1$, hence $V=1$.
+This counterexample invalidates the omitted-term formula.
+Generic support code computes the coefficients directly and does not use
+that simplification. Historical files remain preserved; the correction
+must travel with any use of the old transfer argument.
+
+\subsection{Performance gate and comparison still owed}
+The program requires twenty preregistered hard matching instances, completed
+all-roots outputs on every method, a fastest baseline taking at least one
+second, and at least three cold repetitions. Genuine source-identified
+F4/F5/F6 interfaces must return the same original roots. The immutable floor
+is at least a twofold geometric-mean end-to-end gain, no more than 1.10 worst
+slowdown, A/A variation at most 10\%, qualified isolation, and the requested
+field coverage \ev{E7}. The higher requested speed targets are research
+objectives, not achieved results. Nothing in this manuscript passes the floor.
+
+Comparisons still owed include strong available systems such as Magma,
+msolve, FGb, Singular, and OpenF4, subject to field and contract support.
+The supplied-polynomial stage also owes a matched comparison against
+established factorization implementations such as FLINT, NTL, or Magma.
+Baseline tuning, conversion, setup, solving, extraction, verification, and
+serialization must all be charged consistently. Unsupported fields are
+reported, not silently replaced with easier ideals. Native SAT is not
+itself an F4/F5/F6 baseline.
+
+\subsection{Next queue}
+The failed prediction leads to a changed experiment, not an identical rerun.
+The first queued variant is sorted-source norm-primary search:
+add an exact comparator network for the canonical source encoding, prove its
+unique extensions, enumerate representatives, and restore every distinct
+permutation. Before a hard run, require exact agreement with all eight
+symmetry-oracle sets \ev{E4}, including zero and repeated sources.
+Freeze the comparator source, input digest, native source manifest, budgets,
+and decision mask. Predict a verified witness or representative exhaustion
+on the same actual fixture within a bounded inner search; on failure,
+retain UNKNOWN and move to a structural variant. At most three experiments
+may be scheduled in a bounded session, each at one core and 4 GiB.
+
+The second route is conditional whole-cell pruning using the support
+nilpotence equations, rather than enumerating all relaxed divisors.
+A proposed cell certificate must imply rejection of every point in that
+cell; rejection of random sample norms is insufficient. Its small oracle
+must compare complete cell membership and cover repeated factors.
+The third route develops an odd-characteristic norm parametrization with
+a separate prime-domain contract. It must preserve odd cross terms and
+prove exceptional branches before importing any binary optimization.
+
+This queue separates model preservation, useful structural pruning, and
+end-to-end performance. The present evidence improves representation and
+rejects a bounded search prediction. It leaves both the complete generalized
+algorithm and its qualified speed advantage unresolved.

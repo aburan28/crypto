@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "-m",
+    "research.hybrid_norm_search_20261017_v2.launch",
+    "native-hybrid-limit2-norm-search-n83-20261017-v2",
+    "research/advance/instances/n83-d18-m5-T001-offset0.json",
+    "research/hybrid_norm_xor_20261017_v1/native.so"
+  ],
+  "effective_timeout_seconds": 90,
+  "ended_unix": 1792250943.0399802,
+  "exit_code": 0,
+  "measurement_scope": "development diagnostic; isolation must be established separately",
+  "memory_limit_scope": "per-process address space inherited by descendants",
+  "peak_process_rss_kib": 385368,
+  "pid": 1519,
+  "process_group": 1519,
+  "started_unix": 1792250881.245952,
+  "status": "ok",
+  "stderr": "",
+  "stdout": "{\"evidence\":{\"affine_support_limit\":2,\"external_variables\":40148,\"independent_unsat_certificate\":false,\"last_native_verdict\":-1,\"native_inner_wall_seconds_diagnostic\":61.509865199000004,\"native_stats_after_search\":[7167,12065,26943151,12065,0,2099310,0,40148,45427,45427,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,16384,32768,3,2,1,500000,1,1,0,8064298,10268530,28207875,5670,9169,22491,0,0,0,0,1,1,1,0,953451,5058,0,0,0,9169],\"native_stats_before_search\":[0,0,0,0,0,0,0,40148,45427,45427,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,16384,32768,3,2,1,500000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,26726,0,0],\"norm_primary_count_exact\":null,\"norm_primary_search_complete\":false,\"novelty_claim\":false,\"original_auxiliary_fibers_reconstructed\":false,\"original_root_count_exact\":null,\"primary_variables\":174,\"release_gate_claim\":false,\"root_cap\":4096,\"verified_norm_models\":[],\"verified_norm_primary_lower_bound\":0,\"xor_rows\":26893},\"experiment_id\":\"native-hybrid-limit2-norm-search-n83-20261017-v2\",\"next_actions\":[\"Use actual Gaussian/decision statistics to distinguish representation cost from search behavior; do not retry an unchanged timeout.\",\"Require full original S3 ghost/exception/auxiliary closure, independent completeness certification and matched genuine F4/F5/F6 evidence before any8x claim.\",\"If no witness or completeness in60seconds, change source symmetry/coordinates or constraints under a new frozen hypothesis.\"],\"schema\":\"scientific_result_v1\",\"status\":\"inconclusive\",\"summary\":\"Changed limit2 exact norm-primary search with full native extension and independent literal norm replay; original all-roots completeness remains unclaimed.\"}\n",
+  "stdout_sha256": "9672792341b842e0304941b9b38a3e7dcf28d057e0f3fc6c12e2b0fd4d00929d",
+  "system_seconds": 0.151357,
+  "user_seconds": 61.631079,
+  "wall_seconds": 61.7940265740001
+}

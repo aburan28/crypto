@@ -1,0 +1,4 @@
+This is one native interface experiment, not a complete resumable ledger or root solver.
+Sources: research/native_long_xor_interface_20261017_v1/. Optional native test: set ROOTFINDING_CMS_LIBRARY to the newly built thin wrapper and run cargo test --release -- --include-ignored for that standalone crate.
+The frozen thin wrapper links the existing modified functional-primary core. FREEZE.json pins both shared libraries and159 core-source files; rebuilding after relocation gives a new binary identity. Rebuild commands are recorded in FREEZE.json. The implied_by entry point is deliberately disabled.
+The public commit excludes executables and shared libraries; hashes are retained. The local portable artifact includes these and the pinned core sources for rebuilding. No network, rented compute, hard search or external baseline comparison was used in this experiment.

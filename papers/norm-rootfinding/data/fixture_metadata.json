@@ -1,0 +1,93 @@
+{
+  "chain_links": [
+    [
+      "source_x:0",
+      "source_x:1",
+      "auxiliary_x:0"
+    ],
+    [
+      "auxiliary_x:0",
+      "source_x:2",
+      "auxiliary_x:1"
+    ],
+    [
+      "auxiliary_x:1",
+      "source_x:3",
+      "auxiliary_x:2"
+    ],
+    [
+      "auxiliary_x:2",
+      "source_x:4",
+      "target_x"
+    ]
+  ],
+  "completeness_scope": "All Boolean assignments satisfying this finite-coordinate S3 chain. A solution is algebraic; lifting to a full curve-group decomposition requires separate sign and exceptional-case checks.",
+  "curve": {
+    "a_hex": "0x0",
+    "b_hex": "0x1",
+    "cofactor": "4",
+    "group_order": "9671406556923184866742756",
+    "id": "icv1-f2m83-tm6151469093347-debefd74",
+    "model": "y^2+x*y=x^3+a*x^2+b",
+    "subgroup_order": "2417851639230796216685689"
+  },
+  "equation_count": 332,
+  "field": {
+    "kind": "prime",
+    "p": 2
+  },
+  "n_vars": 339,
+  "provenance": {
+    "claim_scope": "exact algebraic export and coordinate replay; no root solving or speed claim",
+    "public_api": "System512::build",
+    "repository": "https://github.com/aburan28/crypto",
+    "revision": "3d737486869d1ca77e14ad56bdaf376916eecce7",
+    "source_domain": "span_F2(1,z,...,z^(dimension-1)); no factor-base point enumeration used to create target",
+    "vendor_modified": false
+  },
+  "source_basis_hex": [
+    "0x1",
+    "0x2",
+    "0x4",
+    "0x8",
+    "0x10",
+    "0x20",
+    "0x40",
+    "0x80",
+    "0x100",
+    "0x200",
+    "0x400",
+    "0x800",
+    "0x1000",
+    "0x2000",
+    "0x4000",
+    "0x8000",
+    "0x10000",
+    "0x20000"
+  ],
+  "source_dimension": 18,
+  "summands": 5,
+  "target": {
+    "x_hex": "0x622425e96ba633969263b",
+    "y_hex": "0x3258275069b18d0854564"
+  },
+  "norm_target_note": "Norm chart uses negative of the input affine point: same x, y_T=x+y in characteristic two; constants transcribed from frozen norm compiler.",
+  "norm_target": {
+    "z_hex": "0x622425e96ba633969263b",
+    "y_T_hex": "0x507c02b90217be9ec635f"
+  },
+  "full_input_sha256": "5c9be468c207cc2b013123b4265ee0963e96490c16aad1b1650a3528c0ce0c25",
+  "norm_field": {
+    "characteristic": 2,
+    "extension_degree": 83,
+    "modulus_exponents": [
+      83,
+      45,
+      2,
+      1,
+      0
+    ],
+    "polynomial_basis": true,
+    "note": "Original neutral Boolean export field is GF(2); curve-coordinate norm arithmetic uses this extension."
+  }
+}

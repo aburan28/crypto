@@ -5,6 +5,7 @@ directory per paper.
 
 | directory | title | status |
 |---|---|---|
+| [norm-rootfinding/](norm-rootfinding/) | Exact Norm-Based Search for Constrained Roots over Finite Fields: Predicates, Circuit Representations, and Bounded Evidence | research draft, anonymized, not submitted or cleared; exact component proofs, native coordinate profile and UNKNOWN hard search; no qualified speedup |
 | [`structural-completeness/`](structural-completeness/) | Structural Completeness of Prime-Field Elliptic Curves Against Isogeny-Graph Cryptanalysis | research draft, anonymized, not submitted; Markdown twin in `research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md` |
 | [`lll-degeneracy-note/`](lll-degeneracy-note/) | LLL Failures on the Boneh–Venkatesan Lattice Were Floating-Point Artifacts: A Corrected Note | corrected 2026-10-16 and 2026-10-17 (earlier curve-specificity claim and P-521 mechanism withdrawn); anonymized, not submitted |
 | [`eigen-seta/`](eigen-seta/) | Eigen-Séta: an isogeny KEM whose trapdoor is a hidden-degree endomorphism | revision 2 (2026-10-17): assessment added, unqualified NIST-category conjecture withdrawn (two claim tiers); research draft, anonymized, not peer reviewed, not submitted; maintained code in sibling repo `eigenx`, historical code in `eigen_seta/` |
@@ -40,3 +41,4 @@ Conventions shared by every paper here and by the sibling repositories
   the authors from an untracked `AUTHORS` file copied from `AUTHORS.example`.
 
 Add a new paper as a new subdirectory and a row in the table above.
+

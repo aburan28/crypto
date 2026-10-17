@@ -1,0 +1,7 @@
+Title: Exact Norm-Based Search for Constrained Roots over Finite Fields: Predicates, Circuit Representations, and Bounded Evidence
+Authors: Anonymous
+Status: research draft; not submitted; not cleared for submission
+Category: computational algebra / cs.SC
+Keywords: finite fields; constrained roots; elliptic-curve norms; Artin-Schreier; SAT with XOR; exact enumeration
+
+We describe exact component contracts for a norm-based constrained-root search architecture. An explicit binary norm parametrization retains zero and repeated sources, while bounded affine circuit contraction preserves primary model sets by a unique extension. A fixed GF(2^83) profile reduces native coordinates from 58,176 to 45,427, but the subsequent bounded hard search returns UNKNOWN without a verified witness. A repeated-root-safe support criterion applies to all finite fields; odd-field experiments concern supplied quintics only. Original-system completeness, novelty priority, and a qualified speedup over F4/F5/F6 remain unestablished. The paper gives proofs, source-hashed evidence, failure semantics, and the next experimental queue.

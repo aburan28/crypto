@@ -1,0 +1,142 @@
+{
+  "schema": "paper.evidence-map/v1",
+  "measurement_rerun": false,
+  "source_commit": "4619bb97f63d960d40ffce127154b4f54195135d",
+  "artifacts": [
+    {
+      "label": "E0",
+      "repository_path": "research/advance/instances/n83-d18-m5-T001-offset0.json",
+      "sha256": "5c9be468c207cc2b013123b4265ee0963e96490c16aad1b1650a3528c0ce0c25",
+      "bytes": 13509300,
+      "full_input_publication": false,
+      "public_at_source_commit": false
+    },
+    {
+      "label": "E1a",
+      "repository_path": "research/full_binary_norm_circuit_20261017_v1/CONTROLS_REVIEWED.json",
+      "sha256": "5d00a3ad298c9db9ea53cd069c8e6d92083be7a1d5326ba3c635187e26c96c5f",
+      "bytes": 266,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E1b",
+      "repository_path": "research/full_binary_norm_circuit_20261017_v1/PROOF.md",
+      "sha256": "a8ae65f2a6c9f7e8d4a3b3a05bdf925f4cb937eba72e1ff8a4d4aa022a1eb7e7",
+      "bytes": 3852,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E1c",
+      "repository_path": "research/autolab_cycle_20261017_v4/REPORT.md",
+      "sha256": "4c10352b45b944aebe54543016b3afd4dc233e323bb0c37f698f2b2216240032",
+      "bytes": 2721,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E2a",
+      "repository_path": "lab/ledger/attempts/native-cut-aware-hybrid-norm-profile-n83-20261017-v1/0001/scientific_result.json",
+      "sha256": "4d1903fb7506a935fc475d21d7866ccdefdc14aeb390dbaf3a1d59d8078158ec",
+      "bytes": 8560,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E2b",
+      "repository_path": "research/hybrid_norm_xor_20261017_v1/CONTROLS.json",
+      "sha256": "61d25f04fcae78b9d99862b8e07bfa337f36dea7bb05067d2d9e8ab3e6ce9a6f",
+      "bytes": 479,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E2c",
+      "repository_path": "research/hybrid_norm_xor_20261017_v1/PROOF.md",
+      "sha256": "282ca932f2dd9f02e5db2e13676f279c76b0fe437b0dacddcd9eb53982bc15e6",
+      "bytes": 3937,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E3a",
+      "repository_path": "lab/ledger/attempts/native-hybrid-limit2-norm-search-n83-20261017-v2/0001/scientific_result.json",
+      "sha256": "1ca3753f3387c633bd34bd6957856397c78c5dc5d84ec902491e2b01df1494e5",
+      "bytes": 2641,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E3b",
+      "repository_path": "lab/ledger/attempts/native-hybrid-limit2-norm-search-n83-20261017-v2/0001/process.json",
+      "sha256": "67d2906fa7ad679da41b343d740add18695049dd545b5f10115c9834cfa4b46c",
+      "bytes": 2654,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E3c",
+      "repository_path": "research/hybrid_norm_search_20261017_v2/PROOF.md",
+      "sha256": "8dcab11e32d429c1fbc0b2c130d6e0a2e737946121e59e305b51a6040ebab404",
+      "bytes": 2764,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E4",
+      "repository_path": "research/norm_source_symmetry_20261017_v1/PREPARATION_CONTROLS.json",
+      "sha256": "07b6e5e2b47f9f44b63823e4cb1474c39d7a57f609e370f3e4039580a9aa72ca",
+      "bytes": 1447,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E5a",
+      "repository_path": "lab/ledger/attempts/native-odd-interval-roots-NIST-panel-20261017-v2/0001/scientific_result.json",
+      "sha256": "6cdd89b192b3245d247bb439e4449a3d189fd6a1ca55d23e24d33478333760e8",
+      "bytes": 79223,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E5b",
+      "repository_path": "research/odd_interval_roots_20261017_v2/CONTROLS.json",
+      "sha256": "5cdd86bad71993207b770ca32472f7a997c98bd68873b36df13f5272f800a4e6",
+      "bytes": 270,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E6",
+      "repository_path": "research/actual_norm_u_rank_20261017_v1/ERRATUM.md",
+      "sha256": "5b708b180e1c87d73aaaa8a5fe9f6d97f895444b80cfae25cc10e0dfdc269b58",
+      "bytes": 1138,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E7",
+      "repository_path": "performance/GATE.md",
+      "sha256": "fa62d4f19d5b222b534ac1cfa7c4dde265492ac60553d67eea9f0baab7e427fc",
+      "bytes": 7098,
+      "full_input_publication": null,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E1d",
+      "repository_path": "research/actual_norm_u_rank_20261017_v1/PROOF.md",
+      "sha256": "fc6ed16b230427184b629adb20d7e81b92fedf7cf4acf29a9c1ef472a72ab694",
+      "bytes": 3069,
+      "public_at_source_commit": true
+    },
+    {
+      "label": "E1e",
+      "repository_path": "research/support_cost_20261016_v1/PROOF.md",
+      "sha256": "4fb9ec57417f1adca47714afab427fc88b2f251f933077a9c13f73687e5b8f46",
+      "bytes": 1502,
+      "public_at_source_commit": false,
+      "paper_copy": "data/support_predicate_proof.md"
+    }
+  ]
+}
