@@ -878,9 +878,13 @@ pub fn matrix_f5_f2_with_form_timed(
     static FUSED_BUILD: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let fused_build =
         *FUSED_BUILD.get_or_init(|| std::env::var("KIC_F5_FUSED_BUILD").as_deref() != Ok("0"));
+    // Build the criterion survivors straight into packed rows over the full
+    // column set (`research/f5_direct_pack_20260929`: 1.21× complete call,
+    // identical rows and word counts). Set KIC_F5_DIRECT_PACK=0 for the
+    // monomial-list build as a same-binary control.
     static DIRECT_PACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let direct_pack =
-        *DIRECT_PACK.get_or_init(|| std::env::var("KIC_F5_DIRECT_PACK").as_deref() == Ok("1"));
+        *DIRECT_PACK.get_or_init(|| std::env::var("KIC_F5_DIRECT_PACK").as_deref() != Ok("0"));
     let (cols, mut matrix) = if direct_pack {
         if let Some((rows_f4, cols, matrix)) =
             f5_rows_packed_full_columns(polys, n_vars, degree, &criterion)
@@ -1002,9 +1006,12 @@ pub fn matrix_f5_f2_with_form_timed(
             false
         }
     });
+    // Write each pivot row's terms directly (`research/f5_further_2x_20260929`:
+    // 1.04–1.05× complete call on x86, identical rows). Set
+    // KIC_F5_UNPACK_DIRECT=0 for the collecting unpack as a same-binary control.
     static DIRECT_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     let direct_unpack =
-        *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() == Ok("1"));
+        *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() != Ok("0"));
     timings.direct_unpack_used = direct_unpack && !avx512_unpack;
     let out = matrix[..rank]
         .par_iter()
