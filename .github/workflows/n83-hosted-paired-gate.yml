@@ -12,9 +12,9 @@ concurrency:
 
 jobs:
   paired-first-trial:
-    if: github.repository == 'aburan28/crypto' && github.ref == 'refs/heads/main'
+    if: github.repository == 'aburan28/crypto' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/codex/n83-hosted-regenerate-20261016')
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 90
+    timeout-minutes: 125
     env:
       PYTHONDONTWRITEBYTECODE: '1'
       RAYON_NUM_THREADS: '1'
@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 9c92a5f5c02d4163466be4ee7edb557a468a9c2d
+          ref: cb98e85d1c1c1afdd5000bc70eea00969ee86c6c
           fetch-depth: 1
       - name: Set task-owned runner paths
         run: |
@@ -39,27 +39,6 @@ jobs:
             docker pull --platform linux/arm64 "$IMAGE_REF"
             docker image inspect "$IMAGE_REF" --format '{{.Id}} {{.Architecture}} {{.Os}} {{json .RepoDigests}}'
           } > "$RUNNER_TEMP/n83-setup/image.stdout" 2> "$RUNNER_TEMP/n83-setup/image.stderr"
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-2
-      - name: Fetch and hash the three frozen public factor bases
-        run: |
-          set -euo pipefail
-          mkdir -p "$ARCHIVE_DIR" "$RUNNER_TEMP/n83-setup"
-          prefix='s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/objects'
-          for hash in \
-            3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0 \
-            966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47 \
-            b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e; do
-            aws s3 cp --only-show-errors "$prefix/$hash.jsonl.gz" "$ARCHIVE_DIR/$hash.jsonl.gz"
-          done
-          printf '%s  %s\n' \
-            8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d "$ARCHIVE_DIR/3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz" \
-            df02963d1706fa7a64fd7558d88db79b23ea34801ac58062c4c500113e8c57fe "$ARCHIVE_DIR/966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz" \
-            3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf "$ARCHIVE_DIR/b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz" \
-            | sha256sum -c | tee "$RUNNER_TEMP/n83-setup/archive-hashes.stdout"
       - name: Prepare pinned Python audit dependency and offline Cargo registry
         run: |
           set -euo pipefail
@@ -74,6 +53,44 @@ jobs:
             --env CARGO_HOME=/cargo --workdir /src "$IMAGE_REF" \
             cargo fetch --locked --target aarch64-unknown-linux-gnu \
             > "$RUNNER_TEMP/n83-setup/cargo-fetch.stdout" 2> "$RUNNER_TEMP/n83-setup/cargo-fetch.stderr"
+      - name: Regenerate and hash the three frozen public factor bases
+        env:
+          PYTHONPATH: ${{ runner.temp }}/n83-pydeps
+        run: |
+          set -euo pipefail
+          started=$(date +%s)
+          mkdir -p "$RUNNER_TEMP/n83-exporter-target" "$RUNNER_TEMP/n83-pilot-parent"
+          docker run --rm --pull never --platform linux/arm64 \
+            --network none --cpus 4 --memory 8192m --memory-swap 8192m \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
+            --mount "type=bind,src=$CARGO_HOME,dst=/cargo" \
+            --mount "type=bind,src=$RUNNER_TEMP/n83-exporter-target,dst=/target" \
+            --env CARGO_HOME=/cargo --env CARGO_TARGET_DIR=/target \
+            --workdir /src "$IMAGE_REF" \
+            cargo build --release --locked --offline --example koblitz_n83_factor_base_export \
+            > "$RUNNER_TEMP/n83-setup/exporter-build.stdout" \
+            2> "$RUNNER_TEMP/n83-setup/exporter-build.stderr"
+          docker run --rm --pull never --platform linux/arm64 \
+            --network none --cpus 1 --memory 4096m --memory-swap 4096m \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
+            --mount "type=bind,src=$RUNNER_TEMP/n83-exporter-target,dst=/target,readonly" \
+            --mount "type=bind,src=$RUNNER_TEMP/n83-pilot-parent,dst=/pilot" \
+            --workdir /src "$IMAGE_REF" \
+            /target/release/examples/koblitz_n83_factor_base_export \
+            pilot /pilot/panel 1800 \
+            > "$RUNNER_TEMP/n83-setup/pilot.stdout" \
+            2> "$RUNNER_TEMP/n83-setup/pilot.stderr"
+          python3 research/koblitz_n83_factor_base_sweep_20261008/verification/hosted-paired-gate-20261015/prepare_archives.py \
+            --panel "$RUNNER_TEMP/n83-pilot-parent/panel" \
+            --archives "$ARCHIVE_DIR" \
+            --receipt "$RUNNER_TEMP/n83-setup/regeneration.json" \
+            --source-commit "$(git rev-parse HEAD)" \
+            --workflow-commit "$GITHUB_SHA" \
+            --started-unix-seconds "$started" \
+            > "$RUNNER_TEMP/n83-setup/regeneration.stdout" \
+            2> "$RUNNER_TEMP/n83-setup/regeneration.stderr"
       - name: Run separately cold bounded Gray and hash arms
         env:
           PYTHONPATH: ${{ runner.temp }}/n83-pydeps
@@ -81,6 +98,7 @@ jobs:
           set -euo pipefail
           python3 research/koblitz_n83_factor_base_sweep_20261008/verification/hosted-paired-gate-20261015/run.py \
             --archives "$ARCHIVE_DIR" --output "$OUT_DIR" --scratch "$SCRATCH_DIR" \
+            --preparation-receipt "$RUNNER_TEMP/n83-setup/regeneration.json" \
             > "$RUNNER_TEMP/n83-setup/run.stdout" 2> "$RUNNER_TEMP/n83-setup/run.stderr"
       - name: Preserve setup, raw stages and audited outcomes
         if: always()
@@ -89,6 +107,8 @@ jobs:
           name: n83-hosted-pair-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             ${{ runner.temp }}/n83-setup/
+            ${{ runner.temp }}/n83-archives/*.jsonl.gz
+            ${{ runner.temp }}/n83-pilot-parent/panel/manifest.json
             ${{ runner.temp }}/n83-hosted-pair/
             ${{ runner.temp }}/n83-hosted-scratch/*/build/build.stdout
             ${{ runner.temp }}/n83-hosted-scratch/*/build/build.stderr

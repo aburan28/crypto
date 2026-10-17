@@ -25,9 +25,33 @@ replays all 648 ordered pilot pairs and retains 311 admitted configurations
 in 24 distinct shapes under the conditional rank-query floor, source domain
 clauses and source variable count. The selected sequential-K600/hash-K600
 arm is on this source frontier; the same-base Gray arm is a matched control
-with 114 strict source dominators. The [frozen paired gate](verification/k600-gray-hash-paired-protocol-20261014/RESULT.md)
-has not launched either arm, and its local Docker precheck failed at the VM
-disk layer. Source dominance does not establish runtime dominance.
+with 114 strict source dominators. The local [frozen paired gate](verification/k600-gray-hash-paired-protocol-20261014/RESULT.md)
+did not launch because its Docker precheck failed at the VM disk layer. A
+separate [hosted first pair](verification/hosted-paired-run-38983406418/RESULT.md)
+ran both arms on Linux ARM; each reached the 5,000-conflict cap with zero
+models. The retained archive and raw stage receipts passed independent replay
+and S3 byte checks. Source dominance and these censored first trials do not
+establish runtime dominance.
+
+The later [hosted fixed-witness control](verification/hosted-fixed-witness-run-39051579293/RESULT.md)
+reproduced an ordered K1182/K2048 known-answer SAT model on Linux ARM after
+fixing its five summand and three partial-sum x-coordinates. It passed original
+group/S3 replay at 787 conflicts; the 22-file artifact and a fresh S3 GET
+passed byte-identical independent audit. This confirms access to that fixed
+encoding on another host, while the natural Gray/hash searches above remain
+censored. A [separate whole-subgroup support replication](verification/cross-stream-support-20261017/RESULT.md)
+recounts all 648 primary pilot pairs from the later independent overlap
+receipt; its five-summand ceilings agree with the earlier nonidentity screen
+at the reported precision. Neither stage measures a complete IC runtime.
+
+The subsequent [hosted 4+2 six-summand Gray/hash pair](verification/hosted-m6-paired-run-39054543374/RESULT.md)
+used the same public trial and S3-backed sequential K600 base. Both residual
+pool arms hit `UNKNOWN_search_cap` after one SAT call, 20,000 conflicts and zero
+models. The 65-file hosted artifact and three freshly downloaded S3 base
+archives passed independent replay; all 54 pilot factor-base objects were
+present at their manifest-listed sizes. The full 7,500-second hosted envelope
+is charged. These capped one-query results leave natural relation yield and
+complete index-calculus runtime unmeasured; no factor-base winner is selected.
 
 ## Matched retained-base extension, 2026-10-11
 

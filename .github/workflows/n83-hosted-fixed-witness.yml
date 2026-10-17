@@ -1,0 +1,120 @@
+name: N83 hosted fixed-witness SAT access
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/n83-hosted-regenerate-20261016
+    paths:
+      - .github/workflows/n83-hosted-fixed-witness.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: n83-hosted-fixed-witness
+  cancel-in-progress: false
+
+jobs:
+  fixed-witness:
+    if: github.repository == 'aburan28/crypto' && github.ref == 'refs/heads/codex/n83-hosted-regenerate-20261016'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 40
+    env:
+      IMAGE_REF: rust:1.98.1-bookworm@sha256:93ce27a88655056a51dbdd8f5f2d7ddc071c7b0070fb288a37b5a285fc83971e
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Freeze source, fixture, runner and image
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/n83-witness" "$RUNNER_TEMP/n83-cargo" "$RUNNER_TEMP/n83-target"
+          printf 'CARGO_HOME=%s/n83-cargo\nTARGET_DIR=%s/n83-target\nOUT=%s/n83-witness\n' \
+            "$RUNNER_TEMP" "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          git rev-parse HEAD > "$RUNNER_TEMP/n83-witness/source-commit.txt"
+          git status --porcelain=v1 > "$RUNNER_TEMP/n83-witness/source-status.txt"
+          test ! -s "$RUNNER_TEMP/n83-witness/source-status.txt"
+          sha256sum \
+            examples/koblitz_n83_fixed_witness_control.rs \
+            research/koblitz_n83_factor_base_sweep_20261008/verification/known-witness-ordered-sat-20261014/domains.json \
+            research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-known-witness-source-20261012/fixture.json \
+            Cargo.lock .github/workflows/n83-hosted-fixed-witness.yml \
+            > "$RUNNER_TEMP/n83-witness/inputs.sha256"
+          test "$(sha256sum research/koblitz_n83_factor_base_sweep_20261008/verification/known-witness-ordered-sat-20261014/domains.json | cut -d' ' -f1)" = 63accc5b9dc9de6327c5b07e93b3e62717f8376a96c3f91f7bb70b77095f23bb
+          uname -a > "$RUNNER_TEMP/n83-witness/runner.txt"
+          docker version >> "$RUNNER_TEMP/n83-witness/runner.txt"
+          docker pull --platform linux/arm64 "$IMAGE_REF" \
+            > "$RUNNER_TEMP/n83-witness/image-pull.stdout" \
+            2> "$RUNNER_TEMP/n83-witness/image-pull.stderr"
+          docker image inspect "$IMAGE_REF" --format '{{.Id}} {{.Architecture}} {{.Os}} {{json .RepoDigests}}' \
+            > "$RUNNER_TEMP/n83-witness/image-identity.txt"
+      - name: Fetch and build exact example
+        run: |
+          set -euo pipefail
+          docker run --rm --pull never --platform linux/arm64 \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
+            --mount "type=bind,src=$CARGO_HOME,dst=/cargo" \
+            --env CARGO_HOME=/cargo --workdir /src "$IMAGE_REF" \
+            cargo fetch --locked --target aarch64-unknown-linux-gnu \
+            > "$OUT/fetch.stdout" 2> "$OUT/fetch.stderr"
+          timeout --signal=TERM --kill-after=5s 600s docker run --rm --pull never \
+            --platform linux/arm64 --network none --cpus 4 \
+            --memory 8192m --memory-swap 8192m \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/src,readonly" \
+            --mount "type=bind,src=$CARGO_HOME,dst=/cargo" \
+            --mount "type=bind,src=$TARGET_DIR,dst=/target" \
+            --env CARGO_HOME=/cargo --env CARGO_TARGET_DIR=/target \
+            --workdir /src "$IMAGE_REF" \
+            cargo build --release --locked --offline --example koblitz_n83_fixed_witness_control \
+            > "$OUT/build.stdout" 2> "$OUT/build.stderr"
+          cp "$TARGET_DIR/release/examples/koblitz_n83_fixed_witness_control" "$OUT/worker"
+          chmod 755 "$OUT/worker"
+          sha256sum "$OUT/worker" > "$OUT/worker.sha256"
+      - name: Bounded fixed-witness solve with phase markers
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$(cat "$OUT/source-commit.txt")"
+          sha256sum -c "$OUT/inputs.sha256"
+          started=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          start_seconds=$(date +%s)
+          set +e
+          timeout --signal=TERM --kill-after=5s 1200s docker run \
+            --name "n83-witness-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --pull never --platform linux/arm64 --network none --cpus 1 \
+            --memory 4096m --memory-swap 4096m --pids-limit 64 \
+            --cap-drop ALL --security-opt no-new-privileges --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+            --user "$(id -u):$(id -g)" \
+            --mount "type=bind,src=$OUT/worker,dst=/worker,readonly" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/research/koblitz_n83_factor_base_sweep_20261008/verification/known-witness-ordered-sat-20261014/domains.json,dst=/domains.json,readonly" \
+            "$IMAGE_REF" /worker /domains.json 5000 \
+            > "$OUT/solve.stdout" 2> "$OUT/solve.stderr"
+          exit_code=$?
+          set -e
+          ended=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          elapsed=$(( $(date +%s) - start_seconds ))
+          printf '%s\n' "$exit_code" > "$OUT/solve.exit-code"
+          printf 'started_utc=%s\nended_utc=%s\nelapsed_wall_seconds=%s\nconflict_cap=5000\nwall_cap_seconds=1200\n' \
+            "$started" "$ended" "$elapsed" > "$OUT/solve.bounds"
+          docker inspect "n83-witness-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            > "$OUT/container-inspect.json" 2> "$OUT/inspect.stderr" || true
+          docker rm -f "n83-witness-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            > "$OUT/container-cleanup.stdout" 2> "$OUT/container-cleanup.stderr" || true
+          sha256sum "$OUT"/solve.stdout "$OUT"/solve.stderr "$OUT"/container-inspect.json \
+            > "$OUT/output.sha256"
+          if [ "$exit_code" -ne 0 ] && [ "$exit_code" -ne 124 ]; then
+            exit "$exit_code"
+          fi
+      - name: Preserve frozen input, raw execution and cleanup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n83-hosted-witness-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/n83-witness/
+          if-no-files-found: error
+          retention-days: 90

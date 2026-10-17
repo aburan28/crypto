@@ -1,0 +1,28 @@
+{
+  "archives_sha256": {
+    "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0.jsonl.gz": "8463aaf30365d6f6f5d6b189aff4e8afcb6c8305ec27c216700776cbdccba29d",
+    "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47.jsonl.gz": "df02963d1706fa7a64fd7558d88db79b23ea34801ac58062c4c500113e8c57fe",
+    "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e.jsonl.gz": "3e85c9e419fcddd3c9faed3c84470bf96fcad9178e48e1d73629369335841ecf"
+  },
+  "conservative_full_charge_seconds": 7500,
+  "outcomes": [
+    {
+      "elapsed_search_wall_seconds_L0": 1497.377195423,
+      "role": "gray_pool",
+      "search_exit_code": 0,
+      "status": "UNKNOWN_search_cap"
+    },
+    {
+      "elapsed_search_wall_seconds_L0": 1555.4116159730002,
+      "role": "hash_pool",
+      "search_exit_code": 0,
+      "status": "UNKNOWN_search_cap"
+    }
+  ],
+  "plan_sha256": "7788514127328a78cf2b0f634003ddae3ff18a9ff0c0c8cd75b50fcc006152cd",
+  "s3_factor_bases_status": "PASS_3_FROZEN_S3_OBJECTS",
+  "schema": "n83.hosted-m6-paired-audit/v1",
+  "selected_best_total_runtime": null,
+  "source_commit": "17f03c518377468eeb49331ecfd8c3dedc2d72d0",
+  "status": "PASS_MATCHED_4_PLUS_2_ONE_QUERY_REPLAY"
+}

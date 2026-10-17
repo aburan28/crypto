@@ -1,0 +1,99 @@
+{
+  "algebra": {
+    "ordered_indices": [
+      166,
+      0,
+      332,
+      196212,
+      196378
+    ],
+    "ordered_xs": [
+      "3190528981678629953846779",
+      "6322576162995772655031682",
+      "8674926856113960796960747",
+      "2356799046069879186945790",
+      "668067089966811331796550"
+    ],
+    "partial_xs": [
+      "6074522724576400135011444",
+      "4229099761816125480084059",
+      "976447405114368105838624"
+    ],
+    "s3_residuals": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "target": [
+      "6595116073687692399614168",
+      "9473620351503970875544348"
+    ]
+  },
+  "artifact_file_count": 22,
+  "artifact_sha256": {
+    "build.stderr": "c9903bfbee50ffd6c30eca966e6fad5b49b79002d7d84a239d9ca3cf5f3e9918",
+    "build.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "container-cleanup.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "container-cleanup.stdout": "2765d74f0ba4e00a7d7fb918fac56b6c2f541597a0e53fde1ef3b58555817437",
+    "container-inspect.json": "638dc628a01d21a60630152eb5526ce23ee713821f456ae34154c5c68c411ba7",
+    "fetch.stderr": "7180db2fecf890b7e916be4d6bbc32f450aa28a1eb86e434898aec34d50baf43",
+    "fetch.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "image-identity.txt": "e40664ed6850fdbec989b82a4b945da18369eecff37b195fdabe65daadf1d607",
+    "image-pull.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "image-pull.stdout": "72239bfd35da298ba91f3ece17f69aca10c750d3088297272a7d3ae2331305e4",
+    "inputs.sha256": "e7c2150ce10023e618fd7d5253baa7ddb0999641505a46bf4cd917b010fd67d3",
+    "inspect.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "output.sha256": "0ac3468dedd1ae8fea3efbc2529f6370b704b5f852cd404a0f728f8b3b867931",
+    "runner.txt": "b502a2ded57cdebca132533fa18eed27a3cb3fc286f27723e903a8c1d39ccecf",
+    "solve.bounds": "ba4325eebe0b97edcf145701ead94932f12feb5111d997712611c09a7a037d59",
+    "solve.exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "solve.stderr": "38093a5c3a5901b6c0e5e93de21868075c8ceb333694a25bcab38c3eedebf815",
+    "solve.stdout": "42c9d744c399edd5c9865da44e66bc7d8f54f6e84628599e9a31806458a0d56e",
+    "source-commit.txt": "5cc229e23f1e84448eae67dee88be83457d90c4988cdf1e634f3655c78ee84c5",
+    "source-status.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worker": "a380bb1f6d15246eb52bde3ad765b19d3a6dd64552a270d6c0b919233215485f",
+    "worker.sha256": "41a9d61f89e6ab186e9eb354949285eca83d2b1781ef473ca0fc20dc93d51c10"
+  },
+  "github_artifact_id": 12107379138,
+  "natural_relations": null,
+  "outer_wall_seconds_L0": 215,
+  "phases": [
+    {
+      "elapsed_wall_ms_L0": 0.0,
+      "phase": "build_started"
+    },
+    {
+      "clauses": 248087,
+      "elapsed_wall_ms_L0": 23.631679,
+      "phase": "circuit_built",
+      "variables": 84743,
+      "xors": 1660
+    },
+    {
+      "clauses": 714072,
+      "elapsed_wall_ms_L0": 82.034869,
+      "phase": "domains_built",
+      "variables": 101636,
+      "xors": 4980
+    },
+    {
+      "clauses": 714736,
+      "elapsed_wall_ms_L0": 82.09829500000001,
+      "phase": "fixed_units_installed",
+      "variables": 101636,
+      "xors": 4980
+    }
+  ],
+  "protocol_audit_sha256": "ec2f5f2c8bc7429d343be521bc97feeea0ca39bd2b38aabb9e1518c1c17140e9",
+  "run_id": 39051579293,
+  "s3_archive_sha256": "75362a2d12c48a6e7854eaf070d9430a5fbb9d3f484229f167fcff44a621135d",
+  "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/evidence/hosted-fixed-witness-run-39051579293/75362a2d12c48a6e7854eaf070d9430a5fbb9d3f484229f167fcff44a621135d.tar.gz",
+  "schema": "n83.hosted-fixed-witness-retained-audit/v1",
+  "selected_best_total_runtime": null,
+  "solver_conflicts": 787,
+  "source_commit": "0891c2e062ff95e923302e570a8101f83a59b6a5",
+  "status": "PASS_FIXED_WITNESS_SAT_AND_S3_ROUNDTRIP",
+  "total_index_calculus_runtime_ms": null,
+  "worker_wall_ms_L0": 214870.346357
+}

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
+import tempfile
 from unittest import TestCase, main, mock
 
 
@@ -39,6 +41,23 @@ class HostedPairControls(TestCase):
                 runner.run(HERE, Path("/private/tmp/new-n83-hosted-output"),
                            Path("/private/tmp/new-n83-hosted-scratch"))
             plan.assert_not_called()
+
+    def test_preparation_from_another_workflow_commit_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            receipt = Path(directory) / "regeneration.json"
+            receipt.write_text(json.dumps({
+                "schema": "n83.hosted-regenerated-archives/v1",
+                "status": "PASS_3_FROZEN_OBJECTS",
+                "source_commit": "a" * 40,
+                "workflow_dispatch_head_sha": "b" * 40,
+                "archive_sha256": {"base.jsonl.gz": "c" * 64},
+                "pilot_completed_base_count": 54,
+                "hosted_preparation_wall_seconds_L0": 50,
+            }))
+            with mock.patch.dict(runner.os.environ, {"GITHUB_SHA": "d" * 40}):
+                with self.assertRaisesRegex(ValueError, "does not bind frozen inputs"):
+                    runner.checked_preparation(receipt, "a" * 40,
+                                               {"/frozen/base.jsonl.gz": "c" * 64})
 
 
 if __name__ == "__main__":
