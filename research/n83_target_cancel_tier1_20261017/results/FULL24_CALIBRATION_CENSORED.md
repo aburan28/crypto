@@ -23,8 +23,9 @@ resource, event-order, and telemetry checks. Strata 0 and 1 record
 `PASS_10_PERCENT_PER_PAIR`, `PASS_TIER1`. Their per-point timings,
 calibration readings, exact resource counts, and cold costs are preserved in
 the versioned analysis JSON. Cloud `PASS_INDEPENDENT_REPLAY` is the provider
-verifier's result; a separate local replay of stratum 2 reproduced its
-analysis byte for byte. The remaining local archive replays are tracked
+verifier's result; separate local replays of strata 2 and 3 reproduced each
+archived analysis byte for byte after canonical JSON formatting. Their local
+stderr files were empty. The remaining local archive replays are tracked
 separately and are not silently assumed by this summary.
 
 The join candidate is
@@ -43,7 +44,7 @@ per-point ratios, with candidate IDs used to align each point's arms.
 | 0 | 12108389377 | `8428d634647950ae1533307ddaccd5049b75d5db7ef4151c7055102509519c93` | `stratum0_cloud_analysis.json`, `stratum0_provider_receipt.json` |
 | 1 | 12109415285 | `d028fe586e27ab89d0c9159feef20dafbe927a6cc89d03b2c9bebf8d1afc788c` | `stratum1_cloud_analysis.json`, `stratum1_provider_receipt.json` |
 | 2 | 12108835537 | `b1d0248f993b8fd6deefaec5cfa024d65db9ba1d46c3d1135860402f87115181` | `stratum2_analysis.json`, `stratum2_provider_receipt.json`, `stratum2_local_replay_receipt.json` |
-| 3 | 12108209419 | `081f576f5e0fb030749e700529dc30c407ee854674882b5b1af538a78667a75c` | `stratum3_cloud_analysis.json`, `stratum3_provider_receipt.json` |
+| 3 | 12108209419 | `081f576f5e0fb030749e700529dc30c407ee854674882b5b1af538a78667a75c` | `stratum3_cloud_analysis.json`, `stratum3_provider_receipt.json`, `stratum3_local_replay_receipt.json` |
 
 The next confirmation uses a new frozen 24-point domain and independently
 verified same-point pairs on four Tier 1 instances. Calibration repetitions
