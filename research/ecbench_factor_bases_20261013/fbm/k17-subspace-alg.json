@@ -1,0 +1,18 @@
+{
+  "fbm_id": "FBM1hc95f92d783b3",
+  "fbm_sha256": "c95f92d783b3ad37edb71eca8bba295403ef864a967a6c046fdc1321f7e8c163",
+  "config": {
+    "schema": "ecbench.factor_base_measurement/v1",
+    "curve": "icv1-f2m17-tm101-00378d4e",
+    "fb_id": "FB1h70021407fcc7",
+    "fb_sha256": "70021407fcc7901d5d4c9869626149a9617b52eebb61da6291b21f931660d7ca",
+    "family": "binary-subspace",
+    "fb_params": {
+      "dimension": "4"
+    },
+    "oracle": "descent-algebraic:m=2",
+    "solver": "f4-f2",
+    "linalg": "incremental-gauss",
+    "instrument": "ecbench.ic_pipeline/v1"
+  }
+}
