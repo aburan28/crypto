@@ -1,0 +1,10 @@
+{
+  "schema": "prime61.baseline-verification/v1",
+  "original_process_exit_codes": {"control": 0, "prime61": 0},
+  "control": {"status": "VERIFIED_SOLVE", "targets": 62676, "relations": 33, "relation_replays": 33, "scalar": 596767, "group_check": true},
+  "prime61": {"runs": 12, "target_cap_per_run": 100000, "status_every_run": "EXHAUSTED_TRIAL_CAP", "relations_every_run": 0, "recovered_scalar": null},
+  "replay": {"process_exit_code": 0, "byte_comparison_exit_code": 0, "same_host_and_binary": true, "independent_validation": false},
+  "full_operation_cost": null,
+  "candidate_ranking": null,
+  "original_screenshot_experiment_complete": false
+}
