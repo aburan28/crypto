@@ -79,9 +79,27 @@ provide a larger random-access SQLite working volume. A connected existing
 worker/volume and S3 identity remain required for those large runs.
 
 
-Repaired local worker **PID 79776 launched 2026-10-17 06:58:03 UTC**, with
+Historical launch: repaired local worker **PID 79776 launched 2026-10-17 06:58:03 UTC**, with
 24-hour / 2-GiB guards. At 06:59:13 UTC it has audited vertices in all three
 classes and an active job. This is an actual launch, not full-queue completion.
+That process was absent on recovery; this is not its current running status.
 Later progress is in its local ledger and `execution/repaired-continuation/`.
 It will pause on guards/failures; no unattended upload is assumed. The frozen
 Drive snapshots do not track live progress.
+
+
+Latest checkpoint, 17 October 2026 14:50 UTC: the earlier process was absent
+after the environment returned; its PID receipt is historical. A preserved
+interrupted attempt and **2,935 audited vertices / 46,960 records** are in the
+[new checkpoint archive](https://drive.google.com/file/d/1IoPt5C-EYlo488pPVWPx-qpDHo7t1GwY/view).
+There are 30,270 verified recoveries, 14,626 exhausted budgets and 2,064
+timeouts, with samples from every one of the 51 strata; 1,530,557 relations.
+The [report](https://drive.google.com/file/d/1fiyasnknjZ1T0lE8z6yHi7AIhMdUysnA/view)
+is inspected. New runtime epochs and resumes have separate receipts.
+
+[Original A–E local conductors and prefixes](https://drive.google.com/file/d/1zeGSq3GWne9yTH0R37EZ3YI89xG_yR2L/view)
+now include source conductors 268,435,456 / 129,140,163 / 967,458,816 /
+544,195,584 / 644,972,544 and per-vertex bounds, with unknowns retained.
+[One-page report](https://drive.google.com/file/d/17jC_A1uSRHtJc5c8Sy9AkH9jt6UJTbBX/view).
+This is local certification, not complete original class populations. S3
+access was rechecked and still lacks a runtime AWS identity.

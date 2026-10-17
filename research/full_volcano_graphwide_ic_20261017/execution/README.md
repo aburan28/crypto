@@ -233,3 +233,25 @@ remain open. Canonical fastest-method claims are unchanged.
 
 
 [Repaired local survey actually launched](repaired-continuation/README.md): PID 79776, 2026-10-17 06:58:03 UTC, 24-hour/2-GiB guards. The native receipt has audited progress in all three classes; consult the ledger for current coverage. This does not imply all 24,823 vertices are finished.
+
+
+## Checkpoint after interruption, 17 October 2026
+
+The previous process was absent when the environment returned. The unchanged
+native recovery path retained one interrupted attempt and finalized a
+**2,935-audited-vertex / 46,960-record** checkpoint, sampling all 51 strata.
+Outcomes: **30,270 verified, 14,626 exhausted, 2,064 timed out**. Native seals,
+audit/replay receipt bindings and exact populations pass. No historical
+session or mathematical parameter was changed. Source trials **74,829,850**;
+actual oracle calls **71,296,000**; relations **1,530,557**.
+[Recovery and download](recovery-20261017T1450Z/README.md). This is a frozen
+snapshot, not full-vertex or full-matrix completion. New runtime observations
+must retain their epoch; no admitted time comparisons are made.
+
+The same local-bound labeler now exposes a generic certify command and
+certifies source conductors for all original A–E models: **268,435,456;
+129,140,163; 967,458,816; 544,195,584; 644,972,544** respectively.
+The [native local certificate summaries](original-local-strata-20261017T1500Z/README.md)
+retain every unknown vertex and historical global stratum status. The fifteen
+visibility-cut controls pass, and generic C reproduces its frozen certificate.
+These prefixes do not discharge full A/C/D/E generation or new DLP timings.

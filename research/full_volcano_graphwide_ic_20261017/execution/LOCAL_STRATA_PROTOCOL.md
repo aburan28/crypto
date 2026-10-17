@@ -32,3 +32,11 @@ sampled strata only; retain the original expected 165 strata and
 study preparation, not work used by the DLP solver and not included in solver
 elapsed intervals. This is an implementation of existing floor-distance
 reasoning, not a new algebraic identity or speed claim.
+
+
+Generic-command extension, 2026-10-17: the same calculation is exposed as
+`local-strata certify PREFIX_DB FRESH_CERTIFICATE`. It applies the unchanged
+input/complete-kernel/depth checks to each retained original A–E prefix.
+Before use, all fifteen existing complete-truth cuts pass and generic C
+matches its earlier certificate byte for byte. This is a CLI extension and
+certification run, not a new DLP benchmark or change to the frozen C evidence.

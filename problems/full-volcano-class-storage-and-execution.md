@@ -92,7 +92,10 @@ The repository also has a reports-to-S3 workflow for reports merged to main; it 
 needed to use that target. An object archive alone does not supply random-access
 storage for the current SQLite enumerator. A validated external-memory backend
 could change that requirement but is not implemented by an S3 upload command.
-Current free space is approximately 6.8 GiB on the workspace and 2.1 GiB on /tmp.
+At the 14:50 UTC recovery checkpoint, the workspace has approximately 2.9 GiB
+free after retaining checkpoint and delivery verification copies. This is not
+enough for the original remaining full SQLite classes. The normal SDK probe
+still finds no S3 identity; see the [new access receipt](../research/full_volcano_graphwide_ic_20261017/execution/recovery-20261017T1450Z/volcano-resume-s3-access.json).
 
 The [native original-input inventory](../research/full_volcano_graphwide_ic_20261017/evidence/original-applicability.json)
 completely factors the five orders and computes exact largest-prime embedding
@@ -114,6 +117,19 @@ is preserved; the runner repair does not weaken the auditor. Fresh repaired cont
 resource and finite-field implementation gaps.
 
 ## What would unblock it
+
+The recovered additional-corpus checkpoint now contains 2,935 audited vertices
+and 46,960 accepted records across all 51 strata (30,270 verified, 14,626
+exhausted, 2,064 timeout). One unaccepted interrupted attempt is retained;
+its cause is unknown. [Recovery evidence and delivery](../research/full_volcano_graphwide_ic_20261017/execution/recovery-20261017T1450Z/README.md)
+bind the unchanged queue/binaries and existing replay receipts. These counts
+are partial vertex coverage, not completion of the full frozen matrix.
+
+The unchanged local-label method now certifies each original source conductor:
+268,435,456 / 129,140,163 / 967,458,816 / 544,195,584 / 644,972,544.
+[All five retained-prefix certificates](../research/full_volcano_graphwide_ic_20261017/execution/original-local-strata-20261017T1500Z/README.md)
+and the 15 complete-truth calibration cuts preserve unknown conductors. This
+advances conductor identification, not full generation or DLP measurements.
 
 - [ ] Retain complete vertex/map outputs for each fixed case on durable
   storage, with checksummed manifests and accessible download locations.

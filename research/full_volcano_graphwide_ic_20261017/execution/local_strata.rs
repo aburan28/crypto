@@ -168,6 +168,23 @@ fn certify(path: &Path, cutoff: u64) -> Value {
 
 fn main() {
     let a: Vec<_> = env::args().collect();
+    if a.get(1).map(String::as_str) == Some("certify") {
+        assert_eq!(
+            a.len(),
+            4,
+            "local-strata certify PREFIX_DB FRESH_CERTIFICATE"
+        );
+        assert!(!Path::new(&a[3]).exists());
+        let result = certify(Path::new(&a[2]), u64::MAX);
+        fs::write(&a[3], serde_json::to_vec_pretty(&result).unwrap()).unwrap();
+        println!(
+            "{}",
+            json!({"vertices":result["vertices"],"exact":result["vertices_exact"],
+            "unknown":result["vertices_unknown"],"strata":result["strata_exact_observed"],
+            "source_conductor":result["rows"][0]["conductor"]})
+        );
+        return;
+    }
     if a.get(1).map(String::as_str) == Some("summarize") {
         assert_eq!(
             a.len(),
