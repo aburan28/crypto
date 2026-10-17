@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   validate-control:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: python3 scripts/run_koblitz_stage30_n31_search.py self-test
@@ -23,7 +23,7 @@ jobs:
   search:
     if: ${{ github.event_name == 'workflow_dispatch' }}
     needs: validate-control
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
