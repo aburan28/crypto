@@ -22,6 +22,8 @@ permissions:
 jobs:
   private-startup:
     runs-on: ubuntu-latest
+    # Syntax check and offline contract tests; about one second locally.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:

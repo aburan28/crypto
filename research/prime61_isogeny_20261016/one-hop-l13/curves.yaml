@@ -1,0 +1,960 @@
+# Isogeny walk from prime61-isogeny-source written by `isogeny_walk` (src/bin/isogeny_walk.rs).
+# Format: docs/curves/ic/curves.yaml and its schema.  `field` and `curve` are
+# exactly the EC1 preimage, so curve_uid is recomputable from this file.
+# Models: icwalk-canon/v1: the registered model when the curve is the walk's root; else an a=-3 model with the least b when one exists over F_p; else y^2=x^3+3j(1728-j)c^2*x+2j(1728-j)^2c^3 with c the least of {1, least non-residue} that gives an F_p-isomorphic model
+# Generators: icwalk-gen/v1: [cofactor]P for the point P with the least x >= 0 whose y is nonzero (the smaller y as an integer) and whose multiple is not the identity
+# ICV1 slugs of walked curves are computed, not registered (AGENTS.md §11:
+# register a slug before citing it in prose).
+schema_version: 1
+identity_rule: sha256_sorted_key_compact_utf8_json_of_field_and_curve
+curves:
+  icv1-fp61-tm1604388101-9105e769:
+    label: "prime61-isogeny-source (walk root)"
+    curve_tag: fp
+    curve_ref: icwalk/fp/n000000
+    curve_id: EC1P61Cfph21ad10f63efd
+    curve_uid: "urn:ec-record:1:sha256:21ad10f63efdfb9cece7b48145b24c48a2ee16c9cac75581333f3938db42e6c9"
+    position_alias: EC1P61Cfph21ad10f63efdV3L0V5L0V7L0V11L0V13L0
+    icv1_identity:
+      slug: icv1-fp61-tm1604388101-9105e769
+      full: "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:1616729741622916372:unk:unk:r:9105e7695e01"
+      status: registered_representation
+    icv1_registration: "registered in docs/curves/registry.json"
+    trait_status:
+      ordinary:
+        value: true
+        status: derived_from_model
+      j_invariant:
+        value: 1616729741622916372
+        status: derived_from_model
+      endomorphism_discriminant:
+        value: -6649310858224389603
+        status: unproved_in_this_registry
+        proof_ref: "walk.json#class: D_pi is squarefree and 1 mod 4 if its trial-division cofactor is prime; the cofactor passes Miller-Rabin only"
+      volcano_component:
+        value: null
+        status: unknown
+      volcano_total_depth:
+        value: null
+        status: unmeasured
+      group_order:
+        value: 2305843010818082053
+        status: proved
+      trace:
+        value: -1604388101
+        status: derived_from_model
+      non_singular:
+        value: true
+        status: proved
+      generator_valid:
+        value: true
+        status: proved
+      a_minus_3_model:
+        value: true
+        status: derived_from_model
+      qr_prefix_64:
+        value: 35
+        status: derived_from_model
+      coefficient_bits:
+        value:
+          a: 2
+          b: 7
+        status: derived_from_model
+    factor_base_refs: []
+    factor_base_link_status: not_reconciled
+    field:
+      characteristic: 2305843009213693951
+      degree: 1
+      representation: prime
+      element_encoding: "hex integer modulo the characteristic"
+    curve:
+      model: "short Weierstrass"
+      coefficients:
+        - 0
+        - 0
+        - 0
+        - 2305843009213693948
+        - 111
+      subgroup_order: "2305843010818082053"
+      cofactor: 1
+      generator:
+        - "0x1"
+        - "0x18edf7d1ab07e459"
+      target_group: "prime-order subgroup"
+    equation: y^2=x^3+2305843009213693948*x+111
+    a: 2305843009213693948
+    b: 111
+    endomorphism:
+      endomorphism_order_conductor: null
+      frobenius_order_conductor: null
+      frobenius_discriminant: -6649310858224389603
+      volcano_levels:
+        '3':
+          level: 0
+          status: proved
+          proof_ref: "v_3(t^2-4p) = 1 <= 1: the 3-volcano has depth 0"
+        '5':
+          level: 0
+          status: proved
+          proof_ref: "v_5(t^2-4p) = 0 <= 1: the 5-volcano has depth 0"
+        '7':
+          level: 0
+          status: proved
+          proof_ref: "v_7(t^2-4p) = 0 <= 1: the 7-volcano has depth 0"
+        '11':
+          level: 0
+          status: proved
+          proof_ref: "v_11(t^2-4p) = 0 <= 1: the 11-volcano has depth 0"
+        '13':
+          level: 0
+          status: proved
+          proof_ref: "v_13(t^2-4p) = 0 <= 1: the 13-volcano has depth 0"
+      status: partial
+    isogeny_routes:
+      incoming: []
+      outgoing:
+        - IW1E3h1hc23fc79c541a
+        - IW1E7h1h9d0e1a336ea8
+        - IW1E7h1h0f2e834d0b70
+        - IW1E11h1h43a1a2496d2a
+        - IW1E11h1h07246488774f
+        - IW1E13h1h91f867c3fec4
+        - IW1E13h1hd2170ca5d0d6
+    root_route: null
+    walk:
+      node: 0
+      depth: 0
+      expanded: true
+      rational_neighbours_by_ell:
+        '3': 1
+        '5': 0
+        '7': 2
+        '11': 2
+        '13': 2
+    evidence_ref: isogeny_routes.json
+  icv1-fp61-tm1604388101-f883d3f1:
+    label: "prime61-isogeny-source-isogenous curve, walk node 1"
+    curve_tag: fp
+    curve_ref: icwalk/fp/n000001
+    curve_id: EC1P61Cfph9d692774299f
+    curve_uid: "urn:ec-record:1:sha256:9d692774299f1ae70d26008ab645fcbf22c1ae598a5409912d1e386d7d02d3bc"
+    position_alias: EC1P61Cfph9d692774299fV3L0V5L0V7L0V11L0V13L0
+    icv1_identity:
+      slug: icv1-fp61-tm1604388101-f883d3f1
+      full: "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:735163661610613125:unk:unk:r:f883d3f11d5d"
+      status: unresolved
+    icv1_registration: "computed by curve_id::prime; not registered"
+    trait_status:
+      ordinary:
+        value: true
+        status: derived_from_model
+      j_invariant:
+        value: 735163661610613125
+        status: derived_from_model
+      endomorphism_discriminant:
+        value: -6649310858224389603
+        status: unproved_in_this_registry
+        proof_ref: "walk.json#class: D_pi is squarefree and 1 mod 4 if its trial-division cofactor is prime; the cofactor passes Miller-Rabin only"
+      volcano_component:
+        value: null
+        status: unknown
+      volcano_total_depth:
+        value: null
+        status: unmeasured
+      group_order:
+        value: 2305843010818082053
+        status: proved
+      trace:
+        value: -1604388101
+        status: derived_from_model
+      non_singular:
+        value: true
+        status: proved
+      generator_valid:
+        value: true
+        status: proved
+      a_minus_3_model:
+        value: false
+        status: derived_from_model
+      qr_prefix_64:
+        value: 25
+        status: derived_from_model
+      coefficient_bits:
+        value:
+          a: 58
+          b: 58
+        status: derived_from_model
+    factor_base_refs: []
+    factor_base_link_status: not_reconciled
+    field:
+      characteristic: 2305843009213693951
+      degree: 1
+      representation: prime
+      element_encoding: "hex integer modulo the characteristic"
+    curve:
+      model: "short Weierstrass"
+      coefficients:
+        - 0
+        - 0
+        - 0
+        - 2030707415616339720
+        - 266187520339107340
+      subgroup_order: "2305843010818082053"
+      cofactor: 1
+      generator:
+        - "0x1"
+        - "0x8b7131ad27a8497"
+      target_group: "prime-order subgroup"
+    equation: y^2=x^3+2030707415616339720*x+266187520339107340
+    a: 2030707415616339720
+    b: 266187520339107340
+    endomorphism:
+      endomorphism_order_conductor: null
+      frobenius_order_conductor: null
+      frobenius_discriminant: -6649310858224389603
+      volcano_levels:
+        '3':
+          level: 0
+          status: proved
+          proof_ref: "v_3(t^2-4p) = 1 <= 1: the 3-volcano has depth 0"
+        '5':
+          level: 0
+          status: proved
+          proof_ref: "v_5(t^2-4p) = 0 <= 1: the 5-volcano has depth 0"
+        '7':
+          level: 0
+          status: proved
+          proof_ref: "v_7(t^2-4p) = 0 <= 1: the 7-volcano has depth 0"
+        '11':
+          level: 0
+          status: proved
+          proof_ref: "v_11(t^2-4p) = 0 <= 1: the 11-volcano has depth 0"
+        '13':
+          level: 0
+          status: proved
+          proof_ref: "v_13(t^2-4p) = 0 <= 1: the 13-volcano has depth 0"
+      status: partial
+    isogeny_routes:
+      incoming:
+        - IW1E3h1hc23fc79c541a
+      outgoing: []
+    root_route: IW1E3h1hc23fc79c541a
+    walk:
+      node: 1
+      depth: 1
+      expanded: false
+      rational_neighbours_by_ell:
+        '3': 0
+        '5': 0
+        '7': 0
+        '11': 0
+        '13': 0
+    evidence_ref: isogeny_routes.json
+  icv1-fp61-tm1604388101-38c55b40:
+    label: "prime61-isogeny-source-isogenous curve, walk node 2"
+    curve_tag: fp
+    curve_ref: icwalk/fp/n000002
+    curve_id: EC1P61Cfphfe563e21ce70
+    curve_uid: "urn:ec-record:1:sha256:fe563e21ce7039162303459c0673ae6b7b6200b64677377e1cb9b6e16d50b2e6"
+    position_alias: EC1P61Cfphfe563e21ce70V3L0V5L0V7L0V11L0V13L0
+    icv1_identity:
+      slug: icv1-fp61-tm1604388101-38c55b40
+      full: "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:228872134887626155:unk:unk:r:38c55b40ce33"
+      status: unresolved
+    icv1_registration: "computed by curve_id::prime; not registered"
+    trait_status:
+      ordinary:
+        value: true
+        status: derived_from_model
+      j_invariant:
+        value: 228872134887626155
+        status: derived_from_model
+      endomorphism_discriminant:
+        value: -6649310858224389603
+        status: unproved_in_this_registry
+        proof_ref: "walk.json#class: D_pi is squarefree and 1 mod 4 if its trial-division cofactor is prime; the cofactor passes Miller-Rabin only"
+      volcano_component:
+        value: null
+        status: unknown
+      volcano_total_depth:
+        value: null
+        status: unmeasured
+      group_order:
+        value: 2305843010818082053
+        status: proved
+      trace:
+        value: -1604388101
+        status: derived_from_model
+      non_singular:
+        value: true
+        status: proved
+      generator_valid:
+        value: true
+        status: proved
+      a_minus_3_model:
+        value: false
+        status: derived_from_model
+      qr_prefix_64:
+        value: 35
+        status: derived_from_model
+      coefficient_bits:
+        value:
+          a: 60
+          b: 55
+        status: derived_from_model
+    factor_base_refs: []
+    factor_base_link_status: not_reconciled
+    field:
+      characteristic: 2305843009213693951
+      degree: 1
+      representation: prime
+      element_encoding: "hex integer modulo the characteristic"
+    curve:
+      model: "short Weierstrass"
+      coefficients:
+        - 0
+        - 0
+        - 0
+        - 1041428251935393171
+        - 2287743713469519882
+      subgroup_order: "2305843010818082053"
+      cofactor: 1
+      generator:
+        - "0x1"
+        - "0x7ca3eefd5228370"
+      target_group: "prime-order subgroup"
+    equation: y^2=x^3+1041428251935393171*x+2287743713469519882
+    a: 1041428251935393171
+    b: 2287743713469519882
+    endomorphism:
+      endomorphism_order_conductor: null
+      frobenius_order_conductor: null
+      frobenius_discriminant: -6649310858224389603
+      volcano_levels:
+        '3':
+          level: 0
+          status: proved
+          proof_ref: "v_3(t^2-4p) = 1 <= 1: the 3-volcano has depth 0"
+        '5':
+          level: 0
+          status: proved
+          proof_ref: "v_5(t^2-4p) = 0 <= 1: the 5-volcano has depth 0"
+        '7':
+          level: 0
+          status: proved
+          proof_ref: "v_7(t^2-4p) = 0 <= 1: the 7-volcano has depth 0"
+        '11':
+          level: 0
+          status: proved
+          proof_ref: "v_11(t^2-4p) = 0 <= 1: the 11-volcano has depth 0"
+        '13':
+          level: 0
+          status: proved
+          proof_ref: "v_13(t^2-4p) = 0 <= 1: the 13-volcano has depth 0"
+      status: partial
+    isogeny_routes:
+      incoming:
+        - IW1E7h1h9d0e1a336ea8
+      outgoing: []
+    root_route: IW1E7h1h9d0e1a336ea8
+    walk:
+      node: 2
+      depth: 1
+      expanded: false
+      rational_neighbours_by_ell:
+        '3': 0
+        '5': 0
+        '7': 0
+        '11': 0
+        '13': 0
+    evidence_ref: isogeny_routes.json
+  icv1-fp61-tm1604388101-783b00af:
+    label: "prime61-isogeny-source-isogenous curve, walk node 3"
+    curve_tag: fp
+    curve_ref: icwalk/fp/n000003
+    curve_id: EC1P61Cfph9032601fd9f5
+    curve_uid: "urn:ec-record:1:sha256:9032601fd9f5bfd020066aab030997ed02150cbe797317e7c7a5a56f5e275593"
+    position_alias: EC1P61Cfph9032601fd9f5V3L0V5L0V7L0V11L0V13L0
+    icv1_identity:
+      slug: icv1-fp61-tm1604388101-783b00af
+      full: "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:1146564249444689702:unk:unk:r:783b00afc7ac"
+      status: unresolved
+    icv1_registration: "computed by curve_id::prime; not registered"
+    trait_status:
+      ordinary:
+        value: true
+        status: derived_from_model
+      j_invariant:
+        value: 1146564249444689702
+        status: derived_from_model
+      endomorphism_discriminant:
+        value: -6649310858224389603
+        status: unproved_in_this_registry
+        proof_ref: "walk.json#class: D_pi is squarefree and 1 mod 4 if its trial-division cofactor is prime; the cofactor passes Miller-Rabin only"
+      volcano_component:
+        value: null
+        status: unknown
+      volcano_total_depth:
+        value: null
+        status: unmeasured
+      group_order:
+        value: 2305843010818082053
+        status: proved
+      trace:
+        value: -1604388101
+        status: derived_from_model
+      non_singular:
+        value: true
+        status: proved
+      generator_valid:
+        value: true
+        status: proved
+      a_minus_3_model:
+        value: true
+        status: derived_from_model
+      qr_prefix_64:
+        value: 37
+        status: derived_from_model
+      coefficient_bits:
+        value:
+          a: 2
+          b: 58
+        status: derived_from_model
+    factor_base_refs: []
+    factor_base_link_status: not_reconciled
+    field:
+      characteristic: 2305843009213693951
+      degree: 1
+      representation: prime
+      element_encoding: "hex integer modulo the characteristic"
+    curve:
+      model: "short Weierstrass"
+      coefficients:
+        - 0
+        - 0
+        - 0
+        - 2305843009213693948
+        - 2140736075790949278
+      subgroup_order: "2305843010818082053"
+      cofactor: 1
+      generator:
+        - "0x0"
+        - "0x275279e858ef5a"
+      target_group: "prime-order subgroup"
+    equation: y^2=x^3+2305843009213693948*x+2140736075790949278
+    a: 2305843009213693948
+    b: 2140736075790949278
+    endomorphism:
+      endomorphism_order_conductor: null
+      frobenius_order_conductor: null
+      frobenius_discriminant: -6649310858224389603
+      volcano_levels:
+        '3':
+          level: 0
+          status: proved
+          proof_ref: "v_3(t^2-4p) = 1 <= 1: the 3-volcano has depth 0"
+        '5':
+          level: 0
+          status: proved
+          proof_ref: "v_5(t^2-4p) = 0 <= 1: the 5-volcano has depth 0"
+        '7':
+          level: 0
+          status: proved
+          proof_ref: "v_7(t^2-4p) = 0 <= 1: the 7-volcano has depth 0"
+        '11':
+          level: 0
+          status: proved
+          proof_ref: "v_11(t^2-4p) = 0 <= 1: the 11-volcano has depth 0"
+        '13':
+          level: 0
+          status: proved
+          proof_ref: "v_13(t^2-4p) = 0 <= 1: the 13-volcano has depth 0"
+      status: partial
+    isogeny_routes:
+      incoming:
+        - IW1E7h1h0f2e834d0b70
+      outgoing: []
+    root_route: IW1E7h1h0f2e834d0b70
+    walk:
+      node: 3
+      depth: 1
+      expanded: false
+      rational_neighbours_by_ell:
+        '3': 0
+        '5': 0
+        '7': 0
+        '11': 0
+        '13': 0
+    evidence_ref: isogeny_routes.json
+  icv1-fp61-tm1604388101-2673833a:
+    label: "prime61-isogeny-source-isogenous curve, walk node 4"
+    curve_tag: fp
+    curve_ref: icwalk/fp/n000004
+    curve_id: EC1P61Cfphcf9f154c1525
+    curve_uid: "urn:ec-record:1:sha256:cf9f154c1525a7387fc56c37d7cf7cab0df3719a0a2a5ccb870b109a002dcc51"
+    position_alias: EC1P61Cfphcf9f154c1525V3L0V5L0V7L0V11L0V13L0
+    icv1_identity:
+      slug: icv1-fp61-tm1604388101-2673833a
+      full: "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:126994738132478934:unk:unk:r:2673833adc51"
+      status: unresolved
+    icv1_registration: "computed by curve_id::prime; not registered"
+    trait_status:
+      ordinary:
+        value: true
+        status: derived_from_model
+      j_invariant:
+        value: 126994738132478934
+        status: derived_from_model
+      endomorphism_discriminant:
+        value: -6649310858224389603
+        status: unproved_in_this_registry
+        proof_ref: "walk.json#class: D_pi is squarefree and 1 mod 4 if its trial-division cofactor is prime; the cofactor passes Miller-Rabin only"
+      volcano_component:
+        value: null
+        status: unknown
+      volcano_total_depth:
+        value: null
+        status: unmeasured
+      group_order:
+        value: 2305843010818082053
+        status: proved
+      trace:
+        value: -1604388101
+        status: derived_from_model
+      non_singular:
+        value: true
+        status: proved
+      generator_valid:
+        value: true
+        status: proved
+      a_minus_3_model:
+        value: true
+        status: derived_from_model
+      qr_prefix_64:
+        value: 33
+        status: derived_from_model
+      coefficient_bits:
+        value:
+          a: 2
+          b: 60
+        status: derived_from_model
+    factor_base_refs: []
+    factor_base_link_status: not_reconciled
+    field:
+      characteristic: 2305843009213693951
+      degree: 1
+      representation: prime
+      element_encoding: "hex integer modulo the characteristic"
+    curve:
+      model: "short Weierstrass"
+      coefficients:
+        - 0
+        - 0
+        - 0
+        - 2305843009213693948
+        - 1600144244324527754
+      subgroup_order: "2305843010818082053"
+      cofactor: 1
+      generator:
+        - "0x0"
+        - "0x9f39de984d37c85"
+      target_group: "prime-order subgroup"
+    equation: y^2=x^3+2305843009213693948*x+1600144244324527754
+    a: 2305843009213693948
+    b: 1600144244324527754
+    endomorphism:
+      endomorphism_order_conductor: null
+      frobenius_order_conductor: null
+      frobenius_discriminant: -6649310858224389603
+      volcano_levels:
+        '3':
+          level: 0
+          status: proved
+          proof_ref: "v_3(t^2-4p) = 1 <= 1: the 3-volcano has depth 0"
+        '5':
+          level: 0
+          status: proved
+          proof_ref: "v_5(t^2-4p) = 0 <= 1: the 5-volcano has depth 0"
+        '7':
+          level: 0
+          status: proved
+          proof_ref: "v_7(t^2-4p) = 0 <= 1: the 7-volcano has depth 0"
+        '11':
+          level: 0
+          status: proved
+          proof_ref: "v_11(t^2-4p) = 0 <= 1: the 11-volcano has depth 0"
+        '13':
+          level: 0
+          status: proved
+          proof_ref: "v_13(t^2-4p) = 0 <= 1: the 13-volcano has depth 0"
+      status: partial
+    isogeny_routes:
+      incoming:
+        - IW1E11h1h43a1a2496d2a
+      outgoing: []
+    root_route: IW1E11h1h43a1a2496d2a
+    walk:
+      node: 4
+      depth: 1
+      expanded: false
+      rational_neighbours_by_ell:
+        '3': 0
+        '5': 0
+        '7': 0
+        '11': 0
+        '13': 0
+    evidence_ref: isogeny_routes.json
+  icv1-fp61-tm1604388101-a981fc5a:
+    label: "prime61-isogeny-source-isogenous curve, walk node 5"
+    curve_tag: fp
+    curve_ref: icwalk/fp/n000005
+    curve_id: EC1P61Cfphaaaa7d259fd8
+    curve_uid: "urn:ec-record:1:sha256:aaaa7d259fd8c58bc121b3b3cdd8c712ca955c6e74116e92105da52c96c85fcd"
+    position_alias: EC1P61Cfphaaaa7d259fd8V3L0V5L0V7L0V11L0V13L0
+    icv1_identity:
+      slug: icv1-fp61-tm1604388101-a981fc5a
+      full: "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:1178270235812327320:unk:unk:r:a981fc5a2f94"
+      status: unresolved
+    icv1_registration: "computed by curve_id::prime; not registered"
+    trait_status:
+      ordinary:
+        value: true
+        status: derived_from_model
+      j_invariant:
+        value: 1178270235812327320
+        status: derived_from_model
+      endomorphism_discriminant:
+        value: -6649310858224389603
+        status: unproved_in_this_registry
+        proof_ref: "walk.json#class: D_pi is squarefree and 1 mod 4 if its trial-division cofactor is prime; the cofactor passes Miller-Rabin only"
+      volcano_component:
+        value: null
+        status: unknown
+      volcano_total_depth:
+        value: null
+        status: unmeasured
+      group_order:
+        value: 2305843010818082053
+        status: proved
+      trace:
+        value: -1604388101
+        status: derived_from_model
+      non_singular:
+        value: true
+        status: proved
+      generator_valid:
+        value: true
+        status: proved
+      a_minus_3_model:
+        value: false
+        status: derived_from_model
+      qr_prefix_64:
+        value: 31
+        status: derived_from_model
+      coefficient_bits:
+        value:
+          a: 60
+          b: 60
+        status: derived_from_model
+    factor_base_refs: []
+    factor_base_link_status: not_reconciled
+    field:
+      characteristic: 2305843009213693951
+      degree: 1
+      representation: prime
+      element_encoding: "hex integer modulo the characteristic"
+    curve:
+      model: "short Weierstrass"
+      coefficients:
+        - 0
+        - 0
+        - 0
+        - 1192713219158584386
+        - 1314741747848562394
+      subgroup_order: "2305843010818082053"
+      cofactor: 1
+      generator:
+        - "0x0"
+        - "0x85e13215692133f"
+      target_group: "prime-order subgroup"
+    equation: y^2=x^3+1192713219158584386*x+1314741747848562394
+    a: 1192713219158584386
+    b: 1314741747848562394
+    endomorphism:
+      endomorphism_order_conductor: null
+      frobenius_order_conductor: null
+      frobenius_discriminant: -6649310858224389603
+      volcano_levels:
+        '3':
+          level: 0
+          status: proved
+          proof_ref: "v_3(t^2-4p) = 1 <= 1: the 3-volcano has depth 0"
+        '5':
+          level: 0
+          status: proved
+          proof_ref: "v_5(t^2-4p) = 0 <= 1: the 5-volcano has depth 0"
+        '7':
+          level: 0
+          status: proved
+          proof_ref: "v_7(t^2-4p) = 0 <= 1: the 7-volcano has depth 0"
+        '11':
+          level: 0
+          status: proved
+          proof_ref: "v_11(t^2-4p) = 0 <= 1: the 11-volcano has depth 0"
+        '13':
+          level: 0
+          status: proved
+          proof_ref: "v_13(t^2-4p) = 0 <= 1: the 13-volcano has depth 0"
+      status: partial
+    isogeny_routes:
+      incoming:
+        - IW1E11h1h07246488774f
+      outgoing: []
+    root_route: IW1E11h1h07246488774f
+    walk:
+      node: 5
+      depth: 1
+      expanded: false
+      rational_neighbours_by_ell:
+        '3': 0
+        '5': 0
+        '7': 0
+        '11': 0
+        '13': 0
+    evidence_ref: isogeny_routes.json
+  icv1-fp61-tm1604388101-00d9970f:
+    label: "prime61-isogeny-source-isogenous curve, walk node 6"
+    curve_tag: fp
+    curve_ref: icwalk/fp/n000006
+    curve_id: EC1P61Cfph1d882f40147a
+    curve_uid: "urn:ec-record:1:sha256:1d882f40147a2d4b3bac22bf357a0d851f25023935d7a1252a0d4ea9e48c0a80"
+    position_alias: EC1P61Cfph1d882f40147aV3L0V5L0V7L0V11L0V13L0
+    icv1_identity:
+      slug: icv1-fp61-tm1604388101-00d9970f
+      full: "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:531254563034812037:unk:unk:r:00d9970f0a32"
+      status: unresolved
+    icv1_registration: "computed by curve_id::prime; not registered"
+    trait_status:
+      ordinary:
+        value: true
+        status: derived_from_model
+      j_invariant:
+        value: 531254563034812037
+        status: derived_from_model
+      endomorphism_discriminant:
+        value: -6649310858224389603
+        status: unproved_in_this_registry
+        proof_ref: "walk.json#class: D_pi is squarefree and 1 mod 4 if its trial-division cofactor is prime; the cofactor passes Miller-Rabin only"
+      volcano_component:
+        value: null
+        status: unknown
+      volcano_total_depth:
+        value: null
+        status: unmeasured
+      group_order:
+        value: 2305843010818082053
+        status: proved
+      trace:
+        value: -1604388101
+        status: derived_from_model
+      non_singular:
+        value: true
+        status: proved
+      generator_valid:
+        value: true
+        status: proved
+      a_minus_3_model:
+        value: false
+        status: derived_from_model
+      qr_prefix_64:
+        value: 38
+        status: derived_from_model
+      coefficient_bits:
+        value:
+          a: 58
+          b: 59
+        status: derived_from_model
+    factor_base_refs: []
+    factor_base_link_status: not_reconciled
+    field:
+      characteristic: 2305843009213693951
+      degree: 1
+      representation: prime
+      element_encoding: "hex integer modulo the characteristic"
+    curve:
+      model: "short Weierstrass"
+      coefficients:
+        - 0
+        - 0
+        - 0
+        - 149889789905708837
+        - 1949824693151957736
+      subgroup_order: "2305843010818082053"
+      cofactor: 1
+      generator:
+        - "0x0"
+        - "0xa69d0d0a3e26ef2"
+      target_group: "prime-order subgroup"
+    equation: y^2=x^3+149889789905708837*x+1949824693151957736
+    a: 149889789905708837
+    b: 1949824693151957736
+    endomorphism:
+      endomorphism_order_conductor: null
+      frobenius_order_conductor: null
+      frobenius_discriminant: -6649310858224389603
+      volcano_levels:
+        '3':
+          level: 0
+          status: proved
+          proof_ref: "v_3(t^2-4p) = 1 <= 1: the 3-volcano has depth 0"
+        '5':
+          level: 0
+          status: proved
+          proof_ref: "v_5(t^2-4p) = 0 <= 1: the 5-volcano has depth 0"
+        '7':
+          level: 0
+          status: proved
+          proof_ref: "v_7(t^2-4p) = 0 <= 1: the 7-volcano has depth 0"
+        '11':
+          level: 0
+          status: proved
+          proof_ref: "v_11(t^2-4p) = 0 <= 1: the 11-volcano has depth 0"
+        '13':
+          level: 0
+          status: proved
+          proof_ref: "v_13(t^2-4p) = 0 <= 1: the 13-volcano has depth 0"
+      status: partial
+    isogeny_routes:
+      incoming:
+        - IW1E13h1h91f867c3fec4
+      outgoing: []
+    root_route: IW1E13h1h91f867c3fec4
+    walk:
+      node: 6
+      depth: 1
+      expanded: false
+      rational_neighbours_by_ell:
+        '3': 0
+        '5': 0
+        '7': 0
+        '11': 0
+        '13': 0
+    evidence_ref: isogeny_routes.json
+  icv1-fp61-tm1604388101-9dd8dc6c:
+    label: "prime61-isogeny-source-isogenous curve, walk node 7"
+    curve_tag: fp
+    curve_ref: icwalk/fp/n000007
+    curve_id: EC1P61Cfph3bed55529946
+    curve_uid: "urn:ec-record:1:sha256:3bed55529946414419dfeaae3085e611aa03b748eed96119e0b5b5267e4598c6"
+    position_alias: EC1P61Cfph3bed55529946V3L0V5L0V7L0V11L0V13L0
+    icv1_identity:
+      slug: icv1-fp61-tm1604388101-9dd8dc6c
+      full: "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:1107998689682267289:unk:unk:r:9dd8dc6c562a"
+      status: unresolved
+    icv1_registration: "computed by curve_id::prime; not registered"
+    trait_status:
+      ordinary:
+        value: true
+        status: derived_from_model
+      j_invariant:
+        value: 1107998689682267289
+        status: derived_from_model
+      endomorphism_discriminant:
+        value: -6649310858224389603
+        status: unproved_in_this_registry
+        proof_ref: "walk.json#class: D_pi is squarefree and 1 mod 4 if its trial-division cofactor is prime; the cofactor passes Miller-Rabin only"
+      volcano_component:
+        value: null
+        status: unknown
+      volcano_total_depth:
+        value: null
+        status: unmeasured
+      group_order:
+        value: 2305843010818082053
+        status: proved
+      trace:
+        value: -1604388101
+        status: derived_from_model
+      non_singular:
+        value: true
+        status: proved
+      generator_valid:
+        value: true
+        status: proved
+      a_minus_3_model:
+        value: false
+        status: derived_from_model
+      qr_prefix_64:
+        value: 34
+        status: derived_from_model
+      coefficient_bits:
+        value:
+          a: 60
+          b: 60
+        status: derived_from_model
+    factor_base_refs: []
+    factor_base_link_status: not_reconciled
+    field:
+      characteristic: 2305843009213693951
+      degree: 1
+      representation: prime
+      element_encoding: "hex integer modulo the characteristic"
+    curve:
+      model: "short Weierstrass"
+      coefficients:
+        - 0
+        - 0
+        - 0
+        - 830684514635399237
+        - 1235638701082140050
+      subgroup_order: "2305843010818082053"
+      cofactor: 1
+      generator:
+        - "0x0"
+        - "0x203a8c9bac8b5d2"
+      target_group: "prime-order subgroup"
+    equation: y^2=x^3+830684514635399237*x+1235638701082140050
+    a: 830684514635399237
+    b: 1235638701082140050
+    endomorphism:
+      endomorphism_order_conductor: null
+      frobenius_order_conductor: null
+      frobenius_discriminant: -6649310858224389603
+      volcano_levels:
+        '3':
+          level: 0
+          status: proved
+          proof_ref: "v_3(t^2-4p) = 1 <= 1: the 3-volcano has depth 0"
+        '5':
+          level: 0
+          status: proved
+          proof_ref: "v_5(t^2-4p) = 0 <= 1: the 5-volcano has depth 0"
+        '7':
+          level: 0
+          status: proved
+          proof_ref: "v_7(t^2-4p) = 0 <= 1: the 7-volcano has depth 0"
+        '11':
+          level: 0
+          status: proved
+          proof_ref: "v_11(t^2-4p) = 0 <= 1: the 11-volcano has depth 0"
+        '13':
+          level: 0
+          status: proved
+          proof_ref: "v_13(t^2-4p) = 0 <= 1: the 13-volcano has depth 0"
+      status: partial
+    isogeny_routes:
+      incoming:
+        - IW1E13h1hd2170ca5d0d6
+      outgoing: []
+    root_route: IW1E13h1hd2170ca5d0d6
+    walk:
+      node: 7
+      depth: 1
+      expanded: false
+      rational_neighbours_by_ell:
+        '3': 0
+        '5': 0
+        '7': 0
+        '11': 0
+        '13': 0
+    evidence_ref: isogeny_routes.json
