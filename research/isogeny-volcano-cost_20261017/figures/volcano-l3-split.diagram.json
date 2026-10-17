@@ -1,0 +1,738 @@
+{
+ "schema": "volcano-diagram/v2",
+ "ell": 3,
+ "depth": 3,
+ "title": "l3-split: 3-isogeny volcano over F_16759147 \u00b7 every curve \u00d7 4 isomorphic models \u00d7 16 paired targets",
+ "subtitle": "PROTOCOL v1 (research/isogeny-volcano-cost_20261017) \u00b7 % from the class mean",
+ "metrics": [
+  {
+   "key": "rho",
+   "title": "rho.negation \u00b7 mean S",
+   "label": "% from class mean S"
+  },
+  {
+   "key": "ic",
+   "title": "ic.pipeline mitm \u00b7 relation yield",
+   "label": "% from class mean yield"
+  }
+ ],
+ "vertices": [
+  {
+   "id": 0,
+   "label": "v0",
+   "level": 3,
+   "nbrs": [
+    1
+   ],
+   "values": {
+    "rho": -7.612011415590847,
+    "ic": -0.1537709201098747
+   },
+   "highlight": "root"
+  },
+  {
+   "id": 1,
+   "label": "v1",
+   "level": 2,
+   "nbrs": [
+    0,
+    2,
+    3,
+    4
+   ],
+   "values": {
+    "rho": -1.8139437760860688,
+    "ic": -4.898446418047486
+   },
+   "highlight": null
+  },
+  {
+   "id": 2,
+   "label": "v2",
+   "level": 1,
+   "nbrs": [
+    1,
+    5,
+    6,
+    7
+   ],
+   "values": {
+    "rho": 1.954321983277385,
+    "ic": 2.0686508437558038
+   },
+   "highlight": null
+  },
+  {
+   "id": 3,
+   "label": "v3",
+   "level": 3,
+   "nbrs": [
+    1
+   ],
+   "values": {
+    "rho": 5.2789594230593595,
+    "ic": -2.2625689496211354
+   },
+   "highlight": null
+  },
+  {
+   "id": 4,
+   "label": "v4",
+   "level": 3,
+   "nbrs": [
+    1
+   ],
+   "values": {
+    "rho": 7.021837514416718,
+    "ic": 0.2950579490971661
+   },
+   "highlight": null
+  },
+  {
+   "id": 5,
+   "label": "v5",
+   "level": 2,
+   "nbrs": [
+    2,
+    8,
+    9,
+    10
+   ],
+   "values": {
+    "rho": 0.9397888942179744,
+    "ic": 0.22314702065040493
+   },
+   "highlight": null
+  },
+  {
+   "id": 6,
+   "label": "v6",
+   "level": 2,
+   "nbrs": [
+    2,
+    11,
+    12,
+    13
+   ],
+   "values": {
+    "rho": -5.106210326877081,
+    "ic": 0.20462355424124556
+   },
+   "highlight": null
+  },
+  {
+   "id": 7,
+   "label": "v7",
+   "level": 0,
+   "nbrs": [
+    2,
+    14,
+    15,
+    16
+   ],
+   "values": {
+    "rho": -0.9590580259141945,
+    "ic": -1.3068698038841475
+   },
+   "highlight": null
+  },
+  {
+   "id": 8,
+   "label": "v8",
+   "level": 3,
+   "nbrs": [
+    5
+   ],
+   "values": {
+    "rho": 10.55982854073041,
+    "ic": 2.8174540750700805
+   },
+   "highlight": null
+  },
+  {
+   "id": 9,
+   "label": "v9",
+   "level": 3,
+   "nbrs": [
+    5
+   ],
+   "values": {
+    "rho": -3.312568795965698,
+    "ic": -1.0857219011891184
+   },
+   "highlight": null
+  },
+  {
+   "id": 10,
+   "label": "v10",
+   "level": 3,
+   "nbrs": [
+    5
+   ],
+   "values": {
+    "rho": -6.322325770107806,
+    "ic": 1.1443021230524764
+   },
+   "highlight": null
+  },
+  {
+   "id": 11,
+   "label": "v11",
+   "level": 3,
+   "nbrs": [
+    6
+   ],
+   "values": {
+    "rho": -7.119091060500371,
+    "ic": 0.14963205263485158
+   },
+   "highlight": null
+  },
+  {
+   "id": 12,
+   "label": "v12",
+   "level": 3,
+   "nbrs": [
+    6
+   ],
+   "values": {
+    "rho": -0.6507988784770324,
+    "ic": -2.0296568675566395
+   },
+   "highlight": null
+  },
+  {
+   "id": 13,
+   "label": "v13",
+   "level": 3,
+   "nbrs": [
+    6
+   ],
+   "values": {
+    "rho": 0.7396779440916879,
+    "ic": 4.448408813806304
+   },
+   "highlight": null
+  },
+  {
+   "id": 14,
+   "label": "v14",
+   "level": 0,
+   "nbrs": [
+    7,
+    17,
+    18,
+    19
+   ],
+   "values": {
+    "rho": 9.551181067851111,
+    "ic": -3.673855021097261
+   },
+   "highlight": null
+  },
+  {
+   "id": 15,
+   "label": "v15",
+   "level": 1,
+   "nbrs": [
+    7,
+    20,
+    21,
+    22
+   ],
+   "values": {
+    "rho": 1.4790584767274462,
+    "ic": -3.0640787425776472
+   },
+   "highlight": null
+  },
+  {
+   "id": 16,
+   "label": "v16",
+   "level": 0,
+   "nbrs": [
+    7,
+    23,
+    24,
+    25
+   ],
+   "values": {
+    "rho": 1.4797941787499491,
+    "ic": 0.3916450967513585
+   },
+   "highlight": null
+  },
+  {
+   "id": 17,
+   "label": "v17",
+   "level": 1,
+   "nbrs": [
+    14,
+    26,
+    27,
+    28
+   ],
+   "values": {
+    "rho": 5.075905664842972,
+    "ic": -6.2479751122244025
+   },
+   "highlight": null
+  },
+  {
+   "id": 18,
+   "label": "v18",
+   "level": 1,
+   "nbrs": [
+    14,
+    29,
+    30,
+    31
+   ],
+   "values": {
+    "rho": 11.163104199199347,
+    "ic": 3.9282433499057134
+   },
+   "highlight": null
+  },
+  {
+   "id": 19,
+   "label": "v19",
+   "level": 0,
+   "nbrs": [
+    14,
+    32,
+    33,
+    34
+   ],
+   "values": {
+    "rho": -9.272490880425543,
+    "ic": 3.6258972298246706
+   },
+   "highlight": null
+  },
+  {
+   "id": 20,
+   "label": "v20",
+   "level": 2,
+   "nbrs": [
+    15,
+    35,
+    36,
+    37
+   ],
+   "values": {
+    "rho": -8.579459575208793,
+    "ic": 0.03676474484317627
+   },
+   "highlight": null
+  },
+  {
+   "id": 21,
+   "label": "v21",
+   "level": 2,
+   "nbrs": [
+    15,
+    38,
+    39,
+    40
+   ],
+   "values": {
+    "rho": 6.526710053258555,
+    "ic": 4.233087236659605
+   },
+   "highlight": null
+  },
+  {
+   "id": 22,
+   "label": "v22",
+   "level": 2,
+   "nbrs": [
+    15,
+    41,
+    42,
+    43
+   ],
+   "values": {
+    "rho": 8.042256219656263,
+    "ic": 4.011422179463797
+   },
+   "highlight": null
+  },
+  {
+   "id": 23,
+   "label": "v23",
+   "level": 0,
+   "nbrs": [
+    16,
+    44,
+    45,
+    46
+   ],
+   "values": {
+    "rho": 1.2737976124434613,
+    "ic": -3.071396924455705
+   },
+   "highlight": null
+  },
+  {
+   "id": 24,
+   "label": "v24",
+   "level": 1,
+   "nbrs": [
+    16,
+    47,
+    48,
+    49
+   ],
+   "values": {
+    "rho": -1.4556568911173295,
+    "ic": -2.4207401353756874
+   },
+   "highlight": null
+  },
+  {
+   "id": 25,
+   "label": "v25",
+   "level": 1,
+   "nbrs": [
+    16,
+    50,
+    51,
+    52
+   ],
+   "values": {
+    "rho": 3.754584832391439,
+    "ic": -4.929313169173466
+   },
+   "highlight": null
+  },
+  {
+   "id": 26,
+   "label": "v26",
+   "level": 2,
+   "nbrs": [
+    17,
+    53,
+    54,
+    55
+   ],
+   "values": {
+    "rho": -10.838800486377298,
+    "ic": -6.396704471220338
+   },
+   "highlight": null
+  },
+  {
+   "id": 27,
+   "label": "v27",
+   "level": 2,
+   "nbrs": [
+    17,
+    56,
+    57,
+    58
+   ],
+   "values": {
+    "rho": -6.857181140482127,
+    "ic": 1.1684087871002058
+   },
+   "highlight": null
+  },
+  {
+   "id": 28,
+   "label": "v28",
+   "level": 2,
+   "nbrs": [
+    17,
+    59,
+    60,
+    61
+   ],
+   "values": {
+    "rho": -0.16670694765680283,
+    "ic": -1.7002149489105944
+   },
+   "highlight": null
+  },
+  {
+   "id": 29,
+   "label": "v29",
+   "level": 2,
+   "nbrs": [
+    18,
+    62,
+    63,
+    64
+   ],
+   "values": {
+    "rho": 3.2322363964000678,
+    "ic": 4.216244131437485
+   },
+   "highlight": null
+  },
+  {
+   "id": 30,
+   "label": "v30",
+   "level": 2,
+   "nbrs": [
+    18,
+    65,
+    66,
+    67
+   ],
+   "values": {
+    "rho": 5.9631623040058646,
+    "ic": 8.138367691627412
+   },
+   "highlight": null
+  },
+  {
+   "id": 31,
+   "label": "v31",
+   "level": 2,
+   "nbrs": [
+    18,
+    68,
+    69,
+    70
+   ],
+   "values": {
+    "rho": -8.805320096123348,
+    "ic": -2.751229002120248
+   },
+   "highlight": null
+  },
+  {
+   "id": 32,
+   "label": "v32",
+   "level": 1,
+   "nbrs": [
+    19,
+    71,
+    72,
+    73
+   ],
+   "values": {
+    "rho": -7.343480177369877,
+    "ic": 3.849038516787884
+   },
+   "highlight": null
+  },
+  {
+   "id": 33,
+   "label": "v33",
+   "level": 0,
+   "nbrs": [
+    19,
+    74,
+    75,
+    76
+   ],
+   "values": {
+    "rho": -8.746463934321492,
+    "ic": 0.4309944168721769
+   },
+   "highlight": null
+  },
+  {
+   "id": 34,
+   "label": "v34",
+   "level": 1,
+   "nbrs": [
+    19,
+    77,
+    78,
+    79
+   ],
+   "values": {
+    "rho": 4.047394237355673,
+    "ic": -3.5951063238181202
+   },
+   "highlight": null
+  },
+  {
+   "id": 35,
+   "label": "v35",
+   "level": 3,
+   "nbrs": [
+    20
+   ],
+   "values": {
+    "rho": -0.28662637732808083,
+    "ic": -0.7513200505437134
+   },
+   "highlight": null
+  },
+  {
+   "id": 36,
+   "label": "v36",
+   "level": 3,
+   "nbrs": [
+    20
+   ],
+   "values": {
+    "rho": 0.9618599548937068,
+    "ic": 5.024612175698717
+   },
+   "highlight": null
+  },
+  {
+   "id": 37,
+   "label": "v37",
+   "level": 3,
+   "nbrs": [
+    20
+   ],
+   "values": {
+    "rho": 5.653431752523663,
+    "ic": 2.115294579393656
+   },
+   "highlight": null
+  },
+  {
+   "id": 44,
+   "label": "v44",
+   "level": 0,
+   "nbrs": [
+    23,
+    80,
+    81,
+    82
+   ],
+   "values": {
+    "rho": -10.878528395593513,
+    "ic": 5.646163299494122
+   },
+   "highlight": null
+  },
+  {
+   "id": 45,
+   "label": "v45",
+   "level": 1,
+   "nbrs": [
+    23,
+    83,
+    84,
+    85
+   ],
+   "values": {
+    "rho": -5.780849081530793,
+    "ic": 0.26552720512764694
+   },
+   "highlight": null
+  },
+  {
+   "id": 46,
+   "label": "v46",
+   "level": 1,
+   "nbrs": [
+    23,
+    86,
+    87,
+    88
+   ],
+   "values": {
+    "rho": 5.838828662199469,
+    "ic": -4.213954658526475
+   },
+   "highlight": null
+  },
+  {
+   "id": 74,
+   "label": "v74",
+   "level": 0,
+   "nbrs": [
+    33,
+    116,
+    117,
+    118
+   ],
+   "values": {
+    "rho": -2.3966197779244025,
+    "ic": 2.6731982775609175
+   },
+   "highlight": null
+  },
+  {
+   "id": 75,
+   "label": "v75",
+   "level": 1,
+   "nbrs": [
+    33,
+    119,
+    120,
+    121
+   ],
+   "values": {
+    "rho": 2.027156483507131,
+    "ic": -0.09540189908024965
+   },
+   "highlight": null
+  },
+  {
+   "id": 76,
+   "label": "v76",
+   "level": 1,
+   "nbrs": [
+    33,
+    122,
+    123,
+    124
+   ],
+   "values": {
+    "rho": 8.082719830895012,
+    "ic": -1.7522040050274024
+   },
+   "highlight": null
+  },
+  {
+   "id": 82,
+   "label": "v82",
+   "level": 0,
+   "nbrs": [
+    44,
+    140,
+    141,
+    142
+   ],
+   "values": {
+    "rho": 4.723504396054423,
+    "ic": 1.8125027491022072
+   },
+   "highlight": null
+  },
+  {
+   "id": 117,
+   "label": "v117",
+   "level": 0,
+   "nbrs": [
+    74,
+    164,
+    165,
+    166
+   ],
+   "values": {
+    "rho": -8.273407533839139,
+    "ic": -2.4902624294451003
+   },
+   "highlight": null
+  },
+  {
+   "id": 141,
+   "label": "v141",
+   "level": 0,
+   "nbrs": [
+    82,
+    209,
+    210,
+    211
+   ],
+   "values": {
+    "rho": 7.206498722069976,
+    "ic": 2.698082577857619
+   },
+   "highlight": null
+  }
+ ],
+ "footnote": "Colours span each panel's observed range; compare them with the per-curve 95% CIs (about \u00b15.6% rho, \u00b13.5% yield) and the horizontal test in analysis.json before reading a pattern."
+}

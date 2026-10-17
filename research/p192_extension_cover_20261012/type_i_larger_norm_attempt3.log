@@ -1,0 +1,56 @@
+Traceback (most recent call last):
+  File "sage/structure/category_object.pyx", line 858, in sage.structure.category_object.CategoryObject.getattr_from_category
+    return self._cached_methods[name]
+KeyError: 'point_homset'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/projective/projective_subscheme.py", line 120, in point
+    return self._point(self.point_homset(), v, check=check)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/elliptic_curves/ell_point.py", line 593, in __init__
+    point_homset = curve.point_homset()
+                   ^^^^^^^^^^^^^^^^^^
+  File "sage/structure/category_object.pyx", line 852, in sage.structure.category_object.CategoryObject.__getattr__
+    return self.getattr_from_category(name)
+  File "sage/structure/category_object.pyx", line 867, in sage.structure.category_object.CategoryObject.getattr_from_category
+    attr = getattr_from_other_class(self, cls, name)
+  File "sage/cpython/getattr.pyx", line 357, in sage.cpython.getattr.getattr_from_other_class
+    raise AttributeError(dummy_error_message)
+AttributeError: 'sage.rings.finite_rings.element_pari_ffelt.FiniteFieldElement_pari_ffelt' object has no attribute '_SageObject__custom_name'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_larger_norm.py", line 199, in <module>
+    rows = [run(name, params) for name, params in CURVES.items()]
+            ~~~^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_larger_norm.py", line 160, in run
+    row = [sum((quotient(Pt, i) for Pt in pos), O) -
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_larger_norm.py", line 160, in <genexpr>
+    row = [sum((quotient(Pt, i) for Pt in pos), O) -
+                ~~~~~~~~^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/weak-curve-database-20261012/research/p192_extension_cover_20261012/type_i_larger_norm.py", line 111, in quotient
+    return E(Ci + Di / (x0 - rhoi), ki * yi / (x0 - rhoi)**2)
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/elliptic_curves/ell_generic.py", line 601, in __call__
+    return plane_curve.ProjectivePlaneCurve.__call__(self, *args, **kwds)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/generic/scheme.py", line 242, in __call__
+    return self.point(args)
+           ~~~~~~~~~~^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/projective/projective_subscheme.py", line 122, in point
+    return self._point(self, v, check=check)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/elliptic_curves/ell_point.py", line 600, in __init__
+    SchemeMorphism_point_abelian_variety_field.__init__(self, point_homset, v, check=check)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/projective/projective_point.py", line 1171, in __init__
+    X.extended_codomain()._check_satisfies_equations(v)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/Volumes/SSD990/cryptanalysis/third_party/sage-binary/local/var/lib/sage/venv-python3.14/lib/python3.14/site-packages/sage/schemes/generic/algebraic_scheme.py", line 942, in _check_satisfies_equations
+    raise TypeError(
+        "Coordinates %s do not define a point on %s" % (coords, self)
+    )
+TypeError: Coordinates [14645656879200028842667639918122941003589035549859664780292920482305*u^5 + 26307188307472842558819379701535112228551386418034459245270095973145*u^4 + 374657336224600937395497271866334184221090870287370515555297742586*u^3 + 561986004336901406093245907799501276331636305431055773332946613879*u^2 + 23505695552632203638190812165476594985173670501783586808133697690778*u + 19612102506028684434801453205162773395939596315030094361374402591325, 24091705274969029118761390134912605036227765380015781565906803175455*u^5 + 8729934521907038658409413882235119396707665876093301990823240815731*u^4 + 24893535170942600056318416165288897160056498966986448217579552491853*u^3 + 23860329422838580187144116704423530403305790320466518254614295588339*u^2 + 8842502911319162500751504939426152577543515569504940972938682100264*u + 12277471011871717045479990977818993532952376216407854680695929775642, 1] do not define a point on Elliptic Curve defined by y^2 = x^3 + 26959946667150639794667015087019630673557916260026308143510066298878*x + 18958286285566608000408668544493926415504680968679321075787234672564 over Finite Field in u of size 26959946667150639794667015087019630673557916260026308143510066298881^6

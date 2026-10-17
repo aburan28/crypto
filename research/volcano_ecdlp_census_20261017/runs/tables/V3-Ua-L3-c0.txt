@@ -1,0 +1,26 @@
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | med wall ms | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---:|---|
+| ECBS1hdafa20e5dba5 | rho-neg | rho.negation | icv1-fp26-tm6998-627d151e | 21.57 | 128/128 | 1.184 | [1.067, 1.305] | 0.886 | 1.336 | 1.336 | 1.000 | yes | 7.922 | L1×11 L2×117 |
+| ECBS1hdafa20e5dba5 | rho-neg | rho.negation | icv1-fp26-tm6998-410c6a84 | 21.57 | 128/128 | 1.110 | [0.979, 1.241] | 0.886 | 1.253 | 1.253 | 1.000 | yes | 7.731 | L1×11 L2×117 |
+| ECBS1hdafa20e5dba5 | rho-neg | rho.negation | icv1-fp26-tm6998-26c1365d | 21.57 | 128/128 | 1.243 | [1.110, 1.379] | 0.886 | 1.403 | 1.403 | 1.000 | yes | 7.770 | L1×7 L2×121 |
+| ECBS1hdafa20e5dba5 | rho-neg | rho.negation | icv1-fp26-tm6998-2155f962 | 21.57 | 128/128 | 1.196 | [1.084, 1.315] | 0.886 | 1.350 | 1.350 | 1.000 | yes | 7.525 | L1×9 L2×119 |
+| ECBS1hdafa20e5dba5 | rho-plain | rho.plain | icv1-fp26-tm6998-627d151e | 21.57 | 128/128 | 1.551 | [1.393, 1.721] | 1.253 | 1.238 | 1.751 | 1.311 | no | 7.843 | L1×10 L2×118 |
+| ECBS1hdafa20e5dba5 | rho-plain | rho.plain | icv1-fp26-tm6998-410c6a84 | 21.57 | 128/128 | 1.521 | [1.352, 1.685] | 1.253 | 1.214 | 1.716 | 1.370 | no | 7.786 | L1×7 L2×121 |
+| ECBS1hdafa20e5dba5 | rho-plain | rho.plain | icv1-fp26-tm6998-26c1365d | 21.57 | 128/128 | 1.495 | [1.364, 1.626] | 1.253 | 1.193 | 1.687 | 1.202 | no | 7.623 | L1×4 L2×124 |
+| ECBS1hdafa20e5dba5 | rho-plain | rho.plain | icv1-fp26-tm6998-2155f962 | 21.57 | 128/128 | 1.509 | [1.352, 1.672] | 1.253 | 1.204 | 1.702 | 1.261 | no | 7.505 | L1×10 L2×118 |
+| ECBS1hdafa20e5dba5 | bsgs | bsgs.textbook | icv1-fp26-tm6998-627d151e | 21.57 | 128/128 | 1.403 | [1.252, 1.579] | 1.500 | 0.936 | 1.584 | 1.186 | yes | 7.314 | L1×11 L2×117 |
+| ECBS1hdafa20e5dba5 | bsgs | bsgs.textbook | icv1-fp26-tm6998-410c6a84 | 21.57 | 128/128 | 1.403 | [1.241, 1.581] | 1.500 | 0.936 | 1.584 | 1.264 | yes | 7.450 | L1×12 L2×116 |
+| ECBS1hdafa20e5dba5 | bsgs | bsgs.textbook | icv1-fp26-tm6998-26c1365d | 21.57 | 128/128 | 1.403 | [1.241, 1.573] | 1.500 | 0.936 | 1.584 | 1.129 | yes | 7.664 | L1×8 L2×120 |
+| ECBS1hdafa20e5dba5 | bsgs | bsgs.textbook | icv1-fp26-tm6998-2155f962 | 21.57 | 128/128 | 1.403 | [1.249, 1.576] | 1.500 | 0.936 | 1.584 | 1.173 | yes | 7.325 | L1×15 L2×113 |
+| ECBS1hdafa20e5dba5 | bsgs-neg | bsgs.negation | icv1-fp26-tm6998-627d151e | 21.57 | 128/128 | 0.903 | [0.752, 1.078] | 1.000 | 0.903 | 1.019 | 0.763 | yes | 7.162 | L1×8 L2×120 |
+| ECBS1hdafa20e5dba5 | bsgs-neg | bsgs.negation | icv1-fp26-tm6998-410c6a84 | 21.57 | 128/128 | 0.903 | [0.741, 1.080] | 1.000 | 0.903 | 1.019 | 0.814 | yes | 7.574 | L1×11 L2×117 |
+| ECBS1hdafa20e5dba5 | bsgs-neg | bsgs.negation | icv1-fp26-tm6998-26c1365d | 21.57 | 128/128 | 0.903 | [0.741, 1.073] | 1.000 | 0.903 | 1.019 | 0.726 | yes | 7.434 | L1×9 L2×119 |
+| ECBS1hdafa20e5dba5 | bsgs-neg | bsgs.negation | icv1-fp26-tm6998-2155f962 | 21.57 | 128/128 | 0.903 | [0.749, 1.076] | 1.000 | 0.903 | 1.019 | 0.755 | yes | 7.060 | L1×5 L2×123 |
+| ECBS1hdafa20e5dba5 | ic | ic.pipeline | icv1-fp26-tm6998-627d151e | 21.57 | 128/128 | 71.544 | [63.741, 79.165] | – | – | 80.728 | 60.441 | yes | 38.687 | L1×15 L2×113 |
+| ECBS1hdafa20e5dba5 | ic | ic.pipeline | icv1-fp26-tm6998-410c6a84 | 21.57 | 128/128 | 71.232 | [63.282, 79.735] | – | – | 80.377 | 64.162 | yes | 38.685 | L1×20 L2×108 |
+| ECBS1hdafa20e5dba5 | ic | ic.pipeline | icv1-fp26-tm6998-26c1365d | 21.57 | 128/128 | 70.434 | [63.536, 78.541] | – | – | 79.477 | 56.643 | yes | 37.089 | L1×15 L2×113 |
+| ECBS1hdafa20e5dba5 | ic | ic.pipeline | icv1-fp26-tm6998-2155f962 | 21.57 | 128/128 | 60.963 | [53.385, 68.756] | – | – | 68.789 | 50.966 | yes | 30.345 | L1×12 L2×116 |
+| ECBS1hdafa20e5dba5 | rho-neg-aa | rho.negation | icv1-fp26-tm6998-627d151e | 21.57 | 128/128 | 1.184 | [1.067, 1.305] | 0.886 | 1.336 | 1.336 | 1.000 | yes | 8.063 | L1×7 L2×121 |
+| ECBS1hdafa20e5dba5 | rho-neg-aa | rho.negation | icv1-fp26-tm6998-410c6a84 | 21.57 | 128/128 | 1.110 | [0.979, 1.241] | 0.886 | 1.253 | 1.253 | 1.000 | yes | 7.633 | L1×13 L2×115 |
+| ECBS1hdafa20e5dba5 | rho-neg-aa | rho.negation | icv1-fp26-tm6998-26c1365d | 21.57 | 128/128 | 1.243 | [1.110, 1.379] | 0.886 | 1.403 | 1.403 | 1.000 | yes | 7.689 | L1×10 L2×118 |
+| ECBS1hdafa20e5dba5 | rho-neg-aa | rho.negation | icv1-fp26-tm6998-2155f962 | 21.57 | 128/128 | 1.196 | [1.084, 1.315] | 0.886 | 1.350 | 1.350 | 1.000 | yes | 7.546 | L1×15 L2×113 |

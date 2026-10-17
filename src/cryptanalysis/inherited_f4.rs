@@ -732,11 +732,14 @@ impl RewritePlan {
 /// One layout step's rewrite plan, built whole as flat arrays: under eager
 /// specialisation every kept row of a node goes through it, so nothing is
 /// gained by building it a word at a time.
-#[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
 struct StepPlan {
     /// Source word `w`'s segments are `segments[first[w]..first[w + 1]]`.
     first: Vec<u32>,
     segments: Vec<Segment>,
+    /// Segment `k`'s shift runs are `runs[run_first[k]..run_first[k + 1]]`
+    /// (built only for [`EagerMode::Runs`]).
+    run_first: Vec<u32>,
+    runs: Vec<ShiftRun>,
     /// `low[w]`: the smallest destination word of any column in source
     /// words `w ..` (`u32::MAX` if every one is deleted).  A row read from
     /// its word `lead` writes nothing before `low[lead]`.
@@ -744,7 +747,7 @@ struct StepPlan {
 }
 
 impl StepPlan {
-    fn new(map: &[u32]) -> Self {
+    fn new(map: &[u32], with_runs: bool) -> Self {
         let n = map.len().div_ceil(64);
         let mut first = Vec::with_capacity(n + 1);
         let mut segments = Vec::new();
@@ -762,11 +765,112 @@ impl StepPlan {
                 .unwrap_or(u32::MAX);
             low[w] = here.min(low[w + 1]);
         }
+        let mut run_first = Vec::new();
+        let mut runs = Vec::new();
+        if with_runs {
+            run_first.reserve(segments.len() + 1);
+            for seg in &segments {
+                run_first.push(runs.len() as u32);
+                ShiftRun::split_into(seg, &mut runs);
+            }
+            run_first.push(runs.len() as u32);
+        }
         Self {
             first,
             segments,
+            run_first,
+            runs,
             low,
         }
+    }
+}
+
+/// A maximal set of a segment's source bits that its map moves by one
+/// common distance: `dst |= shift(src & mask)`.  A segment's map is
+/// increasing, and a layout step deletes or folds whole blocks of columns,
+/// so a segment is a few such runs; together they do what `pdep ∘ pext`
+/// does, with shifts and masks only, on any CPU.
+#[derive(Clone, Copy, Debug)]
+struct ShiftRun {
+    mask: u64,
+    /// Destination bit minus source bit.
+    shift: i8,
+}
+
+impl ShiftRun {
+    /// The runs of `seg`, appended to `runs`: the `k`-th source bit maps to
+    /// the `k`-th destination bit, as under `pdep(pext(x, src), dst)`.
+    fn split_into(seg: &Segment, runs: &mut Vec<ShiftRun>) {
+        let (mut src, mut dst) = (seg.src_mask, seg.dst_mask);
+        let mut current: Option<ShiftRun> = None;
+        while src != 0 {
+            let (sb, db) = (src.trailing_zeros() as i8, dst.trailing_zeros() as i8);
+            src &= src - 1;
+            dst &= dst - 1;
+            let shift = db - sb;
+            match &mut current {
+                Some(run) if run.shift == shift => run.mask |= 1u64 << sb,
+                _ => {
+                    if let Some(run) = current.take() {
+                        runs.push(run);
+                    }
+                    current = Some(ShiftRun {
+                        mask: 1u64 << sb,
+                        shift,
+                    });
+                }
+            }
+        }
+        if let Some(run) = current {
+            runs.push(run);
+        }
+    }
+
+    #[inline(always)]
+    fn apply(self, x: u64) -> u64 {
+        let v = x & self.mask;
+        if self.shift >= 0 {
+            v << self.shift
+        } else {
+            v >> -self.shift
+        }
+    }
+}
+
+/// [`apply_step_bmi2`] with each segment applied through its shift runs:
+/// the same image, on CPUs without `pext`/`pdep`.
+fn apply_step_runs(plan: &StepPlan, live: &[u64], lead: usize, out: &mut [u64], lo: usize) {
+    for (i, &word) in live.iter().enumerate() {
+        if word == 0 {
+            continue;
+        }
+        let w = lead + i;
+        for k in plan.first[w] as usize..plan.first[w + 1] as usize {
+            let runs = &plan.runs[plan.run_first[k] as usize..plan.run_first[k + 1] as usize];
+            let mut image = 0u64;
+            for run in runs {
+                image |= run.apply(word);
+            }
+            out[plan.segments[k].dst_word as usize - lo] ^= image;
+        }
+    }
+}
+
+/// [`apply_step_bmi2`] or [`apply_step_runs`], as `mode` says.
+#[inline]
+fn apply_step(
+    mode: EagerMode,
+    plan: &StepPlan,
+    live: &[u64],
+    lead: usize,
+    out: &mut [u64],
+    lo: usize,
+) {
+    match mode {
+        #[cfg(target_arch = "x86_64")]
+        // SAFETY: `eager_mode` returns `Bmi2` only after checking BMI2.
+        EagerMode::Bmi2 => unsafe { apply_step_bmi2(plan, live, lead, out, lo) },
+        _ => apply_step_runs(plan, live, lead, out, lo),
     }
 }
 
@@ -793,19 +897,44 @@ unsafe fn apply_step_bmi2(plan: &StepPlan, live: &[u64], lead: usize, out: &mut 
     }
 }
 
+/// How a specialisation rewrites its kept rows; see [`eager_mode`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum EagerMode {
+    /// Lazily, each row from wherever it was last current when first read.
+    Off,
+    /// Eagerly through the step plan, segment by segment with `pext`/`pdep`.
+    #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
+    Bmi2,
+    /// Eagerly through the step plan, segment by segment with shift runs.
+    Runs,
+}
+
 /// Whether a specialisation rewrites every kept row into the child's
 /// layout at once, through the step's own plan, instead of leaving each
 /// to be rewritten from wherever it was last current when something first
 /// reads it.  At every node most rows are read (on `K₀/2²³` dim 8, 70 %
 /// of them were rewritten lazily anyway), and the lazy rewrite paid for a
-/// composed map and a plan per pair of layouts.  Needs BMI2, as the
-/// word-wise rewrite does; `KIC_F4_EAGER=0` keeps the lazy rows as a
-/// same-binary control.  The row space, and so every verdict, is the
-/// same; the specialisation word count charges every kept row's rewrite.
-fn eager_rewrite() -> bool {
-    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    *ENABLED
-        .get_or_init(|| std::env::var("KIC_F4_EAGER").as_deref() != Ok("0") && wordwise_rewrite())
+/// composed map and a plan per pair of layouts.  With BMI2 a segment is one
+/// `pdep ∘ pext`; without it (every aarch64 host) the same image is built
+/// from its shift runs.  `KIC_F4_EAGER=0` keeps the lazy rows and
+/// `KIC_F4_EAGER=runs` forces the shift runs on a BMI2 host, both as
+/// same-binary controls; `KIC_F4_REWRITE=scatter` turns the eager rewrite
+/// off with the word-wise one.  The row space, and so every verdict, is
+/// the same in every mode; the specialisation word count charges every
+/// kept row's rewrite, identically in both eager modes.
+fn eager_mode() -> EagerMode {
+    static MODE: std::sync::OnceLock<EagerMode> = std::sync::OnceLock::new();
+    *MODE.get_or_init(|| {
+        let var = std::env::var("KIC_F4_EAGER");
+        if var.as_deref() == Ok("0") || std::env::var("KIC_F4_REWRITE").as_deref() == Ok("scatter")
+        {
+            EagerMode::Off
+        } else if var.as_deref() == Ok("runs") || !wordwise_rewrite() {
+            EagerMode::Runs
+        } else {
+            EagerMode::Bmi2
+        }
+    })
 }
 
 /// Whether the word-wise rewrite is used: `pext`/`pdep` need BMI2, and
@@ -2105,8 +2234,7 @@ impl ReducedBasis {
     /// layout (none, unless a lazy ancestor left one) is materialised as
     /// before.  Charged as [`ReducedBasis::rewrite`] charges: the words
     /// read, and the words from the image's first nonzero one to the end.
-    #[cfg(target_arch = "x86_64")]
-    fn rewrite_kept(&mut self, plan: &StepPlan, cost: &mut InheritCost) {
+    fn rewrite_kept(&mut self, mode: EagerMode, plan: &StepPlan, cost: &mut InheritCost) {
         let to = self.epoch();
         let words = self.words;
         let mut spans: Vec<(usize, usize)> = Vec::with_capacity(self.rows.len());
@@ -2129,8 +2257,7 @@ impl ReducedBasis {
                     let live = row.live();
                     cost.specialise_word_ops += live.len() as u64;
                     let out = &mut data[off..off + words - lo];
-                    // SAFETY: `eager_rewrite` checked BMI2 for this process.
-                    unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
+                    apply_step(mode, plan, live, row.lead as usize, out, lo);
                 }
             }
         }
@@ -2158,16 +2285,11 @@ impl ReducedBasis {
         }
     }
 
-    #[cfg(not(target_arch = "x86_64"))]
-    fn rewrite_kept(&mut self, _plan: &StepPlan, _cost: &mut InheritCost) {
-        unreachable!("eager rewrite needs BMI2")
-    }
-
     /// [`ReducedBasis::rewrite`] of a row current in the parent's layout,
     /// through the step's plan.
-    #[cfg(target_arch = "x86_64")]
     fn rewrite_step(
         &self,
+        mode: EagerMode,
         plan: &StepPlan,
         row: &LazyRow,
         cost: &mut InheritCost,
@@ -2182,21 +2304,10 @@ impl ReducedBasis {
         }
         let mut data = zeroed_words(words - lo);
         let out = Rc::get_mut(&mut data).expect("just allocated");
-        // SAFETY: `eager_rewrite` checked BMI2 for this process.
-        unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
+        apply_step(mode, plan, live, row.lead as usize, out, lo);
         let first = out.iter().position(|&w| w != 0)?;
         cost.specialise_word_ops += (words - lo - first) as u64;
         Some(Draft { start: lo, data })
-    }
-
-    #[cfg(not(target_arch = "x86_64"))]
-    fn rewrite_step(
-        &self,
-        _plan: &StepPlan,
-        _row: &LazyRow,
-        _cost: &mut InheritCost,
-    ) -> Option<Draft> {
-        unreachable!("eager rewrite needs BMI2")
     }
 
     /// Bring row `r` into the current layout if it is not there yet.  A
@@ -2516,10 +2627,11 @@ impl ReducedBasis {
                 displaced.push((pc, row.clone()));
             }
         }
-        let step = eager_rewrite().then(|| StepPlan::new(&map));
+        let mode = eager_mode();
+        let step = (mode != EagerMode::Off).then(|| StepPlan::new(&map, mode == EagerMode::Runs));
         out.adopt_layout(new_columns, map);
         if let Some(step) = &step {
-            out.rewrite_kept(step, &mut cost);
+            out.rewrite_kept(mode, step, &mut cost);
         }
         cost.displaced_rows = displaced.len() as u64;
         // Lowest pivot first.  The order changes neither the child's row
@@ -2532,7 +2644,7 @@ impl ReducedBasis {
         for (_, row) in displaced {
             let image = match &step {
                 Some(step) if row.version + 1 == out.epoch() => {
-                    out.rewrite_step(step, &row, &mut cost)
+                    out.rewrite_step(mode, step, &row, &mut cost)
                 }
                 _ => out.rewrite(&row, &mut cost),
             };
@@ -2975,6 +3087,7 @@ mod tests {
             let src_words = n_old.div_ceil(64);
             let dst_words = layout.len().div_ceil(64).max(1);
             let plan = RewritePlan::new(Rc::new(composed.clone()));
+            let step = StepPlan::new(&composed, true);
             for _ in 0..8 {
                 let lead = (next() % src_words as u64) as usize;
                 let live: Vec<u64> = (lead..src_words)
@@ -3010,6 +3123,17 @@ mod tests {
                     let lo = unsafe { apply_plan_bmi2(&plan, &live, lead, &mut got) };
                     assert_eq!(got, expected, "trial {trial} (bmi2)");
                     assert_eq!(lo, expected_lo, "trial {trial} (bmi2)");
+                }
+                // the eager step plan: shift runs on every CPU, and pdep/pext
+                // where present, give the same image
+                let mut got = vec![0u64; dst_words];
+                apply_step_runs(&step, &live, lead, &mut got, 0);
+                assert_eq!(got, expected, "trial {trial} (step runs)");
+                #[cfg(target_arch = "x86_64")]
+                if std::arch::is_x86_feature_detected!("bmi2") {
+                    let mut got = vec![0u64; dst_words];
+                    unsafe { apply_step_bmi2(&step, &live, lead, &mut got, 0) };
+                    assert_eq!(got, expected, "trial {trial} (step bmi2)");
                 }
             }
         }

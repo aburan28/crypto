@@ -1,0 +1,20 @@
+{
+  "axiom_command": "lake env lean TraceProjection.lean",
+  "axiom_exit_code": 0,
+  "axiom_log_sha256": "52227a131e869641480429fe00bd41d0fee34f7e6dbdb0fec0b2c2017ef07ed4",
+  "axioms": [
+    "propext"
+  ],
+  "build_command": "lake build TraceProjection",
+  "build_exit_code": 0,
+  "build_log_sha256": "e5e193e6a3f2ac2ac2624e3300c81fe355f189e9c9fa8fbef86f7610b496e964",
+  "fresh_command": "lake env leanchecker --fresh TraceProjection",
+  "fresh_exit_code": 0,
+  "fresh_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "fresh_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "lake_manifest_sha256": "fc1b089030173d9aad95d8dafe3e47168f93fccc14274413e9645acadabbf1b9",
+  "module": "TraceProjection",
+  "module_sha256": "69ad4bc2ba0091090f47931e2c54053ee56ffb91a0c6d1e382a7fa7234e304da",
+  "status": "checked_trace_projection_lean",
+  "toolchain_sha256": "d5edba4e4b8faad9c1baeadb265716d20d03be4d1a2647dc5e35b0c0325bea7b"
+}
