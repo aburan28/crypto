@@ -1,5 +1,0 @@
-#!/bin/bash
-# Inside the test container: record the shutdown as an instance termination.
-read -r job _ <"$FAKE_AWS/ec2/$FAKE_IID"
-echo "$job terminated" >"$FAKE_AWS/ec2/$FAKE_IID"
-echo "shutdown $*" >>"$FAKE_AWS/ec2/$FAKE_IID.shutdown"
