@@ -1,0 +1,52 @@
+{
+  "schema": "ec-hardness/report-render-attempts/v1",
+  "attempts": [
+    {
+      "command": "MPLCONFIGDIR=/private/tmp/p61-matplotlib-cache python3 plot_timings.py",
+      "exit_code": 134,
+      "stderr": "Matplotlib is building the font cache; this may take a moment.",
+      "outputs_created": false,
+      "classification": "renderer_failure"
+    },
+    {
+      "command": "MPLBACKEND=Agg MPLCONFIGDIR=/private/tmp/p61-matplotlib-cache-agg python3 plot_timings.py",
+      "exit_code": 0,
+      "outputs_created": true,
+      "classification": "pass"
+    },
+    {
+      "command": "python3 plot_evidence_pipeline.py",
+      "exit_code": null,
+      "stderr": "Matplotlib selected a temporary cache and began rebuilding the font cache; the tool session ended without an exit receipt.",
+      "outputs_created": false,
+      "classification": "renderer_session_incomplete"
+    },
+    {
+      "command": "MPLBACKEND=Agg MPLCONFIGDIR=/private/tmp/p61-evidence-matplotlib-cache python3 plot_evidence_pipeline.py",
+      "exit_code": 130,
+      "stderr": "Interrupted while system_profiler enumerated macOS fonts for a new cache.",
+      "outputs_created": false,
+      "classification": "renderer_failure"
+    },
+    {
+      "command": "MPLBACKEND=Agg MPLCONFIGDIR=/private/tmp/p61-matplotlib-cache-agg python3 plot_evidence_pipeline.py",
+      "exit_code": 0,
+      "outputs_created": true,
+      "classification": "pass"
+    },
+    {
+      "command": "MPLBACKEND=Agg MPLCONFIGDIR=/private/tmp/p61-matplotlib-cache-agg python3 plot_timings.py",
+      "reason": "regenerated after the x=320..16704 certified expansion",
+      "exit_code": 0,
+      "outputs_created": true,
+      "classification": "pass"
+    },
+    {
+      "command": "MPLBACKEND=Agg MPLCONFIGDIR=/private/tmp/p61-matplotlib-cache-agg python3 plot_evidence_pipeline.py",
+      "reason": "regenerated after the x=320..16704 certified expansion",
+      "exit_code": 0,
+      "outputs_created": true,
+      "classification": "pass"
+    }
+  ]
+}

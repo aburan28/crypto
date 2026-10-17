@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curve challenges · aburan28/crypto</title>
+<meta name="description" content="Certicom ECC2K, ECC2, and ECCp challenges, plus the research curve catalog, and which of them accept distinguished points on this site.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b1020">
+<link rel="canonical" href="https://aburan28.github.io/crypto/status/challenges.html">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to challenges</a>
+
+<header class="topbar">
+  <nav aria-label="Site">
+    <a href="../">Overview</a>
+    <a href="../scoreboard/">Scoreboard</a>
+    <a href="../scoreboard/ic-leaderboard.html">Leaderboard</a>
+    <a href="./">Campaign status</a>
+    <a href="./challenges.html" aria-current="page">Challenges</a>
+    <a href="./how.html">How the walk works</a>
+    <a href="https://github.com/aburan28/crypto">Repository</a>
+  </nav>
+</header>
+
+<main id="main" tabindex="-1">
+  <p class="kicker">Distinguished points · one curve per store</p>
+  <h1>Challenges</h1>
+  <p class="sub">
+    The status dashboard counts one walk: Certicom ECC2K-130 at Hamming weight
+    32. The other curves below are real challenges, and a point found on one
+    of them is not a point of that walk. Joining means generating
+    distinguished points for the curve you picked, in its own field, and
+    keeping them out of a store that belongs to a different curve.
+  </p>
+  <p class="banner UNREACHABLE" id="challenge-banner" role="status">Loading the roster&hellip;</p>
+  <div class="mode-tabs" id="challenge-filters" role="toolbar" aria-label="Challenge groups"></div>
+  <p class="mode-note" id="group-note" role="status"></p>
+  <div class="scroll" tabindex="0">
+    <table>
+      <caption class="sr-only">Challenges and where their distinguished points go</caption>
+      <thead>
+        <tr>
+          <th scope="col">Challenge</th>
+          <th scope="col">Field</th>
+          <th scope="col">Kind</th>
+          <th scope="col">On this site</th>
+          <th scope="col">How to join</th>
+        </tr>
+      </thead>
+      <tbody id="challenge-body">
+        <tr><td colspan="5">Loading&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">
+    The machine-readable roster is <a href="./challenges.json">challenges.json</a>.
+    Names in the Certicom groups follow the published ECC Challenge list.
+    This page does not say which of those challenges already have a public
+    solution. The research rows are families in
+    <a href="https://github.com/aburan28/cryptanalysis/tree/HEAD/challenges/ecc">aburan28/cryptanalysis challenges/ecc</a>
+    (263 curves). <span class="mono">ca-curves rho-job</span> is only for
+    prime-field short-Weierstrass records in that catalog, and it writes a
+    job on the machine that ran it.
+  </p>
+</main>
+<script src="./challenges.js" defer></script>
+</body>
+</html>

@@ -13,6 +13,17 @@
 # from the cached image goes straight to starting the control plane.
 set -euo pipefail
 
+case "${WORKSPACE_OFFLINE:-0}" in
+  0|'') ;;
+  1)
+    offline_repo="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
+    bash "$offline_repo/scripts/private-workspace.sh" check
+    echo "Workspace tools: offline checks passed; start an approved private node with scripts/private-workspace.sh run. No tools were downloaded or services started."
+    exit 0
+    ;;
+  *) echo "WORKSPACE_OFFLINE must be 0 or 1" >&2; exit 2 ;;
+esac
+
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
@@ -31,9 +42,9 @@ project=crypto
 repo="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
 
 # Optional sparse checkout (docs/sparse-checkout.md): CRYPTO_SPARSE_PROFILE=harness
-# in the environment leaves ~4 GB of research archives off disk. Never fatal.
+# (or minimal) in the environment leaves research archives off disk. Never fatal.
 if [ -n "${CRYPTO_SPARSE_PROFILE:-}" ]; then
-  (cd "$repo" && scripts/sparse-checkout.sh apply) \
+  (cd "$repo" && scripts/sparse-checkout.sh apply --profile "$CRYPTO_SPARSE_PROFILE") \
     || echo "sparse profile '$CRYPTO_SPARSE_PROFILE' not applied; checkout stays full"
 fi
 

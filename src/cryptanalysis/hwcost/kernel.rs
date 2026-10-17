@@ -30,7 +30,7 @@ use num_bigint::RandBigInt;
 use rand::rngs::StdRng;
 use rand::SeedableRng;
 
-use crate::cryptanalysis::fp_backend::PrimeField;
+use crate::cryptanalysis::fp_backend::{Fp64, PrimeField};
 
 /// Number of precomputed points `R_j` of the r-adding walk.
 pub const TABLE: usize = 32;
@@ -68,6 +68,7 @@ pub trait Arith {
     type E: Copy + PartialEq;
     fn one(&self) -> Self::E;
     fn is_zero(&self, a: Self::E) -> bool;
+    fn add(&self, a: Self::E, b: Self::E) -> Self::E;
     fn sub(&self, a: Self::E, b: Self::E) -> Self::E;
     fn mul(&self, a: Self::E, b: Self::E) -> Self::E;
     /// A multiplication on a serial dependency chain (the batch
@@ -100,6 +101,10 @@ where
         self.0.is_zero(a)
     }
     #[inline(always)]
+    fn add(&self, a: F::Elem, b: F::Elem) -> F::Elem {
+        self.0.add(a, b)
+    }
+    #[inline(always)]
     fn sub(&self, a: F::Elem, b: F::Elem) -> F::Elem {
         self.0.sub(a, b)
     }
@@ -118,6 +123,253 @@ where
     #[inline(always)]
     fn low(&self, a: F::Elem) -> u64 {
         a.low_word()
+    }
+}
+
+/// A [`PrimeField`] owned by the arithmetic, for timed closures that must
+/// own everything they touch.
+#[derive(Clone)]
+pub struct Owned<F: PrimeField>(pub F);
+
+impl<F: PrimeField> Arith for Owned<F>
+where
+    F::Elem: LowWord,
+{
+    type E = F::Elem;
+    #[inline(always)]
+    fn one(&self) -> F::Elem {
+        self.0.one()
+    }
+    #[inline(always)]
+    fn is_zero(&self, a: F::Elem) -> bool {
+        self.0.is_zero(a)
+    }
+    #[inline(always)]
+    fn add(&self, a: F::Elem, b: F::Elem) -> F::Elem {
+        self.0.add(a, b)
+    }
+    #[inline(always)]
+    fn sub(&self, a: F::Elem, b: F::Elem) -> F::Elem {
+        self.0.sub(a, b)
+    }
+    #[inline(always)]
+    fn mul(&self, a: F::Elem, b: F::Elem) -> F::Elem {
+        self.0.mul(a, b)
+    }
+    #[inline(always)]
+    fn sqr(&self, a: F::Elem) -> F::Elem {
+        self.0.sqr(a)
+    }
+    #[inline(always)]
+    fn inv(&self, a: F::Elem) -> Option<F::Elem> {
+        self.0.inv(a)
+    }
+    #[inline(always)]
+    fn low(&self, a: F::Elem) -> u64 {
+        a.low_word()
+    }
+}
+
+/// `Fp64`'s arithmetic with its two data-dependent branches removed: the
+/// final conditional subtraction of the Montgomery reduction and the
+/// wrap-around of a subtraction become masks.  Elements are `Fp64`'s own
+/// Montgomery representatives and every result is bit for bit `Fp64`'s
+/// ([`check_same_walk`] and the tests confirm it), so timing the two side by
+/// side isolates the cost of those branches on random walk data.
+/// Inversion, which the batch amortises, is delegated to `Fp64`.
+#[derive(Clone)]
+pub struct Fp64Bf {
+    p: u64,
+    n_inv: u64,
+    inner: Fp64,
+}
+
+impl Fp64Bf {
+    pub fn new(f: &Fp64) -> Self {
+        let p = f.p();
+        let mut inv: u64 = 1;
+        for _ in 0..6 {
+            inv = inv.wrapping_mul(2u64.wrapping_sub(p.wrapping_mul(inv)));
+        }
+        Fp64Bf {
+            p,
+            n_inv: inv.wrapping_neg(),
+            inner: f.clone(),
+        }
+    }
+
+    /// `u − p` when `u ≥ p`, else `u`, for `u < 2p`, without a branch.
+    #[inline(always)]
+    fn csub(&self, u: u64) -> u64 {
+        let (d, borrow) = u.overflowing_sub(self.p);
+        d.wrapping_add(self.p & u64::from(borrow).wrapping_neg())
+    }
+
+    #[inline(always)]
+    fn redc(&self, t: u128) -> u64 {
+        let lo = t as u64;
+        let m = lo.wrapping_mul(self.n_inv);
+        let mp = u128::from(m) * u128::from(self.p);
+        let u = ((t >> 64) as u64) + ((mp >> 64) as u64) + u64::from(lo != 0);
+        self.csub(u)
+    }
+}
+
+impl Arith for Fp64Bf {
+    type E = u64;
+    #[inline(always)]
+    fn one(&self) -> u64 {
+        self.inner.one()
+    }
+    #[inline(always)]
+    fn is_zero(&self, a: u64) -> bool {
+        a == 0
+    }
+    #[inline(always)]
+    fn add(&self, a: u64, b: u64) -> u64 {
+        // p < 2^63, so a + b < 2^64.
+        self.csub(a + b)
+    }
+    #[inline(always)]
+    fn sub(&self, a: u64, b: u64) -> u64 {
+        let (d, borrow) = a.overflowing_sub(b);
+        d.wrapping_add(self.p & u64::from(borrow).wrapping_neg())
+    }
+    #[inline(always)]
+    fn mul(&self, a: u64, b: u64) -> u64 {
+        self.redc(u128::from(a) * u128::from(b))
+    }
+    #[inline(always)]
+    fn sqr(&self, a: u64) -> u64 {
+        self.redc(u128::from(a) * u128::from(a))
+    }
+    #[inline(always)]
+    fn inv(&self, a: u64) -> Option<u64> {
+        self.inner.inv(a)
+    }
+    #[inline(always)]
+    fn low(&self, a: u64) -> u64 {
+        a
+    }
+}
+
+/// `Fp64`'s arithmetic with the reduction's final subtraction and the
+/// subtraction's wrap-around chosen by `std::hint::select_unpredictable`,
+/// which asks the compiler for a conditional move rather than a branch.
+/// [`Fp64Bf`]'s masks did not survive optimisation (the baseline build
+/// emits the same branches for both); this variant is the round-2
+/// follow-up's way of getting branch-free code on the baseline ISA.
+/// Bit for bit `Fp64`'s results.
+#[derive(Clone)]
+pub struct Fp64Cm {
+    p: u64,
+    n_inv: u64,
+    inner: Fp64,
+}
+
+impl Fp64Cm {
+    pub fn new(f: &Fp64) -> Self {
+        let b = Fp64Bf::new(f);
+        Fp64Cm {
+            p: b.p,
+            n_inv: b.n_inv,
+            inner: f.clone(),
+        }
+    }
+
+    #[inline(always)]
+    fn csub(&self, u: u64) -> u64 {
+        let (d, borrow) = u.overflowing_sub(self.p);
+        std::hint::select_unpredictable(borrow, u, d)
+    }
+
+    #[inline(always)]
+    fn redc(&self, t: u128) -> u64 {
+        let lo = t as u64;
+        let m = lo.wrapping_mul(self.n_inv);
+        let mp = u128::from(m) * u128::from(self.p);
+        let u = ((t >> 64) as u64) + ((mp >> 64) as u64) + u64::from(lo != 0);
+        self.csub(u)
+    }
+}
+
+impl Arith for Fp64Cm {
+    type E = u64;
+    #[inline(always)]
+    fn one(&self) -> u64 {
+        self.inner.one()
+    }
+    #[inline(always)]
+    fn is_zero(&self, a: u64) -> bool {
+        a == 0
+    }
+    #[inline(always)]
+    fn add(&self, a: u64, b: u64) -> u64 {
+        self.csub(a + b)
+    }
+    #[inline(always)]
+    fn sub(&self, a: u64, b: u64) -> u64 {
+        let (d, borrow) = a.overflowing_sub(b);
+        std::hint::select_unpredictable(borrow, d.wrapping_add(self.p), d)
+    }
+    #[inline(always)]
+    fn mul(&self, a: u64, b: u64) -> u64 {
+        self.redc(u128::from(a) * u128::from(b))
+    }
+    #[inline(always)]
+    fn sqr(&self, a: u64) -> u64 {
+        self.redc(u128::from(a) * u128::from(a))
+    }
+    #[inline(always)]
+    fn inv(&self, a: u64) -> Option<u64> {
+        self.inner.inv(a)
+    }
+    #[inline(always)]
+    fn low(&self, a: u64) -> u64 {
+        a
+    }
+}
+
+/// [`crate::cryptanalysis::prime_fast::Fp64`] (`p < 2⁶²`), the arithmetic
+/// of the production prime-field rho engine.  Its Montgomery form
+/// (`R = 2⁶⁴`, values `< p`) is `fp_backend::Fp64`'s at the same prime, so a
+/// walk through it must equal that field's point for point.
+#[derive(Clone)]
+pub struct PrimeFast(pub crate::cryptanalysis::prime_fast::Fp64);
+
+impl Arith for PrimeFast {
+    type E = u64;
+    #[inline(always)]
+    fn one(&self) -> u64 {
+        self.0.one
+    }
+    #[inline(always)]
+    fn is_zero(&self, a: u64) -> bool {
+        a == 0
+    }
+    #[inline(always)]
+    fn add(&self, a: u64, b: u64) -> u64 {
+        self.0.add(a, b)
+    }
+    #[inline(always)]
+    fn sub(&self, a: u64, b: u64) -> u64 {
+        self.0.sub(a, b)
+    }
+    #[inline(always)]
+    fn mul(&self, a: u64, b: u64) -> u64 {
+        self.0.mul(a, b)
+    }
+    #[inline(always)]
+    fn sqr(&self, a: u64) -> u64 {
+        self.0.sqr(a)
+    }
+    #[inline(always)]
+    fn inv(&self, a: u64) -> Option<u64> {
+        (a != 0).then(|| self.0.inv(a))
+    }
+    #[inline(always)]
+    fn low(&self, a: u64) -> u64 {
+        a
     }
 }
 
@@ -164,6 +416,10 @@ where
     }
     fn is_zero(&self, a: F::Elem) -> bool {
         self.f.is_zero(a)
+    }
+    fn add(&self, a: F::Elem, b: F::Elem) -> F::Elem {
+        self.bump(|t| t.add += 1);
+        self.f.add(a, b)
     }
     fn sub(&self, a: F::Elem, b: F::Elem) -> F::Elem {
         self.bump(|t| t.add += 1);
@@ -295,6 +551,42 @@ pub fn step<A: Arith>(a: &A, w: &mut Walks<A::E>, t: &Table<A::E>, dp_mask: u64)
     }
 }
 
+/// [`step`] through `Fp64` behind a non-inlined symbol, so its machine
+/// code can be found and read (`objdump -d`, the round-2 F3 count); the
+/// timed arms inline the same function.
+#[inline(never)]
+pub fn step_fp64(a: &Owned<Fp64>, w: &mut Walks<u64>, t: &Table<u64>, dp_mask: u64) {
+    step(a, w, t, dp_mask)
+}
+
+/// [`step`] through [`Fp64Bf`], as [`step_fp64`].
+#[inline(never)]
+pub fn step_fp64bf(a: &Fp64Bf, w: &mut Walks<u64>, t: &Table<u64>, dp_mask: u64) {
+    step(a, w, t, dp_mask)
+}
+
+/// [`step`] through [`Fp64Cm`], as [`step_fp64`].
+#[inline(never)]
+pub fn step_fp64cm(a: &Fp64Cm, w: &mut Walks<u64>, t: &Table<u64>, dp_mask: u64) {
+    step(a, w, t, dp_mask)
+}
+
+/// One step through each wrapper from the same walks must agree (run by
+/// `hwcost measure`'s gate, which also keeps both symbols in the binary).
+pub fn check_wrappers(f: &Fp64, seed: u64) -> Result<(), String> {
+    let (mut w, t) = setup(f, 16, seed);
+    let (mut v, _) = setup(f, 16, seed);
+    step_fp64(&Owned(f.clone()), &mut w, &t, 0);
+    step_fp64bf(&Fp64Bf::new(f), &mut v, &t, 0);
+    let (mut u, _) = setup(f, 16, seed);
+    step_fp64cm(&Fp64Cm::new(f), &mut u, &t, 0);
+    if (&w.xs, &w.ys) == (&v.xs, &v.ys) && (&w.xs, &w.ys) == (&u.xs, &u.ys) {
+        Ok(())
+    } else {
+        Err("step_fp64, step_fp64bf and step_fp64cm disagree".into())
+    }
+}
+
 /// The same step with one inversion per walk and no batching: the
 /// reference [`step`] is checked against.
 pub fn step_unbatched<F: PrimeField>(
@@ -399,11 +691,80 @@ where
     Ok(())
 }
 
+/// Run the walk `steps` steps through `a` and through `f` directly from the
+/// same start and confirm every point is the same: an alternative
+/// arithmetic ([`Fp64Bf`]) must compute exactly what the field computes.
+pub fn check_same_walk<F, A>(f: &F, a: &A, b: usize, steps: usize, seed: u64) -> Result<(), String>
+where
+    F: PrimeField,
+    F::Elem: LowWord,
+    A: Arith<E = F::Elem>,
+{
+    let (mut w, t) = setup(f, b, seed);
+    let (mut v, _) = setup(f, b, seed);
+    let p = Plain(f);
+    for s in 0..steps {
+        step(&p, &mut w, &t, 0);
+        step(a, &mut v, &t, 0);
+        if w.xs != v.xs || w.ys != v.ys || v.degenerate != 0 {
+            return Err(format!(
+                "{}: alternative arithmetic differs at step {s}",
+                f.name()
+            ));
+        }
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::cryptanalysis::fp_backend::{Fp64, FpWide};
     use num_bigint::BigUint;
+
+    #[test]
+    fn branch_free_fp64_is_bit_for_bit_fp64() {
+        let f = Fp64::new((1u64 << 63) - 25);
+        let a = Fp64Bf::new(&f);
+        let mut rng = StdRng::seed_from_u64(9);
+        for _ in 0..10_000 {
+            let x = f.from_biguint(&rng.gen_biguint_below(f.modulus()));
+            let y = f.from_biguint(&rng.gen_biguint_below(f.modulus()));
+            assert_eq!(a.mul(x, y), f.mul(x, y));
+            assert_eq!(a.sqr(x), f.sqr(x));
+            assert_eq!(a.sub(x, y), f.sub(x, y));
+            assert_eq!(a.add(x, y), f.add(x, y));
+        }
+        for (x, y) in [
+            (0, 0),
+            (0, 1),
+            (1, 0),
+            (f.p() - 1, f.p() - 1),
+            (f.p() - 1, 0),
+        ] {
+            assert_eq!(a.sub(x, y), f.sub(x, y));
+            assert_eq!(a.add(x, y), f.add(x, y));
+            assert_eq!(a.mul(x, y), f.mul(x, y));
+        }
+        check_same_walk(&f, &a, 33, 6, 3).unwrap();
+        let c = Fp64Cm::new(&f);
+        let mut rng = StdRng::seed_from_u64(10);
+        for _ in 0..10_000 {
+            let x = f.from_biguint(&rng.gen_biguint_below(f.modulus()));
+            let y = f.from_biguint(&rng.gen_biguint_below(f.modulus()));
+            assert_eq!(c.mul(x, y), f.mul(x, y));
+            assert_eq!(c.sub(x, y), f.sub(x, y));
+            assert_eq!(c.add(x, y), f.add(x, y));
+        }
+        check_same_walk(&f, &c, 33, 6, 5).unwrap();
+        check_wrappers(&f, 6).unwrap();
+        // The disassembly wrappers compute the same walk.
+        let (mut w, t) = setup(&f, 16, 4);
+        let (mut v, _) = setup(&f, 16, 4);
+        step_fp64(&Owned(f.clone()), &mut w, &t, 0);
+        step_fp64bf(&a, &mut v, &t, 0);
+        assert_eq!((w.xs, w.ys), (v.xs, v.ys));
+    }
 
     #[test]
     fn batched_walk_matches_reference_and_stays_on_curve() {

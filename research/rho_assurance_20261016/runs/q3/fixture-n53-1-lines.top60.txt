@@ -1,0 +1,60 @@
+    975 ( 0.00%)          out.mask_in_place();
+    975 ( 0.00%)          let m = self.m;
+    975 ( 0.00%)              let k = out.bits.len();
+    965,496 ( 0.10%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/std/src/hash/random.rs:<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&(u8, u64, u64)>
+    952,751 ( 0.10%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/cmp.rs:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul
+936,411,494 (100.0%)  PROGRAM TOTALS
+    922,845 ( 0.10%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/iter/range.rs:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::inv
+    886,518 ( 0.09%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/ptr/mod.rs:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::solve
+   884,616 ( 0.09%)          if self.folds() {
+    876,889 ( 0.09%)  /rust/deps/hashbrown-0.17.1/src/raw.rs:<hashbrown::map::HashMap<(u8, u64, u64), (u64, u64), std::hash::random::RandomState>>::insert
+    852 ( 0.00%)              nn >>= 1;
+    852 ( 0.00%)                  let sq = beta.square(irreducible);
+    832 ( 0.00%)          let next = trace * s_cur - q * s_prev;
+    828,013 ( 0.09%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/alloc/src/raw_vec/mod.rs:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::solve
+    828,011 ( 0.09%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/ops/arith.rs:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::canonicalize
+    828,011 ( 0.09%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/alloc/src/raw_vec/mod.rs:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::canonicalize
+    828,011 ( 0.09%)      fast: bool,
+    828,011 ( 0.09%)              result = self.double(result);
+    828,011 ( 0.09%)              if scalar.bit(bit) {
+    827,744 ( 0.09%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/iter/adapters/enumerate.rs:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::solve
+809,375 ( 0.09%)  <counts for unidentified lines in src/cryptanalysis/koblitz_index_calculus.rs>
+    776 ( 0.00%)  => src/binary_ecc/f2m.rs:<crypto_lib::binary_ecc::f2m::F2mElement>::add (8x)
+   775,956 ( 0.08%)              for ((&x, prefix), a) in xc.iter().zip(pc.iter_mut()).zip(acc.iter_mut()) {
+   775,956 ( 0.08%)                      *a = self.fold_shifted(_mm_cvtsi64_si128(x as i64), *a);
+    775,956 ( 0.08%)                  lane.live = false;
+    775,956 ( 0.08%)                  if self.scalar_mul(self.generator, candidate) == q {
+    775,956 ( 0.08%)                      return Some(StrongRhoOutcomeG {
+    775,956 ( 0.08%)                      debug_assert!(
+    775,956 ( 0.08%)                          walk_steps: steps,
+    769 ( 0.00%)          let nw = acc.bits.len();
+    769 ( 0.00%)          acc.mask_in_place();
+        742 ( 0.00%)  => /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/compiler-builtins/compiler-builtins/src/macros.rs:__umodti3 (53x)
+    732,020 ( 0.08%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/slice/sort/unstable/quicksort.rs:core::slice::sort::unstable::quicksort::quicksort::<u64, <u64 as core::cmp::PartialOrd>::lt>'2 [release/examples/koblitz_rho_fixture]
+    732 ( 0.00%)  => src/binary_ecc/f2m.rs:<crypto_lib::binary_ecc::f2m::F2mElement>::square_k_times (1x)
+    725,032 ( 0.08%)  /rust/deps/hashbrown-0.17.1/src/control/tag.rs:<hashbrown::map::HashMap<(u8, u64, u64), (u64, u64), std::hash::random::RandomState>>::insert
+    725,032 ( 0.08%)          let lanes_n = params.lanes.max(1);
+    688,080 ( 0.07%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/intrinsics/mod.rs:<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write
+    676,715 ( 0.07%)      /// Solve `[d]G = Q` for one target `q` in the prime subgroup.
+    671,935 ( 0.07%)  src/binary_ecc/f2m.rs:<crypto_lib::binary_ecc::f2m::F2mElement>::square_k_times::{closure#0} [release/examples/koblitz_rho_fixture]
+635,716 ( 0.07%)  => src/binary_ecc/f2m.rs:<crypto_lib::binary_ecc::f2m::F2mElement>::mul::{closure#0} (1,276x)
+    624,660 ( 0.07%)                  if point != RawPointG::Infinity {
+    621,456 ( 0.07%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/ptr/mod.rs:<std::hash::random::DefaultHasher as core::hash::Hasher>::write
+    621,456 ( 0.07%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/cmp.rs:<std::hash::random::DefaultHasher as core::hash::Hasher>::write
+    613,600 ( 0.07%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/slice/iter.rs:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::batch_inv_clmul
+    598,957 ( 0.06%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/ptr/mod.rs:core::slice::sort::unstable::quicksort::quicksort::<u64, <u64 as core::cmp::PartialOrd>::lt>'2
+    594,987 ( 0.06%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/../../stdarch/crates/core_arch/src/simd.rs:<crypto_lib::cryptanalysis::semaev_decomp::Gf2>::inv_clmul
+        594 ( 0.00%)  }
+    584 ( 0.00%)  => src/binary_ecc/f2m.rs:<crypto_lib::binary_ecc::f2m::F2mElement>::square_k_times (1x)
+    583 ( 0.00%)      pub fn from_bit_positions(positions: &[u32], m: u32) -> Self {
+    580,723 ( 0.06%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/ops/bit.rs:<crypto_lib::cryptanalysis::koblitz_strong_rho::StrongRhoG<crypto_lib::cryptanalysis::semaev_decomp::Gf2, u64>>::add
+    573,400 ( 0.06%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/num/uint_macros.rs:<core::hash::sip::Hasher<core::hash::sip::Sip13Rounds> as core::hash::Hasher>::write
+    568 ( 0.00%)              beta_len *= 2;
+    542,850 ( 0.06%)      }
+    542,850 ( 0.06%)          (best, best_k)
+        540 ( 0.00%)  
+    535,350 ( 0.06%)  /rustc/2d8144b7880597b6e6d3dfd63a9a9efae3f533d3/library/core/src/slice/iter/macros.rs:crypto_lib::binary_ecc::f2m::reduce_words
+    532 ( 0.00%)  => src/cryptanalysis/koblitz_index_calculus.rs:crypto_lib::cryptanalysis::koblitz_index_calculus::span_f2 (1x)
+    530 ( 0.00%)          while e > 0 {
+    530 ( 0.00%)          rows.push((img_bits, 1u128 << i));
+    530 ( 0.00%)              e >>= 1;
