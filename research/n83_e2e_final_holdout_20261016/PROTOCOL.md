@@ -27,15 +27,10 @@ collisions. This inventory check supplements the generator's pinned exclusions.
 Run `python3 research/n83_e2e_final_holdout_20261016/generate.py
 --verify-sealed` before using the fixture in a measured job.
 
-The next frozen protocol will name the exact finalist candidate manifests
-after the pending screens complete. It must carry two separate comparisons:
-the primary single-target online interval after reusable preparation, paired
-with same-point rho, and the supplementary complete one-target cold process
-interval. K3072/root11 is the current independently replayed Tier 1 online
-reference; the K1104/K1120 root11 and root22 families are the current cold
-finalists. The exact executed-source candidate IDs will be frozen before
-running this fixture. Each comparison will use fresh processes on these same
-public points, symmetric A/B controls, separately timed phases, and
-alternating same-point rho solves within a Tier 1 resource envelope. It will
-fix paired advancement rules for both metrics before any timings on these
-points, preserving inconclusive selections as null.
+The exact eight-candidate schedule, same-point rho and calibration pairs,
+Tier 1 admission rules, and separate online and cold selection rules are
+frozen in [COMPARISON_PROTOCOL.md](COMPARISON_PROTOCOL.md). That protocol
+uses this fixture only after its sealed replay passes. K3072/root11 remains
+a separate earlier Tier 1 online reference because its executed source
+differs; it needs a same-source comparison before joining this candidate
+ranking.
