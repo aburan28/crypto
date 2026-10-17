@@ -1,0 +1,437 @@
+{
+  "archive": "artifacts/public_order_phase.tar.xz",
+  "bytes": 467024,
+  "sha256": "ebb927852e0566a4225509df09a8e3c38ac5e09eba05ab6e4606f158bbdfca56",
+  "archive_extracted_and_every_file_matched_staging": true,
+  "main_and_IC_setup_scalar_values_absent": true,
+  "private_journals_and_recovered_scalar_records_absent": true,
+  "raw_RNG_journals_absent": true,
+  "files": [
+    {
+      "path": "ORDER_FROZEN.json",
+      "bytes": 925,
+      "sha256": "2b6774b8800d5428288900586670bc592889877f008016790a3a1ffb859df14d",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "ORDER_FROZEN.sha256",
+      "bytes": 852,
+      "sha256": "438de3cc0cfdb45b6b8a7f3dfe7b6aaedaa2ddb03f84830f389d58c8a7e70a04",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "ORDER_LAUNCH_FROZEN.json",
+      "bytes": 444,
+      "sha256": "dd17762b774c3e76f66028fd9a341b3ce93b611304dedb162b0861af50499c4a",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "ORDER_PROTOCOL.md",
+      "bytes": 2884,
+      "sha256": "a1ca42e258bd2f1607cb92417b089cf3a1180ff8dd99a3f8a40b85926c78dc30",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "PUBLIC_SCOPE.json",
+      "bytes": 270,
+      "sha256": "64e24069f38eb4c7a906c76c0186cb4e8cec577ae4fb2818cb76a10c75743968",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "REPRODUCE.md",
+      "bytes": 1088,
+      "sha256": "0a9c9a20da30c92894618e153ea6ec63758f44fd8a9433d65cb93280acb53ed1",
+      "classification": "public metadata, validation, protocol or hashes"
+    },
+    {
+      "path": "data/family.json",
+      "bytes": 41053,
+      "sha256": "7aa5ebb99f4aa2d8f8027c0acb05436f1caa4001ecd001e66c77eb33450d8c12",
+      "classification": "previously published public curve/PQ/walk-seed input"
+    },
+    {
+      "path": "data/fixtures.json",
+      "bytes": 1636561,
+      "sha256": "980d931ce1a804684b160bdab9b213b87688ab9100f0cdf1cd14c390e809acb8",
+      "classification": "previously published public curve/PQ/walk-seed input"
+    },
+    {
+      "path": "data/order_gp_1525.jsonl",
+      "bytes": 1112519,
+      "sha256": "35a6cdb60c6678ff69f9799ba19c6c9d3480a27af5690c513de21fd8cd7cd7a3",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "order_measure",
+      "bytes": 231448,
+      "sha256": "3b004f9f0e44d2f63754c620b0c725f305f0508eff7da88b5851ce988d24c511",
+      "classification": "compiled executable from supplied public source; no fixture/scalar data compiled in"
+    },
+    {
+      "path": "runs/order_full_1525/complete.json",
+      "bytes": 1419,
+      "sha256": "980be83b25296b459a13db9fef69fe841899ad880d4bf79bb8b7fb16a4ab3fdf",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/controls.json",
+      "bytes": 2011,
+      "sha256": "7f160b1535487e9b3b251bafff031260ffb7a19fdadc2f3de8bfbc8b28ef39da",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_0.jsonl",
+      "bytes": 107617,
+      "sha256": "d956a8e14192454b7878f20552ec047250d3f1d47830c37712efd5d65e048254",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_1.jsonl",
+      "bytes": 107602,
+      "sha256": "ca218d958a9c6c5ab0ee4f96c119ed2922789e585dc136d715bc76fee3e6b6ed",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_10.jsonl",
+      "bytes": 107828,
+      "sha256": "233231e759c61bcebb9aefb849ef1cd4d44170907c6c985eaa6ca37454f0a225",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_11.jsonl",
+      "bytes": 107832,
+      "sha256": "c470eef9402d426a00cb187b6a7d22903fd6579913d6094184e80853fd95681b",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_12.jsonl",
+      "bytes": 107830,
+      "sha256": "de3cf697ccbfefcaeec6c6d337d0f61c57613351b2bbb87e4772b61ceafc0979",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_13.jsonl",
+      "bytes": 107834,
+      "sha256": "9688fc399b1493dc69276895622d23add97d83add6b009420305cc2c1eff2c39",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_14.jsonl",
+      "bytes": 107807,
+      "sha256": "7132b2725f074b9e44f0d74776d99c731a384aed666a09bd2d04acf26f3b5983",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_15.jsonl",
+      "bytes": 107817,
+      "sha256": "0dec113cd29ad1ae2644b2ade44e2b1dd0352550b39c3334a90d52ff1bdb679e",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_16.jsonl",
+      "bytes": 107794,
+      "sha256": "b6ee5e0fd39ed3c1468a86986c88b50e2ddde144f988d20628ad0ba3ed47af57",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_17.jsonl",
+      "bytes": 107824,
+      "sha256": "3eba180a49b63ab2dafbf497d3d948c4084d20c6879bede67f03d46366b0a032",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_18.jsonl",
+      "bytes": 107784,
+      "sha256": "50d948d90b79058b3ce517d5f98e2ed84c486540a6ea2fd453c46f41affcae59",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_19.jsonl",
+      "bytes": 107788,
+      "sha256": "8a3e008f6fd33f05fd252c6174464d07753772f8d9f0cf51965c789989972456",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_2.jsonl",
+      "bytes": 107607,
+      "sha256": "2dd24ca77adb95312449f1d642cd57758ba0ae97d5ad0911a5bfb9dc4d82e865",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_20.jsonl",
+      "bytes": 107806,
+      "sha256": "07da1a133a049f129fb6bbc3f7ff5e733c1a92c0a208d14170b08a6818d85c0d",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_21.jsonl",
+      "bytes": 107809,
+      "sha256": "40fb606e5ab20fd92da749c6981240fdba89555289a9866dfbf52a5db9e9011a",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_22.jsonl",
+      "bytes": 107796,
+      "sha256": "2eaee029d69a8a605f4044885871e8fc5c2e5eebc6c19a577dc28e90d85b1101",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_23.jsonl",
+      "bytes": 107787,
+      "sha256": "bf0230dcfd89375a6afcfd39a2163b20e12a26019ccbbeae3c1101fd48b3fea5",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_24.jsonl",
+      "bytes": 107819,
+      "sha256": "8b51650c1243957ead025a5ba2f1f650d54adfc6ab61b6b3bbd2f14e1bebf4e8",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_25.jsonl",
+      "bytes": 107789,
+      "sha256": "cf83f4cf9bc0e3ffd5d1c4687495127200d16b806368c95694da69a3929430dd",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_26.jsonl",
+      "bytes": 107782,
+      "sha256": "e556643c499c1a733db99f6d5b7445401b84f50ce1d20fc0261ab3ab5b258c36",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_27.jsonl",
+      "bytes": 107790,
+      "sha256": "fd37001da11d01dbda925230df1ddf26966b30818af750cd258c1283461dc4b5",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_28.jsonl",
+      "bytes": 107817,
+      "sha256": "076071aed796516f29407197876bd1edc0faf28a9b1125010c79e485d505b46d",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_29.jsonl",
+      "bytes": 107786,
+      "sha256": "b8b9b844ff58bf9d973bd0f76bcb4b3ee7ccd99a399ed3b7d817d78615ec3bd8",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_3.jsonl",
+      "bytes": 107601,
+      "sha256": "ed7cd53f6fab3ca75400cfbc8c4066381657584346221f6571774c0214aaa9e9",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_30.jsonl",
+      "bytes": 107788,
+      "sha256": "cc29f2ec524681fcf60e65205b61800d82cbb4bb166fffd158e228de579f62fd",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_31.jsonl",
+      "bytes": 107795,
+      "sha256": "4ba847abd5241b6b558711083d2a3026eae665e0faa07a294b7d2f34c21ff47b",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_32.jsonl",
+      "bytes": 107830,
+      "sha256": "87fa11f021e1612248814355bdd86dbf386b9594c4372a37ff4fa3f8737a451a",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_33.jsonl",
+      "bytes": 107801,
+      "sha256": "2b60d8612b4f45d0c7091f044c06a8dafc915241f17cb05999d01570aa6d164f",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_34.jsonl",
+      "bytes": 107808,
+      "sha256": "667b8c60204c69ecdd2deb96c206bda1190984938ed59be0e22ae63407304380",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_35.jsonl",
+      "bytes": 107842,
+      "sha256": "8a9236b6c899978ca2c8b3901a42057a31220901a3ec6105b8ddfbb66f372e7e",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_36.jsonl",
+      "bytes": 107830,
+      "sha256": "28c4268111197816d0547890f560301d1a4911b35b0744c1110acaadb1bd7ed6",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_37.jsonl",
+      "bytes": 107838,
+      "sha256": "54d2b7719ce855266d55ae7e71ff15a9ff79cdd9744ee3b530b87c1445ae7b4f",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_38.jsonl",
+      "bytes": 107827,
+      "sha256": "cb5be2031c0cb24a503e2ad6e2e315760c74784671cc0b826b5b6d9a182bc80d",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_39.jsonl",
+      "bytes": 107798,
+      "sha256": "7d32b23662b7adab319f2feffdf3f36c003b9407b37e4c117b197f95e7e99566",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_4.jsonl",
+      "bytes": 107593,
+      "sha256": "78dcfadbf5d0250a2cbac689c73a8e639e96b682e082425834dd3ff2636db713",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_40.jsonl",
+      "bytes": 107783,
+      "sha256": "e09960d1b1a351ddc64d492879cb6bcb6b257819dab7d7f892204ed07e2e947d",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_41.jsonl",
+      "bytes": 107801,
+      "sha256": "7bae2fd536adee7e641532dfb5051cca2f1f82f17c8f27b660ed9b26c56b43f9",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_42.jsonl",
+      "bytes": 107792,
+      "sha256": "9149e77b7b71e2beb7be56bbaf38415e827432e6be4088ac64934f3f13f954f7",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_43.jsonl",
+      "bytes": 107792,
+      "sha256": "f5a27e54d16c4561656d8459202375d9e7c37ce926ef08ccb9190a3196126c4c",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_44.jsonl",
+      "bytes": 107785,
+      "sha256": "bf600bdb5d0013d822016f7171a05bdb8d08b7c17a519d301c06d6bc6d3b1592",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_45.jsonl",
+      "bytes": 107808,
+      "sha256": "32336dc2960b331c7b6911cfef3f8bdb9ccbcc9a1db26bbcd9ada626b0cdcb88",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_5.jsonl",
+      "bytes": 107599,
+      "sha256": "79721e908fd031fd2ec8cac5184ad24eca9caf50f31d8bde75691c3e90ae2f9d",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_6.jsonl",
+      "bytes": 107604,
+      "sha256": "2ec8d51a5e9ee0d07ba7c802e4da7658f0a3f8b285e8e0b1958a6db64e5bbbc6",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_7.jsonl",
+      "bytes": 107583,
+      "sha256": "e2cbd975c20a57260ae51b262fd07e52245ea66b372a106ac40a0638d2f8ca38",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_8.jsonl",
+      "bytes": 107592,
+      "sha256": "1847377e3e40c21e8940bea42afd2e054914e585782c071b5c6da1e6465c1155",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "runs/order_full_1525/curve_9.jsonl",
+      "bytes": 107627,
+      "sha256": "666c6d6edc884b6ddf2c5537477ac064fcff988d112a8a5cc1a47c78db3ef008",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "source/ec.hpp",
+      "bytes": 4284,
+      "sha256": "353ea4a49f88dd0b3cc2af6c439e7771e819338b800fe537e5a31b1e1810bedc",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/json.hpp",
+      "bytes": 919975,
+      "sha256": "9bea4c8066ef4a1c206b2be5a36302f8926f7fdc6087af5d20b417d0cf103ea6",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/measure_process.cpp",
+      "bytes": 2009,
+      "sha256": "aa77662b32a2b5f42cc2eeecc27cd7203201355b5f850e0c63c9671d6a880a73",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/order_measure.cpp",
+      "bytes": 5284,
+      "sha256": "0b1f5e79aefe0eb779cdea107ec7be392ccb1f92bf9581430929334b8107855c",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/order_report.mjs",
+      "bytes": 11552,
+      "sha256": "c375fb5280d80dd7296e990897cccb40ac9af28c4f5853f8416693e7e22245a7",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/order_setup.gp",
+      "bytes": 3193143,
+      "sha256": "f6dc5217a6b6e2e3f203979a220794a70b6a0028fdeb44f2730ab2e3e624fee2",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "source/order_setup.mjs",
+      "bytes": 2256,
+      "sha256": "be4e73b832755f1eb727546681b4bc3f305335493ccfe9beb2674a657b240e97",
+      "classification": "source; GP contains only previously public curve/point inputs"
+    },
+    {
+      "path": "validation/order_gp_1525.err",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "validation/order_gp_resources.json",
+      "bytes": 441,
+      "sha256": "35c16327580fdaf55f51a5434d8e47c68e0f5d9d33ffcc7763042bbf9b9f6b8b",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "validation/order_gp_runtime_threads.txt",
+      "bytes": 34,
+      "sha256": "f1a3322c03d7af68411763d3a9c1158fe7c71d5edd999ed308ef9a8ab65f3933",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "validation/order_native.err",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "validation/order_native.log",
+      "bytes": 39,
+      "sha256": "cc28d1c27490e0a56c53e6144bca0279005758ddbaaf1c2ef98582e828fb19c0",
+      "classification": "point/curve order measurement"
+    },
+    {
+      "path": "validation/order_native_resources.json",
+      "bytes": 421,
+      "sha256": "b9eef23aa0033ec97aeb8648bb3528d2031e0f0f0e5d0bebb8b6af88352aae27",
+      "classification": "point/curve order measurement"
+    }
+  ]
+}

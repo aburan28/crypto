@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "runtime/root/usr/bin/gp",
+    "-q",
+    "-f",
+    "-s",
+    "256M",
+    "source/order_setup.gp"
+  ],
+  "child_system_us": 1668866,
+  "child_user_us": 8605934,
+  "exit_status": 0,
+  "involuntary_switches": 7788,
+  "major_faults": 0,
+  "max_rss_kib": 44112,
+  "minor_faults": 30382,
+  "stderr": "validation/order_gp_1525.err",
+  "stdout": "data/order_gp_1525.jsonl",
+  "voluntary_switches": 56217,
+  "wall_ns": 8593688935
+}

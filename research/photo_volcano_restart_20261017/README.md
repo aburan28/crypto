@@ -175,3 +175,57 @@ cold-cost claim is made. `source/monitor.mjs` observes the real native workers,
 appends local status, and generates a new local report on native completion.
 It sends no data externally; that final report still requires PDF inspection
 and a later PR update. It never restarts a solver or declares full IC complete.
+
+## Orders and arithmetic replay, 2026-10-17 continuation
+
+The [separately frozen order phase](ORDER_PROTOCOL.md) independently recomputed
+all 46 curve cardinalities and checked **9200 native point orders against
+9200 PARI point orders**, including both P and Q of every problem. All match.
+Its [inspected report and heatmaps](reports/orders_1525_v2/README.md) include
+full-group invariant factors, setup and point-check costs, field/group counters,
+per-curve/per-problem statistics, timer resolution, and the actual GP default
+thread count (5). Reference point-order reduction counts 12381 field
+multiplications including squares per point; this is not an ECDLP-solver count.
+Every order record and the compiled bundle remain preserved locally. The
+readable source and full per-curve/per-problem order tables are published;
+scalar witnesses and RNG journals are excluded.
+
+A [new, separately frozen native arithmetic replay](FIELD_PROTOCOL.md) now
+runs on the exact full corpus. Its instrumented backend passes the same
+376415 group, 2063 BSGS and 134 rho checks, as well as counter classification
+and reset controls. The first actual rho replay matches the original answer
+and all nonclock solver statistics. Two rho counting workers are active;
+the two BSGS counting workers wait for all original BSGS batches to complete.
+The baseline binaries, data and timing records are unchanged. No replay
+coverage is claimed before its case records exist.
+
+The readable [instrumented backend](field_backend/INSTRUMENTATION.json) and
+[source wrapper](source/field_replay_public.cpp) provide a tested
+`field_replay_public` program that reads only public P/Q
+fixtures and walk seeds, verifies the returned point equation, and exports no
+scalar. It reproduces the first case's complete counter vector. Its BSGS mode
+counts cold setup+query, while the checkpoint worker counts setup/query/free
+separately. Rebuilding uses `-O3 -march=native -ftls-model=initial-exec` for
+the instrumented shared library, loaded at process startup. Instrumented
+wall time includes counter overhead and must not replace original timings.
+
+Counters distinguish F_p from scalar-mod-r arithmetic and record actual
+modular API invocations, Montgomery multiply/square/reduction, inverse and
+Euclid divisions, and EC coordinate complements. They are not retired machine
+instructions or a full state stream. Montgomery reductions overlap with the
+multiplication/square categories; do not add them as independent costs.
+Full coverage, full random-corpus IC recovery and unavailable hardware/state
+metrics remain open. Check FIELD_LIVE_STATUS.json locally for actual progress.
+
+The new compressed order/replay bundles are local: automatic upload review
+rejected them because it could not verify an opaque archive against the
+approved public subset. This change publishes readable source, aggregate
+order tables and inspected visuals; it uploads no new compiled binary or raw
+measurement journal. Existing approved public input archives supply the same
+P/Q fixtures. Build an independent counter replay without touching the
+running original files: `bash source/build_field_public.sh NEW_OUTPUT_DIR`,
+then `NEW_OUTPUT_DIR/field_replay_public ROOT 0 0 rho`.
+
+A direct own-process hardware-counter probe returned ENOENT for cycles,
+instructions, cache misses and branch misses. These metrics remain null;
+the primitive counters do not stand in for unavailable hardware events.

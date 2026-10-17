@@ -1,0 +1,73 @@
+{
+  "base_source": "source/native_snapshot",
+  "arithmetic_expressions_preserved": true,
+  "changed_files": [
+    {
+      "file": "include/cryptanalysis/ca_modarith.h",
+      "anchor": "typedef unsigned __int128 ca_u128;",
+      "replacements": 1
+    },
+    {
+      "file": "include/cryptanalysis/ca_modarith.h",
+      "anchor": "static inline uint64_t ca_addmod(uint64_t a, uint64_t b, uint64_t m)\n{",
+      "replacements": 1
+    },
+    {
+      "file": "include/cryptanalysis/ca_modarith.h",
+      "anchor": "static inline uint64_t ca_submod(uint64_t a, uint64_t b, uint64_t m)\n{",
+      "replacements": 1
+    },
+    {
+      "file": "include/cryptanalysis/ca_modarith.h",
+      "anchor": "static inline uint64_t ca_mulmod(uint64_t a, uint64_t b, uint64_t m)\n{",
+      "replacements": 1
+    },
+    {
+      "file": "include/cryptanalysis/ca_modarith.h",
+      "anchor": "static inline uint64_t ca_mont_redc(const ca_mont *m, ca_u128 t)\n{",
+      "replacements": 1
+    },
+    {
+      "file": "include/cryptanalysis/ca_modarith.h",
+      "anchor": "static inline uint64_t ca_mont_mul(const ca_mont *m, uint64_t a, uint64_t b)\n{",
+      "replacements": 1
+    },
+    {
+      "file": "include/cryptanalysis/ca_modarith.h",
+      "anchor": "static inline uint64_t ca_mont_sqr(const ca_mont *m, uint64_t a)\n{",
+      "replacements": 1
+    },
+    {
+      "file": "src/modarith.c",
+      "anchor": "uint64_t ca_invmod(uint64_t a, uint64_t m)\n{",
+      "replacements": 1
+    },
+    {
+      "file": "src/modarith.c",
+      "anchor": "    while (newr) {",
+      "replacements": 1
+    },
+    {
+      "file": "src/group_ec.c",
+      "anchor": "g->p - FY(a)",
+      "replacements": 3
+    },
+    {
+      "file": "src/group_ec.c",
+      "anchor": "g->p - FX(a)",
+      "replacements": 1
+    },
+    {
+      "file": "src/group_ec.c",
+      "anchor": "g->p - y",
+      "replacements": 2
+    }
+  ],
+  "threads_supported_for_complete_capture": 1,
+  "slots": [
+    "Fp",
+    "scalar_mod_r",
+    "other_modulus"
+  ],
+  "counter_boundary": "Executed modular API calls and explicit EC coordinate complements; not hardware instructions or full state streams"
+}
