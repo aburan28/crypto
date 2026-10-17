@@ -37,6 +37,7 @@ fn main() -> Result<()> {
     let mut groups: BTreeMap<(String, u64, String, String), BTreeMap<String, Stats>> =
         BTreeMap::new();
     let mut statuses: BTreeMap<(String, u64, String, String), u64> = BTreeMap::new();
+    let mut outcome_totals: BTreeMap<String, u64> = BTreeMap::new();
     let mut campaigns = Vec::new();
     let mut total = 0;
     let mut verified = 0;
@@ -53,6 +54,7 @@ fn main() -> Result<()> {
         let mut jobs =
             c.prepare("SELECT graph,vertex,conductor,state,session FROM jobs ORDER BY ordinal")?;
         let mut coverage: BTreeMap<(String, String), u64> = BTreeMap::new();
+        let mut strata: BTreeMap<(String, u64, String), u64> = BTreeMap::new();
         let mut bytes = 0u64;
         let mut sessions = 0;
         for row in jobs.query_map([], |r| {
@@ -66,6 +68,9 @@ fn main() -> Result<()> {
         })? {
             let (graph, vertex, conductor, state, session) = row?;
             *coverage.entry((graph.clone(), state.clone())).or_default() += 1;
+            *strata
+                .entry((graph.clone(), conductor, state.clone()))
+                .or_default() += 1;
             if state != "audited" {
                 continue;
             }
@@ -81,6 +86,7 @@ fn main() -> Result<()> {
                 let arm = v["arm"].as_str().unwrap().to_string();
                 let status = v["outcome"]["status"].as_str().unwrap().to_string();
                 total += 1;
+                *outcome_totals.entry(status.clone()).or_default() += 1;
                 if status == "verified" {
                     verified += 1;
                 }
@@ -164,7 +170,12 @@ fn main() -> Result<()> {
             .into_iter()
             .map(|((g, s), n)| json!({"graph":g,"state":s,"vertices":n}))
             .collect();
-        campaigns.push(json!({"path":root,"manifest_sha256":sha256_hex(&fs::read(root.join("campaign.json"))?),"mode":manifest["mode"],"planned_vertices":manifest["vertices_planned"],"coverage":coverage,"audited_sessions":sessions,"audited_records_bytes":bytes}));
+        let strata_audited = strata.keys().filter(|(_, _, s)| s == "audited").count();
+        let stratum_coverage: Vec<Value> = strata
+            .into_iter()
+            .map(|((g, f, s), n)| json!({"graph":g,"conductor":f,"state":s,"vertices":n}))
+            .collect();
+        campaigns.push(json!({"path":root,"manifest_sha256":sha256_hex(&fs::read(root.join("campaign.json"))?),"mode":manifest["mode"],"planned_vertices":manifest["vertices_planned"],"coverage":coverage,"stratum_coverage":stratum_coverage,"strata_audited":strata_audited,"audited_sessions":sessions,"audited_records_bytes":bytes}));
     }
     obs.sync_all()?;
     let mut csv = File::create(out.join("statistics.csv"))?;
@@ -189,7 +200,7 @@ fn main() -> Result<()> {
         let n = statuses[&(graph.clone(), conductor, arm.clone(), status.clone())];
         summaries.push(json!({"graph":graph,"conductor_0_means_all":conductor,"arm":arm,"status":status,"records":n,"metrics":output}));
     }
-    let summary = json!({"schema":"volcano-ic-summary/v1","wall_claim":"UNQUALIFIED; L0/debug diagnostic; raw observations only","aggregation":"Each status separate. Means over present values only; n explicit. Conductor 0 denotes graph aggregate, not a stratum. Timeout counts are unknown, not zero.","campaigns":campaigns,"measured_records":total,"verified_records":verified,"relation_observations":measured_yield,"relation_trials":trials,"relations_found":relations,"weighted_relation_yield":if trials>0{Some(relations as f64/trials as f64)}else{None},"groups":summaries});
+    let summary = json!({"schema":"volcano-ic-summary/v1","wall_claim":"UNQUALIFIED; L0/debug diagnostic; raw observations only","aggregation":"Each status separate. Means over present values only; n explicit. Conductor 0 denotes graph aggregate, not a stratum. Timeout counts are unknown, not zero.","campaigns":campaigns,"measured_records":total,"verified_records":verified,"outcome_totals":outcome_totals,"relation_observations":measured_yield,"relation_trials":trials,"relations_found":relations,"weighted_relation_yield":if trials>0{Some(relations as f64/trials as f64)}else{None},"groups":summaries});
     serde_json::to_writer_pretty(File::create(out.join("summary.json"))?, &summary)?;
     println!(
         "{}",

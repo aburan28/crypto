@@ -30,11 +30,17 @@ Those are separate acceptance conditions; merging tooling cannot discharge them.
   workload preparation certified the actual largest-prime subgroup and a
   nonzero generator at every vertex; see
   [the full-graph IC protocol](../research/full_volcano_graphwide_ic_20261017/PROTOCOL.md)
-  and its `evidence/inventory.json`. There are zero solver runs so far.
+  and its `evidence/inventory.json`. A separate bounded native IC campaign
+  has now executed controls, a three-root pilot and a 12-vertex survey prefix.
+  The prefix has 192 attempts (119 verified, 58 exhausted, 15 timed out),
+  with standard audits and successful/exhausted deterministic replays;
+  [reports and source](../research/full_volcano_graphwide_ic_20261017/execution/README.md).
+  Its full queue covers every vertex; current completion comes from its ledger.
 - **Execution gaps for that corpus:** exact per-vertex subgroup/generator
-  representation registration, validated subgroup/quotient factor-base
-  adapters, resumable ecbench matrix execution and full accounting still
-  need implementation/validation. The measured matrix and its storage/core
+  representation registration and qualified full-matrix execution remain open.
+  A checked cofactor-projected subgroup base and resumable bounded driver now
+  exist; two focused tests pass and exhausted records have supplemental replay.
+  L0/debug measurements do not establish qualified runtimes. The full matrix and its storage/core
   cost have not been provisioned or estimated from a qualified pilot. The
   available MOV implementation supports a supersingular k=2 teaching path
   with BSGS/PH, not finite-field IC for the exact embedding degrees 30875,

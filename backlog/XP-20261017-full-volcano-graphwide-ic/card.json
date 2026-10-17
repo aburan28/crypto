@@ -7,7 +7,7 @@
     "volcano graph-wide IC workstream"
   ],
   "status": "draft",
-  "status_note": "Every-vertex input preparation is complete for the three additional graphs. Solver campaign is not implemented/launched; representation registration, base validation, finite-field backends and qualified pilot costs remain open.",
+  "status_note": "Every-vertex preparation and a checked projected subgroup base are implemented. Controls and pilot passed audits, and a separately bounded all-vertex survey has launched (first 12 vertices: 192 attempts, 119 verified, 58 exhausted, 15 timeouts). This full matrix remains draft: exact representation registration, finite-field backends and qualified resource pilot remain open.",
   "blocked_on": [
     "problem:problems/full-volcano-class-storage-and-execution.md"
   ],
@@ -29,7 +29,7 @@
   },
   "code": {
     "repo": "crypto",
-    "commit": "e1b0e302e51083b4c9ad70b1860b66bc0a3c6642",
+    "commit": "ee54ad603fef4768817fbca2f133564e81ce84f1",
     "branch": null,
     "build": [
       [
@@ -52,11 +52,12 @@
   },
   "run": {
     "argv": [
-      "TODO-implement-and-validate-resumable-graphwide-ecbench-driver",
-      "--manifest",
-      "research/full_volcano_graphwide_ic_20261017/evidence/inventory.json",
-      "--out",
-      "{out}"
+      "volcano-ic-driver",
+      "run",
+      "{out}",
+      "24823",
+      "86400",
+      "137438953472"
     ],
     "env": {
       "RAYON_NUM_THREADS": "1"
@@ -70,7 +71,7 @@
     "stop": "all"
   },
   "checkpoint": {
-    "file": null,
+    "file": "ledger.sqlite",
     "resume_flag": null
   },
   "outputs": {
@@ -80,7 +81,7 @@
   },
   "cairn": {
     "mode": "lab-task",
-    "notes": "Not published, leased or scheduled. Inputs have certified all 24823 vertices; this card does not claim solver execution.",
+    "notes": "This full-matrix card is not published, leased or scheduled. The separate bounded survey is real local execution. Its resume ledger does not imply that this qualified full-matrix card has launched. run.argv requires a preplanned full campaign and intentionally refuses until the original gates are satisfied.",
     "space": "TBD",
     "tasks": [
       "XP-20261017-full-volcano-graphwide-ic"

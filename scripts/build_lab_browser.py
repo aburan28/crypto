@@ -38,7 +38,7 @@ COVER_LINKS = "docs/curves/cover-links.yaml"
 STANDARDS_COVERAGE = "docs/curves/standards/coverage.json"
 LEADERBOARD = "docs/ic/leaderboard.json"
 TOURNAMENT_RUNS = "research/ic_candidate_tournament_20260915/runs"
-ECBENCH_SESSIONS_GLOBS = ("research/ecbench_*/sessions/*", "research/isogeny_conductor_gap_*/sessions/*", "research/fiber_ic_scaling_*/sessions/*")
+ECBENCH_SESSIONS_GLOBS = ("research/ecbench_*/sessions/*", "research/isogeny_conductor_gap_*/sessions/*", "research/fiber_ic_scaling_*/sessions/*", "research/full_volcano_graphwide_ic_*/execution/campaigns/*/sessions/*")
 IC1_SCAN_GLOBS = (
     "docs/ic/**/*.json",
     "docs/ic/**/*.md",
@@ -80,6 +80,7 @@ VOCABULARY = {
     ],
     "factor_base_families": [
         {"name": "prime-abscissa", "params": "size", "what": "The points whose abscissa is below a bound on a prime-field curve."},
+        {"name": "prime-projected-abscissa", "params": "size,scan_cap", "what": "Cofactor-projected rational points, checked in the selected prime subgroup, with distinct negation pairs folded into columns."},
         {"name": "koblitz-orbit", "params": "divisor", "what": "A Frobenius-invariant subspace of abscissae named by factors of x^n - 1; Frobenius-closed, so the table folds."},
         {"name": "binary-subspace", "params": "dimension", "what": "Abscissae in a polynomial-basis F2-subspace; needs no invariant factor, so not Frobenius-closed."},
         {"name": "compact-orbit-scan", "params": "", "what": "Orbit base built by scanning a compact representative set."},

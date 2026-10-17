@@ -4,14 +4,18 @@ Run the full matrix in [the protocol](PROTOCOL.md), preserving every vertex,
 conductor, independent one-target workload, factor base and method, including
 failure, timeout and unsupported cases. This card is a draft, not a launched
 or leased job. [Certified input preparation](../../research/full_volcano_graphwide_ic_20261017/README.md)
-covers all 24,823 vertices of the three additional completed graphs. It does
-not discharge the original fixed A--E campaign.
+covers all 24,823 vertices of the three additional completed graphs. A separate
+[bounded native survey](../../research/full_volcano_graphwide_ic_20261017/execution/README.md)
+has launched; its first 12 vertices/strata contain 192 audited attempts,
+119 verified recoveries, 58 exhausted budgets and 15 timeouts. Controls and
+pilot also ran. These do not discharge this full matrix or the original A--E.
 
 Before ready: register exact per-vertex subgroup/generator representations;
-validate subgroup/quotient-aware IC relations and counted factor-base setup;
-freeze and audit a native ecbench control/pilot; derive total core, memory,
+extend the passed subgroup-projection controls and audited native pilot to
+the qualified full contract; derive total core, memory,
 storage and time needs from that pilot; select/provision a worker and durable
-checkpoint/output storage; implement and test the exact full-matrix driver.
+checkpoint/output storage. The resumable driver exists, with full launch
+deliberately gated until the remaining original prerequisites are met.
 The existing k=2 supersingular MOV teaching implementation is not finite-field
 IC for the actual large embedding degrees in the three classes.
 

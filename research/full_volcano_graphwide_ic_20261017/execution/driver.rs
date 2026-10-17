@@ -9,21 +9,32 @@ use crypto_lib::cryptanalysis::ic_boundary::{CountedGroup, GroupOps, PrimeCurve,
 use rusqlite::{params, Connection};
 use serde_json::{json, Value};
 use std::collections::{BTreeSet, VecDeque};
-use std::fs::{self, File, OpenOptions};
+#[cfg(unix)]
+use std::fs::OpenOptions;
+use std::fs::{self, File};
 use std::io::{BufRead, BufReader, Write};
+#[cfg(unix)]
 use std::os::fd::AsRawFd;
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::Command;
+#[cfg(unix)]
+use std::process::Stdio;
+#[cfg(unix)]
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+#[cfg(unix)]
+use std::time::Instant;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+#[cfg(unix)]
 static STOP: AtomicBool = AtomicBool::new(false);
+#[cfg(unix)]
 extern "C" {
     fn flock(fd: i32, operation: i32) -> i32;
     fn signal(sig: i32, handler: usize) -> usize;
     fn kill(pid: i32, sig: i32) -> i32;
 }
+#[cfg(unix)]
 extern "C" fn stop(_: i32) {
     STOP.store(true, Ordering::Relaxed);
 }
@@ -46,6 +57,7 @@ fn write_json(p: &Path, v: &Value) -> Result<()> {
 fn read_json(p: &Path) -> Result<Value> {
     Ok(serde_json::from_slice(&fs::read(p)?)?)
 }
+#[cfg(unix)]
 fn bytes(p: &Path) -> Result<u64> {
     let mut n = 0;
     for e in fs::read_dir(p)? {
@@ -208,6 +220,7 @@ fn plan(root: &Path, input: &Path, binary: &Path, mode: &str) -> Result<()> {
     )?;
     status(root)
 }
+#[cfg(unix)]
 fn command(bin: &Path, args: &[&str], log: &Path) -> Result<i32> {
     let f = File::create(log)?;
     let mut child = Command::new(bin)
@@ -308,6 +321,7 @@ fn replay_exhausted(session: &Path, out: &Path) -> Result<bool> {
     )?;
     Ok(ok)
 }
+#[cfg(unix)]
 fn run(root: &Path, max_jobs: u64, max_seconds: u64, max_bytes: u64) -> Result<()> {
     let lock = OpenOptions::new()
         .create(true)
@@ -483,6 +497,10 @@ fn run(root: &Path, max_jobs: u64, max_seconds: u64, max_bytes: u64) -> Result<(
         return Err("attempt failed; inspect preserved logs before resume".into());
     }
     Ok(())
+}
+#[cfg(not(unix))]
+fn run(_: &Path, _: u64, _: u64, _: u64) -> Result<()> {
+    Err("campaign execution requires Unix advisory locking and signals; planning, status and summaries remain available".into())
 }
 fn status(root: &Path) -> Result<()> {
     let c = db(root)?;

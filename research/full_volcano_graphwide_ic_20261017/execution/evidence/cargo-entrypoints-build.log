@@ -1,0 +1,31 @@
+   Compiling crypto v0.1.0 (/workspace/repos/crypto)
+error[E0432]: unresolved import `rusqlite`
+ --> research/full_volcano_graphwide_ic_20261017/execution/driver.rs:9:5
+  |
+9 | use rusqlite::{params, Connection};
+  |     ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+  |
+  = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `rusqlite`
+ --> research/full_volcano_graphwide_ic_20261017/execution/summarize.rs:3:5
+  |
+3 | use rusqlite::Connection;
+  |     ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+  |
+  = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0433]: cannot find module or crate `rusqlite` in this scope
+  --> research/full_volcano_graphwide_ic_20261017/execution/summarize.rs:52:13
+   |
+52 |             rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+   |             ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+   |
+   = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+For more information about this error, try `rustc --explain E0432`.
+error: could not compile `crypto` (bin "volcano-ic-driver") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+Some errors have detailed explanations: E0432, E0433.
+For more information about an error, try `rustc --explain E0432`.
+error: could not compile `crypto` (bin "volcano-ic-summarize") due to 2 previous errors
