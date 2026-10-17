@@ -116,3 +116,63 @@ Scope: 24-bit `p`, depth 3, split craters, ℓ ∈ {2, 3}, the three methods
 at v1's parameters. No security statement. An H1 effect is an IC-yield
 statement; it becomes an improvement only if it also shows in IC cost S
 and survives the §5a band (CLAUDE.md success criterion).
+
+## Amendment v2.1: 20 more classes (frozen 2026-10-17, before any v2 result was analysed)
+
+At the owner's request ("run on like 20 more"), 20 more classes were added
+before any v2 record had been analysed or looked at. The 8 v2 sessions were
+still running at the time. The selection rule of §2 continued from seed
+1005 and took the next 10 accepted seeds per ℓ: seeds 1005–1014 for both
+ℓ, none rejected. Export and arms are as in §2–§3. Together the 28 classes
+add 109,072 runs.
+
+The digest of `sha256sum classes/*/spec*.json classes/*/curves.jsonl` over
+all 28 classes is
+`ed9a7b88526c1e5aa68ce2754bdfd025d3cc00ec950b688e875c56fd79b06786`.
+
+| class | p | curves per level (crater → floor) | workload curves | `E(F_p)` (count of curves) |
+|:--|--:|:--|--:|:--|
+| `l2-s1005` | 12559009 | 15 / 4 / 4 / 12 | 320 | Z/6279242 × Z/2: 23, Z/12558484: 12 |
+| `l2-s1006` | 10730249 | 11 / 4 / 4 / 12 | 256 | Z/10725908: 12, Z/5362954 × Z/2: 19 |
+| `l2-s1007` | 12588977 | 13 / 4 / 4 / 12 | 288 | Z/6294458 × Z/2: 21, Z/12588916: 12 |
+| `l2-s1008` | 13255609 | 11 / 4 / 4 / 12 | 256 | Z/13256692: 12, Z/6628346 × Z/2: 19 |
+| `l2-s1009` | 16400273 | 11 / 4 / 4 / 12 | 256 | Z/16405044: 12, Z/8202522 × Z/2: 19 |
+| `l2-s1010` | 14137777 | 11 / 4 / 4 / 12 | 256 | Z/14143092: 12, Z/7071546 × Z/2: 19 |
+| `l2-s1011` | 15778489 | 11 / 4 / 4 / 12 | 256 | Z/15783668: 12, Z/7891834 × Z/2: 19 |
+| `l2-s1012` | 9429193 | 11 / 4 / 4 / 12 | 256 | Z/9427604: 12, Z/4713802 × Z/2: 19 |
+| `l2-s1013` | 15841393 | 11 / 4 / 4 / 12 | 256 | Z/15844852: 12, Z/7922426 × Z/2: 19 |
+| `l2-s1014` | 13765033 | 15 / 4 / 4 / 12 | 320 | Z/6880938 × Z/2: 23, Z/13761876: 12 |
+| `l3-s1005` | 14793199 | 11 / 4 / 4 / 12 | 256 | Z/14789257: 31 |
+| `l3-s1006` | 13258519 | 11 / 4 / 4 / 12 | 256 | Z/13255576: 31 |
+| `l3-s1007` | 9616627 | 11 / 4 / 4 / 12 | 256 | Z/9618394: 31 |
+| `l3-s1008` | 11838751 | 11 / 4 / 4 / 12 | 256 | Z/11832244: 31 |
+| `l3-s1009` | 14161963 | 11 / 4 / 4 / 12 | 256 | Z/14164309: 31 |
+| `l3-s1010` | 12334183 | 16 / 4 / 4 / 12 | 336 | Z/6167852 × Z/2: 36 |
+| `l3-s1011` | 11719327 | 11 / 4 / 4 / 12 | 256 | Z/11716011: 12, Z/3905337 × Z/3: 19 |
+| `l3-s1012` | 10191403 | 11 / 4 / 4 / 12 | 256 | Z/10191307: 31 |
+| `l3-s1013` | 13041643 | 15 / 4 / 4 / 12 | 320 | Z/13038607: 35 |
+| `l3-s1014` | 14467003 | 15 / 4 / 4 / 12 | 320 | Z/14460001: 35 |
+
+**Analysis under v2.1.** The H1–H4 tests and controls of §1 and §4 are
+unchanged and run on all 28 classes: 14 with ℓ = 2 for H1, 14 with ℓ = 3
+for H2, and all 28 for H3 and H4. Two reports are produced:
+
+- **v2:** the 8 classes as originally frozen.
+- **v2.1:** all 28 classes. This is the headline; the 20 new classes are
+  a replication set the original 8 did not choose.
+
+A difference between the two is reported, not reconciled.
+
+**Mechanism contrasts.** These are pre-specified, reported per class, and
+not tested. `E(F_p)`'s ℓ-power torsion changes between levels in every
+ℓ = 2 class and in exactly one ℓ = 3 class:
+
+- In `l3-s1011` the floor is cyclic and the upper levels are
+  Z/n × Z/3. This is the ℓ = 3 analogue of the ℓ = 2 structure change.
+  If the ℓ = 2 yield effect comes from ℓ-torsion structure, this class
+  should show a floor deficit.
+- `l3-s1003` and `l3-s1010` are Z/n × Z/2 at every level, so their
+  structure doesn't change; they should show none.
+
+**Running.** The 109,072 new runs go in batches of 5 classes, each under
+the host's 2-hour background limit.
