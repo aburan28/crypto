@@ -68,6 +68,7 @@ def materialize(validated_path, selection_path, stratum_dirs):
         point_file = directory / 'points' / f'p{index:02d}' / 'target.jsonl'
         target_blob = json.dumps(public[index], separators=(',', ':')) + '\n'
         if (stratum['stratum'] != stratum_index or
+                answers[index]['fixture_index'] != index or
                 (point_file.exists() and point_file.read_text() != target_blob)):
             raise ValueError('raw point, host or sealed fixture differs')
         workload = {
@@ -102,6 +103,10 @@ def materialize(validated_path, selection_path, stratum_dirs):
                       arm.get('resource_status') == 'PASS' and
                       rho['status'] == 'PASS_INDEPENDENT_REPLAY' and
                       rho.get('resource_status') == 'PASS')
+            tier_qualified = (passed and
+                              validated['evidence_status'] == 'PASS_INDEPENDENT_REPLAY' and
+                              validated['different_cloud_instances'] and
+                              stratum['tier_status'] == 'PASS_TIER1')
             rows.append({
                 'candidate_id': candidate, 'workload_id': workload_id,
                 'run_id': f'{candidate}W{workload_id}R1',
@@ -109,8 +114,7 @@ def materialize(validated_path, selection_path, stratum_dirs):
                 'producer_target_file_status': ('PRESENT_MATCHING' if
                                                 point_file.exists() else 'NOT_WRITTEN'),
                 'status': arm['status'],
-                'hardware_tier': 'cloud_instance_tier1' if passed and
-                                 stratum['tier_status'] == 'PASS_TIER1' else
+                'hardware_tier': 'cloud_instance_tier1' if tier_qualified else
                                  'cloud_instance_exploratory',
                 'candidate_manifest_sha256':
                     dispatch['candidate_manifests'][candidate]['sha256'],
