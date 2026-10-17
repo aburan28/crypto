@@ -10,6 +10,9 @@ const MAXN: usize = 16;
 thread_local! {
     /// Override of the multi-limb Karatsuba threshold (for tuning runs; None = built-in default).
     pub static KARATSUBA_N: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
+    /// Override of the shorter-operand length from which products go through the multi-prime
+    /// NTT (`crate::ntt`; for tuning runs and tests; None = built-in default, usize::MAX = never).
+    pub static NTT_N: std::cell::Cell<Option<usize>> = const { std::cell::Cell::new(None) };
 }
 
 #[derive(Clone, Debug)]
@@ -1052,6 +1055,16 @@ impl<const N: usize> FpM<N> {
     pub fn uses_adx(&self) -> bool {
         self.adx
     }
+    /// Shorter-operand length from which `conv_long` uses the multi-prime NTT: about 1.2-1.5x
+    /// past the measured crossover with Karatsuba (`examples/profile_ntt.rs`).
+    pub fn ntt_threshold(&self) -> usize {
+        match N {
+            1 => 1024,
+            2 => 192,
+            3 | 4 => 128,
+            _ => 256,
+        }
+    }
     /// Canonical residue (out of Montgomery form).
     pub fn to_canonical(&self, a: &[u64; N]) -> [u64; N] {
         let mut one = [0u64; N];
@@ -1343,6 +1356,83 @@ impl<const N: usize> Field for FpM<N> {
             });
         }
         r
+    }
+    fn conv_sq(&self, a: &[Self::E]) -> Vec<Self::E> {
+        if N == 1 && self.pbits <= 62 {
+            return self.conv(a, a);
+        }
+        // coefficient k: 2 sum_{i < k - i} a_i a_{k-i} (+ a_{k/2}^2), lazily accumulated
+        let n = a.len();
+        let mut r = Vec::with_capacity(2 * n - 1);
+        for k in 0..2 * n - 1 {
+            let lo = k.saturating_sub(n - 1);
+            let mut acc = [0u64; 2 * MAXN + 2];
+            let mut i = lo;
+            while 2 * i < k {
+                Self::mul_acc(&mut acc, &a[i], &a[k - i]);
+                i += 1;
+            }
+            let mut top = 0u64;
+            for w in acc[..2 * N + 2].iter_mut() {
+                let nt = *w >> 63;
+                *w = (*w << 1) | top;
+                top = nt;
+            }
+            if k % 2 == 0 {
+                Self::mul_acc(&mut acc, &a[k / 2], &a[k / 2]);
+            }
+            r.push(self.redc_wide(&mut acc));
+        }
+        r
+    }
+    fn conv_long(&self, a: &[Self::E], b: &[Self::E]) -> Option<Vec<Self::E>> {
+        let thr = NTT_N.with(|k| k.get()).unwrap_or(self.ntt_threshold());
+        if a.len().min(b.len()) < thr {
+            return None;
+        }
+        // the Montgomery residues aR, bR as integers: exact convolution T = sum (aR)(bR) as
+        // mixed-radix digits, T = sum_i d_i M_i with M_i = m_0 .. m_{i-1}; then
+        // redc_wide(sum_i d_i (M_i mod p)) = T R^{-1} = (sum ab) R, as `conv_trunc` returns
+        let (d, t) = crate::ntt::conv_digits(a, b, self.pbits);
+        let ps = crate::ntt::primes();
+        let mut cm: Vec<[u64; N]> = Vec::with_capacity(t);
+        let mut m = Big::from_u64(1);
+        for pr in &ps[..t] {
+            cm.push(big_mod(&m, &self.pbig).limbs(N).try_into().unwrap());
+            m = m.mul(&Big::from_u64(pr.p));
+        }
+        let nout = a.len() + b.len() - 1;
+        let mut out = Vec::with_capacity(nout);
+        for k in 0..nout {
+            let mut acc = [0u64; 2 * MAXN + 2];
+            for (i, c) in cm.iter().enumerate() {
+                let di = d[k * t + i] as u128;
+                let mut carry = 0u64;
+                for j in 0..N {
+                    let s = acc[j] as u128 + di * c[j] as u128 + carry as u128;
+                    acc[j] = s as u64;
+                    carry = (s >> 64) as u64;
+                }
+                let mut j = N;
+                while carry != 0 {
+                    let (s, o) = acc[j].overflowing_add(carry);
+                    acc[j] = s;
+                    carry = o as u64;
+                    j += 1;
+                }
+            }
+            out.push(self.redc_wide(&mut acc));
+        }
+        Some(out)
+    }
+    fn sqr_threshold(&self) -> usize {
+        // schoolbook squares form each cross product once, so they stay ahead of Karatsuba
+        // much longer than general products (examples/profile_sqr.rs)
+        match N {
+            1 if self.pbits <= 62 => self.karatsuba_threshold(),
+            2..=4 => 96,
+            _ => 64,
+        }
     }
     fn karatsuba_threshold(&self) -> usize {
         KARATSUBA_N
