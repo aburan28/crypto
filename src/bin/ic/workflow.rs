@@ -49,7 +49,7 @@ use super::experiment::{
 use clap::{Args, ValueEnum};
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
-    search, Candidate, FactorBaseSpec, Family, SearchOptions,
+    freeze_spec, search, Candidate, FactorBaseSpec, Family, SearchOptions,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, CollectedRelation,
@@ -902,6 +902,7 @@ fn search_options(src: &FactorBaseSource, p: &WorkflowParams) -> Result<SearchOp
         "factor" => vec![Family::Factor],
         "divisor" => vec![Family::Divisor],
         "union" => vec![Family::Union],
+        "greedy" => vec![Family::Greedy],
         "all" => vec![Family::Factor, Family::Divisor, Family::Union],
         other => return Err(format!("unknown factor-base family {other:?}")),
     };
@@ -1239,8 +1240,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     .take(5)
                     .map(candidate_json)
                     .collect();
+                // A greedy selection is saved by the orbits it chose, so
+                // every later stage and worker rebuilds it without the scan.
                 (
-                    best.spec.clone(),
+                    freeze_spec(&c, &best.spec).unwrap_or_else(|_| best.spec.clone()),
                     Some(json!({"candidates_scored":report.candidates.len(),
                         "targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
                         "elapsed_ms":report.elapsed_ms,"top":top})),

@@ -10,6 +10,8 @@ source-pinned pairing variants), 36
 published odd-characteristic parameter cases, three exact prime-field
 examples and twenty-six criterion entries. The WAM1 research queue adds
 38 input- and witness-specific checks, giving the site 64 searchable attack
+examples and twenty-four criterion entries. The WAM1 research queue adds
+38 input- and witness-specific checks, giving the site 62 searchable attack
 checks in total. Each evaluated finding has a
 [WID1 identifier](IDENTIFIERS.md) distinct from its curve identity.
 
@@ -191,6 +193,7 @@ costed divisor relation pipeline are the further assessment gates.
 
 The [machine-readable registry](criteria.json) specifies domain, recognition,
 required witness, construction and primary source for twenty-six criteria. The
+required witness, construction and primary source for twenty-four criteria. The
 entries make four crucial separations.
 
 The new `ic_relation_support_rank` entry tests a fixed-base index-calculus

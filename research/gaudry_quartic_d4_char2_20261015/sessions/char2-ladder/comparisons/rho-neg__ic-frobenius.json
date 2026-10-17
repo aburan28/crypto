@@ -1,0 +1,217 @@
+{
+  "schema": "ecbench.comparison/v1",
+  "comparison_id": "ECC1hfe682d3889b5",
+  "a": {
+    "session_id": "ECBS1h4d63e1551dc1",
+    "arm": "rho-neg",
+    "method_id": "ECM1hefea4e0ebe79",
+    "method": "rho.negation",
+    "measured": 8,
+    "verified": 8,
+    "statuses": {
+      "verified": 8
+    },
+    "mean_s": 1.0518762160391537,
+    "mean_ratio_to_floor": 1.1869152085418397,
+    "lower_bound": true,
+    "deterministic": true
+  },
+  "b": {
+    "session_id": "ECBS1h4d63e1551dc1",
+    "arm": "ic-frobenius",
+    "method_id": "ECM1he2d2aef75c06",
+    "method": "ic.pipeline",
+    "measured": 8,
+    "verified": 8,
+    "statuses": {
+      "verified": 8
+    },
+    "mean_s": 1177.4887289441222,
+    "mean_ratio_to_floor": 1328.6537512303223,
+    "lower_bound": false,
+    "deterministic": true
+  },
+  "workloads": [
+    {
+      "workload_id": "W1240e58de0c0",
+      "slug": "icv1-f2m24-t1171-7fbf6d93",
+      "r": 1198289,
+      "floor_s": 0.8862269254527579,
+      "pairs": 1,
+      "a_mean_s": 1.0167504610878018,
+      "b_mean_s": 4501.259034683707,
+      "ratio_b_over_a": 4427.103017851496
+    },
+    {
+      "workload_id": "W255399ed9512",
+      "slug": "icv1-f2m48-tm17036033-cfcd9389",
+      "r": 28147499374669,
+      "floor_s": 0.8862269254527579,
+      "pairs": 1,
+      "a_mean_s": 0.8468376798785417,
+      "b_mean_s": 42.59161661075577,
+      "ratio_b_over_a": 50.29490021849819
+    },
+    {
+      "workload_id": "W739a83ada978",
+      "slug": "icv1-f2m48-tm17036033-cfcd9389",
+      "r": 28147499374669,
+      "floor_s": 0.8862269254527579,
+      "pairs": 1,
+      "a_mean_s": 0.9322604843133568,
+      "b_mean_s": 44.033807158550495,
+      "ratio_b_over_a": 47.23337296762392
+    },
+    {
+      "workload_id": "W845d6165060e",
+      "slug": "icv1-f2m40-t573363-49958dc1",
+      "r": 549755527207,
+      "floor_s": 0.8862269254527579,
+      "pairs": 1,
+      "a_mean_s": 0.7221557546196506,
+      "b_mean_s": 71.42725719033507,
+      "ratio_b_over_a": 98.90838192926235
+    },
+    {
+      "workload_id": "Wa195d33f5d8a",
+      "slug": "icv1-f2m32-tm45925-abb49a5a",
+      "r": 715835537,
+      "floor_s": 0.8862269254527579,
+      "pairs": 1,
+      "a_mean_s": 1.0481738751295897,
+      "b_mean_s": 459.6211602310231,
+      "ratio_b_over_a": 438.4970577273722
+    },
+    {
+      "workload_id": "Wabf66d7f9859",
+      "slug": "icv1-f2m24-t1171-7fbf6d93",
+      "r": 1198289,
+      "floor_s": 0.8862269254527579,
+      "pairs": 1,
+      "a_mean_s": 1.3136452498151474,
+      "b_mean_s": 3653.692549391834,
+      "ratio_b_over_a": 2781.338835508271
+    },
+    {
+      "workload_id": "Wc69dfe4568cc",
+      "slug": "icv1-f2m40-t573363-49958dc1",
+      "r": 549755527207,
+      "floor_s": 0.8862269254527579,
+      "pairs": 1,
+      "a_mean_s": 1.9108941026486612,
+      "b_mean_s": 73.42173602551888,
+      "ratio_b_over_a": 38.42271318109681
+    },
+    {
+      "workload_id": "Wf87c59c61bdd",
+      "slug": "icv1-f2m32-tm45925-abb49a5a",
+      "r": 715835537,
+      "floor_s": 0.8862269254527579,
+      "pairs": 1,
+      "a_mean_s": 0.6242921208204799,
+      "b_mean_s": 573.8626702612521,
+      "ratio_b_over_a": 919.2213887099031
+    }
+  ],
+  "curves": [
+    {
+      "slug": "icv1-f2m24-t1171-7fbf6d93",
+      "log2_r": 20.192544464583342,
+      "workloads": 2,
+      "pairs": 2,
+      "ratio_b_over_a": 3499.384909576483,
+      "ci95": [
+        2781.338835508271,
+        4427.103017851496
+      ],
+      "ci_method": "cluster"
+    },
+    {
+      "slug": "icv1-f2m32-tm45925-abb49a5a",
+      "log2_r": 29.415052925905787,
+      "workloads": 2,
+      "pairs": 2,
+      "ratio_b_over_a": 617.9401153714872,
+      "ci95": [
+        438.4970577273722,
+        919.2213887099031
+      ],
+      "ci_method": "cluster"
+    },
+    {
+      "slug": "icv1-f2m40-t573363-49958dc1",
+      "log2_r": 38.999999247678055,
+      "workloads": 2,
+      "pairs": 2,
+      "ratio_b_over_a": 55.01186877111747,
+      "ci95": [
+        38.42271318109681,
+        98.90838192926235
+      ],
+      "ci_method": "cluster"
+    },
+    {
+      "slug": "icv1-f2m48-tm17036033-cfcd9389",
+      "log2_r": 44.678071992430525,
+      "workloads": 2,
+      "pairs": 2,
+      "ratio_b_over_a": 48.69063748860268,
+      "ci95": [
+        47.23337296762392,
+        50.29490021849819
+      ],
+      "ci_method": "cluster"
+    }
+  ],
+  "ops": {
+    "status": "ok",
+    "unit": "ecbench.gae",
+    "ratio_b_over_a": 1119.41758069021,
+    "ci95": [
+      154.81157926584729,
+      2331.663697430552
+    ],
+    "ci_method": "cluster",
+    "pairs": 8,
+    "unpaired_runs": 0,
+    "same_seeds": true,
+    "same_session": true,
+    "pooled_curves": 4,
+    "bounded": true,
+    "resamples": 4000
+  },
+  "wall": {
+    "status": "descriptive",
+    "reasons": [
+      "8 of 8 pairs did not reach L2",
+      "0 admitted pairs; at least 5 are needed"
+    ],
+    "required_level": "L2",
+    "pairs": 8,
+    "pairs_below_level": 8,
+    "median_ratio": 1317.600414910578,
+    "ci95": null,
+    "aa_arms": null,
+    "aa_pairs": 0,
+    "aa_median_ratio": null,
+    "aa_ci95": null,
+    "outside_noise": null
+  },
+  "quality": {
+    "score": 40,
+    "rubric": "average paired isolation points (L0=0, L1=40, L2=75, L3=90); +10 only for an L2-or-higher A/A 95% interval containing 1 within [0.9,1.1]",
+    "paired_attempts": 8,
+    "verified_pairs": 8,
+    "admitted_pairs": 0,
+    "levels": {
+      "L1": 8
+    },
+    "p95_foreign_busy_percent": 4.877421145391012,
+    "p95_run_queue_percent": 0.12924976098693397,
+    "contention_observed_runs": 16,
+    "notes": [
+      "no admitted A/A interval; calibration bonus unavailable"
+    ]
+  },
+  "verdict": "ops (ok): ic-frobenius / rho-neg = 1119.4176 [154.812, 2331.664] (cluster) over 8 pairs on 8 workloads, 4 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1317.6004, not a result: 8 of 8 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)"
+}

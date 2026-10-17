@@ -24,6 +24,10 @@ for l in open(os.path.join(here, "ours_k4.jsonl")):
     ours[r["name"]] = {"family": "k=4 S5" if r["name"].startswith("s5") else f"k=4 generic d={r['equation_degree']}",
                        "ours_s": r["ours_total_ms"] / 1e3, "ours_engine": "gaudry_quartic (Macaulay)",
                        "expect": {"solutions": r["ours_solutions"]}, "size": f"dim {r['ours_dim']}"}
+for l in open(os.path.join(here, "ours_d4.jsonl")):
+    r = json.loads(l)
+    ours[r["name"]] = {"family": "k=4 D4", "ours_s": r["ours_total_ms"] / 1e3, "ours_engine": "gaudry_quartic_d4 (Macaulay, 5 unknowns)",
+                       "expect": {"solutions": r["ours_solutions"]}, "size": f"dim {r['ours_dim']}"}
 for l in open(os.path.join(here, "ours_pkm.jsonl")):
     r = json.loads(l)
     ours[r["name"]] = {"family": f"PKM m={r['m']}", "ours_s": r["ours_ms"] / 1e3, "ours_engine": r["ours_engine"],
