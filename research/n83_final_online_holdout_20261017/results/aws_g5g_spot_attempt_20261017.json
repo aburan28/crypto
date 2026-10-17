@@ -1,0 +1,23 @@
+{
+  "approved_max_minutes": 165,
+  "approved_max_usd": "5",
+  "artifact_status": "INFRASTRUCTURE_FAILURE_NO_INSTANCE_CREATED",
+  "automatic_shutdown_minutes": 150,
+  "availability_zone": "us-east-1b",
+  "dry_run_status": "DryRunOperation: Request would have succeeded, but DryRun flag is set.",
+  "experiment_result": null,
+  "instance_type": "g5g.metal",
+  "launch_error": "Blocked: This account is currently blocked and not recognized as a valid account.",
+  "launch_status": "PROVIDER_ACCOUNT_BLOCKED",
+  "market_type": "spot",
+  "max_spot_price_usd_per_hour": "0.45",
+  "postcheck_g5g_instances_pending_running_stopping_stopped": [],
+  "postcheck_g5g_spot_requests_open_active": [],
+  "region": "us-east-1",
+  "requested_count": 1,
+  "schema": "n83.g5g-spot-attempt/v1",
+  "spot_quote_timestamp_utc": "2026-10-17T08:00:00Z",
+  "spot_quote_usd_per_hour": "0.399400",
+  "temporary_security_group_deleted": true,
+  "temporary_security_group_id": "sg-0cbb51d370a982c7b"
+}
