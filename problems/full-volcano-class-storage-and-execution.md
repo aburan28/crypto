@@ -156,3 +156,19 @@ existing volume/worker or a validated streaming backend.
 
 2026-10-16: protocol and native CLI implementation started. Full A/C/D/E
 generation and the requested graph-wide benchmark campaign remain open.
+
+2026-10-17 later update: the clean repaired checkpoint reaches 4,037 audited
+vertices / 64,592 records (41,573 verified, 20,132 exhausted, 2,887 timeout)
+and 2,098,636 relations. [Checkpoint evidence](../research/full_volcano_graphwide_ic_20261017/execution/checkpoint-4037/README.md).
+Both EC and k=1 finite-field arms now verify all prime-power components of
+each selected exact C point order on all 1,869 retained models: 3,738 targets
+per arm, 7,476 primary records, separate exact non-clock replay.
+[Full-order evidence](../research/full_volcano_graphwide_ic_20261017/execution/full_point_order/README.md).
+This supersedes the earlier statement that other prime-power parts remain
+untested for those selected C points. It does not establish maximality, all C
+vertices, transported-target comparisons, independent arithmetic or large-k IC.
+Rechecking and deleting only B's redundant compressed local cache recovered
+7,904,902,167 bytes; its checked raw graph and prior Drive parts remain.
+The historical specialized B generator is an mmap backend restricted to
+D_K=-11 and 3-power conductor, not a generic external-memory A/C/D/E generator.
+These resource and implementation gaps remain open.

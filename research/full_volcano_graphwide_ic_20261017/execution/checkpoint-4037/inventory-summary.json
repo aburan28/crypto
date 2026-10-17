@@ -1,0 +1,312 @@
+{
+  "campaign_manifest_sha256": "ece27f28868bcf4b371b2da9e6626492ca88665f27d8643c82b7d200c0959150",
+  "exhausted_replays": 20132,
+  "graphs": [
+    {
+      "graph": "mixed",
+      "max_audited_conductor": 1728,
+      "max_planned_conductor": 1728,
+      "strata": [
+        {
+          "conductor": 1,
+          "vertices_audited": 1,
+          "vertices_planned": 1
+        },
+        {
+          "conductor": 2,
+          "vertices_audited": 3,
+          "vertices_planned": 3
+        },
+        {
+          "conductor": 3,
+          "vertices_audited": 4,
+          "vertices_planned": 4
+        },
+        {
+          "conductor": 4,
+          "vertices_audited": 6,
+          "vertices_planned": 6
+        },
+        {
+          "conductor": 6,
+          "vertices_audited": 12,
+          "vertices_planned": 12
+        },
+        {
+          "conductor": 8,
+          "vertices_audited": 12,
+          "vertices_planned": 12
+        },
+        {
+          "conductor": 9,
+          "vertices_audited": 12,
+          "vertices_planned": 12
+        },
+        {
+          "conductor": 12,
+          "vertices_audited": 24,
+          "vertices_planned": 24
+        },
+        {
+          "conductor": 16,
+          "vertices_audited": 24,
+          "vertices_planned": 24
+        },
+        {
+          "conductor": 18,
+          "vertices_audited": 36,
+          "vertices_planned": 36
+        },
+        {
+          "conductor": 24,
+          "vertices_audited": 48,
+          "vertices_planned": 48
+        },
+        {
+          "conductor": 27,
+          "vertices_audited": 36,
+          "vertices_planned": 36
+        },
+        {
+          "conductor": 32,
+          "vertices_audited": 48,
+          "vertices_planned": 48
+        },
+        {
+          "conductor": 36,
+          "vertices_audited": 72,
+          "vertices_planned": 72
+        },
+        {
+          "conductor": 48,
+          "vertices_audited": 96,
+          "vertices_planned": 96
+        },
+        {
+          "conductor": 54,
+          "vertices_audited": 108,
+          "vertices_planned": 108
+        },
+        {
+          "conductor": 64,
+          "vertices_audited": 46,
+          "vertices_planned": 96
+        },
+        {
+          "conductor": 72,
+          "vertices_audited": 144,
+          "vertices_planned": 144
+        },
+        {
+          "conductor": 96,
+          "vertices_audited": 90,
+          "vertices_planned": 192
+        },
+        {
+          "conductor": 108,
+          "vertices_audited": 216,
+          "vertices_planned": 216
+        },
+        {
+          "conductor": 144,
+          "vertices_audited": 132,
+          "vertices_planned": 288
+        },
+        {
+          "conductor": 192,
+          "vertices_audited": 1,
+          "vertices_planned": 384
+        },
+        {
+          "conductor": 216,
+          "vertices_audited": 180,
+          "vertices_planned": 432
+        },
+        {
+          "conductor": 288,
+          "vertices_audited": 1,
+          "vertices_planned": 576
+        },
+        {
+          "conductor": 432,
+          "vertices_audited": 1,
+          "vertices_planned": 864
+        },
+        {
+          "conductor": 576,
+          "vertices_audited": 1,
+          "vertices_planned": 1152
+        },
+        {
+          "conductor": 864,
+          "vertices_audited": 1,
+          "vertices_planned": 1728
+        },
+        {
+          "conductor": 1728,
+          "vertices_audited": 1,
+          "vertices_planned": 3456
+        }
+      ],
+      "strata_audited": 28,
+      "strata_planned": 28,
+      "vertices_audited": 1356,
+      "vertices_planned": 10070
+    },
+    {
+      "graph": "three",
+      "max_audited_conductor": 6561,
+      "max_planned_conductor": 6561,
+      "strata": [
+        {
+          "conductor": 1,
+          "vertices_audited": 1,
+          "vertices_planned": 1
+        },
+        {
+          "conductor": 3,
+          "vertices_audited": 2,
+          "vertices_planned": 2
+        },
+        {
+          "conductor": 9,
+          "vertices_audited": 6,
+          "vertices_planned": 6
+        },
+        {
+          "conductor": 27,
+          "vertices_audited": 18,
+          "vertices_planned": 18
+        },
+        {
+          "conductor": 81,
+          "vertices_audited": 54,
+          "vertices_planned": 54
+        },
+        {
+          "conductor": 243,
+          "vertices_audited": 162,
+          "vertices_planned": 162
+        },
+        {
+          "conductor": 729,
+          "vertices_audited": 486,
+          "vertices_planned": 486
+        },
+        {
+          "conductor": 2187,
+          "vertices_audited": 608,
+          "vertices_planned": 1458
+        },
+        {
+          "conductor": 6561,
+          "vertices_audited": 1,
+          "vertices_planned": 4374
+        }
+      ],
+      "strata_audited": 9,
+      "strata_planned": 9,
+      "vertices_audited": 1338,
+      "vertices_planned": 6561
+    },
+    {
+      "graph": "two",
+      "max_audited_conductor": 8192,
+      "max_planned_conductor": 8192,
+      "strata": [
+        {
+          "conductor": 1,
+          "vertices_audited": 1,
+          "vertices_planned": 1
+        },
+        {
+          "conductor": 2,
+          "vertices_audited": 1,
+          "vertices_planned": 1
+        },
+        {
+          "conductor": 4,
+          "vertices_audited": 2,
+          "vertices_planned": 2
+        },
+        {
+          "conductor": 8,
+          "vertices_audited": 4,
+          "vertices_planned": 4
+        },
+        {
+          "conductor": 16,
+          "vertices_audited": 8,
+          "vertices_planned": 8
+        },
+        {
+          "conductor": 32,
+          "vertices_audited": 16,
+          "vertices_planned": 16
+        },
+        {
+          "conductor": 64,
+          "vertices_audited": 32,
+          "vertices_planned": 32
+        },
+        {
+          "conductor": 128,
+          "vertices_audited": 64,
+          "vertices_planned": 64
+        },
+        {
+          "conductor": 256,
+          "vertices_audited": 128,
+          "vertices_planned": 128
+        },
+        {
+          "conductor": 512,
+          "vertices_audited": 256,
+          "vertices_planned": 256
+        },
+        {
+          "conductor": 1024,
+          "vertices_audited": 512,
+          "vertices_planned": 512
+        },
+        {
+          "conductor": 2048,
+          "vertices_audited": 317,
+          "vertices_planned": 1024
+        },
+        {
+          "conductor": 4096,
+          "vertices_audited": 1,
+          "vertices_planned": 2048
+        },
+        {
+          "conductor": 8192,
+          "vertices_audited": 1,
+          "vertices_planned": 4096
+        }
+      ],
+      "strata_audited": 14,
+      "strata_planned": 14,
+      "vertices_audited": 1343,
+      "vertices_planned": 8192
+    }
+  ],
+  "measured_records": 64592,
+  "ok": true,
+  "outcome_totals": {
+    "exhausted": 20132,
+    "timeout": 2887,
+    "verified": 41573
+  },
+  "schema": "volcano-checkpoint-inventory/v1",
+  "scope": "Receipt/file hashes, record seals, ledger/queue identities and exact replay coverage; not a fresh or independent solver replay.",
+  "states": {
+    "audited": 4037,
+    "queued": 20786
+  },
+  "strata_audited": 51,
+  "strata_planned": 51,
+  "successful_replays": 41573,
+  "vertices_audited": 4037,
+  "vertices_planned": 24823
+}

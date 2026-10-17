@@ -1,0 +1,18 @@
+{
+  "checked_utc": "2026-10-17T20:08:52.885382+00:00",
+  "standalone_native_tests": {
+    "passed": 5,
+    "log": "../validation/tests.log"
+  },
+  "primary_prefix_records": 7476,
+  "paired_workloads": 3738,
+  "same_implementation_replay": "all non-clock record/fixture/truth fields match; separate cohorts",
+  "manifest_check": "all entries pass; final v2 C and repaired 4037",
+  "C_extracted_binary_source_control": "4 records / 2 fixtures / 2 truths match",
+  "C_outer_repack": "byte-identical",
+  "4037_outer_repack": "not rechecked",
+  "presentation": "8 C pages and 3 survey pages inspected; viewer desktop/floor/mobile inspected",
+  "new_script_checks": "Python syntax, Rust formatting, diff whitespace pass",
+  "root_library_checks": "Prior unchanged library-source validation: 4260 pass, 9 loopback EPERM; those 9 pass in 37-test network-enabled retry. No new root library/Cargo edits in this evidence change. See recovery-20261017T1450Z/validation.json. No claim that current upstream source was retested.",
+  "runtime_comparison": "unqualified; PSI unavailable, prefix replay contended; no A/A or external fastest result"
+}

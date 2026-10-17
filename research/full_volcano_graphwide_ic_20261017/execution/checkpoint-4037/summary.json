@@ -1,0 +1,468 @@
+{
+  "aggregation": "Each status separate. Means over present values only; n explicit. Conductor 0 denotes graph aggregate, not a stratum. Timeout counters are unknown, not zero. Duplicate workload/arm/round/seed and cross-binary pooling are refused.",
+  "binary_sha256": "35d89073f4d666b094c213a1d31b0c819b63600123e067c111af3c947d7609a9",
+  "call_observations": 40368,
+  "campaigns": [
+    {
+      "audited_records_bytes": 425482223,
+      "audited_sessions": 4037,
+      "coverage": [
+        {
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 1356
+        },
+        {
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 8714
+        },
+        {
+          "graph": "three",
+          "state": "audited",
+          "vertices": 1338
+        },
+        {
+          "graph": "three",
+          "state": "queued",
+          "vertices": 5223
+        },
+        {
+          "graph": "two",
+          "state": "audited",
+          "vertices": 1343
+        },
+        {
+          "graph": "two",
+          "state": "queued",
+          "vertices": 6849
+        }
+      ],
+      "manifest_sha256": "ece27f28868bcf4b371b2da9e6626492ca88665f27d8643c82b7d200c0959150",
+      "mode": "survey",
+      "path": "/workspace/volcano_ic_repaired_checkpoint_20261017T1849Z/campaign",
+      "planned_vertices": 24823,
+      "strata_audited": 51,
+      "stratum_coverage": [
+        {
+          "conductor": 1,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 2,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 3
+        },
+        {
+          "conductor": 3,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 4
+        },
+        {
+          "conductor": 4,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 6
+        },
+        {
+          "conductor": 6,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 12
+        },
+        {
+          "conductor": 8,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 12
+        },
+        {
+          "conductor": 9,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 12
+        },
+        {
+          "conductor": 12,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 24
+        },
+        {
+          "conductor": 16,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 24
+        },
+        {
+          "conductor": 18,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 36
+        },
+        {
+          "conductor": 24,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 48
+        },
+        {
+          "conductor": 27,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 36
+        },
+        {
+          "conductor": 32,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 48
+        },
+        {
+          "conductor": 36,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 72
+        },
+        {
+          "conductor": 48,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 96
+        },
+        {
+          "conductor": 54,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 108
+        },
+        {
+          "conductor": 64,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 46
+        },
+        {
+          "conductor": 64,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 50
+        },
+        {
+          "conductor": 72,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 144
+        },
+        {
+          "conductor": 96,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 90
+        },
+        {
+          "conductor": 96,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 102
+        },
+        {
+          "conductor": 108,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 216
+        },
+        {
+          "conductor": 144,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 132
+        },
+        {
+          "conductor": 144,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 156
+        },
+        {
+          "conductor": 192,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 192,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 383
+        },
+        {
+          "conductor": 216,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 180
+        },
+        {
+          "conductor": 216,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 252
+        },
+        {
+          "conductor": 288,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 288,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 575
+        },
+        {
+          "conductor": 432,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 432,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 863
+        },
+        {
+          "conductor": 576,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 576,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 1151
+        },
+        {
+          "conductor": 864,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 864,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 1727
+        },
+        {
+          "conductor": 1728,
+          "graph": "mixed",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 1728,
+          "graph": "mixed",
+          "state": "queued",
+          "vertices": 3455
+        },
+        {
+          "conductor": 1,
+          "graph": "three",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 3,
+          "graph": "three",
+          "state": "audited",
+          "vertices": 2
+        },
+        {
+          "conductor": 9,
+          "graph": "three",
+          "state": "audited",
+          "vertices": 6
+        },
+        {
+          "conductor": 27,
+          "graph": "three",
+          "state": "audited",
+          "vertices": 18
+        },
+        {
+          "conductor": 81,
+          "graph": "three",
+          "state": "audited",
+          "vertices": 54
+        },
+        {
+          "conductor": 243,
+          "graph": "three",
+          "state": "audited",
+          "vertices": 162
+        },
+        {
+          "conductor": 729,
+          "graph": "three",
+          "state": "audited",
+          "vertices": 486
+        },
+        {
+          "conductor": 2187,
+          "graph": "three",
+          "state": "audited",
+          "vertices": 608
+        },
+        {
+          "conductor": 2187,
+          "graph": "three",
+          "state": "queued",
+          "vertices": 850
+        },
+        {
+          "conductor": 6561,
+          "graph": "three",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 6561,
+          "graph": "three",
+          "state": "queued",
+          "vertices": 4373
+        },
+        {
+          "conductor": 1,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 2,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 4,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 2
+        },
+        {
+          "conductor": 8,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 4
+        },
+        {
+          "conductor": 16,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 8
+        },
+        {
+          "conductor": 32,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 16
+        },
+        {
+          "conductor": 64,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 32
+        },
+        {
+          "conductor": 128,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 64
+        },
+        {
+          "conductor": 256,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 128
+        },
+        {
+          "conductor": 512,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 256
+        },
+        {
+          "conductor": 1024,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 512
+        },
+        {
+          "conductor": 2048,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 317
+        },
+        {
+          "conductor": 2048,
+          "graph": "two",
+          "state": "queued",
+          "vertices": 707
+        },
+        {
+          "conductor": 4096,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 4096,
+          "graph": "two",
+          "state": "queued",
+          "vertices": 2047
+        },
+        {
+          "conductor": 8192,
+          "graph": "two",
+          "state": "audited",
+          "vertices": 1
+        },
+        {
+          "conductor": 8192,
+          "graph": "two",
+          "state": "queued",
+          "vertices": 4095
+        }
+      ]
+    }
+  ],
+  "decomposition_calls": 98188909,
+  "measured_records": 64592,
+  "mitm_call_lookup_checks": 24221,
+  "outcome_totals": {
+    "exhausted": 20132,
+    "timeout": 2887,
+    "verified": 41573
+  },
+  "relation_observations": 40368,
+  "relation_trials": 103036278,
+  "relations_found": 2098636,
+  "schema": "volcano-ic-summary/v2",
+  "verified_records": 41573,
+  "wall_claim": "RAW_DESCRIPTIVE_ONLY; profile/isolation are in sealed records; no admitted runtime comparison",
+  "weighted_oracle_call_yield": 0.021373452677837575,
+  "weighted_relation_yield": 0.02036793293329171,
+  "yield_definitions": {
+    "decomposition_calls": "targets_tried - repeated_targets_skipped for these classic guarded walk arms; identity skips occur before trial increment",
+    "oracle_call_relation_yield": "relations_found / decomposition_calls; absent when calls are zero or unknown",
+    "relation_yield": "Legacy alias: relations per nonidentity source trial, including duplicate queries skipped before the oracle. Not relations per oracle call.",
+    "trial_relation_yield": "relations_found / targets_tried"
+  }
+}

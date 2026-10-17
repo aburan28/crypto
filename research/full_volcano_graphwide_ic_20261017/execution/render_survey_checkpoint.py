@@ -1,6 +1,6 @@
 """Presentation only: plot native checkpoint statistics without recomputing them.
 
-Usage: NATIVE_SUMMARY_DIR CHECKPOINT_DIR FRESH_REPORT RUN_ID
+Usage: NATIVE_SUMMARY_DIR CHECKPOINT_DIR FRESH_REPORT RUN_ID [CONTEXT_NOTE_TYP]
 """
 import json
 import sys
@@ -9,6 +9,7 @@ import typst
 
 summary_dir, checkpoint, out = map(Path, sys.argv[1:4])
 run_id = sys.argv[4]
+context_note = Path(sys.argv[5]).read_text() if len(sys.argv) > 5 else ''
 doc = json.loads((summary_dir / "summary.json").read_text())
 inv = json.loads((checkpoint / "inventory.json").read_text())
 assert inv["ok"] and inv["outcome_totals"] == doc["outcome_totals"]
@@ -115,6 +116,9 @@ finite-field backends remain open. Original C's r=7 k=1 diagnostic is separate.
 Complete graph topology is for the declared fields and finite prime degrees,
 not every other prime or infinitely many compositions.
 '''
+if context_note:
+    (out/'context-note.typ').write_text(context_note)
+    source += '\n' + context_note
 (out/'report.typ').write_text(source)
 typst.compile(str(out/'report.typ'),output=str(out/'report.pdf'))
 (out/'figure.typ').write_text('#set page(width:1100pt,height:740pt,margin:0pt)\n#image("all-strata-yield.svg",width:100%)\n')
