@@ -1,0 +1,35 @@
+{
+  "answers_sha256": "363adc7f9bded3f4a25a80c7b27da5a2305afb30ee6741932cbe76f455c2865b",
+  "calibrations_per_host": 30,
+  "candidate_ids": [
+    "IC1N83Ckb1a1fb164672PDP4rootRCguidedLAgaussTDdirectISO0h829ed476f094",
+    "IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0h3eb055926289",
+    "IC1N83Ckb1a1fb183762PDP4rootRCguidedLAgaussTDdirectISO0h82329aa062fa"
+  ],
+  "files_sha256": {
+    "aggregate.py": "735d0f46a7496e97cef5455e007218d4aafe63f54859cec1f50464c66d3c7a27",
+    "answers.jsonl": "363adc7f9bded3f4a25a80c7b27da5a2305afb30ee6741932cbe76f455c2865b",
+    "candidate_IC1N83Ckb1a1fb164672PDP4rootRCguidedLAgaussTDdirectISO0h829ed476f094.json": "20067a0de5536bc6e8cc750b1932eaa410fc4e3eb5c899f7a4dd40061aac0afe",
+    "candidate_IC1N83Ckb1a1fb169984PDP4rootRCguidedLAgaussTDdirectISO0h3eb055926289.json": "4247e199b35999629b0d3b446f830581c639994c8fdcb1e624e6c4cdd09a422c",
+    "candidate_IC1N83Ckb1a1fb183762PDP4rootRCguidedLAgaussTDdirectISO0h82329aa062fa.json": "714f3b626d2d7c07b70d34472b244607d1bf210d2daa219aa18e0fb7a130e085",
+    "fixture_manifest.json": "0fc72f1e38b6a338e6ed65053c2ef9d382894b17bde9c75e0cdea96af3b32afa",
+    "generate.py": "514329656510e88d3316b688eef4d15104c64a5be7edb42f56ace269461d1dec",
+    "materialize_candidates.py": "c9368027db218b5faf946a02e1cef40e7a71b3efb1d6e5e43e9d6f5728fd8420",
+    "run.py": "3c0ae6bb988f436fe6f5ed23d311dd2b127e552491f5827a234340e47eed9b8c",
+    "select.py": "afde719e89289d8d8a0d28cc87e8b2e6439d558f308e98248d25d0d3c5100e36",
+    "targets.jsonl": "89c7208dd4fc7a5621cf727b3fac9a6714f04f66a312e516b418c31764e7547e",
+    "test_protocol.py": "7578ef4be7de387885f7a399c3890622ab39885076810194a9d8a37b8d5991ca",
+    "verify.py": "4599d1c7c15f945a4246a2d08ebdc8fea4076a2a3b538641b08b8d0dcaba8c1b"
+  },
+  "host_count": 2,
+  "ic_cap_seconds": 480,
+  "ic_rho_pairs_per_host": 15,
+  "points_per_host": 5,
+  "producer_cap_seconds_per_host": 7200,
+  "rho_cap_seconds": 120,
+  "runner_os": "ubuntu-24.04",
+  "schema": "n83.k992-cold-followup-dispatch/v1",
+  "source_sha256": "8a2fe55dd90dc33892c197d27260182bf783fc8212fb485d8297daf2bbba8e12",
+  "targets_sha256": "89c7208dd4fc7a5621cf727b3fac9a6714f04f66a312e516b418c31764e7547e",
+  "workflow_sha256": "e514576f5dbf4f08c68df34b46726a44990658c850129f13f98c6295d0feb438"
+}
