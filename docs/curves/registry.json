@@ -29306,16 +29306,17 @@
    "j": "228885397",
    "end": "unk",
    "aliases": [
+    "generic-dlp-20261017-rho-32",
     "ic-frontier-fp32"
    ],
    "standard_names": [],
    "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json",
     "research/ic_frontier_campaign_20261015/phase1/sessions/P32/plan.json",
     "research/ic_frontier_campaign_20261015/phase1/sessions/P32/spec.json",
     "research/ic_frontier_campaign_20261015/phase1/spec-P32.json",
     "research/ic_frontier_campaign_20261015/pilot/sessions/fP32/plan.json",
-    "research/ic_frontier_campaign_20261015/pilot/sessions/fP32/spec.json",
-    "research/ic_frontier_campaign_20261015/pilot/spec-feas-P32.json"
+    "research/ic_frontier_campaign_20261015/pilot/sessions/fP32/spec.json"
    ],
    "representations": [
     {
@@ -29346,6 +29347,7 @@
       "target_group": "prime-order subgroup"
      },
      "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json",
       "research/ic_frontier_campaign_20261015/prime_curves.json"
      ]
     }
@@ -29410,16 +29412,17 @@
    "j": "52378808525",
    "end": "unk",
    "aliases": [
+    "generic-dlp-20261017-rho-36",
     "ic-frontier-fp36"
    ],
    "standard_names": [],
    "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json",
     "research/ic_frontier_campaign_20261015/phase1/sessions/P36/plan.json",
     "research/ic_frontier_campaign_20261015/phase1/sessions/P36/spec.json",
     "research/ic_frontier_campaign_20261015/phase1/spec-P36.json",
     "research/ic_frontier_campaign_20261015/pilot/sessions/fP36/plan.json",
-    "research/ic_frontier_campaign_20261015/pilot/sessions/fP36/spec.json",
-    "research/ic_frontier_campaign_20261015/pilot/spec-feas-P36.json"
+    "research/ic_frontier_campaign_20261015/pilot/sessions/fP36/spec.json"
    ],
    "representations": [
     {
@@ -29450,6 +29453,7 @@
       "target_group": "prime-order subgroup"
      },
      "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json",
       "research/ic_frontier_campaign_20261015/prime_curves.json"
      ]
     }
@@ -29682,6 +29686,61 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-fp40-t1502959-42c6aada",
+   "icv1": "ICV1:fp-1099511624389:1502959:1099510121431:0:unk:unk:r:42c6aada3d74",
+   "family": "prime",
+   "params": {
+    "p": "1099511624389",
+    "a": "0",
+    "b": "7"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"7\",\"field\":\"fp-1099511624389\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1099511624389\",\"v\":\"1\"}",
+   "trace": 1502959,
+   "order": "1099510121431",
+   "j": "0",
+   "end": "unk",
+   "aliases": [
+    "generic-dlp-20261017-bsgs-40"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P40Cfph68cd046762be",
+     "curve_uid": "urn:ec-record:1:sha256:68cd046762bebf26241129ecb7eb05977dfe50b1e3fec9d4899d66e6302a6b43",
+     "field_sha256": "d128df878e9e8816b75d85009d0c8db71255b7283fdf2210c9530c42b5ff369b",
+     "field": {
+      "characteristic": 1099511624389,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       0,
+       7
+      ],
+      "subgroup_order": "1099510121431",
+      "cofactor": 1,
+      "generator": [
+       "0xfebc99b836",
+       "0x4b221e82b8"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-fp40-tm924137-0ecaaeb9",
    "icv1": "ICV1:fp-1099511627563:-924137:1099512551701:1023683239453:unk:unk:r:0ecaaeb9efd2",
    "family": "prime",
@@ -29696,16 +29755,17 @@
    "j": "1023683239453",
    "end": "unk",
    "aliases": [
+    "generic-dlp-20261017-rho-40",
     "ic-frontier-fp40"
    ],
    "standard_names": [],
    "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json",
     "research/ic_frontier_campaign_20261015/phase1/sessions/P40/plan.json",
     "research/ic_frontier_campaign_20261015/phase1/sessions/P40/spec.json",
     "research/ic_frontier_campaign_20261015/phase1/spec-P40.json",
     "research/ic_frontier_campaign_20261015/pilot/sessions/fP40/plan.json",
-    "research/ic_frontier_campaign_20261015/pilot/sessions/fP40/spec.json",
-    "research/ic_frontier_campaign_20261015/pilot/spec-feas-P40.json"
+    "research/ic_frontier_campaign_20261015/pilot/sessions/fP40/spec.json"
    ],
    "representations": [
     {
@@ -29736,6 +29796,7 @@
       "target_group": "prime-order subgroup"
      },
      "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json",
       "research/ic_frontier_campaign_20261015/prime_curves.json"
      ]
     }
@@ -30000,6 +30061,116 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
+   "slug": "icv1-fp44-tm1269095-f56aca35",
+   "icv1": "ICV1:fp-17592186040927:-1269095:17592187310023:0:unk:unk:r:f56aca35a0e1",
+   "family": "prime",
+   "params": {
+    "p": "17592186040927",
+    "a": "0",
+    "b": "7"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"7\",\"field\":\"fp-17592186040927\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"17592186040927\",\"v\":\"1\"}",
+   "trace": -1269095,
+   "order": "17592187310023",
+   "j": "0",
+   "end": "unk",
+   "aliases": [
+    "generic-dlp-20261017-bsgs-44"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P44Cfph1b88146a9bdb",
+     "curve_uid": "urn:ec-record:1:sha256:1b88146a9bdb1e72fb7a3aa6dc9cd2e022524b3dc4d00c5ac4f17d8505f94888",
+     "field_sha256": "8a0d5f109746d5f937d4345f0764e1453351dc946752a535f8d9d9ecfae1fb60",
+     "field": {
+      "characteristic": 17592186040927,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       0,
+       7
+      ],
+      "subgroup_order": "17592187310023",
+      "cofactor": 1,
+      "generator": [
+       "0xe33a19babff",
+       "0x7488549bc35"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp44-tm6431881-43acc95d",
+   "icv1": "ICV1:fp-17592186044399:-6431881:17592192476281:6470554627570:unk:unk:r:43acc95d260a",
+   "family": "prime",
+   "params": {
+    "p": "17592186044399",
+    "a": "17592186044396",
+    "b": "95"
+   },
+   "model_json": "{\"a\":\"17592186044396\",\"b\":\"95\",\"field\":\"fp-17592186044399\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"17592186044399\",\"v\":\"1\"}",
+   "trace": -6431881,
+   "order": "17592192476281",
+   "j": "6470554627570",
+   "end": "unk",
+   "aliases": [
+    "generic-dlp-20261017-rho-44"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P44Cfphb537415ab9df",
+     "curve_uid": "urn:ec-record:1:sha256:b537415ab9df6ed132731d3ccba983dbbdd3f34df7a4680b6e13305939753c1a",
+     "field_sha256": "d16c600d89c77e0491c28bc4ee2dd546f42ae26acdf992b23c2032451c9e2811",
+     "field": {
+      "characteristic": 17592186044399,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       17592186044396,
+       95
+      ],
+      "subgroup_order": "17592192476281",
+      "cofactor": 1,
+      "generator": [
+       "0x1",
+       "0x79f099bdd35"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+     ]
+    }
+   ]
+  },
+  {
    "slug": "icv1-fp45-tm403-3bb5b4de",
    "icv1": "ICV1:fp-19643936473787:-403:19643936474191:19643935589051:unk:unk:r:3bb5b4defed0",
    "family": "prime",
@@ -30201,6 +30372,226 @@
      },
      "sources": [
       "research/isogeny_class_trio_20261017/curves.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp48-t14984575-af5d5615",
+   "icv1": "ICV1:fp-281474976707983:14984575:281474961723409:0:unk:unk:r:af5d5615f27d",
+   "family": "prime",
+   "params": {
+    "p": "281474976707983",
+    "a": "0",
+    "b": "7"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"7\",\"field\":\"fp-281474976707983\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"281474976707983\",\"v\":\"1\"}",
+   "trace": 14984575,
+   "order": "281474961723409",
+   "j": "0",
+   "end": "unk",
+   "aliases": [
+    "generic-dlp-20261017-bsgs-48"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P48Cfph1decadb90348",
+     "curve_uid": "urn:ec-record:1:sha256:1decadb90348d59fffa1eae169997c48919e48d68bbc373ef4f5e2d2d30a489e",
+     "field_sha256": "b6c8227362be2e6d3c2d0a70b08e66728656ea5edd49a0639478ac4a8794db37",
+     "field": {
+      "characteristic": 281474976707983,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       0,
+       7
+      ],
+      "subgroup_order": "281474961723409",
+      "cofactor": 1,
+      "generator": [
+       "0x210644f01a41",
+       "0x553d08cef988"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp48-tm15186475-c683ebfc",
+   "icv1": "ICV1:fp-281474976710591:-15186475:281474991897067:244919784929905:unk:unk:r:c683ebfc9c07",
+   "family": "prime",
+   "params": {
+    "p": "281474976710591",
+    "a": "281474976710588",
+    "b": "9"
+   },
+   "model_json": "{\"a\":\"281474976710588\",\"b\":\"9\",\"field\":\"fp-281474976710591\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"281474976710591\",\"v\":\"1\"}",
+   "trace": -15186475,
+   "order": "281474991897067",
+   "j": "244919784929905",
+   "end": "unk",
+   "aliases": [
+    "generic-dlp-20261017-rho-48"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P48Cfph16a1065d0035",
+     "curve_uid": "urn:ec-record:1:sha256:16a1065d0035977332a2a0ccc2c12d0eff497b257a4fc7040f5cb5afd18cba49",
+     "field_sha256": "296cabcfcb812a1fffdb56fca11f217ce70ccf529dbd4d9330dadebbe6ecc75e",
+     "field": {
+      "characteristic": 281474976710591,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       281474976710588,
+       9
+      ],
+      "subgroup_order": "281474991897067",
+      "cofactor": 1,
+      "generator": [
+       "0x1",
+       "0x65d982db5114"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp52-tm131765273-051185e0",
+   "icv1": "ICV1:fp-4503599627369383:-131765273:4503599759134657:0:unk:unk:r:051185e0e89a",
+   "family": "prime",
+   "params": {
+    "p": "4503599627369383",
+    "a": "0",
+    "b": "7"
+   },
+   "model_json": "{\"a\":\"0\",\"b\":\"7\",\"field\":\"fp-4503599627369383\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"4503599627369383\",\"v\":\"1\"}",
+   "trace": -131765273,
+   "order": "4503599759134657",
+   "j": "0",
+   "end": "unk",
+   "aliases": [
+    "generic-dlp-20261017-bsgs-52"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P52Cfpha1d0789153ac",
+     "curve_uid": "urn:ec-record:1:sha256:a1d0789153ac698739eabdb828f751728eb4886074af19fb6616ca8ba720d8cd",
+     "field_sha256": "c24101581f374fbe856ea3b49efc117f3378285061793df7ff67ce49c8fff82c",
+     "field": {
+      "characteristic": 4503599627369383,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       0,
+       7
+      ],
+      "subgroup_order": "4503599759134657",
+      "cofactor": 1,
+      "generator": [
+       "0x569919abed625",
+       "0x3feb926cc10a1"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp52-t113543683-af85fb1e",
+   "icv1": "ICV1:fp-4503599627370323:113543683:4503599513826641:2721144505530546:unk:unk:r:af85fb1eb570",
+   "family": "prime",
+   "params": {
+    "p": "4503599627370323",
+    "a": "4503599627370320",
+    "b": "124"
+   },
+   "model_json": "{\"a\":\"4503599627370320\",\"b\":\"124\",\"field\":\"fp-4503599627370323\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"4503599627370323\",\"v\":\"1\"}",
+   "trace": 113543683,
+   "order": "4503599513826641",
+   "j": "2721144505530546",
+   "end": "unk",
+   "aliases": [
+    "generic-dlp-20261017-rho-52"
+   ],
+   "standard_names": [],
+   "sources": [
+    "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P52Cfph6ba46c698d8f",
+     "curve_uid": "urn:ec-record:1:sha256:6ba46c698d8f39833af605bfffb16ccd22cbacc6673207c380b9b768f0d08f30",
+     "field_sha256": "1a6b8da6cb94895c7174512f72036656e9da260a5b9662b5669bc22b01d250f9",
+     "field": {
+      "characteristic": 4503599627370323,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       4503599627370320,
+       124
+      ],
+      "subgroup_order": "4503599513826641",
+      "cofactor": 1,
+      "generator": [
+       "0x2",
+       "0x45595ae15b7a5"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/generic_dlp_memory_parallelism_20261017/inputs/curves.json"
      ]
     }
    ]
@@ -30696,6 +31087,59 @@
      },
      "sources": [
       "research/isogeny_class_trio_20261017/curves.json"
+     ]
+    }
+   ]
+  },
+  {
+   "slug": "icv1-fp61-tm1604388101-9105e769",
+   "icv1": "ICV1:fp-2305843009213693951:-1604388101:2305843010818082053:1616729741622916372:unk:unk:r:9105e7695e01",
+   "family": "prime",
+   "params": {
+    "p": "2305843009213693951",
+    "a": "2305843009213693948",
+    "b": "111"
+   },
+   "model_json": "{\"a\":\"2305843009213693948\",\"b\":\"111\",\"field\":\"fp-2305843009213693951\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"2305843009213693951\",\"v\":\"1\"}",
+   "trace": -1604388101,
+   "order": "2305843010818082053",
+   "j": "1616729741622916372",
+   "end": "unk",
+   "aliases": [],
+   "standard_names": [],
+   "sources": [
+    "research/prime61_isogeny_20261016/PROTOCOL.json"
+   ],
+   "representations": [
+    {
+     "ec1": "EC1P61Cfph21ad10f63efd",
+     "curve_uid": "urn:ec-record:1:sha256:21ad10f63efdfb9cece7b48145b24c48a2ee16c9cac75581333f3938db42e6c9",
+     "field_sha256": "0b7ce6fa873845e1354c16922f024f105157a815232621c26a65cef133e18102",
+     "field": {
+      "characteristic": 2305843009213693951,
+      "degree": 1,
+      "representation": "prime",
+      "element_encoding": "hex integer modulo the characteristic"
+     },
+     "curve": {
+      "model": "short Weierstrass",
+      "coefficients": [
+       0,
+       0,
+       0,
+       2305843009213693948,
+       111
+      ],
+      "subgroup_order": "2305843010818082053",
+      "cofactor": 1,
+      "generator": [
+       "0x1",
+       "0x18edf7d1ab07e459"
+      ],
+      "target_group": "prime-order subgroup"
+     },
+     "sources": [
+      "research/prime61_isogeny_20261016/PROTOCOL.json"
      ]
     }
    ]
